@@ -1,0 +1,28 @@
+---------------------------
+Running for 0 seconds
+Making request 1
+Retrieved 1 orders in 174 ms
+Made 1 requests in 0 seconds (average: 174 ms/request)
+---------------------------
+Running for 0 seconds
+Making request 2
+> [0;32m/opt/code/tap-shopify/spikes/rate-limiting/sdk_rate_limit.py[0m(25)[0;36mrequest_orders[0;34m()[0m
+[0;32m     24 [0;31m        [0;32mimport[0m [0mipdb[0m[0;34m;[0m [0mipdb[0m[0;34m.[0m[0mset_trace[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0m
+[0m[0;32m---> 25 [0;31m        [0;36m1[0m[0;34m+[0m[0;36m1[0m[0;34m[0m[0m
+[0m[0;32m     26 [0;31m[0;34m[0m[0m
+[0m
+ipdb> [1;32m     20 [0m[0;32mdef[0m [0mrequest_orders[0m[0;34m([0m[0mlim[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0m
+[1;32m     21 [0m    [0;32mtry[0m[0;34m:[0m[0;34m[0m[0m
+[1;32m     22 [0m        [0;32mreturn[0m [0mshopify[0m[0;34m.[0m[0mOrder[0m[0;34m.[0m[0mfind[0m[0;34m([0m[0mlimit[0m[0;34m=[0m[0mlim[0m[0;34m)[0m[0;34m[0m[0m
+[1;32m     23 [0m    [0;32mexcept[0m [0mException[0m [0;32mas[0m [0me[0m[0;34m:[0m[0;34m[0m[0m
+[1;32m     24 [0m        [0;32mimport[0m [0mipdb[0m[0;34m;[0m [0mipdb[0m[0;34m.[0m[0mset_trace[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0m
+[0;32m---> 25 [0;31m        [0;36m1[0m[0;34m+[0m[0;36m1[0m[0;34m[0m[0m
+[0m[1;32m     26 [0m[0;34m[0m[0m
+[1;32m     27 [0m[0miterations[0m [0;34m=[0m [0;36m0[0m[0;34m[0m[0m
+[1;32m     28 [0m[0;32mwhile[0m [0;32mTrue[0m[0;34m:[0m[0;34m[0m[0m
+[1;32m     29 [0m    [0miterations[0m [0;34m+=[0m [0;36m1[0m[0;34m[0m[0m
+[1;32m     30 [0m    [0;31m#if iterations == 5:[0m[0;34m[0m[0;34m[0m[0m
+
+ipdb> ClientError('Response(code=429, body="b\'{"errors":"Exceeded 2 calls per second for api client. Reduce request rates to resume uninterrupted service."}\'", headers={\'X-Sorting-Hat-ShopId\': \'4007166025\', \'X-Sorting-Hat-FeatureSet\': \'default\', \'Referrer-Policy\': \'origin-when-cross-origin\', \'Server\': \'nginx\', \'Transfer-Encoding\': \'chunked\', \'X-Frame-Options\': \'DENY\', \'X-Sorting-Hat-ShopId-Cached\': \'0\', \'Content-Type\': \'application/json; charset=utf-8\', \'X-XSS-Protection\': \'1; mode=block; report=/xss-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Forders&source%5Bsection%5D=admin_api&source%5Buuid%5D=92e2b436-1618-4a90-a691-b5a17a0d3674\', \'X-Sorting-Hat-PodId\': \'72\', \'Retry-After\': \'2.0\', \'X-Stats-UserId\': \'0\', \'X-Sorting-Hat-PodId-Cached\': \'0\', \'Connection\': \'close\', \'X-Dc\': \'ash,gcp-us-central1\', \'Date\': \'Wed, 12 Sep 2018 18:53:12 GMT\', \'X-Shopify-API-Terms\': \'By accessing or using the Shopify API you agree to the Shopify API License and Terms of Use at https://www.shopify.com/legal/api-terms\', \'X-Sorting-Hat-PrivacyLevel\': \'default\', \'Strict-Transport-Security\': \'max-age=7889238\', \'X-Permitted-Cross-Domain-Policies\': \'none\', \'X-ShopId\': \'4007166025\', \'X-Download-Options\': \'noopen\', \'X-Stats-ApiClientId\': \'2555537\', \'X-Sorting-Hat-Section\': \'pod\', \'X-Stats-ApiPermissionId\': \'78135918665\', \'Server-Timing\': \'socket_queue;dur=1, edge;dur=16, processing;dur=48, util;dur=0.125\', \'X-Content-Type-Options\': \'nosniff\', \'X-ShardId\': \'72\', \'Content-Security-Policy\': "default-src \'self\' data: blob: \'unsafe-inline\' \'unsafe-eval\' https://* shopify-pos://*; block-all-mixed-content; child-src \'self\' https://* shopify-pos://*; connect-src \'self\' wss://* https://*; frame-ancestors \'none\'; script-src https://cdn.shopify.com https://checkout.shopifycs.com https://js-agent.newrelic.com https://bam.nr-data.net https://dme0ih8comzn4.cloudfront.net https://api.stripe.com https://mpsnare.iesnare.com https://appcenter.intuit.com https://www.paypal.com https://maps.googleapis.com https://stats.g.doubleclick.net https://www.google-analytics.com https://v.shopify.com https://widget.intercom.io https://js.intercomcdn.com \'self\' \'unsafe-inline\' \'unsafe-eval\'; upgrade-insecure-requests; report-uri /csp-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Forders&source%5Bsection%5D=admin_api&source%5Buuid%5D=92e2b436-1618-4a90-a691-b5a17a0d3674", \'X-Request-Id\': \'92e2b436-1618-4a90-a691-b5a17a0d3674\'}, msg="Too Many Requests")',)
+ipdb> *** AttributeError: 'ClientError' object has no attribute 'ClientErrror'
+ipdb> 
