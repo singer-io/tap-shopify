@@ -7,6 +7,13 @@
     "updated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "referring_type": {
+      "type": "string"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }
