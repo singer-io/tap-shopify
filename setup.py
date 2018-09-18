@@ -10,10 +10,11 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_shopify"],
     install_requires=[
-        "singer-python==5.2.0",
+        "ShopifyAPI==3.1.0",
         "requests==2.19.1",
+        "singer-python==5.2.0",
     ],
-    extras_requires={
+    extras_require={
         'dev': [
             'pylint',
             'ipdb'

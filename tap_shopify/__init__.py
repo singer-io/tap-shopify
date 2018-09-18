@@ -2,6 +2,7 @@
 import os
 import json
 import singer
+import shopify
 from singer import utils
 from singer import metadata
 
@@ -30,17 +31,20 @@ class Orders:
     key_properties = None
     metadata = None
     schema = None
+    client = None
 
-    def __init__(self, schema):
+    def __init__(self, client, schema):
         self.name = "orders"
         self.replication_method = "INCREMENTAL"
         self.replication_key = 'updated_at'
         self.key_properties = ['id']
         self.schema = schema
         self.metadata = self.load_metadata()
+        self.client = client
 
     def sync(self, state):
-        pass
+        for order in self.client.Order.find(limit=250):
+            yield order.to_dict()
 
     def load_metadata(self):
         mdata = metadata.new()
@@ -58,7 +62,7 @@ class Orders:
                 mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
 
         return metadata.to_list(mdata)
-
+    
 
 STREAMS = {
     'orders': Orders
@@ -71,7 +75,7 @@ def discover():
 
     for schema_name, schema in raw_schemas.items():
 
-        stream = STREAMS[schema_name](schema)
+        stream = STREAMS[schema_name](None, schema)
 
         # TODO: populate any metadata and stream's key properties here..
         stream_metadata = stream.metadata
@@ -108,17 +112,36 @@ def get_selected_streams(catalog):
 
     return selected_streams
 
+def get_shopify_client(config):
+    api_key = config['api_key']
+    shop = config['shop']
+    session = shopify.Session("%s.myshopify.com" % (shop),
+                              api_key)
+    shopify.ShopifyResource.activate_session(session)
+    return shopify
+
 def sync(config, state, catalog):
 
     selected_stream_ids = get_selected_streams(catalog)
 
     # Loop over streams in catalog
-    for stream in catalog['streams']:
-        stream_id = stream['tap_stream_id']
-        stream_schema = stream['schema']
+    for catalog_entry in catalog['streams']:
+        stream_id = catalog_entry['tap_stream_id']
+        stream_schema = catalog_entry['schema']
+        client = get_shopify_client(config)
+        stream = STREAMS[stream_id](client, stream_schema)
+
         if stream_id in selected_stream_ids:
-            # TODO: sync code for stream goes here...
             LOGGER.info('Syncing stream:' + stream_id)
+
+            # write schema message
+            singer.write_schema(stream.name, stream.schema, stream.key_properties)
+            
+            # sync 
+            for rec in stream.sync(state):
+                print(rec)
+                #TODO Write record
+            
     return
 
 @utils.handle_top_exception(LOGGER)
@@ -142,7 +165,7 @@ def main():
             catalog = args.catalog
         else:
             catalog =  discover()
-
+    
         sync(args.config, args.state, catalog)
 
 if __name__ == "__main__":
