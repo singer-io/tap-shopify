@@ -5,6 +5,7 @@ import singer
 import shopify
 from singer import utils
 from singer import metadata
+from singer import Transformer
 
 REQUIRED_CONFIG_KEYS = ["api_key"]
 LOGGER = singer.get_logger()
@@ -62,7 +63,7 @@ class Orders:
                 mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
 
         return metadata.to_list(mdata)
-    
+
 
 STREAMS = {
     'orders': Orders
@@ -136,12 +137,13 @@ def sync(config, state, catalog):
 
             # write schema message
             singer.write_schema(stream.name, stream.schema, stream.key_properties)
-            
-            # sync 
-            for rec in stream.sync(state):
-                print(rec)
-                #TODO Write record
-            
+
+            # sync
+            with Transformer() as transformer:
+                for rec in stream.sync(state):
+                    rec = transformer.transform(rec, stream.schema, metadata.to_map(stream.metadata))
+                    singer.write_record(stream.name, rec)
+
     return
 
 @utils.handle_top_exception(LOGGER)
@@ -165,7 +167,7 @@ def main():
             catalog = args.catalog
         else:
             catalog =  discover()
-    
+
         sync(args.config, args.state, catalog)
 
 if __name__ == "__main__":
