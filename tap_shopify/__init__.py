@@ -3,6 +3,7 @@ import os
 import json
 import singer
 from singer import utils
+from singer import metadata
 
 REQUIRED_CONFIG_KEYS = ["api_key"]
 LOGGER = singer.get_logger()
@@ -22,23 +23,67 @@ def load_schemas():
 
     return schemas
 
+class Orders:
+    name = None
+    replication_method = None
+    replication_key = None
+    key_properties = None
+    metadata = None
+    schema = None
+
+    def __init__(self, schema):
+        self.name = "orders"
+        self.replication_method = "INCREMENTAL"
+        self.replication_key = 'updated_at'
+        self.key_properties = ['id']
+        self.schema = schema
+        self.metadata = self.load_metadata()
+
+    def sync(self, state):
+        pass
+
+    def load_metadata(self):
+        mdata = metadata.new()
+
+        mdata = metadata.write(mdata, (), 'table-key-properties', self.key_properties)
+        mdata = metadata.write(mdata, (), 'forced-replication-method', self.replication_method)
+
+        if self.replication_key:
+            mdata = metadata.write(mdata, (), 'valid-replication-keys', [self.replication_key])
+
+        for field_name in self.schema['properties'].keys():
+            if field_name in self.key_properties or field_name == self.replication_key:
+                mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
+            else:
+                mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
+
+        return metadata.to_list(mdata)
+
+
+STREAMS = {
+    'orders': Orders
+}
+
+
 def discover():
     raw_schemas = load_schemas()
     streams = []
 
     for schema_name, schema in raw_schemas.items():
 
+        stream = STREAMS[schema_name](schema)
+
         # TODO: populate any metadata and stream's key properties here..
-        stream_metadata = []
-        stream_key_properties = []
+        stream_metadata = stream.metadata
+        stream_key_properties = stream.key_properties
 
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
             'tap_stream_id': schema_name,
             'schema': schema,
-            'metadata' : [],
-            'key_properties': []
+            'metadata' : stream.metadata,
+            'key_properties': stream.key_properties
         }
         streams.append(catalog_entry)
 
