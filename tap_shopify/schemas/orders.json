@@ -1,4 +1,170 @@
 {
+  "definitions": {
+    "transactions": {
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "created_at": {
+            "type": ["null", "string"],
+            "format": "date-time"
+          },
+          "amount": {
+            "type": ["null", "number"]
+          }
+        }
+      }
+    },
+    "tax_lines": {
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "price": {"type": "number"},
+          "rate": {"type": "number"}
+        }
+      }
+    },
+    "order_adjustments": {
+      "type": ["null", "object"],
+      "properties": {
+        "amount": {
+          "type": ["null", "number"]
+        },
+        "tax_amount": {
+          "type": ["null", "number"]
+        }
+      }
+    },
+    "line_items": {
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+"discount_allocations": {},
+          "properties": {},
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fulfillable_quantity": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "gift_card": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "grams": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "product_id": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "variant_title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "variant_inventory_management": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fulfillment_service": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "admin_graphql_api_id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "vendor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "variant_id": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "quantity": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "taxable": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "sku": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "product_exists": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "fulfillment_status": {
+            "type": [
+              "null"
+            ]
+          },
+          "requires_shipping": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "price": {"type": ["null", "number"]},
+          "total_discount": {"type": ["null", "number"]},
+          "tax_lines": {
+            "$ref": "#/definitions/tax_lines"
+          }
+        }
+      }
+    }
+  },
   "type": [
     "null",
     "object"
@@ -10,11 +176,31 @@
     },
     "discount_codes": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "amount": {
+            "type": ["null", "number"]
+          }
+        }
+      }
     },
     "fulfillments": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "created_at": {
+            "type": ["null", "string"],
+            "format": "date-time"},
+          "updated_at": {
+            "type": ["null", "string"],
+            "format": "date-time"},
+          "line_items": {
+            "$ref": "#/definitions/line_items"
+          }
+        }
+      }
     },
     "number": {
       "type": [
@@ -30,8 +216,10 @@
     },
     "closed_at": {
       "type": [
-        "null"
-      ]
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     },
     "buyer_accepts_marketing": {
       "type": [
@@ -73,7 +261,8 @@
           "type": [
             "null",
             "string"
-          ]
+          ],
+          "format": "date-time"
         },
         "last_name": {
           "type": [
@@ -107,7 +296,7 @@
         "total_spent": {
           "type": [
             "null",
-            "string"
+            "number"
           ]
         },
         "default_address": {
@@ -263,7 +452,8 @@
           "type": [
             "null",
             "string"
-          ]
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -314,7 +504,7 @@
     "subtotal_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "financial_status": {
@@ -462,7 +652,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     },
     "checkout_token": {
       "type": [
@@ -483,13 +674,13 @@
     "total_discounts": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "total_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "billing_address": {
@@ -592,7 +783,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     },
     "device_id": {
       "type": [
@@ -602,7 +794,7 @@
     "total_line_items_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "location_id": {
@@ -627,157 +819,43 @@
     },
     "refunds": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "created_at": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "order_adjustments": {
+          "$ref": "#/definitions/order_adjustments"
+        },
+        "transactions": {
+          "$ref": "#/definitions/transactions"
+        }
+      }
+    },
+    "transactions": {
+          "$ref": "#/definitions/transactions"
+    },
+    "order_adjustments": {
+      "$ref": "#/definitions/order_adjustments"
     },
     "shipping_lines": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "price": {"type": ["null", "number"]},
+          "tax_lines": {"$ref": "#/definitions/tax_lines"}
+        }
+      }
     },
     "tax_lines": {
-      "type": ["null", "array"],
-      "items": {}
+      "$ref": "#/definitions/tax_lines"
     },
     "line_items": {
-      "items": {
-        "type": [
-          "null",
-          "object"
-        ],
-        "properties": {
-          "discount_allocations": {},
-          "properties": {},
-          "tax_lines": {},
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fulfillable_quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "gift_card": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "grams": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "variant_title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "variant_inventory_management": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fulfillment_service": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "admin_graphql_api_id": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "vendor": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "variant_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "total_discount": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "taxable": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "sku": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "product_exists": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "price": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fulfillment_status": {
-            "type": [
-              "null"
-            ]
-          },
-          "requires_shipping": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          }
-        }
-      },
-      "type": [
-        "null",
-        "array"
-      ]
+      "$ref": "#/definitions/line_items"
     },
     "source_url": {
       "type": [
@@ -799,7 +877,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     },
     "note": {
       "type": [
@@ -809,7 +888,7 @@
     "total_tax": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "gateway": {
@@ -837,13 +916,15 @@
     },
     "cancelled_at": {
       "type": [
-        "null"
-      ]
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     },
     "total_price_usd": {
       "type": [
         "null",
-        "string"
+        "number"
       ]
     },
     "browser_ip": {

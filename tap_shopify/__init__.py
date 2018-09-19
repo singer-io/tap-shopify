@@ -17,11 +17,15 @@ def get_abs_path(path):
 def load_schemas():
     schemas = {}
 
+    # This schema represents many of the currency values as JSON schema
+    # 'number's, which may result in lost precision.
     for filename in os.listdir(get_abs_path('schemas')):
         path = get_abs_path('schemas') + '/' + filename
         file_raw = filename.replace('.json', '')
         with open(path) as file:
-            schemas[file_raw] = json.load(file)
+            raw_dict = json.load(file)
+            schema = singer.resolve_schema_references(raw_dict, raw_dict)
+            schemas[file_raw] = schema
 
     return schemas
 
