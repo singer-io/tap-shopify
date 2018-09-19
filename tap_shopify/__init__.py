@@ -2,7 +2,10 @@
 import os
 import json
 import singer
+import pyactiveresource
 import shopify
+import time
+import math
 from singer import utils
 from singer import metadata
 from singer import Transformer
@@ -50,13 +53,29 @@ class Orders:
         start_date = (singer.get_bookmark(state, self.name, self.replication_key)) or config['start_date']
 
         while True:
-            orders = shopify.Order.find(
-                limit=250,
-                page=page,
-                updated_at_min=start_date,
-                # Order is an undocumented query param that we believe
-                # ensures the order of the results.
-                order="updated_at asc")
+            try:
+                orders = shopify.Order.find(
+                    # Max allowed value as of 2018-09-19 11:53:48
+                    limit=250,
+                    page=page,
+                    updated_at_min=start_date,
+                    # Order is an undocumented query param that we believe
+                    # ensures the order of the results.
+                    order="updated_at asc")
+            except pyactiveresource.connection.ClientError as e:
+                # We have never seen this be anything _but_ a 429. Other
+                # states should be consider untested.
+                resp = e.response
+                if 429 == resp.code:
+                    # Retry-After is an undocumented header. But honoring
+                    # it was proven to work in our spikes.
+                    sleep_time_str = resp.headers['Retry-After']
+                    LOGGER.info("Received 429 -- sleeping for {} seconds".format(sleep_time_str))
+                    time.sleep(math.floor(float(sleep_time_str)))
+                    continue
+                else:
+                    LOGGER.ERROR("Received a {} error.".format(resp.code))
+                    raise
             for order in orders:
                 singer.write_bookmark(state,
                                       self.name,
