@@ -8,8 +8,8 @@ import requests
 import time
 
 SHOP_NAME = 'stitchdatawearhouse'
-API_KEY = 'd469b3cbbcd3f458b08235fd518c1b9b'
-PASSWORD = 'd5f1e595a443430d6f26bc66433484d8'
+API_KEY = sys.argv[1]
+PASSWORD = sys.argv[2]
 
 shop_url = "https://%s:%s@%s.myshopify.com/admin" % (API_KEY, PASSWORD, SHOP_NAME)
 shopify.ShopifyResource.set_site(shop_url)
