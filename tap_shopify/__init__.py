@@ -32,19 +32,17 @@ class Orders:
     key_properties = None
     metadata = None
     schema = None
-    client = None
 
-    def __init__(self, client, schema):
+    def __init__(self, schema):
         self.name = "orders"
         self.replication_method = "INCREMENTAL"
         self.replication_key = 'updated_at'
         self.key_properties = ['id']
         self.schema = schema
         self.metadata = self.load_metadata()
-        self.client = client
 
     def sync(self, state):
-        for order in self.client.Order.find(limit=250):
+        for order in shopify.Order.find(limit=250):
             yield order.to_dict()
 
     def load_metadata(self):
@@ -76,7 +74,7 @@ def discover():
 
     for schema_name, schema in raw_schemas.items():
 
-        stream = STREAMS[schema_name](None, schema)
+        stream = STREAMS[schema_name](schema)
 
         # TODO: populate any metadata and stream's key properties here..
         stream_metadata = stream.metadata
@@ -113,13 +111,12 @@ def get_selected_streams(catalog):
 
     return selected_streams
 
-def get_shopify_client(config):
+def initialize_shopify_client(config):
     api_key = config['api_key']
     shop = config['shop']
     session = shopify.Session("%s.myshopify.com" % (shop),
                               api_key)
     shopify.ShopifyResource.activate_session(session)
-    return shopify
 
 def sync(config, state, catalog):
 
@@ -129,8 +126,8 @@ def sync(config, state, catalog):
     for catalog_entry in catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream_schema = catalog_entry['schema']
-        client = get_shopify_client(config)
-        stream = STREAMS[stream_id](client, stream_schema)
+        initialize_shopify_client(config)
+        stream = STREAMS[stream_id](stream_schema)
 
         if stream_id in selected_stream_ids:
             LOGGER.info('Syncing stream:' + stream_id)
