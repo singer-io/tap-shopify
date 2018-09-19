@@ -8,6 +8,14 @@
       "type": ["null", "array"],
       "items": {}
     },
+    "discount_codes": {
+      "type": ["null", "array"],
+      "items": {}
+    },
+    "fulfillments": {
+      "type": ["null", "array"],
+      "items": {}
+    },
     "number": {
       "type": [
         "null",
@@ -613,6 +621,22 @@
         "null"
       ]
     },
+    "note_attributes": {
+      "type": ["null", "array"],
+      "items": {}
+    },
+    "refunds": {
+      "type": ["null", "array"],
+      "items": {}
+    },
+    "shipping_lines": {
+      "type": ["null", "array"],
+      "items": {}
+    },
+    "tax_lines": {
+      "type": ["null", "array"],
+      "items": {}
+    },
     "line_items": {
       "items": {
         "type": [
@@ -620,6 +644,9 @@
           "object"
         ],
         "properties": {
+          "discount_allocations": {},
+          "properties": {},
+          "tax_lines": {},
           "title": {
             "type": [
               "null",
