@@ -46,8 +46,14 @@ class Orders:
         self.metadata = self.load_metadata()
 
     def sync(self, state):
-        for order in shopify.Order.find(limit=250):
-            yield order.to_dict()
+        page = 1
+        while True:
+            orders = shopify.Order.find(limit=250, page=page)
+            for order in orders:
+                yield order.to_dict()
+            if 250 > len(orders):
+                break
+            page += 1
 
     def load_metadata(self):
         mdata = metadata.new()
