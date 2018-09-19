@@ -45,12 +45,25 @@ class Orders:
         self.schema = schema
         self.metadata = self.load_metadata()
 
-    def sync(self, state):
+    def sync(self, config, state):
         page = 1
+        start_date = (singer.get_bookmark(state, self.name, self.replication_key)) or config['start_date']
+
         while True:
-            orders = shopify.Order.find(limit=250, page=page)
+            orders = shopify.Order.find(
+                limit=250,
+                page=page,
+                updated_at_min=start_date,
+                # Order is an undocumented query param that we believe
+                # ensures the order of the results.
+                order="updated_at asc")
             for order in orders:
+                singer.write_bookmark(state,
+                                      self.name,
+                                      self.replication_key,
+                                      order.updated_at)
                 yield order.to_dict()
+            singer.write_state(state)
             if 250 > len(orders):
                 break
             page += 1
@@ -147,7 +160,7 @@ def sync(config, state, catalog):
 
             # sync
             with Transformer() as transformer:
-                for rec in stream.sync(state):
+                for rec in stream.sync(config, state):
                     rec = transformer.transform(rec, stream.schema, metadata.to_map(stream.metadata))
                     singer.write_record(stream.name, rec)
 
