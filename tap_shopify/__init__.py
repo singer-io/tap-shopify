@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import os
 import json
-import singer
-import pyactiveresource
-import shopify
 import time
 import math
+
+import singer
 from singer import utils
 from singer import metadata
 from singer import Transformer
+import pyactiveresource
+import shopify
+
 
 REQUIRED_CONFIG_KEYS = ["api_key"]
 LOGGER = singer.get_logger()
@@ -50,7 +52,11 @@ class Orders:
 
     def sync(self, config, state):
         page = 1
-        start_date = (singer.get_bookmark(state, self.name, self.replication_key)) or config['start_date']
+        start_date = (
+            singer.get_bookmark(
+                state,
+                self.name,
+                self.replication_key)) or config['start_date']
 
         while True:
             try:
@@ -62,15 +68,15 @@ class Orders:
                     # Order is an undocumented query param that we believe
                     # ensures the order of the results.
                     order="updated_at asc")
-            except pyactiveresource.connection.ClientError as e:
+            except pyactiveresource.connection.ClientError as client_error:
                 # We have never seen this be anything _but_ a 429. Other
                 # states should be consider untested.
-                resp = e.response
-                if 429 == resp.code:
+                resp = client_error.response
+                if resp.code == 429:
                     # Retry-After is an undocumented header. But honoring
                     # it was proven to work in our spikes.
                     sleep_time_str = resp.headers['Retry-After']
-                    LOGGER.info("Received 429 -- sleeping for {} seconds".format(sleep_time_str))
+                    LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
                     time.sleep(math.floor(float(sleep_time_str)))
                     continue
                 else:
@@ -83,7 +89,7 @@ class Orders:
                                       order.updated_at)
                 yield order.to_dict()
             singer.write_state(state)
-            if 250 > len(orders):
+            if len(orders) < 250:
                 break
             page += 1
 
@@ -118,10 +124,6 @@ def discover():
 
         stream = STREAMS[schema_name](schema)
 
-        # TODO: populate any metadata and stream's key properties here..
-        stream_metadata = stream.metadata
-        stream_key_properties = stream.key_properties
-
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
@@ -148,7 +150,7 @@ def get_selected_streams(catalog):
         else:
             for entry in stream_metadata:
                 # stream metadata will have empty breadcrumb
-                if not entry['breadcrumb'] and entry['metadata'].get('selected',None):
+                if not entry['breadcrumb'] and entry['metadata'].get('selected', None):
                     selected_streams.append(stream['tap_stream_id'])
 
     return selected_streams
@@ -172,7 +174,7 @@ def sync(config, state, catalog):
         stream = STREAMS[stream_id](stream_schema)
 
         if stream_id in selected_stream_ids:
-            LOGGER.info('Syncing stream:' + stream_id)
+            LOGGER.info('Syncing stream: %s', stream_id)
 
             # write schema message
             singer.write_schema(stream.name, stream.schema, stream.key_properties)
@@ -180,10 +182,11 @@ def sync(config, state, catalog):
             # sync
             with Transformer() as transformer:
                 for rec in stream.sync(config, state):
-                    rec = transformer.transform(rec, stream.schema, metadata.to_map(stream.metadata))
+                    rec = transformer.transform(rec,
+                                                stream.schema,
+                                                metadata.to_map(stream.metadata))
                     singer.write_record(stream.name, rec)
 
-    return
 
 @utils.handle_top_exception(LOGGER)
 def main():
@@ -205,7 +208,7 @@ def main():
         elif args.catalog:
             catalog = args.catalog
         else:
-            catalog =  discover()
+            catalog = discover()
 
         sync(args.config, args.state, catalog)
 
