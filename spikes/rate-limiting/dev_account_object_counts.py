@@ -39,19 +39,30 @@ for shopify_object in shopify_objects:
             print("{} {}".format(object_counts[shopify_object], shopify_object))
 
 # Cycle through orders and count transactions
-params = {"limit": 250}
+params = {
+    "limit": 250,
+    "page": 1
+}
 
 orders_resp = shopify_request('orders.json', params)
 transactions_count = 0
 orders_count = 0
-if 'orders' in orders_resp:
-    for order in orders_resp['orders']:
-        if 'id' in order:
-            endpoint = 'orders/{}/transactions.json'.format(order['id'])
-            transactions_resp = shopify_request(endpoint, params)
-            if 'transactions' in transactions_resp:
-                transactions_count += len(transactions_resp['transactions'])
-        orders_count += 1
+current_page = 1
+while True:
+    if 'orders' in orders_resp:
+        for order in orders_resp['orders']:
+            if 'id' in order:
+                endpoint = 'orders/{}/transactions.json'.format(order['id'])
+                transactions_resp = shopify_request(endpoint, params)
+                if 'transactions' in transactions_resp:
+                    transactions_count += len(transactions_resp['transactions'])
+            orders_count += 1
+
+    current_page += 1
+    params["page"] = current_page
+    orders_resp = shopify_request('orders.json', params)
+    if 'orders' not in orders_resp or not any(orders_resp.get('orders')):
+        break
 print("{} transactions across {} orders".format(transactions_count, orders_count))
 
 
