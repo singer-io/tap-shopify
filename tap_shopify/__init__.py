@@ -151,7 +151,7 @@ class Orders(Stream):
             if len(orders) < RESULTS_PER_PAGE:
                 break
             page += 1
-        LOGGER.info('Count = {}'.format(count))    
+        LOGGER.info('Count = {}'.format(count))
 
 
 def get_selected_streams(catalog):
@@ -189,7 +189,7 @@ def sync(config, state, catalog):
         stream_schema = catalog_entry['schema']
         stream = STREAMS[stream_id](stream_schema)
         stream_metadata = metadata.to_map(catalog_entry['metadata'])
-        
+
         initialize_shopify_client(config)
 
 
