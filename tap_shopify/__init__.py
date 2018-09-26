@@ -94,34 +94,16 @@ class Stream():
         bookmark = singer.get_bookmark(state, self.name, self.replication_key) or config["start_date"]
         return utils.strptime_with_tz(bookmark)
 
-    def update_bookmark(self, state, value):
-        current_bookmark = self.get_bookmark(state)
+    def update_bookmark(self, state, config, value):
+        current_bookmark = self.get_bookmark(state, config)
         if value and utils.strptime_with_tz(value) > current_bookmark:
             singer.write_bookmark(state, self.name, self.replication_key, value)
 
-
-class Orders(Stream):
-    name = 'orders'
-    replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
-    key_properties = ['id']
-
-    def sync(self, config, state):
+    def paginate_endpoint(self, state, config, call_endpoint, start_date):
         page = 1
-        start_date = self.get_bookmark(state, config)
-        count = 0
-
         while True:
             try:
-                orders = shopify.Order.find(
-                    # Max allowed value as of 2018-09-19 11:53:48
-                    limit=RESULTS_PER_PAGE,
-                    page=page,
-                    updated_at_min=start_date,
-                    # Order is an undocumented query param that we believe
-                    # ensures the order of the results.
-                    order="updated_at asc")
-
+                values = call_endpoint(page, start_date)
             except pyactiveresource.connection.ClientError as client_error:
                 # We have never seen this be anything _but_ a 429. Other
                 # states should be consider untested.
@@ -136,18 +118,42 @@ class Orders(Stream):
                 else:
                     LOGGER.ERROR("Received a {} error.".format(resp.code))
                     raise
-            for order in orders:
-                singer.write_bookmark(state,
-                                      self.name,
-                                      self.replication_key,
-                                      order.updated_at)
-                yield order.to_dict()
-                count += 1
+            for value in values:
+                dict_value = value.to_dict()
+                self.update_bookmark(state, config, dict_value[self.replication_key])
+                yield dict_value
 
-            singer.write_state(state)
-            if len(orders) < RESULTS_PER_PAGE:
+            if not isinstance(self, SubStream):
+                singer.write_state(state)
+
+            if len(values) < RESULTS_PER_PAGE:
                 break
             page += 1
+
+class Orders(Stream):
+    name = 'orders'
+    replication_method = 'INCREMENTAL'
+    replication_key = 'updated_at'
+    key_properties = ['id']
+
+    def call_endpoint(self, page, start_date):
+        return shopify.Order.find(
+            # Max allowed value as of 2018-09-19 11:53:48
+            limit=RESULTS_PER_PAGE,
+            page=page,
+            updated_at_min=start_date,
+            # Order is an undocumented query param that we believe
+            # ensures the order of the results.
+            order="updated_at asc")
+
+    def sync(self, config, state):
+        start_date = self.get_bookmark(state, config)
+        count = 0
+
+        for order in self.paginate_endpoint(state, config, self.call_endpoint, start_date):
+            yield order
+            count += 1
+
         LOGGER.info('Count = {}'.format(count))
 
 class SubStream(Stream):
@@ -208,12 +214,32 @@ class Metafields(SubStream):
     replication_key = 'updated_at'
     key_properties = ['id']
 
+    def _call_root_endpoint(self, page, start_date):
+        shopify.Metafield.find(
+            # Max allowed value as of 2018-09-19 11:53:48
+            limit=RESULTS_PER_PAGE,
+            page=page,
+            updated_at_min=start_date,
+            # Order is an undocumented query param that we believe
+            # ensures the order of the results.
+            order="updated_at asc")
+
+    def _sync_root(self, config, state):
+        start_date = self.get_bookmark(state, config)
+        count = 0
+
+        metafields = self.paginate_endpoint(state, config, self._call_root_endpoint, start_date)
+        for metafield in metafields:
+            yield metafield
+            count += 1
+
+        LOGGER.info('Count = {}'.format(count))
+
     def sync(self, config, state, parent_id=None):
         # Two Options: Child and Root
         # If Root
         if self.parent_type is None:
-            # Sync root metafields
-            pass
+            self._sync_root(config, state)
         else:
             # Sync child metafields for parent ID
             pass
