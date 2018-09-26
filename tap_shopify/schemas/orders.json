@@ -41,7 +41,7 @@
       "items": {
         "type": ["null", "object"],
         "properties": {
-"discount_allocations": {},
+          "discount_allocations": {},
           "properties": {},
           "title": {
             "type": [
@@ -147,8 +147,10 @@
           },
           "fulfillment_status": {
             "type": [
-              "null"
-            ]
+              "null",
+              "string"
+            ],
+            "enum": ["fulfilled", "partial", "not_eligible"]
           },
           "requires_shipping": {
             "type": [
@@ -172,7 +174,13 @@
   "properties": {
     "discount_applications": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {}
+      }
     },
     "discount_codes": {
       "type": ["null", "array"],
@@ -288,11 +296,6 @@
             "boolean"
           ]
         },
-        "multipass_identifier": {
-          "type": [
-            "null"
-          ]
-        },
         "total_spent": {
           "type": [
             "null",
@@ -373,7 +376,8 @@
             },
             "address2": {
               "type": [
-                "null"
+                "null",
+                "string"
               ]
             },
             "customer_id": {
@@ -402,7 +406,8 @@
             },
             "company": {
               "type": [
-                "null"
+                "null",
+                "string"
               ]
             }
           }
@@ -415,7 +420,8 @@
         },
         "note": {
           "type": [
-            "null"
+            "null",
+            "string"
           ]
         },
         "tags": {
@@ -465,18 +471,15 @@
     },
     "fulfillment_status": {
       "type": [
-        "null"
-      ]
+        "null",
+        "string"
+      ],
+      "enum": ["fulfilled", "partial", "not_eligible"]
     },
     "phone": {
       "type": [
         "null",
         "string"
-      ]
-    },
-    "checkout_id": {
-      "type": [
-        "null"
       ]
     },
     "total_weight": {
@@ -491,14 +494,10 @@
         "integer"
       ]
     },
-    "source_identifier": {
-      "type": [
-        "null"
-      ]
-    },
     "landing_site": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "subtotal_price": {
@@ -515,17 +514,14 @@
     },
     "referring_site": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "cart_token": {
       "type": [
-        "null"
-      ]
-    },
-    "reference": {
-      "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "app_id": {
@@ -614,7 +610,8 @@
         },
         "address2": {
           "type": [
-            "null"
+            "null",
+            "string"
           ]
         },
         "country": {
@@ -637,7 +634,8 @@
         },
         "company": {
           "type": [
-            "null"
+            "null",
+            "string"
           ]
         }
       }
@@ -657,12 +655,14 @@
     },
     "checkout_token": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "cancel_reason": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "processing_method": {
@@ -751,7 +751,8 @@
         },
         "address2": {
           "type": [
-            "null"
+            "null",
+            "string"
           ]
         },
         "country": {
@@ -774,7 +775,8 @@
         },
         "company": {
           "type": [
-            "null"
+            "null",
+            "string"
           ]
         }
       }
@@ -788,7 +790,8 @@
     },
     "device_id": {
       "type": [
-        "null"
+        "null",
+        "integer"
       ]
     },
     "total_line_items_price": {
@@ -799,7 +802,8 @@
     },
     "location_id": {
       "type": [
-        "null"
+        "null",
+        "integer"
       ]
     },
     "total_tip_received": {
@@ -810,28 +814,48 @@
     },
     "customer_locale": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "note_attributes": {
       "type": ["null", "array"],
-      "items": {}
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
     },
     "refunds": {
       "type": ["null", "array"],
       "items": {
-        "created_at": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "date-time"
-        },
-        "order_adjustments": {
-          "$ref": "#/definitions/order_adjustments"
-        },
-        "transactions": {
-          "$ref": "#/definitions/transactions"
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "created_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "order_adjustments": {
+            "$ref": "#/definitions/order_adjustments"
+          },
+          "transactions": {
+            "$ref": "#/definitions/transactions"
+          }
         }
       }
     },
@@ -859,12 +883,8 @@
     },
     "source_url": {
       "type": [
-        "null"
-      ]
-    },
-    "landing_site_ref": {
-      "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "tags": {
@@ -882,7 +902,8 @@
     },
     "note": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "total_tax": {
@@ -899,7 +920,8 @@
     },
     "user_id": {
       "type": [
-        "null"
+        "null",
+        "integer"
       ]
     },
     "id": {
@@ -929,7 +951,8 @@
     },
     "browser_ip": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "order_status_url": {
