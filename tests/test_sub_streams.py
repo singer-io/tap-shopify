@@ -1,0 +1,124 @@
+from unittest import TestCase
+from tap_shopify import Metafields
+from singer import utils
+
+class TestSubStreamBookmarkAccessors(TestCase):
+    test_schema = None
+    config = {"start_date": "2017-09-26T15:54:00.00000Z"}
+    str_current_bookmark = "2018-09-26T15:54:00.00000Z"
+
+    # Get Bookmark
+    def test_get_bookmark_exists_root(self):
+        instance = Metafields(self.test_schema)
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {"metafields": {"updated_at": current_bookmark}}}
+
+        actual = instance.get_bookmark(state, self.config)
+        self.assertEqual(utils.strptime_with_tz(current_bookmark), actual)
+
+    def test_get_bookmark_does_not_exist_root(self):
+        instance = Metafields(self.test_schema)
+
+        state = {}
+
+        actual = instance.get_bookmark(state, self.config)
+        self.assertEqual(utils.strptime_with_tz(self.config["start_date"]), actual)
+
+    def test_get_bookmark_exists_child(self):
+        instance = Metafields(self.test_schema, parent_type="orders")
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {"orders": {"metafields": {"updated_at": current_bookmark}}}}
+
+        actual = instance.get_bookmark(state, self.config)
+        self.assertEqual(utils.strptime_with_tz(current_bookmark), actual)
+
+    def test_get_bookmark_does_not_exist_child(self):
+        instance = Metafields(self.test_schema, parent_type="orders")
+
+        state = {"bookmarks": {"orders":{}}}
+
+        actual = instance.get_bookmark(state, self.config)
+        self.assertEqual(utils.strptime_with_tz(self.config["start_date"]), actual)
+
+    def test_get_bookmark_parent_does_not_exist_child(self):
+        instance = Metafields(self.test_schema, parent_type="orders")
+
+        state = {"bookmarks": {}}
+
+        actual = instance.get_bookmark(state, self.config)
+        self.assertEqual(utils.strptime_with_tz(self.config["start_date"]), actual)
+
+    # Write Bookmark
+    def test_write_bookmark_exists_root(self):
+        instance = Metafields(self.test_schema)
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {"metafields": {"updated_at": self.config["start_date"]}}}
+        state_expected = dict(state)
+        state_expected["bookmarks"]["metafields"]["updated_at"] = current_bookmark
+
+        instance.update_bookmark(state, self.config, current_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_does_not_exist_root(self):
+        instance = Metafields(self.test_schema)
+
+        current_bookmark = self.str_current_bookmark
+        state = {}
+        state_expected = {"bookmarks": {"metafields": {"updated_at": current_bookmark}}}
+
+        instance.update_bookmark(state, self.config, current_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_exists_child(self):
+        instance = Metafields(self.test_schema, "orders")
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {"orders": {"metafields": {"updated_at": self.config["start_date"]}}}}
+        state_expected = dict(state)
+        state_expected["bookmarks"]["orders"]["metafields"]["updated_at"] = current_bookmark
+
+        instance.update_bookmark(state, self.config, current_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_does_not_exist_child(self):
+        instance = Metafields(self.test_schema, "orders")
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {"orders": {}}}
+        state_expected = {"bookmarks": { "orders": {"metafields": {"updated_at": current_bookmark}}}}
+
+        instance.update_bookmark(state, self.config, current_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_parent_does_not_exist_child(self):
+        instance = Metafields(self.test_schema, "orders")
+
+        current_bookmark = self.str_current_bookmark
+        state = {"bookmarks": {}}
+        state_expected = {"bookmarks": { "orders": {"metafields": {"updated_at": current_bookmark}}}}
+
+        instance.update_bookmark(state, self.config, current_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_new_value_root(self):
+        instance = Metafields(self.test_schema)
+
+        new_bookmark = self.config["start_date"]
+        state = {"bookmarks": {"metafields": {"updated_at": self.str_current_bookmark}}}
+        state_expected = dict(state)
+
+        instance.update_bookmark(state, self.config, new_bookmark)
+        self.assertEqual(state_expected, state)
+
+    def test_write_bookmark_new_value_child(self):
+        instance = Metafields(self.test_schema, "orders")
+
+        new_bookmark = self.config["start_date"]
+        state = {"bookmarks": {"orders": {"metafields": {"updated_at": self.str_current_bookmark}}}}
+        state_expected = dict(state)
+
+        instance.update_bookmark(state, self.config, new_bookmark)
+        self.assertEqual(state_expected, state)

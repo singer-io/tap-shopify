@@ -106,9 +106,6 @@ class Orders(Stream):
     replication_key = 'updated_at'
     key_properties = ['id']
 
-    def __init__(self, schema):
-        self.schema = schema
-
     def sync(self, config, state):
         page = 1
         start_date = self.get_bookmark(state, config)
@@ -153,6 +150,73 @@ class Orders(Stream):
             page += 1
         LOGGER.info('Count = {}'.format(count))
 
+class SubStream(Stream):
+    """
+    A SubStream may optionally have a parent, if so, it adapts its bookmarking to access
+    either at the root level, or beneath the parent key, if specified.
+
+    A SubStream must follow these principles:
+    1. It needs its own bookmark field.
+    2. If parent records don't get updated when child records are updated, it needs a lookback
+       window tuned to the expected activity window of the data.
+       - The parent will check for child updates on its records within this window.
+    3. Child records should only be synced up to the start time of the sync run, in case
+       they get updated during the tap's run time.
+    4. To solve for selecting the child stream later than the parent, the parent sync needs
+       to start requesting data from the min(parent, child, start_date) bookmark
+    5. Mark the initial bookmark for either stream as the `start_date` of the config so
+       that we don't emit records outside of the requested range
+    6. Write state only after a guaranteed "full sync"
+       - If the parent is queried using a sliding time window, write child bookmarks, but
+         don't use them until the full window is finished.
+    """
+    parent_type = None
+    parent_lookback_window = 0
+
+    def __init__(self, schema, parent_type=None):
+        self.parent_type = parent_type
+        super().__init__(schema)
+
+    def get_bookmark(self, state, config):
+        if self.parent_type is None:
+            bookmark = singer.get_bookmark(state, self.name, self.replication_key) or config["start_date"]
+        else:
+            bookmark = singer.get_bookmark(state, self.parent_type, self.name) or config["start_date"]
+            if isinstance(bookmark, dict):
+                bookmark = bookmark.get(self.replication_key) or config["start_date"]
+        return utils.strptime_with_tz(bookmark)
+
+    def update_bookmark(self, state, config, value):
+        current_bookmark = self.get_bookmark(state, config)
+        if value and utils.strptime_with_tz(value) > current_bookmark:
+            if self.parent_type is None:
+                singer.write_bookmark(state, self.name, self.replication_key, value)
+            else:
+                root_bookmarks = state.get("bookmarks")
+                if root_bookmarks is None:
+                    state["bookmarks"] = {}
+                parent_bookmark = state.get("bookmarks", {}).get(self.parent_type)
+                if parent_bookmark is None:
+                    state["bookmarks"][self.parent_type] = {}
+                child_bookmark = singer.get_bookmark(state, self.parent_type, self.name) or {}
+                child_bookmark[self.replication_key] = value
+                singer.write_bookmark(state, self.parent_type, self.name, child_bookmark)
+
+class Metafields(SubStream):
+    name = 'metafields'
+    replication_method = 'INCREMENTAL'
+    replication_key = 'updated_at'
+    key_properties = ['id']
+
+    def sync(self, config, state, parent_id=None):
+        # Two Options: Child and Root
+        # If Root
+        if self.parent_type is None:
+            # Sync root metafields
+            pass
+        else:
+            # Sync child metafields for parent ID
+            pass
 
 def get_selected_streams(catalog):
     '''
