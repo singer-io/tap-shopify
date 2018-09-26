@@ -4,7 +4,7 @@ import math
 import shopify
 from datetime import datetime
 import sys
-import requests    
+import requests
 import time
 
 SHOP_NAME = 'stitchdatawearhouse'
@@ -49,14 +49,12 @@ while True:
     print("Retrieved {} orders in {} ms".format(
         len(the_orders),
         req_duration_ms))
-    
+
     total_duration = (datetime.now() - start)
     total_duration_seconds = total_duration.seconds
     total_duration_milliseconds = total_duration_seconds * 1000 + math.floor(total_duration.microseconds/1000)
     print("Made {} requests in {} seconds (average: {} ms/request)".format (
-        iterations, 
+        iterations,
         total_duration_seconds,
         math.floor(total_duration_milliseconds/iterations)))
     sys.stdout.flush()
-
-

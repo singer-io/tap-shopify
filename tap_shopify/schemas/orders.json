@@ -149,8 +149,7 @@
             "type": [
               "null",
               "string"
-            ],
-            "enum": ["fulfilled", "partial", "not_eligible"]
+            ]
           },
           "requires_shipping": {
             "type": [
@@ -473,8 +472,7 @@
       "type": [
         "null",
         "string"
-      ],
-      "enum": ["fulfilled", "partial", "not_eligible"]
+      ]
     },
     "phone": {
       "type": [
