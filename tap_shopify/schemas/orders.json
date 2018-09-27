@@ -26,13 +26,28 @@
       }
     },
     "order_adjustments": {
-      "type": ["null", "object"],
-      "properties": {
-        "amount": {
-          "type": ["null", "number"]
-        },
-        "tax_amount": {
-          "type": ["null", "number"]
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"]
+        "properties": {
+          "amount": {
+            "type": ["null", "number"]
+          },
+          "tax_amount": {
+            "type": ["null", "number"]
+          },
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "order_id": {
+            "type": ["null", "integer"]
+          },
+          "kind": {
+            "type": ["null", "string"]
+          },
+          "reason": {
+            "type": ["null", "string"]
+          }
         }
       }
     },
