@@ -127,6 +127,17 @@ class Stream():
         bookmark = singer.get_bookmark(Context.state, self.name, self.replication_key) or Context.config["start_date"]
         return utils.strptime_with_tz(bookmark)
 
+    def get_min_bookmark(self):
+        min_bookmark = self.get_bookmark()
+        for sub_stream_name in SUB_STREAMS.get(self.name, []):
+            if not Context.is_selected(sub_stream_name):
+                continue
+            sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name), parent_type=self.name)
+            sub_stream_bookmark = sub_stream.get_bookmark()
+            if sub_stream_bookmark < min_bookmark:
+                min_bookmark = sub_stream_bookmark
+        return min_bookmark
+
     def update_bookmark(self, value):
         current_bookmark = self.get_bookmark()
         if value and utils.strptime_with_tz(value) > current_bookmark:
@@ -152,7 +163,10 @@ class Stream():
                     LOGGER.ERROR("Received a {} error.".format(resp.code))
                     raise
             for value in values:
-                self.update_bookmark(getattr(value, self.replication_key))
+                # Only update the bookmark if we are actually syncing this stream's records
+                # Applicable when a parent is being requested to retrieve child records
+                if Context.is_selected(self.name):
+                    self.update_bookmark(getattr(value, self.replication_key))
                 yield value
 
             if not isinstance(self, SubStream):
@@ -180,13 +194,14 @@ class Orders(Stream):
 
     def sync(self):
         orders_bookmark = self.get_bookmark()
+        start_bookmark = self.get_min_bookmark()
         count = 0
 
-        # TODO: Get sub-stream bookmarks and find lowest, start
-        #       syncing parent by that value - lookback window
-        for order in self.paginate_endpoint(self.call_endpoint, orders_bookmark):
+        for order in self.paginate_endpoint(self.call_endpoint, start_bookmark):
+            updated_at = utils.strptime_with_tz(order.updated_at)
             if (Context.is_selected(self.name) and
-                order.updated_at >= orders_bookmark):
+                updated_at >= orders_bookmark):
+                count += 1
                 yield (self.name, order.to_dict())
 
             sub_stream_names = SUB_STREAMS.get(self.name, [])
@@ -196,9 +211,8 @@ class Orders(Stream):
                     values = sub_stream.sync(order)
                     for value in values:
                         yield value
-            count += 1
 
-        LOGGER.info('Count = {}'.format(count))
+        LOGGER.info('Orders Count = {}'.format(count))
 
 class SubStream(Stream):
     """
@@ -277,7 +291,7 @@ class Metafields(SubStream):
             yield (self.name, metafield.to_dict())
             count += 1
 
-        LOGGER.info('Count = {}'.format(count))
+        LOGGER.info('Shop Metafields Count = {}'.format(count))
 
     def _sync_child(self, parent_obj):
         start_date = self.get_bookmark()
@@ -300,7 +314,8 @@ class Metafields(SubStream):
             yield (self.name, metafield.to_dict())
             count += 1
 
-        LOGGER.info('Count = {}'.format(count))
+        LOGGER.info('{} Metafields Count = {}'.format(self.parent_type.replace('_', ' ').title(),
+                                                      count))
 
     def sync(self, parent_obj=None):
         if self.parent_type is None:

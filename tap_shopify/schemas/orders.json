@@ -28,7 +28,7 @@
     "order_adjustments": {
       "type": ["null", "array"],
       "items": {
-        "type": ["null", "object"]
+        "type": ["null", "object"],
         "properties": {
           "amount": {
             "type": ["null", "number"]
