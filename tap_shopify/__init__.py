@@ -11,13 +11,18 @@ from singer import Transformer
 import pyactiveresource
 import shopify
 
-REQUIRED_CONFIG_KEYS = ["api_key"]
+REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
 RESULTS_PER_PAGE = 250
 
-def initialize_shopify_client(config):
-    api_key = config['api_key']
-    shop = config['shop']
+class Context():
+    config = None
+    state = {}
+    catalog = None
+
+def initialize_shopify_client():
+    api_key = Context.config['api_key']
+    shop = Context.config['shop']
     session = shopify.Session("%s.myshopify.com" % (shop),
                               api_key)
     activate_resp = shopify.ShopifyResource.activate_session(session)
@@ -74,7 +79,9 @@ def discover():
             'tap_stream_id': schema_name,
             'schema': schema,
             'metadata' : get_discovery_metadata(stream),
-            'key_properties': stream.key_properties
+            'key_properties': stream.key_properties,
+            'replication_key': stream.replication_key,
+            'replication_method': stream.replication_method
         }
         streams.append(catalog_entry)
 
@@ -90,16 +97,16 @@ class Stream():
     def __init__(self, schema):
         self.schema = schema
 
-    def get_bookmark(self, state, config):
-        bookmark = singer.get_bookmark(state, self.name, self.replication_key) or config["start_date"]
+    def get_bookmark(self):
+        bookmark = singer.get_bookmark(Context.state, self.name, self.replication_key) or Context.config["start_date"]
         return utils.strptime_with_tz(bookmark)
 
-    def update_bookmark(self, state, config, value):
-        current_bookmark = self.get_bookmark(state, config)
+    def update_bookmark(self, value):
+        current_bookmark = self.get_bookmark()
         if value and utils.strptime_with_tz(value) > current_bookmark:
-            singer.write_bookmark(state, self.name, self.replication_key, value)
+            singer.write_bookmark(Context.state, self.name, self.replication_key, value)
 
-    def paginate_endpoint(self, state, config, call_endpoint, start_date):
+    def paginate_endpoint(self, call_endpoint, start_date):
         page = 1
         while True:
             try:
@@ -119,12 +126,11 @@ class Stream():
                     LOGGER.ERROR("Received a {} error.".format(resp.code))
                     raise
             for value in values:
-                dict_value = value.to_dict()
-                self.update_bookmark(state, config, dict_value[self.replication_key])
-                yield dict_value
+                self.update_bookmark(getattr(value, self.replication_key))
+                yield value
 
             if not isinstance(self, SubStream):
-                singer.write_state(state)
+                singer.write_state(Context.state)
 
             if len(values) < RESULTS_PER_PAGE:
                 break
@@ -146,12 +152,13 @@ class Orders(Stream):
             # ensures the order of the results.
             order="updated_at asc")
 
-    def sync(self, config, state):
-        start_date = self.get_bookmark(state, config)
+    def sync(self):
+        start_date = self.get_bookmark()
         count = 0
 
-        for order in self.paginate_endpoint(state, config, self.call_endpoint, start_date):
-            yield order
+        for order in self.paginate_endpoint(self.call_endpoint, start_date):
+            # TODO: Sync child stream using "order"
+            yield order.to_dict()
             count += 1
 
         LOGGER.info('Count = {}'.format(count))
@@ -183,30 +190,30 @@ class SubStream(Stream):
         self.parent_type = parent_type
         super().__init__(schema)
 
-    def get_bookmark(self, state, config):
+    def get_bookmark(self):
         if self.parent_type is None:
-            bookmark = singer.get_bookmark(state, self.name, self.replication_key) or config["start_date"]
+            bookmark = singer.get_bookmark(Context.state, self.name, self.replication_key) or Context.config["start_date"]
         else:
-            bookmark = singer.get_bookmark(state, self.parent_type, self.name) or config["start_date"]
+            bookmark = singer.get_bookmark(Context.state, self.parent_type, self.name) or Context.config["start_date"]
             if isinstance(bookmark, dict):
-                bookmark = bookmark.get(self.replication_key) or config["start_date"]
+                bookmark = bookmark.get(self.replication_key) or Context.config["start_date"]
         return utils.strptime_with_tz(bookmark)
 
-    def update_bookmark(self, state, config, value):
-        current_bookmark = self.get_bookmark(state, config)
+    def update_bookmark(self, value):
+        current_bookmark = self.get_bookmark()
         if value and utils.strptime_with_tz(value) > current_bookmark:
             if self.parent_type is None:
-                singer.write_bookmark(state, self.name, self.replication_key, value)
+                singer.write_bookmark(Context.state, self.name, self.replication_key, value)
             else:
-                root_bookmarks = state.get("bookmarks")
+                root_bookmarks = Context.state.get("bookmarks")
                 if root_bookmarks is None:
-                    state["bookmarks"] = {}
-                parent_bookmark = state.get("bookmarks", {}).get(self.parent_type)
+                    Context.state["bookmarks"] = {}
+                parent_bookmark = Context.state.get("bookmarks", {}).get(self.parent_type)
                 if parent_bookmark is None:
-                    state["bookmarks"][self.parent_type] = {}
-                child_bookmark = singer.get_bookmark(state, self.parent_type, self.name) or {}
+                    Context.state["bookmarks"][self.parent_type] = {}
+                child_bookmark = singer.get_bookmark(Context.state, self.parent_type, self.name) or {}
                 child_bookmark[self.replication_key] = value
-                singer.write_bookmark(state, self.parent_type, self.name, child_bookmark)
+                singer.write_bookmark(Context.state, self.parent_type, self.name, child_bookmark)
 
 class Metafields(SubStream):
     name = 'metafields'
@@ -224,34 +231,49 @@ class Metafields(SubStream):
             # ensures the order of the results.
             order="updated_at asc")
 
-    def _sync_root(self, config, state):
-        start_date = self.get_bookmark(state, config)
+    def _sync_root(self):
+        start_date = self.get_bookmark()
         count = 0
 
-        metafields = self.paginate_endpoint(state, config, self._call_root_endpoint, start_date)
+        metafields = self.paginate_endpoint(self._call_root_endpoint, start_date)
         for metafield in metafields:
             yield metafield
             count += 1
 
         LOGGER.info('Count = {}'.format(count))
 
-    def sync(self, config, state, parent_id=None):
+    def _sync_child(self, parent_obj):
+        start_date = self.get_bookmark()
+        count = 0
+
+        def call_child_endpoint(page, start_date):
+            pass
+
+        metafields = self.paginate_endpoint(call_child_endpoint, start_date)
+        for metafield in metafields:
+            yield metafield
+            count += 1
+
+        LOGGER.info('Count = {}'.format(count))
+
+    def sync(self, parent_obj=None):
         # Two Options: Child and Root
         # If Root
         if self.parent_type is None:
-            self._sync_root(config, state)
+            self._sync_root()
         else:
             # Sync child metafields for parent ID
+            self._sync_child(parent_id)
             pass
 
-def get_selected_streams(catalog):
+def get_selected_streams():
     '''
     Gets selected streams.  Checks schema's 'selected' first (legacy)
     and then checks metadata (current), looking for an empty breadcrumb
     and mdata with a 'selected' entry
     '''
     selected_streams = []
-    for stream in catalog['streams']:
+    for stream in Context.catalog['streams']:
         stream_metadata = stream['metadata']
         if stream['schema'].get('selected', False):
             selected_streams.append(stream['tap_stream_id'])
@@ -269,18 +291,18 @@ STREAMS = {
 }
 
 
-def sync(config, state, catalog):
+def sync():
 
-    selected_stream_ids = get_selected_streams(catalog)
+    selected_stream_ids = get_selected_streams()
 
     # Loop over streams in catalog
-    for catalog_entry in catalog['streams']:
+    for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream_schema = catalog_entry['schema']
         stream = STREAMS[stream_id](stream_schema)
         stream_metadata = metadata.to_map(catalog_entry['metadata'])
 
-        initialize_shopify_client(config)
+        initialize_shopify_client()
 
 
         if stream_id in selected_stream_ids:
@@ -291,7 +313,7 @@ def sync(config, state, catalog):
 
             # sync
             with Transformer() as transformer:
-                for rec in stream.sync(config, state):
+                for rec in stream.sync():
                     rec = transformer.transform(rec, stream.schema, stream_metadata)
                     singer.write_record(stream.name, rec)
 
@@ -308,17 +330,14 @@ def main():
         print(json.dumps(catalog, indent=2))
     # Otherwise run in sync mode
     else:
-
-        # 'properties' is the legacy name of the catalog
-        if args.properties:
-            catalog = args.properties
-        # 'catalog' is the current name
-        elif args.catalog:
-            catalog = args.catalog
+        if args.catalog:
+            Context.catalog = args.catalog.to_dict()
         else:
-            catalog = discover()
+            Context.catalog = discover()
 
-        sync(args.config, args.state, catalog)
+        Context.config = args.config
+        Context.state = args.state
+        sync()
 
 if __name__ == "__main__":
     main()
