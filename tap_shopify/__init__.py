@@ -20,6 +20,32 @@ class Context():
     state = {}
     catalog = None
 
+    @classmethod
+    def is_selected(cls, stream_name):
+        stream = [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
+        stream_metadata = stream['metadata']
+        if stream['schema'].get('selected', False):
+            return True
+        else:
+            for entry in stream_metadata:
+                # stream metadata will have empty breadcrumb
+                if entry['breadcrumb'] == () and entry['metadata'].get('selected', None):
+                    return True
+
+        return False
+
+    @classmethod
+    def has_selected_child(cls, stream_name):
+        for sub_stream_name in SUB_STREAMS.get(stream_name, []):
+            if cls.is_selected(sub_stream_name):
+                return True
+        return False
+
+    @classmethod
+    def get_schema(cls, stream_name):
+        stream =  [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
+        return stream["schema"]
+
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
@@ -153,12 +179,23 @@ class Orders(Stream):
             order="updated_at asc")
 
     def sync(self):
-        start_date = self.get_bookmark()
+        orders_bookmark = self.get_bookmark()
         count = 0
 
-        for order in self.paginate_endpoint(self.call_endpoint, start_date):
-            # TODO: Sync child stream using "order"
-            yield order.to_dict()
+        # TODO: Get sub-stream bookmarks and find lowest, start
+        #       syncing parent by that value - lookback window
+        for order in self.paginate_endpoint(self.call_endpoint, orders_bookmark):
+            if (Context.is_selected(self.name) and
+                order.updated_at >= orders_bookmark):
+                yield (self.name, order.to_dict())
+
+            sub_stream_names = SUB_STREAMS.get(self.name, [])
+            for sub_stream_name in sub_stream_names:
+                if Context.is_selected(sub_stream_name):
+                    sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name), parent_type=self.name)
+                    values = sub_stream.sync(order)
+                    for value in values:
+                        yield value
             count += 1
 
         LOGGER.info('Count = {}'.format(count))
@@ -222,7 +259,7 @@ class Metafields(SubStream):
     key_properties = ['id']
 
     def _call_root_endpoint(self, page, start_date):
-        shopify.Metafield.find(
+        return shopify.Metafield.find(
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,
             page=page,
@@ -237,7 +274,7 @@ class Metafields(SubStream):
 
         metafields = self.paginate_endpoint(self._call_root_endpoint, start_date)
         for metafield in metafields:
-            yield metafield
+            yield (self.name, metafield.to_dict())
             count += 1
 
         LOGGER.info('Count = {}'.format(count))
@@ -247,53 +284,51 @@ class Metafields(SubStream):
         count = 0
 
         def call_child_endpoint(page, start_date):
-            pass
+            return shopify.Metafield.find(
+                # Max allowed value as of 2018-09-19 11:53:48
+                limit=RESULTS_PER_PAGE,
+                page=page,
+                updated_at_min=start_date,
+                # Order is an undocumented query param that we believe
+                # ensures the order of the results.
+                order="updated_at asc",
+                **{"metafield[owner_id]": parent_obj.id,
+                   "metafield[owner_resource]": self.parent_type})
 
         metafields = self.paginate_endpoint(call_child_endpoint, start_date)
         for metafield in metafields:
-            yield metafield
+            yield (self.name, metafield.to_dict())
             count += 1
 
         LOGGER.info('Count = {}'.format(count))
 
     def sync(self, parent_obj=None):
-        # Two Options: Child and Root
-        # If Root
         if self.parent_type is None:
-            self._sync_root()
+            for rec in self._sync_root():
+                yield rec
         else:
-            # Sync child metafields for parent ID
-            self._sync_child(parent_id)
-            pass
-
-def get_selected_streams():
-    '''
-    Gets selected streams.  Checks schema's 'selected' first (legacy)
-    and then checks metadata (current), looking for an empty breadcrumb
-    and mdata with a 'selected' entry
-    '''
-    selected_streams = []
-    for stream in Context.catalog['streams']:
-        stream_metadata = stream['metadata']
-        if stream['schema'].get('selected', False):
-            selected_streams.append(stream['tap_stream_id'])
-        else:
-            for entry in stream_metadata:
-                # stream metadata will have empty breadcrumb
-                if not entry['breadcrumb'] and entry['metadata'].get('selected', None):
-                    selected_streams.append(stream['tap_stream_id'])
-
-    return selected_streams
-
+            for rec in self._sync_child(parent_obj):
+                yield rec
 
 STREAMS = {
-    'orders': Orders
+    'orders': Orders,
+    'metafields': Metafields
+}
+
+SUB_STREAMS = {
+    'orders': ['metafields']
 }
 
 
 def sync():
 
-    selected_stream_ids = get_selected_streams()
+    # Emit all schemas first so we have them for child streams
+    for stream in Context.catalog["streams"]:
+        if Context.is_selected(stream["tap_stream_id"]):
+            singer.write_schema(stream["tap_stream_id"],
+                                stream["schema"],
+                                stream["key_properties"],
+                                bookmark_properties=stream["replication_key"])
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
@@ -304,18 +339,14 @@ def sync():
 
         initialize_shopify_client()
 
-
-        if stream_id in selected_stream_ids:
+        if Context.is_selected(stream_id) or Context.has_selected_child(stream_id):
             LOGGER.info('Syncing stream: %s', stream_id)
 
-            # write schema message
-            singer.write_schema(stream.name, stream.schema, stream.key_properties)
-
-            # sync
             with Transformer() as transformer:
-                for rec in stream.sync():
+                for (tap_stream_id, rec) in stream.sync():
+                    extraction_time = singer.utils.now()
                     rec = transformer.transform(rec, stream.schema, stream_metadata)
-                    singer.write_record(stream.name, rec)
+                    singer.write_record(tap_stream_id, rec, time_extracted=extraction_time)
 
 
 @utils.handle_top_exception(LOGGER)
