@@ -95,6 +95,8 @@ def discover():
     streams = []
 
     for schema_name, schema in raw_schemas.items():
+        if schema_name not in STREAM_OBJECTS:
+            continue
 
         stream = STREAM_OBJECTS[schema_name](schema)
 
