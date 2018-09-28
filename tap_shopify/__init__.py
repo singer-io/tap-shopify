@@ -302,7 +302,7 @@ class Metafields(SubStream):
 
         metafields = self.paginate_endpoint(call_endpoint, start_date)
         for metafield in metafields:
-            yield (self.name, metafield.to_dict())
+            yield metafield.to_dict()
             count += 1
 
         LOGGER.info('Shop Metafields Count = %s', count)
@@ -325,7 +325,7 @@ class Metafields(SubStream):
 
         metafields = self.paginate_endpoint(call_child_endpoint, start_date)
         for metafield in metafields:
-            yield (self.name, metafield.to_dict())
+            yield metafield.to_dict()
             count += 1
 
         LOGGER.info('%s Metafields Count = %s',
@@ -343,7 +343,7 @@ class Metafields(SubStream):
             if value_type and value_type == "json_string":
                 value = rec.get("value")
                 rec["value"] = json.loads(value) if value is not None else value
-            yield rec
+            yield (self.name, rec)
 
 STREAM_OBJECTS = {
     'orders': Orders,

@@ -589,6 +589,17 @@
               "integer"
             ]
           },
+          "receipt": {
+            "type" ["null", "object"],
+            "properties": {
+              "testcase": {
+                "type": ["null", "boolean"]
+              },
+              "authorization": {
+                "type": ["null", "string"]
+              }
+            }
+          }
           "tracking_number": {
             "type": [
               "null",
