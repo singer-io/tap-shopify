@@ -201,9 +201,13 @@ class Orders(Stream):
 
         for order in self.paginate_endpoint(call_endpoint, start_bookmark):
             updated_at = utils.strptime_with_tz(order.updated_at)
+            order_dict = order.to_dict()
+            # TODO: Transactions stream, compare the values returned
+            #       from this vs. querying directly
+            transactions = order_dict.pop("transactions", [])
             if (Context.is_selected(self.name) and updated_at >= orders_bookmark):
                 count += 1
-                yield (self.name, order.to_dict())
+                yield (self.name, order_dict)
 
             sub_stream_names = STREAMS.get(self.name, [])
             for sub_stream_name in sub_stream_names:
