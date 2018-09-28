@@ -16,9 +16,9 @@ LOGGER = singer.get_logger()
 RESULTS_PER_PAGE = 250
 
 class Context():
-    config = None
+    config = {}
     state = {}
-    catalog = None
+    catalog = []
 
     @classmethod
     def is_selected(cls, stream_name):
@@ -26,11 +26,11 @@ class Context():
         stream_metadata = stream['metadata']
         if stream['schema'].get('selected', False):
             return True
-        else:
-            for entry in stream_metadata:
-                # stream metadata will have empty breadcrumb
-                if entry['breadcrumb'] == () and entry['metadata'].get('selected', None):
-                    return True
+
+        for entry in stream_metadata:
+            # stream metadata will have empty breadcrumb
+            if entry['breadcrumb'] == () and entry['metadata'].get('selected', None):
+                return True
 
         return False
 
@@ -43,7 +43,7 @@ class Context():
 
     @classmethod
     def get_schema(cls, stream_name):
-        stream =  [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
+        stream = [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
         return stream["schema"]
 
 def initialize_shopify_client():
@@ -51,8 +51,7 @@ def initialize_shopify_client():
     shop = Context.config['shop']
     session = shopify.Session("%s.myshopify.com" % (shop),
                               api_key)
-    activate_resp = shopify.ShopifyResource.activate_session(session)
-
+    shopify.ShopifyResource.activate_session(session)
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -124,7 +123,8 @@ class Stream():
         self.schema = schema
 
     def get_bookmark(self):
-        bookmark = singer.get_bookmark(Context.state, self.name, self.replication_key) or Context.config["start_date"]
+        bookmark = (singer.get_bookmark(Context.state, self.name, self.replication_key)
+                    or Context.config["start_date"])
         return utils.strptime_with_tz(bookmark)
 
     def get_min_bookmark(self):
@@ -132,7 +132,8 @@ class Stream():
         for sub_stream_name in SUB_STREAMS.get(self.name, []):
             if not Context.is_selected(sub_stream_name):
                 continue
-            sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name), parent_type=self.name)
+            sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name),
+                                                  parent_type=self.name)
             sub_stream_bookmark = sub_stream.get_bookmark()
             if sub_stream_bookmark < min_bookmark:
                 min_bookmark = sub_stream_bookmark
@@ -199,15 +200,15 @@ class Orders(Stream):
 
         for order in self.paginate_endpoint(self.call_endpoint, start_bookmark):
             updated_at = utils.strptime_with_tz(order.updated_at)
-            if (Context.is_selected(self.name) and
-                updated_at >= orders_bookmark):
+            if (Context.is_selected(self.name) and updated_at >= orders_bookmark):
                 count += 1
                 yield (self.name, order.to_dict())
 
             sub_stream_names = SUB_STREAMS.get(self.name, [])
             for sub_stream_name in sub_stream_names:
                 if Context.is_selected(sub_stream_name):
-                    sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name), parent_type=self.name)
+                    sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name),
+                                                          parent_type=self.name)
                     values = sub_stream.sync(order)
                     for value in values:
                         yield value
@@ -243,9 +244,11 @@ class SubStream(Stream):
 
     def get_bookmark(self):
         if self.parent_type is None:
-            bookmark = singer.get_bookmark(Context.state, self.name, self.replication_key) or Context.config["start_date"]
+            bookmark = (singer.get_bookmark(Context.state, self.name, self.replication_key)
+                        or Context.config["start_date"])
         else:
-            bookmark = singer.get_bookmark(Context.state, self.parent_type, self.name) or Context.config["start_date"]
+            bookmark = (singer.get_bookmark(Context.state, self.parent_type, self.name)
+                        or Context.config["start_date"])
             if isinstance(bookmark, dict):
                 bookmark = bookmark.get(self.replication_key) or Context.config["start_date"]
         return utils.strptime_with_tz(bookmark)
@@ -262,7 +265,8 @@ class SubStream(Stream):
                 parent_bookmark = Context.state.get("bookmarks", {}).get(self.parent_type)
                 if parent_bookmark is None:
                     Context.state["bookmarks"][self.parent_type] = {}
-                child_bookmark = singer.get_bookmark(Context.state, self.parent_type, self.name) or {}
+                child_bookmark = (singer.get_bookmark(Context.state, self.parent_type, self.name)
+                                  or {})
                 child_bookmark[self.replication_key] = value
                 singer.write_bookmark(Context.state, self.parent_type, self.name, child_bookmark)
 
