@@ -332,11 +332,16 @@ class Metafields(SubStream):
 
     def sync(self, parent_obj=None):
         if self.parent_type is None:
-            for rec in self._sync_root():
-                yield rec
+            records = self._sync_root()
         else:
-            for rec in self._sync_child(parent_obj):
-                yield rec
+            records = self._sync_child(parent_obj)
+
+        for rec in records:
+            value_type = rec.get("value_type")
+            if value_type and value_type == "json_string":
+                value = rec.get("value")
+                rec["value"] = json.loads(value) if value is not None else value
+            yield rec
 
 STREAM_OBJECTS = {
     'orders': Orders,

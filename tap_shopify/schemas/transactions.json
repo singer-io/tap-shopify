@@ -1005,11 +1005,6 @@
             "integer"
           ]
         },
-        "order": {
-          "type": [
-            "null"
-          ]
-        },
         "paid": {
           "type": [
             "null",

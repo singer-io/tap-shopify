@@ -1,16 +1,6 @@
 {
-  "type": [
-    "null",
-    "object"
-  ],
   "properties": {
     "owner_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "id": {
       "type": [
         "null",
         "integer"
@@ -22,32 +12,7 @@
         "string"
       ]
     },
-    "namespace": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "value": {
-      "type": [
-        "null",
-        "integer",
-        "string"
-      ]
-    },
-    "key": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "owner_resource": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "updated_at": {
       "type": [
         "null",
         "string"
@@ -59,7 +24,26 @@
         "string"
       ]
     },
+    "key": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "namespace": {
       "type": [
         "null",
         "string"
@@ -70,6 +54,26 @@
         "null",
         "string"
       ]
+    },
+    "value": {
+      "type": [
+        "null",
+        "integer",
+        "object",
+        "string"
+      ],
+      "properties": {}
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     }
-  }
+  },
+  "type": [
+    "null",
+    "object"
+  ]
 }
