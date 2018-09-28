@@ -18,7 +18,7 @@ RESULTS_PER_PAGE = 250
 class Context():
     config = {}
     state = {}
-    catalog = []
+    catalog = {}
 
     @classmethod
     def is_selected(cls, stream_name):
@@ -36,7 +36,7 @@ class Context():
 
     @classmethod
     def has_selected_child(cls, stream_name):
-        for sub_stream_name in SUB_STREAMS.get(stream_name, []):
+        for sub_stream_name in STREAMS.get(stream_name, []):
             if cls.is_selected(sub_stream_name):
                 return True
         return False
@@ -96,7 +96,7 @@ def discover():
 
     for schema_name, schema in raw_schemas.items():
 
-        stream = STREAMS[schema_name](schema)
+        stream = STREAM_OBJECTS[schema_name](schema)
 
         # create and add catalog entry
         catalog_entry = {
@@ -129,11 +129,12 @@ class Stream():
 
     def get_min_bookmark(self):
         min_bookmark = self.get_bookmark()
-        for sub_stream_name in SUB_STREAMS.get(self.name, []):
+        for sub_stream_name in STREAMS.get(self.name, []):
             if not Context.is_selected(sub_stream_name):
                 continue
-            sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name),
-                                                  parent_type=self.name)
+            sub_stream = STREAM_OBJECTS[sub_stream_name](
+                Context.get_schema(sub_stream_name), parent_type=self.name
+            )
             sub_stream_bookmark = sub_stream.get_bookmark()
             if sub_stream_bookmark < min_bookmark:
                 min_bookmark = sub_stream_bookmark
@@ -161,7 +162,7 @@ class Stream():
                     time.sleep(math.floor(float(sleep_time_str)))
                     continue
                 else:
-                    LOGGER.ERROR("Received a {} error.".format(resp.code))
+                    LOGGER.ERROR("Received a %s error.", resp.code)
                     raise
             for value in values:
                 # Only update the bookmark if we are actually syncing this stream's records
@@ -183,37 +184,38 @@ class Orders(Stream):
     replication_key = 'updated_at'
     key_properties = ['id']
 
-    def call_endpoint(self, page, start_date):
-        return shopify.Order.find(
-            # Max allowed value as of 2018-09-19 11:53:48
-            limit=RESULTS_PER_PAGE,
-            page=page,
-            updated_at_min=start_date,
-            # Order is an undocumented query param that we believe
-            # ensures the order of the results.
-            order="updated_at asc")
-
     def sync(self):
         orders_bookmark = self.get_bookmark()
         start_bookmark = self.get_min_bookmark()
         count = 0
 
-        for order in self.paginate_endpoint(self.call_endpoint, start_bookmark):
+        def call_endpoint(page, start_date):
+            return shopify.Order.find(
+                # Max allowed value as of 2018-09-19 11:53:48
+                limit=RESULTS_PER_PAGE,
+                page=page,
+                updated_at_min=start_date,
+                # Order is an undocumented query param that we believe
+                # ensures the order of the results.
+                order="updated_at asc")
+
+        for order in self.paginate_endpoint(call_endpoint, start_bookmark):
             updated_at = utils.strptime_with_tz(order.updated_at)
             if (Context.is_selected(self.name) and updated_at >= orders_bookmark):
                 count += 1
                 yield (self.name, order.to_dict())
 
-            sub_stream_names = SUB_STREAMS.get(self.name, [])
+            sub_stream_names = STREAMS.get(self.name, [])
             for sub_stream_name in sub_stream_names:
                 if Context.is_selected(sub_stream_name):
-                    sub_stream = STREAMS[sub_stream_name](Context.get_schema(sub_stream_name),
-                                                          parent_type=self.name)
+                    sub_stream = STREAM_OBJECTS[sub_stream_name](
+                        Context.get_schema(sub_stream_name), parent_type=self.name
+                    )
                     values = sub_stream.sync(order)
                     for value in values:
                         yield value
 
-        LOGGER.info('Orders Count = {}'.format(count))
+        LOGGER.info('Orders Count = %s', count)
 
 class SubStream(Stream):
     """
@@ -276,26 +278,28 @@ class Metafields(SubStream):
     replication_key = 'updated_at'
     key_properties = ['id']
 
-    def _call_root_endpoint(self, page, start_date):
-        return shopify.Metafield.find(
-            # Max allowed value as of 2018-09-19 11:53:48
-            limit=RESULTS_PER_PAGE,
-            page=page,
-            updated_at_min=start_date,
-            # Order is an undocumented query param that we believe
-            # ensures the order of the results.
-            order="updated_at asc")
 
     def _sync_root(self):
         start_date = self.get_bookmark()
         count = 0
 
-        metafields = self.paginate_endpoint(self._call_root_endpoint, start_date)
+        def call_endpoint(page, start_date):
+            return shopify.Metafield.find(
+                # Max allowed value as of 2018-09-19 11:53:48
+                limit=RESULTS_PER_PAGE,
+                page=page,
+                updated_at_min=start_date,
+                # Order is an undocumented query param that we believe
+                # ensures the order of the results.
+                order="updated_at asc")
+
+
+        metafields = self.paginate_endpoint(call_endpoint, start_date)
         for metafield in metafields:
             yield (self.name, metafield.to_dict())
             count += 1
 
-        LOGGER.info('Shop Metafields Count = {}'.format(count))
+        LOGGER.info('Shop Metafields Count = %s', count)
 
     def _sync_child(self, parent_obj):
         start_date = self.get_bookmark()
@@ -318,8 +322,9 @@ class Metafields(SubStream):
             yield (self.name, metafield.to_dict())
             count += 1
 
-        LOGGER.info('{} Metafields Count = {}'.format(self.parent_type.replace('_', ' ').title(),
-                                                      count))
+        LOGGER.info('%s Metafields Count = %s',
+                    self.parent_type.replace('_', ' ').title(),
+                    count)
 
     def sync(self, parent_obj=None):
         if self.parent_type is None:
@@ -329,15 +334,15 @@ class Metafields(SubStream):
             for rec in self._sync_child(parent_obj):
                 yield rec
 
-STREAMS = {
+STREAM_OBJECTS = {
     'orders': Orders,
     'metafields': Metafields
 }
 
-SUB_STREAMS = {
-    'orders': ['metafields']
+STREAMS = {
+    'orders': ['metafields'],
+    'metafields': []
 }
-
 
 def sync():
 
@@ -353,12 +358,13 @@ def sync():
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream_schema = catalog_entry['schema']
-        stream = STREAMS[stream_id](stream_schema)
+        stream = STREAM_OBJECTS[stream_id](stream_schema)
         stream_metadata = metadata.to_map(catalog_entry['metadata'])
 
         initialize_shopify_client()
 
-        if Context.is_selected(stream_id) or Context.has_selected_child(stream_id):
+        if (STREAMS.get(stream_id) and (Context.is_selected(stream_id) or
+                                        Context.has_selected_child(stream_id))):
             LOGGER.info('Syncing stream: %s', stream_id)
 
             with Transformer() as transformer:
