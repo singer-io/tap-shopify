@@ -21,10 +21,17 @@ class Context():
     state = {}
     catalog = {}
     tap_start = None
+    stream_map = None
+
+    @classmethod
+    def get_catalog_entry(cls, stream_name):
+        if cls.stream_map is None:
+            cls.stream_map = {s["tap_stream_id"]: s for s in cls.catalog['streams']}
+        return cls.stream_map[stream_name]
 
     @classmethod
     def is_selected(cls, stream_name):
-        stream = [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
+        stream = cls.get_catalog_entry(stream_name)
         stream_metadata = metadata.to_map(stream['metadata'])
         return metadata.get(stream_metadata, (), 'selected')
 
@@ -374,7 +381,8 @@ def sync():
             for (tap_stream_id, rec) in stream.sync():
                 with Transformer() as transformer:
                     extraction_time = singer.utils.now()
-                    rec = transformer.transform(rec, stream_schema, stream_metadata)
+                    record_schema = Context.get_catalog_entry(tap_stream_id)['schema']
+                    rec = transformer.transform(rec, record_schema, stream_metadata)
                     singer.write_record(tap_stream_id, rec, time_extracted=extraction_time)
 
 

@@ -714,6 +714,12 @@
             "boolean"
           ]
         },
+        "multipass_identifier": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
         "phone": {
           "type": [
             "null",
