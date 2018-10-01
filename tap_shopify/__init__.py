@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import datetime
 import json
 import time
 import math
@@ -24,16 +25,8 @@ class Context():
     @classmethod
     def is_selected(cls, stream_name):
         stream = [s for s in cls.catalog["streams"] if s["tap_stream_id"] == stream_name][0]
-        stream_metadata = stream['metadata']
-        if stream['schema'].get('selected', False):
-            return True
-
-        for entry in stream_metadata:
-            # stream metadata will have empty breadcrumb
-            if entry['breadcrumb'] == () and entry['metadata'].get('selected', None):
-                return True
-
-        return False
+        stream_metadata = metadata.to_map(stream['metadata'])
+        return metadata.get(stream_metadata, (), 'selected')
 
     @classmethod
     def has_selected_child(cls, stream_name):
@@ -74,7 +67,7 @@ def load_schemas():
     return schemas
 
 
-def get_discovery_metadata(stream):
+def get_discovery_metadata(stream, schema):
     mdata = metadata.new()
     mdata = metadata.write(mdata, (), 'table-key-properties', stream.key_properties)
     mdata = metadata.write(mdata, (), 'forced-replication-method', stream.replication_method)
@@ -82,7 +75,7 @@ def get_discovery_metadata(stream):
     if stream.replication_key:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [stream.replication_key])
 
-    for field_name in stream.schema['properties'].keys():
+    for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
         else:
@@ -99,14 +92,14 @@ def discover():
         if schema_name not in STREAM_OBJECTS:
             continue
 
-        stream = STREAM_OBJECTS[schema_name](schema)
+        stream = STREAM_OBJECTS[schema_name]()
 
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
             'tap_stream_id': schema_name,
             'schema': schema,
-            'metadata' : get_discovery_metadata(stream),
+            'metadata' : get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
@@ -120,27 +113,23 @@ class Stream():
     replication_method = None
     replication_key = None
     key_properties = None
-    schema = None
-
-    def __init__(self, schema):
-        self.schema = schema
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state, self.name, self.replication_key)
                     or Context.config["start_date"])
         return utils.strptime_with_tz(bookmark)
 
-    def get_min_bookmark(self):
+    def query_start(self):
         min_bookmark = self.get_bookmark()
         for sub_stream_name in STREAMS.get(self.name, []):
             if not Context.is_selected(sub_stream_name):
                 continue
-            sub_stream = STREAM_OBJECTS[sub_stream_name](
-                Context.get_schema(sub_stream_name), parent_type=self.name
-            )
+            sub_stream = STREAM_OBJECTS[sub_stream_name](parent_type=self.name)
             sub_stream_bookmark = sub_stream.get_bookmark()
-            if sub_stream_bookmark < min_bookmark:
-                min_bookmark = sub_stream_bookmark
+            look_back = sub_stream.parent_lookback_window
+            adjusted_sub_bookmark = sub_stream_bookmark - datetime.timedelta(days=look_back)
+            if adjusted_sub_bookmark < min_bookmark:
+                min_bookmark = adjusted_sub_bookmark
         return min_bookmark
 
     def update_bookmark(self, value):
@@ -174,12 +163,16 @@ class Stream():
                     self.update_bookmark(getattr(value, self.replication_key))
                 yield value
 
-            if not isinstance(self, SubStream):
+            if not isinstance(self, SubStream) and not Context.has_selected_child(self.name):
                 singer.write_state(Context.state)
 
             if len(values) < RESULTS_PER_PAGE:
                 break
             page += 1
+
+        if not isinstance(self, SubStream):
+            singer.write_state(Context.state)
+
 
 class Orders(Stream):
     name = 'orders'
@@ -189,7 +182,7 @@ class Orders(Stream):
 
     def sync(self):
         orders_bookmark = self.get_bookmark()
-        start_bookmark = self.get_min_bookmark()
+        start_bookmark = self.query_start()
         count = 0
 
         def call_endpoint(page, start_date):
@@ -216,9 +209,7 @@ class Orders(Stream):
             sub_stream_names = STREAMS.get(self.name, [])
             for sub_stream_name in sub_stream_names:
                 if Context.is_selected(sub_stream_name):
-                    sub_stream = STREAM_OBJECTS[sub_stream_name](
-                        Context.get_schema(sub_stream_name), parent_type=self.name
-                    )
+                    sub_stream = STREAM_OBJECTS[sub_stream_name](parent_type=self.name)
                     values = sub_stream.sync(order)
                     for value in values:
                         yield value
@@ -248,9 +239,8 @@ class SubStream(Stream):
     parent_type = None
     parent_lookback_window = 0
 
-    def __init__(self, schema, parent_type=None):
+    def __init__(self, parent_type=None):
         self.parent_type = parent_type
-        super().__init__(schema)
 
     def get_bookmark(self):
         if self.parent_type is None:
@@ -360,6 +350,7 @@ STREAMS = {
 }
 
 def sync():
+    initialize_shopify_client()
 
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
@@ -373,19 +364,17 @@ def sync():
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream_schema = catalog_entry['schema']
-        stream = STREAM_OBJECTS[stream_id](stream_schema)
+        stream = STREAM_OBJECTS[stream_id]()
         stream_metadata = metadata.to_map(catalog_entry['metadata'])
-
-        initialize_shopify_client()
 
         if (STREAMS.get(stream_id) and (Context.is_selected(stream_id) or
                                         Context.has_selected_child(stream_id))):
             LOGGER.info('Syncing stream: %s', stream_id)
 
-            with Transformer() as transformer:
-                for (tap_stream_id, rec) in stream.sync():
+            for (tap_stream_id, rec) in stream.sync():
+                with Transformer() as transformer:
                     extraction_time = singer.utils.now()
-                    rec = transformer.transform(rec, stream.schema, stream_metadata)
+                    rec = transformer.transform(rec, stream_schema, stream_metadata)
                     singer.write_record(tap_stream_id, rec, time_extracted=extraction_time)
 
 

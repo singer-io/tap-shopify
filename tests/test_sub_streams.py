@@ -13,7 +13,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
 
     # Get Bookmark
     def test_get_bookmark_exists_root(self):
-        instance = Metafields(self.test_schema)
+        instance = Metafields()
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {"metafields": {"updated_at": current_bookmark}}}
@@ -22,7 +22,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(utils.strptime_with_tz(current_bookmark), actual)
 
     def test_get_bookmark_does_not_exist_root(self):
-        instance = Metafields(self.test_schema)
+        instance = Metafields()
 
         Context.state = {}
 
@@ -30,7 +30,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(utils.strptime_with_tz(self.config["start_date"]), actual)
 
     def test_get_bookmark_exists_child(self):
-        instance = Metafields(self.test_schema, parent_type="orders")
+        instance = Metafields(parent_type="orders")
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {"orders": {"metafields": {"updated_at": current_bookmark}}}}
@@ -39,7 +39,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(utils.strptime_with_tz(current_bookmark), actual)
 
     def test_get_bookmark_does_not_exist_child(self):
-        instance = Metafields(self.test_schema, parent_type="orders")
+        instance = Metafields(parent_type="orders")
 
         Context.state = {"bookmarks": {"orders":{}}}
 
@@ -47,7 +47,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(utils.strptime_with_tz(self.config["start_date"]), actual)
 
     def test_get_bookmark_parent_does_not_exist_child(self):
-        instance = Metafields(self.test_schema, parent_type="orders")
+        instance = Metafields(parent_type="orders")
 
         Context.state = {"bookmarks": {}}
 
@@ -56,7 +56,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
 
     # Write Bookmark
     def test_write_bookmark_exists_root(self):
-        instance = Metafields(self.test_schema)
+        instance = Metafields()
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {"metafields": {"updated_at": self.config["start_date"]}}}
@@ -67,7 +67,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_does_not_exist_root(self):
-        instance = Metafields(self.test_schema)
+        instance = Metafields()
 
         current_bookmark = self.str_current_bookmark
         Context.state = {}
@@ -77,7 +77,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_exists_child(self):
-        instance = Metafields(self.test_schema, "orders")
+        instance = Metafields("orders")
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {"orders": {"metafields": {"updated_at": self.config["start_date"]}}}}
@@ -88,7 +88,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_does_not_exist_child(self):
-        instance = Metafields(self.test_schema, "orders")
+        instance = Metafields("orders")
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {"orders": {}}}
@@ -98,7 +98,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_parent_does_not_exist_child(self):
-        instance = Metafields(self.test_schema, "orders")
+        instance = Metafields("orders")
 
         current_bookmark = self.str_current_bookmark
         Context.state = {"bookmarks": {}}
@@ -108,7 +108,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_new_value_root(self):
-        instance = Metafields(self.test_schema)
+        instance = Metafields()
 
         new_bookmark = self.config["start_date"]
         Context.state = {"bookmarks": {"metafields": {"updated_at": self.str_current_bookmark}}}
@@ -118,7 +118,7 @@ class TestSubStreamBookmarkAccessors(TestCase):
         self.assertEqual(state_expected, Context.state)
 
     def test_write_bookmark_new_value_child(self):
-        instance = Metafields(self.test_schema, "orders")
+        instance = Metafields("orders")
 
         new_bookmark = self.config["start_date"]
         Context.state = {"bookmarks": {"orders": {"metafields": {"updated_at": self.str_current_bookmark}}}}

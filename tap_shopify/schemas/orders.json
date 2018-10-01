@@ -590,7 +590,7 @@
             ]
           },
           "receipt": {
-            "type" ["null", "object"],
+            "type": ["null", "object"],
             "properties": {
               "testcase": {
                 "type": ["null", "boolean"]
@@ -599,7 +599,7 @@
                 "type": ["null", "string"]
               }
             }
-          }
+          },
           "tracking_number": {
             "type": [
               "null",
