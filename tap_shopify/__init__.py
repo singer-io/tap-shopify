@@ -19,6 +19,7 @@ class Context():
     config = {}
     state = {}
     catalog = {}
+    tap_start = None
 
     @classmethod
     def is_selected(cls, stream_name):
@@ -197,6 +198,7 @@ class Orders(Stream):
                 limit=RESULTS_PER_PAGE,
                 page=page,
                 updated_at_min=start_date,
+                updated_at_max=Context.tap_start,
                 # Order is an undocumented query param that we believe
                 # ensures the order of the results.
                 order="updated_at asc")
@@ -295,6 +297,7 @@ class Metafields(SubStream):
                 limit=RESULTS_PER_PAGE,
                 page=page,
                 updated_at_min=start_date,
+                updated_at_max=Context.tap_start,
                 # Order is an undocumented query param that we believe
                 # ensures the order of the results.
                 order="updated_at asc")
@@ -317,6 +320,7 @@ class Metafields(SubStream):
                 limit=RESULTS_PER_PAGE,
                 page=page,
                 updated_at_min=start_date,
+                updated_at_max=Context.tap_start,
                 # Order is an undocumented query param that we believe
                 # ensures the order of the results.
                 order="updated_at asc",
@@ -397,6 +401,7 @@ def main():
         print(json.dumps(catalog, indent=2))
     # Otherwise run in sync mode
     else:
+        Context.tap_start = utils.now()
         if args.catalog:
             Context.catalog = args.catalog.to_dict()
         else:
