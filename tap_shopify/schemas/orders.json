@@ -1674,6 +1674,11 @@
         "string"
       ],
       "format": "date-time"
+    },
+    "reference": {
+      "type": [
+        "null"
+      ]
     }
   },
   "type": [

@@ -166,8 +166,10 @@ class Stream():
             for value in values:
                 # Only update the bookmark if we are actually syncing this stream's records
                 # Applicable when a parent is being requested to retrieve child records
-                if Context.is_selected(self.name):
-                    self.update_bookmark(getattr(value, self.replication_key))
+                bookmark_value = getattr(value, self.replication_key)
+                bookmark_datetime = utils.strptime_with_tz(bookmark_value)
+                if Context.is_selected(self.name) and bookmark_datetime < Context.tap_start:
+                    self.update_bookmark(bookmark_value)
                 yield value
 
             if not isinstance(self, SubStream) and not Context.has_selected_child(self.name):
@@ -236,8 +238,9 @@ class SubStream(Stream):
     3. Child records should only be synced up to the start time of the sync run, in case
        they get updated during the tap's run time.
     4. To solve for selecting the child stream later than the parent, the parent sync needs
-       to start requesting data from the min(parent, child, start_date) bookmark
-    5. Mark the initial bookmark for either stream as the `start_date` of the config so
+       to start requesting data from the min(parent, child, start_date) bookmark, adjusted 
+       for lookback window
+    5. Treat the initial bookmark for either stream as the `start_date` of the config so
        that we don't emit records outside of the requested range
     6. Write state only after a guaranteed "full sync"
        - If the parent is queried using a sliding time window, write child bookmarks, but
@@ -346,13 +349,36 @@ class Metafields(SubStream):
                 rec["value"] = json.loads(value) if value is not None else value
             yield (self.name, rec)
 
+class Transactions(SubStream):
+    name = 'transactions'
+    replication_method = 'INCREMENTAL'
+    replication_key = 'created_at' # Transactions are immutable?
+    key_properties = ['id']
+
+    def sync(self, parent_obj):
+        start_date = self.get_bookmark()
+        count = 0
+
+        def call_endpoint(page, start_date):
+            return shopify.Transaction.find(order_id=parent_obj.id)
+
+        for t in self.paginate_endpoint(call_endpoint, start_date):
+            transaction_dict = t.to_dict()
+            created_at = utils.strptime_with_tz(transaction_dict[self.replication_key])
+            if created_at >= start_date:
+                count += 1
+                yield (self.name, transaction_dict)
+
+        LOGGER.info("Transactions Count = %s", count)
+
 STREAM_OBJECTS = {
     'orders': Orders,
-    'metafields': Metafields
+    'metafields': Metafields,
+    'transactions': Transactions
 }
 
 STREAMS = {
-    'orders': ['metafields'],
+    'orders': ['metafields', 'transactions'],
     'metafields': []
 }
 
