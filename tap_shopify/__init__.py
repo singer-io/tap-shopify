@@ -396,9 +396,7 @@ def sync():
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
-        stream_schema = catalog_entry['schema']
         stream = STREAM_OBJECTS[stream_id]()
-        stream_metadata = metadata.to_map(catalog_entry['metadata'])
 
         if (STREAMS.get(stream_id) and (Context.is_selected(stream_id) or
                                         Context.has_selected_child(stream_id))):
@@ -408,7 +406,8 @@ def sync():
                 with Transformer() as transformer:
                     extraction_time = singer.utils.now()
                     record_schema = Context.get_catalog_entry(tap_stream_id)['schema']
-                    rec = transformer.transform(rec, record_schema, stream_metadata)
+                    record_metadata = Context.get_catalog_entry(tap_stream_id)['metadata']
+                    rec = transformer.transform(rec, record_schema, metadata.to_map(record_metadata))
                     singer.write_record(tap_stream_id, rec, time_extracted=extraction_time)
 
 
