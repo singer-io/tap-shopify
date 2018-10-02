@@ -25,7 +25,7 @@ class Context():
 
     @classmethod
     def get_catalog_entry(cls, stream_name):
-        if cls.stream_map is None:
+        if not cls.stream_map:
             cls.stream_map = {s["tap_stream_id"]: s for s in cls.catalog['streams']}
         return cls.stream_map[stream_name]
 
