@@ -5,12 +5,12 @@ import json
 import time
 import math
 
+import pyactiveresource
+import shopify
 import singer
 from singer import utils
 from singer import metadata
 from singer import Transformer
-import pyactiveresource
-import shopify
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
@@ -21,7 +21,7 @@ class Context():
     state = {}
     catalog = {}
     tap_start = None
-    stream_map = None
+    stream_map = {}
 
     @classmethod
     def get_catalog_entry(cls, stream_name):
@@ -208,10 +208,9 @@ class Orders(Stream):
         for order in self.paginate_endpoint(call_endpoint, start_bookmark):
             updated_at = utils.strptime_with_tz(order.updated_at)
             order_dict = order.to_dict()
-            # TODO: Transactions stream, compare the values returned
-            #       from this vs. querying directly
-            transactions = order_dict.pop("transactions", [])
-            if (Context.is_selected(self.name) and updated_at >= orders_bookmark):
+            # Popping this because Transactions is its own stream
+            order_dict.pop("transactions", [])
+            if Context.is_selected(self.name) and updated_at >= orders_bookmark:
                 count += 1
                 yield (self.name, order_dict)
 
@@ -238,7 +237,7 @@ class SubStream(Stream):
     3. Child records should only be synced up to the start time of the sync run, in case
        they get updated during the tap's run time.
     4. To solve for selecting the child stream later than the parent, the parent sync needs
-       to start requesting data from the min(parent, child, start_date) bookmark, adjusted 
+       to start requesting data from the min(parent, child, start_date) bookmark, adjusted
        for lookback window
     5. Treat the initial bookmark for either stream as the `start_date` of the config so
        that we don't emit records outside of the requested range
@@ -359,11 +358,11 @@ class Transactions(SubStream):
         start_date = self.get_bookmark()
         count = 0
 
-        def call_endpoint(page, start_date):
+        def call_endpoint(_1, _2):
             return shopify.Transaction.find(order_id=parent_obj.id)
 
-        for t in self.paginate_endpoint(call_endpoint, start_date):
-            transaction_dict = t.to_dict()
+        for transaction in self.paginate_endpoint(call_endpoint, start_date):
+            transaction_dict = transaction.to_dict()
             created_at = utils.strptime_with_tz(transaction_dict[self.replication_key])
             if created_at >= start_date:
                 count += 1
@@ -405,10 +404,13 @@ def sync():
             for (tap_stream_id, rec) in stream.sync():
                 with Transformer() as transformer:
                     extraction_time = singer.utils.now()
-                    record_schema = Context.get_catalog_entry(tap_stream_id)['schema']
-                    record_metadata = Context.get_catalog_entry(tap_stream_id)['metadata']
-                    rec = transformer.transform(rec, record_schema, metadata.to_map(record_metadata))
-                    singer.write_record(tap_stream_id, rec, time_extracted=extraction_time)
+                    record_stream = Context.get_catalog_entry(tap_stream_id)
+                    record_schema = record_stream['schema']
+                    record_metadata = metadata.to_map(record_stream['metadata'])
+                    rec = transformer.transform(rec, record_schema, record_metadata)
+                    singer.write_record(tap_stream_id,
+                                        rec,
+                                        time_extracted=extraction_time)
 
 
 @utils.handle_top_exception(LOGGER)
