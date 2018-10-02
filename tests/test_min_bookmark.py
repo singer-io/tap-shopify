@@ -1,5 +1,7 @@
 from unittest import TestCase
-from tap_shopify import Metafields, Context, Orders
+from tap_shopify.context import Context
+from tap_shopify.streams.metafields import Metafields
+from tap_shopify.streams.orders import Orders
 from singer import utils
 
 class TestMinBookmark(TestCase):

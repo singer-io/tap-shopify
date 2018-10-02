@@ -1,5 +1,6 @@
 from unittest import TestCase
-from tap_shopify import Metafields, Context
+from tap_shopify.context import Context
+from tap_shopify.streams.metafields import Metafields
 from singer import utils
 
 class TestSubStreamBookmarkAccessors(TestCase):
