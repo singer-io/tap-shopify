@@ -37,9 +37,7 @@ def load_schemas():
         path = get_abs_path('schemas') + '/' + filename
         file_raw = filename.replace('.json', '')
         with open(path) as file:
-            raw_dict = json.load(file)
-            schema = singer.resolve_schema_references(raw_dict, raw_dict)
-            schemas[file_raw] = schema
+            schemas[file_raw] = json.load(file)
 
     return schemas
 
@@ -60,11 +58,24 @@ def get_discovery_metadata(stream, schema):
 
     return metadata.to_list(mdata)
 
+def load_schema_references():
+    def get_abs_path(path):
+        return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
+
+    shared_schema_file = "definitions.json"
+    shared_schema_path = get_abs_path('schemas/')
+
+    refs = {}
+    with open(os.path.join(shared_schema_path, shared_schema_file)) as data_file:
+        refs[shared_schema_file] = json.load(data_file)
+
+    return refs
 
 def discover():
     raw_schemas = load_schemas()
     streams = []
 
+    refs = load_schema_references()
     for schema_name, schema in raw_schemas.items():
         if schema_name not in Context.stream_objects:
             continue
@@ -75,7 +86,7 @@ def discover():
         catalog_entry = {
             'stream': schema_name,
             'tap_stream_id': schema_name,
-            'schema': schema,
+            'schema': singer.resolve_schema_references(schema, refs),
             'metadata' : get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
@@ -102,7 +113,7 @@ def sync():
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
 
-        if (Context.streams.get(stream_id) and (Context.is_selected(stream_id) or
+        if (Context.streams.get(stream_id) is not None and (Context.is_selected(stream_id) or
                                                 Context.has_selected_child(stream_id))):
             LOGGER.info('Syncing stream: %s', stream_id)
 
