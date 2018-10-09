@@ -13,7 +13,7 @@ class Transactions(SubStream):
     replication_key = 'created_at' # Transactions are immutable?
     key_properties = ['id']
 
-    def sync(self, parent_obj):
+    def sync(self, parent_obj, start_bookmark=None):
         start_date = self.get_bookmark()
         count = 0
 

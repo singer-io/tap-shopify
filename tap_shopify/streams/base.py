@@ -40,12 +40,12 @@ class Stream():
         if value and utils.strptime_with_tz(value) > current_bookmark:
             singer.write_bookmark(Context.state, self.name, self.replication_key, value)
 
-    def sync_substreams(self, parent_obj):
+    def sync_substreams(self, parent_obj, start_bookmark):
         sub_stream_names = Context.streams.get(self.name, [])
         for sub_stream_name in sub_stream_names:
             if Context.is_selected(sub_stream_name):
                 sub_stream = Context.stream_objects[sub_stream_name](parent_type=self.name)
-                values = sub_stream.sync(parent_obj)
+                values = sub_stream.sync(parent_obj, start_bookmark)
                 for value in values:
                     yield value
 
@@ -73,19 +73,17 @@ class Stream():
                 # Applicable when a parent is being requested to retrieve child records
                 bookmark_value = getattr(value, self.replication_key)
                 bookmark_datetime = utils.strptime_with_tz(bookmark_value)
+
                 if Context.is_selected(self.name) and bookmark_datetime < Context.tap_start:
                     self.update_bookmark(bookmark_value)
                 yield value
 
-            if not isinstance(self, SubStream) and not Context.has_selected_child(self.name):
-                singer.write_state(Context.state)
+            singer.write_state(Context.state)
 
             if len(values) < RESULTS_PER_PAGE:
                 break
             page += 1
 
-        if not isinstance(self, SubStream):
-            singer.write_state(Context.state)
 
 
 class SubStream(Stream):
