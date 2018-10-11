@@ -74,9 +74,8 @@ class Stream():
 
                 if Context.is_selected(self.name) and bookmark_datetime < Context.tap_start:
                     self.update_bookmark(bookmark_value)
-                yield value
-
-            singer.write_state(Context.state)
+                    singer.write_state(Context.state)
+                    yield value
 
             if len(values) < RESULTS_PER_PAGE:
                 break
@@ -127,14 +126,3 @@ class SubStream(Stream):
         if value and utils.strptime_with_tz(value) > current_bookmark:
             if self.parent_type is None:
                 singer.write_bookmark(Context.state, self.name, self.replication_key, value)
-            else:
-                root_bookmarks = Context.state.get("bookmarks")
-                if root_bookmarks is None:
-                    Context.state["bookmarks"] = {}
-                parent_bookmark = Context.state.get("bookmarks", {}).get(self.parent_type)
-                if parent_bookmark is None:
-                    Context.state["bookmarks"][self.parent_type] = {}
-                child_bookmark = (singer.get_bookmark(Context.state, self.parent_type, self.name)
-                                  or {})
-                child_bookmark[self.replication_key] = value
-                singer.write_bookmark(Context.state, self.parent_type, self.name, child_bookmark)
