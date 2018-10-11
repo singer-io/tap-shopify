@@ -40,14 +40,12 @@ class Stream():
         if value and utils.strptime_with_tz(value) > current_bookmark:
             singer.write_bookmark(Context.state, self.name, self.replication_key, value)
 
-    def sync_substreams(self, parent_obj, start_bookmark):
+    def sync_substreams(self, parent_obj):
         sub_stream_names = Context.streams.get(self.name, [])
         for sub_stream_name in sub_stream_names:
             if Context.is_selected(sub_stream_name):
                 sub_stream = Context.stream_objects[sub_stream_name](parent_type=self.name)
-                values = sub_stream.sync(parent_obj, start_bookmark)
-                for value in values:
-                    yield value
+                yield from sub_stream.sync(parent_obj)
 
     def paginate_endpoint(self, call_endpoint, start_date):
         page = 1

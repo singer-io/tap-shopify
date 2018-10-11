@@ -38,7 +38,7 @@ class Orders(Stream):
                 count += 1
                 yield (self.name, order_dict)
 
-            for rec in self.sync_substreams(order, start_bookmark):
+            for rec in self.sync_substreams(order):
                 yield rec
 
         LOGGER.info('Orders Count = %s', count)

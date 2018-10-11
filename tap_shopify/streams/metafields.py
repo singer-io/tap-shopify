@@ -36,15 +36,14 @@ class Metafields(SubStream):
 
         LOGGER.info('Shop Metafields Count = %s', count)
 
-    def _sync_child(self, parent_obj, start_bookmark):
+    def _sync_child(self, parent_obj):
         count = 0
 
-        def call_child_endpoint(page, start_date):
+        def call_child_endpoint(page, _):
             return shopify.Metafield.find(
                 # Max allowed value as of 2018-09-19 11:53:48
                 limit=RESULTS_PER_PAGE,
                 page=page,
-                updated_at_min=start_bookmark,
                 updated_at_max=Context.tap_start,
                 # Order is an undocumented query param that we believe
                 # ensures the order of the results.
@@ -52,7 +51,7 @@ class Metafields(SubStream):
                 **{"metafield[owner_id]": parent_obj.id,
                    "metafield[owner_resource]": self.parent_type})
 
-        metafields = self.paginate_endpoint(call_child_endpoint, start_bookmark)
+        metafields = self.paginate_endpoint(call_child_endpoint, None)
         for metafield in metafields:
             yield metafield.to_dict()
             count += 1
@@ -61,11 +60,11 @@ class Metafields(SubStream):
                     self.parent_type.replace('_', ' ').title(),
                     count)
 
-    def sync(self, parent_obj=None, start_bookmark=None):
+    def sync(self, parent_obj=None):
         if self.parent_type is None:
             records = self._sync_root()
         else:
-            records = self._sync_child(parent_obj, start_bookmark)
+            records = self._sync_child(parent_obj)
 
         for rec in records:
             value_type = rec.get("value_type")
