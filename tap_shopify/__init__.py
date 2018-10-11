@@ -117,14 +117,14 @@ def sync():
                                                 Context.has_selected_child(stream_id))):
             LOGGER.info('Syncing stream: %s', stream_id)
 
-            for (tap_stream_id, rec) in stream.sync():
+            for rec in stream.sync():
                 with Transformer() as transformer:
                     extraction_time = singer.utils.now()
-                    record_stream = Context.get_catalog_entry(tap_stream_id)
+                    record_stream = Context.get_catalog_entry(rec['something'])
                     record_schema = record_stream['schema']
                     record_metadata = metadata.to_map(record_stream['metadata'])
                     rec = transformer.transform(rec, record_schema, record_metadata)
-                    singer.write_record(tap_stream_id,
+                    singer.write_record(rec['something'],
                                         rec,
                                         time_extracted=extraction_time)
 
