@@ -40,14 +40,18 @@ class Stream():
     def get_objects(self, parent_object=None):
         start_date=self.get_bookmark()
         page = 1
+        sub_page = 1
         while True:
             count = 0
 
             try:
+                # FIXME GOD I HATE THIS BIFURCATION SO MUCH WHAT IS WRONG
+                # WITH ME!?
                 if parent_object:
-                    # FIXME definitely not paginating or setting
-                    # reasonable limit
-                    objects = parent_object.metafields()
+                    objects = parent_object.metafields(
+                        limit=RESULTS_PER_PAGE,
+                        page=sub_page,
+                        order="updated_at asc")
                 else:
                     objects = self.replication_object.find(
                         # Max allowed value as of 2018-09-19 11:53:48
@@ -81,4 +85,7 @@ class Stream():
 
             if len(objects) < RESULTS_PER_PAGE:
                 break
-            page += 1
+            if parent_object:
+                sub_page += 1
+            else:
+                page += 1
