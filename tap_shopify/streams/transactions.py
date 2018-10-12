@@ -7,15 +7,14 @@ from tap_shopify.streams.base import Stream
 
 LOGGER = singer.get_logger()
 
+# FIXME this is broken
 class Transactions(Stream):
     name = 'transactions'
-    replication_method = 'INCREMENTAL'
     # Transactions have no updated_at property.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
     replication_key = 'created_at'
-    replication_object = shopify.Order
-    key_properties = ['id']
 
+    # FIXME update to the pattern in metafields
     def get_objects(self):
         # Get orders, bookmarking at `transactions`
         orders.name = "transactions"

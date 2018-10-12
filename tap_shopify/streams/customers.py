@@ -8,6 +8,7 @@ from tap_shopify.streams.base import Stream, RESULTS_PER_PAGE
 LOGGER = singer.get_logger()
 
 class Customers(Stream):
+    # FIXME Remove unnecessary overrides and try it out.
     name = 'customers'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'

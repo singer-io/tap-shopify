@@ -5,9 +5,11 @@ from singer import utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream, RESULTS_PER_PAGE
 
+# FIXME Most of these classes probably don't need LOGGER anymore
 LOGGER = singer.get_logger()
 
 class Orders(Stream):
+    # FIXME remove unnecessary overrides
     name = 'orders'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'

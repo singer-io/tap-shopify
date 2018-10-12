@@ -14,9 +14,12 @@ class AbandonedCheckouts(Stream):
     replication_object = shopify.Checkout
     key_properties = ['id']
 
+    # FIXME We need `status='any'` here during call_api
+
     def sync(self):
         for abandoned_checkout in self.get_objects():
-            # TODO: Filter out customer and replace with ID? It can be foreign keyed
+            # TODO: Filter out customer and replace with ID? It can be
+            # foreign keyed
             yield abandoned_checkout.to_dict()
 
 Context.stream_objects['abandoned_checkouts'] = AbandonedCheckouts

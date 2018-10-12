@@ -9,6 +9,7 @@ from tap_shopify.streams.base import (Stream,
 LOGGER = singer.get_logger()
 
 class Metafields(Stream):
+    # FIXME remove unnecessary overrides
     name = 'metafields'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
@@ -24,6 +25,9 @@ class Metafields(Stream):
     def get_call_api_fn(self, obj):
         @shopify_error_handling()
         def call_api(page):
+            # We always retrieve these wholesale since there's no obvious
+            # way to bookmark them (the bookmark would only be valid
+            # within the object)
             return obj.metafields(
                 limit=RESULTS_PER_PAGE,
                 page=page,
@@ -34,7 +38,6 @@ class Metafields(Stream):
         # Get shop metafields, should paginate fine
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`
-        start_time=self.get_bookmark()
         for selected_parent in self.get_selected_parents():
             # The name member controls many things, but most importantly
             # the bookmark key. This switches us over to the

@@ -18,7 +18,6 @@ setup(
         'dev': [
             'pylint',
             'ipdb',
-            'nose'
         ]
     },
     entry_points="""

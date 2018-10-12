@@ -35,9 +35,9 @@ def load_schemas():
     # 'number's, which may result in lost precision.
     for filename in os.listdir(get_abs_path('schemas')):
         path = get_abs_path('schemas') + '/' + filename
-        file_raw = filename.replace('.json', '')
+        schema_name = filename.replace('.json', '')
         with open(path) as file:
-            schemas[file_raw] = json.load(file)
+            schemas[schema_name] = json.load(file)
 
     return schemas
 

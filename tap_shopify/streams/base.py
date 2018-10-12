@@ -42,11 +42,18 @@ def shopify_error_handling():
     return decorator
 
 class Stream():
+    # Used for bookmarking and stream identification. Is overridden by
+    # subclasses to change the bookmark key.
     name = None
+    # FIXME always 'INCREMENTAL'
     replication_method = None
-    replication_key = None
-    replication_object = None
+    # FIXME replication_key is never overridden meaningfully. It should
+    # just be hardcoded here to `updated_at`.
+    replication_key = 'updated_at'
+    # FIXME Always `['id']`. Hardcode
     key_properties = None
+    # Controls which SDK object we use to call the API by default.
+    replication_object = None
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -61,25 +68,25 @@ class Stream():
         # recent thing it saw the next time you run, because the querying
         # only allows greater than or equal semantics.
 
-        # Assuming that ordering works for bookmarking
+        # We are applying ordering on the API retrieval which _should_
+        # mean that we can _always_ update the bookmark.
         singer.write_bookmark(
             Context.state,
             # name is overridden by some substreams
             self.name,
             # All bookmarkable streams bookmark `updated_at`
-            # FIXME remove configurable replication_key from all the
-            # things
-            'updated_at',
+            self.replication_key,
             obj.updated_at)
         singer.write_state(Context.state)
 
+    # This function can be overridden by subclasses for specialized API
+    # interactions. If you override it you need to remember to decorate it
+    # with shopify_error_handling to get 429 handling.
     @shopify_error_handling()
     def call_api(self, page):
         return self.replication_object.find(
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,
-            # TODO do we need `status='any'` here or
-            # something? See abandoned_checkouts
             page=page,
             updated_at_min=self.get_bookmark(),
             # Order is an undocumented query param that we believe
