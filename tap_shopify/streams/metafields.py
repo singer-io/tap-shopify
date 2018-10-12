@@ -21,15 +21,14 @@ class Metafields(Stream):
             if Context.is_selected(parent_stream):
                 yield Context.stream_objects[parent_stream]()
 
-    # FIXME rename
-    def indirection_is_fun(self, obj):
+    def get_call_api_fn(self, obj):
         @shopify_error_handling()
-        def close(page):
+        def call_api(page):
             return obj.metafields(
                 limit=RESULTS_PER_PAGE,
                 page=page,
                 order="updated_at asc")
-        return close
+        return call_api
 
     def get_objects(self):
         # Get shop metafields, should paginate fine
@@ -43,7 +42,7 @@ class Metafields(Stream):
             # to make resetting individual streams easier.
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
-                selected_parent.call_api = self.indirection_is_fun(parent_object)
+                selected_parent.call_api = self.get_call_api_fn(parent_object)
                 yield from selected_parent.get_objects()
 
     def sync(self):

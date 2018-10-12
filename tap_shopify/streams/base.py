@@ -90,8 +90,6 @@ class Stream():
         page = 1
         # Page through till the end of the resultset
         while True:
-            count = 0
-
             # `call_api` is set above for the default case and overridden
             # for sub classes that are responsible for substreams on other
             # objects.
@@ -100,9 +98,6 @@ class Stream():
             for obj in objects:
                 self.update_bookmark(obj)
                 yield obj
-                count += 1
-
-            LOGGER.info('%s Count = %s', self.name, count)
 
             if len(objects) < RESULTS_PER_PAGE:
                 # You know you're at the end when the current page has
