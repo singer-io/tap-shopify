@@ -6,15 +6,10 @@ from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       shopify_error_handling)
 
-LOGGER = singer.get_logger()
 
 class Metafields(Stream):
-    # FIXME remove unnecessary overrides
     name = 'metafields'
-    replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
     replication_object = shopify.Metafield
-    key_properties = ['id']
 
     def get_selected_parents(self):
         # FIXME note all other parents

@@ -3,18 +3,25 @@ import singer
 from  pyactiveresource.connection import ServerError
 from singer import utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream, RESULTS_PER_PAGE
-
-LOGGER = singer.get_logger()
+from tap_shopify.streams.base import (Stream,
+                                      RESULTS_PER_PAGE,
+                                      shopify_error_handling)
 
 class AbandonedCheckouts(Stream):
     name = 'abandoned_checkouts'
-    replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
     replication_object = shopify.Checkout
-    key_properties = ['id']
 
-    # FIXME We need `status='any'` here during call_api
+    @shopify_error_handling()
+    def call_api(self, page):
+        return self.replication_object.find(
+            # Max allowed value as of 2018-09-19 11:53:48
+            limit=RESULTS_PER_PAGE,
+            page=page,
+            status='any',
+            updated_at_min=self.get_bookmark(),
+            # Order is an undocumented query param that we believe
+            # ensures the order of the results.
+            order="updated_at asc")
 
     def sync(self):
         for abandoned_checkout in self.get_objects():

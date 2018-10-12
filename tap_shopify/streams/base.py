@@ -45,13 +45,9 @@ class Stream():
     # Used for bookmarking and stream identification. Is overridden by
     # subclasses to change the bookmark key.
     name = None
-    # FIXME always 'INCREMENTAL'
-    replication_method = None
-    # FIXME replication_key is never overridden meaningfully. It should
-    # just be hardcoded here to `updated_at`.
+    replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
-    # FIXME Always `['id']`. Hardcode
-    key_properties = None
+    key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
 
