@@ -113,18 +113,21 @@ def sync():
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
 
-        if Context.is_selected(stream_id):
-            LOGGER.info('Syncing stream: %s', stream_id)
+        if not Context.is_selected(stream_id):
+            LOGGER.info('Skipping stream: %s', stream_id)
+            continue
 
-            for rec in stream.sync():
-                with Transformer() as transformer:
-                    extraction_time = singer.utils.now()
-                    record_schema = catalog_entry['schema']
-                    record_metadata = metadata.to_map(catalog_entry['metadata'])
-                    rec = transformer.transform(rec, record_schema, record_metadata)
-                    singer.write_record(stream_id,
-                                        rec,
-                                        time_extracted=extraction_time)
+        LOGGER.info('Syncing stream: %s', stream_id)
+
+        for rec in stream.sync():
+            with Transformer() as transformer:
+                extraction_time = singer.utils.now()
+                record_schema = catalog_entry['schema']
+                record_metadata = metadata.to_map(catalog_entry['metadata'])
+                rec = transformer.transform(rec, record_schema, record_metadata)
+                singer.write_record(stream_id,
+                                    rec,
+                                    time_extracted=extraction_time)
 
 
 @utils.handle_top_exception(LOGGER)
