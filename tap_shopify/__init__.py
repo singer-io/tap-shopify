@@ -35,9 +35,9 @@ def load_schemas():
     # 'number's, which may result in lost precision.
     for filename in os.listdir(get_abs_path('schemas')):
         path = get_abs_path('schemas') + '/' + filename
-        file_raw = filename.replace('.json', '')
+        schema_name = filename.replace('.json', '')
         with open(path) as file:
-            schemas[file_raw] = json.load(file)
+            schemas[schema_name] = json.load(file)
 
     return schemas
 
@@ -113,20 +113,21 @@ def sync():
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
 
-        if (Context.streams.get(stream_id) is not None and (Context.is_selected(stream_id) or
-                                                Context.has_selected_child(stream_id))):
-            LOGGER.info('Syncing stream: %s', stream_id)
+        if not Context.is_selected(stream_id):
+            LOGGER.info('Skipping stream: %s', stream_id)
+            continue
 
-            for (tap_stream_id, rec) in stream.sync():
-                with Transformer() as transformer:
-                    extraction_time = singer.utils.now()
-                    record_stream = Context.get_catalog_entry(tap_stream_id)
-                    record_schema = record_stream['schema']
-                    record_metadata = metadata.to_map(record_stream['metadata'])
-                    rec = transformer.transform(rec, record_schema, record_metadata)
-                    singer.write_record(tap_stream_id,
-                                        rec,
-                                        time_extracted=extraction_time)
+        LOGGER.info('Syncing stream: %s', stream_id)
+
+        for rec in stream.sync():
+            with Transformer() as transformer:
+                extraction_time = singer.utils.now()
+                record_schema = catalog_entry['schema']
+                record_metadata = metadata.to_map(catalog_entry['metadata'])
+                rec = transformer.transform(rec, record_schema, record_metadata)
+                singer.write_record(stream_id,
+                                    rec,
+                                    time_extracted=extraction_time)
 
 
 @utils.handle_top_exception(LOGGER)

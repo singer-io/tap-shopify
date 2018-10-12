@@ -1,5 +1,4 @@
 .DEFAULT_GOAL := test
 
 test:
-	pylint tap_shopify -d missing-docstring,duplicate-code
-	nosetests
+	pylint tap_shopify -d missing-docstring
