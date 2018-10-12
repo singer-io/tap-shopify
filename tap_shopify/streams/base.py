@@ -37,21 +37,27 @@ class Stream():
             obj.updated_at)
         singer.write_state(Context.state)
 
-    def get_objects(self):
+    def get_objects(self, parent_object=None):
         start_date=self.get_bookmark()
         page = 1
         while True:
             count = 0
+
             try:
-                objects = self.replication_object.find(
-                    # Max allowed value as of 2018-09-19 11:53:48
-                    limit=RESULTS_PER_PAGE,
-                    # TODO do we need `status='any'` here or something? See abandoned_checkouts
-                    page=page,
-                    updated_at_min=start_date,
-                    # Order is an undocumented query param that we believe
-                    # ensures the order of the results.
-                    order="updated_at asc")
+                if parent_object:
+                    # FIXME definitely not paginating or setting
+                    # reasonable limit
+                    objects = parent_object.metafields()
+                else:
+                    objects = self.replication_object.find(
+                        # Max allowed value as of 2018-09-19 11:53:48
+                        limit=RESULTS_PER_PAGE,
+                        # TODO do we need `status='any'` here or something? See abandoned_checkouts
+                        page=page,
+                        updated_at_min=start_date,
+                        # Order is an undocumented query param that we believe
+                        # ensures the order of the results.
+                        order="updated_at asc")
             except pyactiveresource.connection.ClientError as client_error:
                 # We have never seen this be anything _but_ a 429. Other
                 # states should be consider untested.

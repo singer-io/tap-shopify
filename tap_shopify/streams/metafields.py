@@ -14,19 +14,18 @@ class Metafields(Stream):
     key_properties = ['id']
 
     def get_selected_parents(self):
-        import ipdb; ipdb.set_trace()
-        1+1
-        pass
+        for parent_stream in ['orders']:
+            if Context.is_selected(parent_stream):
+                yield Context.stream_objects[parent_stream]()
 
     def get_objects(self):
         # Get shop metafields, should paginate fine
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`
         for selected_parent in self.get_selected_parents():
-            selected_parent.name = "metafield_{}".format(selected_parent.something)
+            selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
-                # Maybe need pagination here?
-                yield from parent_object.metafields()
+                yield from selected_parent.get_objects(parent_object)
 
     def sync(self):
         # Shop metafields

@@ -10,7 +10,10 @@ LOGGER = singer.get_logger()
 class Transactions(Stream):
     name = 'transactions'
     replication_method = 'INCREMENTAL'
-    replication_key = 'created_at' # Transactions are immutable?
+    # Transactions have no updated_at property.
+    # https://help.shopify.com/en/api/reference/orders/transaction#properties
+    replication_key = 'created_at'
+    replication_object = shopify.Order
     key_properties = ['id']
 
     def get_objects(self):
