@@ -11,7 +11,7 @@ class AbandonedCheckouts(Stream):
     name = 'abandoned_checkouts'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
-    replication_object = shopify.AbandonedCheckouts
+    replication_object = shopify.Checkout
     key_properties = ['id']
 
     def sync(self):

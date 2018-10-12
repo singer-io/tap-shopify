@@ -38,6 +38,7 @@ class Stream():
         singer.write_state(Context.state)
 
     def get_objects(self):
+        start_date=self.get_bookmark()
         page = 1
         while True:
             count = 0
@@ -47,7 +48,7 @@ class Stream():
                     limit=RESULTS_PER_PAGE,
                     # TODO do we need `status='any'` here or something? See abandoned_checkouts
                     page=page,
-                    updated_at_min=self.start_date,
+                    updated_at_min=start_date,
                     # Order is an undocumented query param that we believe
                     # ensures the order of the results.
                     order="updated_at asc")
@@ -70,7 +71,7 @@ class Stream():
                 yield obj
                 count += 1
 
-            LOGGER.info('%s Count = %s', object_type, count)
+            LOGGER.info('%s Count = %s', self.name, count)
 
             if len(objects) < RESULTS_PER_PAGE:
                 break

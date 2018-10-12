@@ -11,7 +11,7 @@ class Customers(Stream):
     name = 'customers'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
-    replication_object = shopify.Customers
+    replication_object = shopify.Customer
     key_properties = ['id']
 
     def sync(self):

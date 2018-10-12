@@ -3,7 +3,7 @@ import singer
 
 from singer import utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import SubStream
+from tap_shopify.streams.base import Stream
 
 LOGGER = singer.get_logger()
 
@@ -21,7 +21,7 @@ class Transactions(Stream):
             yield from order.transactions()
 
     def sync(self, parent_obj):
-        for transaction in self.get_objects()
+        for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
             created_at = utils.strptime_with_tz(transaction_dict[self.replication_key])
             yield transaction_dict

@@ -2,7 +2,7 @@ import json
 import shopify
 import singer
 from tap_shopify.context import Context
-from tap_shopify.streams.base import SubStream, RESULTS_PER_PAGE
+from tap_shopify.streams.base import Stream, RESULTS_PER_PAGE
 
 LOGGER = singer.get_logger()
 
@@ -10,11 +10,12 @@ class Metafields(Stream):
     name = 'metafields'
     replication_method = 'INCREMENTAL'
     replication_key = 'updated_at'
-    replication_object = shopify.Metafields
+    replication_object = shopify.Metafield
     key_properties = ['id']
 
     def get_selected_parents(self):
-        Context something something
+        import ipdb; ipdb.set_trace()
+        1+1
         pass
 
     def get_objects(self):
