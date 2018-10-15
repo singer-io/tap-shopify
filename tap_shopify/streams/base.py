@@ -1,9 +1,8 @@
 import time
-import datetime
 import math
+import functools
 
 import pyactiveresource
-import functools
 import singer
 from singer import utils
 from tap_shopify.context import Context
@@ -75,8 +74,10 @@ class Stream():
             Context.state,
             # name is overridden by some substreams
             self.name,
+            # FIXME no longer true? Transactions don't?
             # All bookmarkable streams bookmark `updated_at`
             self.replication_key,
+            # FIXME what happens when transactions come through here?
             obj.updated_at)
         singer.write_state(Context.state)
 
@@ -107,9 +108,9 @@ class Stream():
                 self.update_bookmark(obj)
                 yield obj
 
+            # You know you're at the end when the current page has
+            # less than the request size limits you set.
             if len(objects) < RESULTS_PER_PAGE:
-                # You know you're at the end when the current page has
-                # less than the request size limits you set.
                 break
             page += 1
 

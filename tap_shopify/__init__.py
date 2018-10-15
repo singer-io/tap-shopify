@@ -59,9 +59,6 @@ def get_discovery_metadata(stream, schema):
     return metadata.to_list(mdata)
 
 def load_schema_references():
-    def get_abs_path(path):
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
-
     shared_schema_file = "definitions.json"
     shared_schema_path = get_abs_path('schemas/')
 

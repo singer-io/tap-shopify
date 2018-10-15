@@ -1,32 +1,33 @@
-import shopify
-import singer
-
 from singer import utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
                                       shopify_error_handling)
+
+
+def get_call_api_fn(obj):
+    @shopify_error_handling()
+    def call_api(page):
+        # We always retrieve these wholesale since there's no obvious
+        # way to bookmark them (the bookmark would only be valid
+        # within the object)
+
+        # FIXME Need to check if why these params cause an error
+        return obj.transactions(
+            #limit=RESULTS_PER_PAGE,
+            #page=page,
+            #order="updated_at asc"
+        )
+    return call_api
+
 
 class Transactions(Stream):
     name = 'transactions'
     # Transactions have no updated_at property.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
     replication_key = 'created_at'
-
-    def get_call_api_fn(self, obj):
-        @shopify_error_handling()
-        def call_api(page):
-            # We always retrieve these wholesale since there's no obvious
-            # way to bookmark them (the bookmark would only be valid
-            # within the object)
-
-            # FIXME Need to check if why these params cause an error
-            return obj.transactions(
-                #limit=RESULTS_PER_PAGE,
-                #page=page,
-                #order="updated_at asc"
-            )
-        return call_api
+    # FIXME bookmarking is likely wrong on transactions since we are not
+    # overriding all the things we need to to to change it to
+    # 'created_at'?
 
     def get_objects(self):
         # Right now, it's ok for the user to select 'transactions' but not
@@ -43,7 +44,7 @@ class Transactions(Stream):
         for parent_object in selected_parent.get_objects():
             # Override `call_api` to use the parent_object as the api
             # retrieval object.
-            selected_parent.call_api = self.get_call_api_fn(parent_object)
+            selected_parent.call_api = get_call_api_fn(parent_object)
             # Page through the specific parent_object's transactions
             yield from selected_parent.get_objects()
 
