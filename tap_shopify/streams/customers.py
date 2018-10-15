@@ -10,8 +10,4 @@ class Customers(Stream):
     name = 'customers'
     replication_object = shopify.Customer
 
-    def sync(self):
-        for customer in self.get_objects():
-            yield customer.to_dict()
-
 Context.stream_objects['customers'] = Customers

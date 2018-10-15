@@ -12,8 +12,7 @@ class Metafields(Stream):
     replication_object = shopify.Metafield
 
     def get_selected_parents(self):
-        # FIXME note all other parents
-        for parent_stream in ['orders']:
+        for parent_stream in ['orders', 'customers']:
             if Context.is_selected(parent_stream):
                 yield Context.stream_objects[parent_stream]()
 
@@ -23,6 +22,11 @@ class Metafields(Stream):
             # We always retrieve these wholesale since there's no obvious
             # way to bookmark them (the bookmark would only be valid
             # within the object)
+            #
+            # An explicit assumption being made here is that
+            # parent_objects never have more than a page or two of
+            # metafields. If we encounter an account where that isn't true
+            # this strategy will likely be too slow to run.
             return obj.metafields(
                 limit=RESULTS_PER_PAGE,
                 page=page,
@@ -30,7 +34,7 @@ class Metafields(Stream):
         return call_api
 
     def get_objects(self):
-        # Get shop metafields, should paginate fine
+        # Get top-level shop metafields
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`
         for selected_parent in self.get_selected_parents():

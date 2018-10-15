@@ -12,6 +12,11 @@ LOGGER = singer.get_logger()
 
 RESULTS_PER_PAGE = 250
 
+# This seems unnecessarily complicated. Rewriting it as a contextmanager
+# doesn't work initially because of the looping logic which is forbidden
+# in a context manager. There's probably another way to structure it so
+# the looping is encapsulated with the decorator but the error handling is
+# encapsulated with a contextmanager.
 def shopify_error_handling():
     def decorator(fnc):
         @functools.wraps(fnc)
@@ -107,3 +112,12 @@ class Stream():
                 # less than the request size limits you set.
                 break
             page += 1
+
+    def sync(self):
+        """Yield's processed SDK object dicts to the caller.
+
+        This is the default implementation. Get's all of self's objects
+        and calls to_dict on them with no further processing.
+        """
+        for obj in self.get_objects():
+            yield obj.to_dict()
