@@ -12,28 +12,16 @@ def get_selected_parents():
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
-
-def get_call_api_fn(obj):
-    @shopify_error_handling()
-    def call_api(page):
-        # We always retrieve these wholesale since there's no obvious
-        # way to bookmark them (the bookmark would only be valid
-        # within the object)
-        #
-        # An explicit assumption being made here is that
-        # parent_objects never have more than a page or two of
-        # metafields. If we encounter an account where that isn't true
-        # this strategy will likely be too slow to run.
-        return obj.metafields(
-            limit=RESULTS_PER_PAGE,
-            page=page,
-            order="updated_at asc")
-    return call_api
-
-
 class Metafields(Stream):
     name = 'metafields'
     replication_object = shopify.Metafield
+
+    @shopify_error_handling()
+    def get_metafields(self, parent_object, page):
+        return parent_object.metafields(
+            limit=RESULTS_PER_PAGE,
+            page=page,
+            order="updated_at asc")
 
     def get_objects(self):
         # Get top-level shop metafields
@@ -46,8 +34,14 @@ class Metafields(Stream):
             # to make resetting individual streams easier.
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
-                selected_parent.call_api = get_call_api_fn(parent_object)
-                yield from selected_parent.get_objects()
+                page = 1
+                while True:
+                    metafields = self.get_metafields(parent_object, page)
+                    for metafield in metafields:
+                        yield metafield
+                    if len(metafields) < RESULTS_PER_PAGE:
+                        break
+                    page += 1
 
     def sync(self):
         # Shop metafields
