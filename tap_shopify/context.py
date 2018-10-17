@@ -7,7 +7,7 @@ class Context():
     stream_map = {}
     stream_objects = {}
     counts = {}
-    
+
     @classmethod
     def get_catalog_entry(cls, stream_name):
         if not cls.stream_map:
