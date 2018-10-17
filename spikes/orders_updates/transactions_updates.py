@@ -53,11 +53,11 @@ new_order = {
       {
         "kind": "authorization",
         "status": "success",
-        "amount": 238.47
+        "amount": 250.00
       }
     ],
     "total_tax": 13.5,
-    "currency": "EUR"
+    "currency": "USD"
   }
 }
 order_post_endpoint = 'orders.json'
@@ -73,12 +73,12 @@ new_transaction = {
     "transaction": {
         "kind": "capture",
         "status": "success",
-        "amount": 238.47
+        "amount": 0.10
     }
 }
+
 transactions_post_endpoint = 'orders/{}/transactions.json'.format(new_order_id)
 transactions_post_resp = shopify_post(transactions_post_endpoint, new_transaction)
-
 
 # ---------- 3 Get updated_at after adding transaction ----------
 order_get_endpoint = 'orders/{}.json'.format(new_order_id)
