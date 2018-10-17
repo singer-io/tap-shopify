@@ -104,6 +104,7 @@ def sync():
                                 stream["schema"],
                                 stream["key_properties"],
                                 bookmark_properties=stream["replication_key"])
+            Context.counts[stream["tap_stream_id"]] = 0
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
@@ -125,7 +126,12 @@ def sync():
                 singer.write_record(stream_id,
                                     rec,
                                     time_extracted=extraction_time)
+                Context.counts[stream_id] += 1
 
+    LOGGER.info('----------------------')
+    for stream_id, stream_count in Context.counts.items():
+        LOGGER.info('{}: {}'.format(stream_id, stream_count))
+    LOGGER.info('----------------------')
 
 @utils.handle_top_exception(LOGGER)
 def main():

@@ -12,7 +12,7 @@ class Transactions(Stream):
     # Transactions have no updated_at property.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
-    @shopify_error_handling()    
+    @shopify_error_handling()
     def get_transactions(self, parent_object):
         return parent_object.transactions()
 
