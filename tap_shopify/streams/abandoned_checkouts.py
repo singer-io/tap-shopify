@@ -11,8 +11,6 @@ class AbandonedCheckouts(Stream):
     @shopify_error_handling()
     def call_api(self, page):
         return self.replication_object.find(
-            # TODO Can we extract this into some kind of splat **arg
-            # builder?
 
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,

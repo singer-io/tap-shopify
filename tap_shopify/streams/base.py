@@ -85,29 +85,29 @@ class Stream():
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 handling.
     @shopify_error_handling()
-    def call_api(self, page):
+    def call_api(self, page, bookmark):
         return self.replication_object.find(
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,
             page=page,
-            updated_at_min=self.get_bookmark(),
+            updated_at_min=bookmark,
             # Order is an undocumented query param that we believe
             # ensures the order of the results.
             order="updated_at asc")
 
     def get_objects(self):
         page = 1
+        bookmark = self.get_bookmark()
         # Page through till the end of the resultset
         while True:
             # `call_api` is set above for the default case and overridden
             # for sub classes that are responsible for substreams on other
             # objects.
-            objects = self.call_api(page)
+            objects = self.call_api(page, bookmark)
 
             for obj in objects:
-                self.update_bookmark(obj)
                 yield obj
-
+                self.update_bookmark(obj)
             # You know you're at the end when the current page has
             # less than the request size limits you set.
             if len(objects) < RESULTS_PER_PAGE:
