@@ -12,16 +12,16 @@ def get_selected_parents():
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
+@shopify_error_handling()
+def get_metafields(parent_object, page):
+    return parent_object.metafields(
+        limit=RESULTS_PER_PAGE,
+        page=page,
+        order="updated_at asc")
+
 class Metafields(Stream):
     name = 'metafields'
     replication_object = shopify.Metafield
-
-    @shopify_error_handling()
-    def get_metafields(self, parent_object, page):
-        return parent_object.metafields(
-            limit=RESULTS_PER_PAGE,
-            page=page,
-            order="updated_at asc")
 
     def get_objects(self):
         # Get top-level shop metafields
@@ -36,7 +36,7 @@ class Metafields(Stream):
             for parent_object in selected_parent.get_objects():
                 page = 1
                 while True:
-                    metafields = self.get_metafields(parent_object, page)
+                    metafields = get_metafields(parent_object, page)
                     for metafield in metafields:
                         yield metafield
                     if len(metafields) < RESULTS_PER_PAGE:

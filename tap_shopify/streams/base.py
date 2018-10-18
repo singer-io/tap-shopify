@@ -74,10 +74,7 @@ class Stream():
             Context.state,
             # name is overridden by some substreams
             self.name,
-            # FIXME no longer true? Transactions don't?
-            # All bookmarkable streams bookmark `updated_at`
             self.replication_key,
-            # FIXME what happens when transactions come through here?
             obj.updated_at)
         singer.write_state(Context.state)
 

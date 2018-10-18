@@ -1,21 +1,16 @@
-import singer
-from singer import utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
 
-LOGGER = singer.get_logger()
+@shopify_error_handling()
+def get_transactions(parent_object):
+    return parent_object.transactions()
 
 class Transactions(Stream):
     name = 'transactions'
     replication_key = 'created_at'
     # Transactions have no updated_at property.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
-
-    @shopify_error_handling()
-    def get_transactions(self, parent_object):
-        return parent_object.transactions()
-
 
     def get_objects(self):
         # Right now, it's ok for the user to select 'transactions' but not
@@ -31,7 +26,7 @@ class Transactions(Stream):
 
         # Page through all `orders`, bookmarking at `transaction_orders`
         for parent_object in selected_parent.get_objects():
-            transactions = self.get_transactions(parent_object)
+            transactions = get_transactions(parent_object)
             for transaction in transactions:
                 yield transaction
 

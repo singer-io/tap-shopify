@@ -130,7 +130,7 @@ def sync():
 
     LOGGER.info('----------------------')
     for stream_id, stream_count in Context.counts.items():
-        LOGGER.info('{}: {}'.format(stream_id, stream_count))
+        LOGGER.info('%s: %d', stream_id, stream_count)
     LOGGER.info('----------------------')
 
 @utils.handle_top_exception(LOGGER)

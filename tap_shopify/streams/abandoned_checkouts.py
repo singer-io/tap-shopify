@@ -9,21 +9,16 @@ class AbandonedCheckouts(Stream):
     replication_object = shopify.Checkout
 
     @shopify_error_handling()
-    def call_api(self, page):
+    def call_api(self, page, bookmark):
         return self.replication_object.find(
 
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,
             page=page,
-            updated_at_min=self.get_bookmark(),
+            updated_at_min=bookmark,
 
-            # TODO Must begin setting updated_at_max at least for this
-            # stream. The client's bookmark is currently in 2014 and we
-            # get a timeout error retrieving all of it at once. 150 days
-            # at a time seems to work OK.
-
-            # Order is an undocumented query
-            # param that we believe ensures the order of the results.
+            # Order is an undocumented query param that we believe ensures
+            # the order of the results.
             order="updated_at asc",
 
             # https://help.shopify.com/en/api/reference/orders/abandoned_checkouts#endpoints
