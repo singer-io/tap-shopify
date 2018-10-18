@@ -106,16 +106,28 @@ def sync():
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
 
+
+
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
+
+        currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
+
+        if currently_sync_stream_name and stream_id != currently_sync_stream_name:
+            continue
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
             continue
 
         LOGGER.info('Syncing stream: %s', stream_id)
+
+        if not Context.state.get('bookmarks'):
+            Context.state['bookmarks'] = {}
+        Context.state['bookmarks']['currently_sync_stream'] = stream_id
+
 
         for rec in stream.sync():
             with Transformer() as transformer:
@@ -127,6 +139,9 @@ def sync():
                                     rec,
                                     time_extracted=extraction_time)
                 Context.counts[stream_id] += 1
+
+        Context.state['bookmarks'].pop('currently_sync_stream')
+        singer.write_state(Context.state)
 
     LOGGER.info('----------------------')
     for stream_id, stream_count in Context.counts.items():
