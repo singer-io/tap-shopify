@@ -82,34 +82,49 @@ class Stream():
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 handling.
     @shopify_error_handling()
-    def call_api(self, page, bookmark):
+    def call_api(self, page, bookmark_min, bookmark_max, status="open"):
         return self.replication_object.find(
             # Max allowed value as of 2018-09-19 11:53:48
             limit=RESULTS_PER_PAGE,
             page=page,
-            updated_at_min=bookmark,
+            updated_at_min=bookmark_min,
+            updated_at_max=bookmark_max,
             # Order is an undocumented query param that we believe
             # ensures the order of the results.
-            order="updated_at asc")
+            order="updated_at asc",
+            status=status)
 
-    def get_objects(self):
-        page = 1
-        bookmark = self.get_bookmark()
+    def get_objects(self, status="open"):
+        
+        updated_at_min = self.get_bookmark()
+        chunk_size = 30
+        stop_time = singer.utils.now()
+        
         # Page through till the end of the resultset
-        while True:
-            # `call_api` is set above for the default case and overridden
-            # for sub classes that are responsible for substreams on other
-            # objects.
-            objects = self.call_api(page, bookmark)
+        while updated_at_min < stop_time:
+            page = 1
+            updated_at_max = updated_at_min + datetime.timedelta(days=chunk_size)
+            if updated_at_max > stop_time:
+                updated_at_max = stop_time
+            while True:
+                using_args = {
+                    "page": page,
+                    "bookmark_min": updated_at_min,
+                    "bookmark_max": updated_at_max,
+                    "status": status
+                }
+                objects = self.call_api(**using_args)
 
-            for obj in objects:
-                yield obj
-                self.update_bookmark(obj)
-            # You know you're at the end when the current page has
-            # less than the request size limits you set.
-            if len(objects) < RESULTS_PER_PAGE:
-                break
-            page += 1
+                for obj in objects:
+                    yield obj
+                    self.update_bookmark(obj)
+
+                    # You know you're at the end when the current page has
+                    # less than the request size limits you set.
+                if len(objects) < RESULTS_PER_PAGE:
+                    break
+                page += 1
+            updated_at_min = updated_at_max
 
     def sync(self):
         """Yield's processed SDK object dicts to the caller.
