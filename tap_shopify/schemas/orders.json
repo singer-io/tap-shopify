@@ -1373,7 +1373,8 @@
     },
     "reference": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     }
   },
