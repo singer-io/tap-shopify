@@ -8,7 +8,7 @@ from tap_shopify.streams.base import (Stream,
 
 
 def get_selected_parents():
-    for parent_stream in ['orders', 'customers']:
+    for parent_stream in ['orders', 'customers', 'products']:
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 

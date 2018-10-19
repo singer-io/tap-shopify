@@ -75,24 +75,16 @@ class Stream():
             # name is overridden by some substreams
             self.name,
             self.replication_key,
-            obj.updated_at)
+            getattr(obj, self.replication_key)
+        )
         singer.write_state(Context.state)
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 handling.
     @shopify_error_handling()
-    def call_api(self, page, bookmark_min, bookmark_max, status="open"):
-        return self.replication_object.find(
-            # Max allowed value as of 2018-09-19 11:53:48
-            limit=RESULTS_PER_PAGE,
-            page=page,
-            updated_at_min=bookmark_min,
-            updated_at_max=bookmark_max,
-            # Order is an undocumented query param that we believe
-            # ensures the order of the results.
-            order="updated_at asc",
-            status=status)
+    def call_api(self, query_params):
+        return self.replication_object.find(**query_params)
 
     def get_objects(self, status="open"):
 
@@ -107,13 +99,13 @@ class Stream():
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
-                using_args = {
+                query_params = {
                     "page": page,
                     "bookmark_min": updated_at_min,
                     "bookmark_max": updated_at_max,
-                    "status": status
+                    "limit": RESULTS_PER_PAGE
                 }
-                objects = self.call_api(**using_args)
+                objects = self.call_api(query_params)
 
                 for obj in objects:
                     yield obj
