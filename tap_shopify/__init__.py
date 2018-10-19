@@ -93,6 +93,20 @@ def discover():
 
     return {'streams': streams}
 
+def shuffle_streams(stream_name):
+    '''
+    Takes the name of the first stream to sync and reshuffles the order
+    of the list to put it at the top
+    '''
+    index = 0
+    matching_index = 0
+    for catalog_entry in Context.catalog["streams"]:
+        if catalog_entry["tap_stream_id"] == stream_name:
+            matching_index = index
+        index += 1
+    top_half = Context.catalog["streams"][matching_index:]
+    bottom_half = Context.catalog["streams"][:matching_index]
+    Context.catalog["streams"] = top_half + bottom_half
 
 def sync():
     initialize_shopify_client()
@@ -106,17 +120,13 @@ def sync():
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
 
-
+    currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
+    shuffle_streams(currently_sync_stream_name)
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
-
-        currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
-
-        if currently_sync_stream_name and stream_id != currently_sync_stream_name:
-            continue
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
