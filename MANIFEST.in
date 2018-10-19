@@ -1,2 +1,3 @@
 include LICENSE
 include tap_shopify/schemas/*.json
+include tap_shopify/streams/*.py
