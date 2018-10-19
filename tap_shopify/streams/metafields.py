@@ -23,7 +23,7 @@ class Metafields(Stream):
     name = 'metafields'
     replication_object = shopify.Metafield
 
-    def get_objects(self):
+    def get_objects(self, status="open"):
         # Get top-level shop metafields
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`

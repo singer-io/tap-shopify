@@ -63,6 +63,42 @@
           "integer"
         ]
       },
+      "compare_at_price": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "destination_location_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "key": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "line_price": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "origin_location_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "applied_discount": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
       "fulfillable_quantity": {
         "type": [
           "null",
@@ -184,7 +220,7 @@
       "id": {
         "type": [
           "null",
-          "integer"
+          "string"
         ]
       },
       "taxable": {
@@ -290,6 +326,30 @@
           "type": [
             "null",
             "number"
+          ]
+        },
+        "compare_at": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "position": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "source": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "zone": {
+          "type": [
+            "null",
+            "string"
           ]
         }
       },

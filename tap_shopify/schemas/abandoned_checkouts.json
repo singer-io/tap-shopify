@@ -19,7 +19,7 @@
     "currency": {
       "type": [
         "null",
-        "number"
+        "string"
       ]
     },
     "completed_at": {
@@ -289,6 +289,18 @@
       ]
     },
     "note": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "customer_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "presentment_currency": {
       "type": [
         "null",
         "string"

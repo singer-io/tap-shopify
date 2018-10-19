@@ -1,8 +1,6 @@
 import shopify
 from tap_shopify.context import Context
-from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
-                                      shopify_error_handling)
+from tap_shopify.streams.base import Stream
 
 class AbandonedCheckouts(Stream):
     name = 'abandoned_checkouts'

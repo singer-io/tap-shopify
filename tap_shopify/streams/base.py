@@ -1,7 +1,7 @@
 import time
 import math
 import functools
-
+import datetime
 import pyactiveresource
 import singer
 from singer import utils
@@ -95,11 +95,11 @@ class Stream():
             status=status)
 
     def get_objects(self, status="open"):
-        
+
         updated_at_min = self.get_bookmark()
-        chunk_size = 30
+        chunk_size = 60
         stop_time = singer.utils.now()
-        
+
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
             page = 1
