@@ -17,7 +17,7 @@ setup(
     extras_require={
         'dev': [
             'pylint',
-            'ipdb'
+            'ipdb',
         ]
     },
     entry_points="""

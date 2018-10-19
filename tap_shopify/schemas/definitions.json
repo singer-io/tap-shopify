@@ -1,0 +1,366 @@
+{
+  "location": {
+    "properties": {
+      "country_code": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "address1": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "city": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "address2": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "province_code": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "zip": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "type": [
+      "null",
+      "object"
+    ]
+  },
+  "line_item": {
+    "properties": {
+      "grams": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "compare_at_price": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "destination_location_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "key": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "line_price": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "origin_location_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "applied_discount": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "fulfillable_quantity": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "variant_title": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "properties": {
+        "items": {
+          "properties": {
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "value": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
+        ]
+      },
+      "tax_code": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "discount_allocations": {
+        "items": {
+          "properties": {
+            "discount_application_index": {
+              "type": [
+                "null",
+                "integer"
+              ]
+            },
+            "amount": {
+              "type": [
+                "null",
+                "number"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
+        ]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "pre_tax_price": {
+        "type": [
+          "null",
+          "number"
+        ]
+      },
+      "sku": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "product_exists": {
+        "type": [
+          "null",
+          "boolean"
+        ]
+      },
+      "total_discount": {
+        "type": [
+          "null",
+          "number"
+        ]
+      },
+      "name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "fulfillment_status": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "gift_card": {
+        "type": [
+          "null",
+          "boolean"
+        ]
+      },
+      "id": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "taxable": {
+        "type": [
+          "null",
+          "boolean"
+        ]
+      },
+      "vendor": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "tax_lines": {
+        "$ref": "definitions.json#/tax_lines"
+      },
+      "origin_location": {
+        "$ref": "definitions.json#/location"
+      },
+      "price": {
+        "type": [
+          "null",
+          "number"
+        ]
+      },
+      "requires_shipping": {
+        "type": [
+          "null",
+          "boolean"
+        ]
+      },
+      "fulfillment_service": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "variant_inventory_management": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "title": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "destination_location": {
+        "$ref": "definitions.json#/location"
+      },
+      "quantity": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "product_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "variant_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "type": [
+      "null",
+      "object"
+    ]
+  },
+  "line_items": {
+    "items": {
+      "$ref": "definitions.json#/line_item"
+    },
+    "type": [
+      "null",
+      "array"
+    ]
+  },
+  "tax_lines": {
+    "items": {
+      "properties": {
+        "price": {
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "title": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "rate": {
+          "type": [
+            "null",
+            "number"
+          ]
+        },
+        "compare_at": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "position": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "source": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "zone": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "type": [
+      "null",
+      "array"
+    ]
+  }
+}
