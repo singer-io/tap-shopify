@@ -24,7 +24,7 @@ setup(
     [console_scripts]
     tap-shopify=tap_shopify:main
     """,
-    packages=["tap_shopify"],
+    packages=["tap_shopify", "tap_shopify/streams"],
     package_data = {
         "schemas": ["tap_shopify/schemas/*.json"]
     },
