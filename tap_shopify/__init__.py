@@ -19,10 +19,22 @@ LOGGER = singer.get_logger()
 
 def initialize_shopify_client():
     api_key = Context.config['api_key']
+    password = Context.config['password']
+    shared_secret = Context.config['shared_secret']
     shop = Context.config['shop']
-    session = shopify.Session("%s.myshopify.com" % (shop),
-                              api_key)
-    shopify.ShopifyResource.activate_session(session)
+    auth_type = Context.config['auth_type']
+    # Exists two methods: https://github.com/Shopify/shopify_python_api
+    # Private or public application
+    # Use a private application
+    if auth_type == 'private':
+        shop_url = "https://%s:%s@%s.myshopify.com/admin" % (api_key, password, shop)
+        shopify.ShopifyResource.set_site(shop_url)
+        shopify.Session.setup(api_key=api_key, secret=shared_secret)
+    # Use a public application
+    else:
+        session = shopify.Session("%s.myshopify.com" % (shop),
+                                  api_key)
+        shopify.ShopifyResource.activate_session(session)
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
