@@ -307,6 +307,82 @@
       "array"
     ]
   },
+  "image": {
+    "properties": {
+      "updated_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "created_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "variant_ids": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        }
+      },
+      "height": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "alt": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "src": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "position": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "width": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "type": [
+      "null",
+      "object"
+    ]
+  },
   "tax_lines": {
     "items": {
       "properties": {

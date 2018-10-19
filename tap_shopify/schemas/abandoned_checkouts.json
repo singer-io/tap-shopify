@@ -382,7 +382,8 @@
           },
           "delivery_category": {
             "type": [
-              "null"
+              "null",
+              "string"
             ]
           },
           "markup": {
@@ -408,7 +409,8 @@
     },
     "source": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "shipping_address": {

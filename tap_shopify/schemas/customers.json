@@ -18,7 +18,8 @@
     },
     "multipass_identifier": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "default_address": {
@@ -171,7 +172,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     },
     "note": {
       "type": [
@@ -341,7 +343,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     }
   }
 }

@@ -149,7 +149,8 @@
     },
     "location_id": {
       "type": [
-        "null"
+        "null",
+        "integer"
       ]
     }
   },
