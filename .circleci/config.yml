@@ -31,10 +31,10 @@ jobs:
                        --client-id=50 \
                        tap_tester.suites.shopify
 workflows:
+  version: 2
   commit:
     jobs:
       - build
-  version: 2
   build_daily:
     triggers:
       - schedule:
