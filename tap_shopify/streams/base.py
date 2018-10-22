@@ -101,8 +101,8 @@ class Stream():
             while True:
                 query_params = {
                     "page": page,
-                    "bookmark_min": updated_at_min,
-                    "bookmark_max": updated_at_max,
+                    "updated_at_min": updated_at_min,
+                    "updated_at_max": updated_at_max,
                     "limit": RESULTS_PER_PAGE
                 }
                 objects = self.call_api(query_params)
