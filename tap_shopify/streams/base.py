@@ -86,7 +86,7 @@ class Stream():
     def call_api(self, query_params):
         return self.replication_object.find(**query_params)
 
-    def get_objects(self, status="open"):
+    def get_objects(self):
 
         updated_at_min = self.get_bookmark()
         chunk_size = 60
@@ -105,7 +105,7 @@ class Stream():
                     "updated_at_max": updated_at_max,
                     "order": "updated_at asc",
                     "limit": RESULTS_PER_PAGE,
-                    "status": status
+                    "status": "any"
                 }
                 objects = self.call_api(query_params)
 

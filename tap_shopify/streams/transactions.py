@@ -12,7 +12,7 @@ class Transactions(Stream):
     # Transactions have no updated_at property.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
-    def get_objects(self, status="open"):
+    def get_objects(self):
         # Right now, it's ok for the user to select 'transactions' but not
         # 'orders'. This data may not be all that useful but we're taking
         # the less opinionated approach to begin with to favor simplicity.

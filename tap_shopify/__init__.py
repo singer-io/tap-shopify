@@ -98,12 +98,10 @@ def shuffle_streams(stream_name):
     Takes the name of the first stream to sync and reshuffles the order
     of the list to put it at the top
     '''
-    index = 0
     matching_index = 0
-    for catalog_entry in Context.catalog["streams"]:
+    for i, catalog_entry in enumerate(Context.catalog["streams"]):
         if catalog_entry["tap_stream_id"] == stream_name:
-            matching_index = index
-        index += 1
+            matching_index = i
     top_half = Context.catalog["streams"][matching_index:]
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half

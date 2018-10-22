@@ -11,7 +11,7 @@ class Collects(Stream):
     replication_object = shopify.Collect
     replication_key = 'id'
 
-    def get_objects(self, status="open"):
+    def get_objects(self):
         page = 1
         start_id = singer.get_bookmark(Context.state,
                                        self.name,

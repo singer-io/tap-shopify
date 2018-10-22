@@ -7,7 +7,7 @@ class AbandonedCheckouts(Stream):
     replication_object = shopify.Checkout
 
     def sync(self):
-        for abandoned_checkout in self.get_objects(status="any"):
+        for abandoned_checkout in self.get_objects():
             abandoned_checkout_dict = abandoned_checkout.to_dict()
             # Customer is a stream on its own that can be foreign keyed to
             if abandoned_checkout_dict.get('customer'):
