@@ -1,8 +1,7 @@
 import singer
 import shopify
 from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
-                                      shopify_error_handling)
+                                      RESULTS_PER_PAGE)
 from tap_shopify.context import Context
 
 
@@ -31,11 +30,9 @@ class Collects(Stream):
                 yield obj
                 self.update_bookmark(obj)
 
-            # You know you're at the end when the current page has
-            # less than the request size limits you set.
             if len(objects) < RESULTS_PER_PAGE:
                 break
             page += 1
 
-    
+
 Context.stream_objects['collects'] = Collects

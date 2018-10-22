@@ -154,8 +154,5 @@
       ]
     }
   },
-  "type": [
-    "null",
-    "object"
-  ]
+  "type": "object"
 }
