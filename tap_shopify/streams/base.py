@@ -103,7 +103,9 @@ class Stream():
                     "page": page,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
-                    "limit": RESULTS_PER_PAGE
+                    "order": "updated_at asc",
+                    "limit": RESULTS_PER_PAGE,
+                    "status": status
                 }
                 objects = self.call_api(query_params)
 
