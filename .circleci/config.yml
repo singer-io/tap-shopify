@@ -32,6 +32,9 @@ jobs:
                        tap_tester.suites.shopify
 workflows:
   version: 2
+  commit:
+    jobs:
+      - build
   build_daily:
     triggers:
       - schedule:
