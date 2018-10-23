@@ -118,8 +118,11 @@ def sync():
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
 
+    # If there is a currently syncing stream bookmark, shuffle the
+    # stream order so it gets sync'd first
     currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
-    shuffle_streams(currently_sync_stream_name)
+    if currently_sync_stream_name:
+        shuffle_streams(currently_sync_stream_name)
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:

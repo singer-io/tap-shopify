@@ -63,19 +63,16 @@ class Stream():
                     or Context.config["start_date"])
         return utils.strptime_with_tz(bookmark)
 
-    def update_bookmark(self, obj):
+    def update_bookmark(self, bookmark_value):
         # NOTE: Bookmarking can never be updated to not get the most
         # recent thing it saw the next time you run, because the querying
         # only allows greater than or equal semantics.
-
-        # We are applying ordering on the API retrieval which _should_
-        # mean that we can _always_ update the bookmark.
         singer.write_bookmark(
             Context.state,
             # name is overridden by some substreams
             self.name,
             self.replication_key,
-            getattr(obj, self.replication_key)
+            bookmark_value
         )
         singer.write_state(Context.state)
 
@@ -103,20 +100,19 @@ class Stream():
                     "page": page,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
-                    "order": "updated_at asc",
                     "limit": RESULTS_PER_PAGE,
                     "status": "any"
                 }
                 objects = self.call_api(query_params)
-
                 for obj in objects:
                     yield obj
-                    self.update_bookmark(obj)
 
                     # You know you're at the end when the current page has
                     # less than the request size limits you set.
                 if len(objects) < RESULTS_PER_PAGE:
+                    self.update_bookmark(utils.strftime(updated_at_max))
                     break
+
                 page += 1
             updated_at_min = updated_at_max
 
