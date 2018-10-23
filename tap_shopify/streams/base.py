@@ -107,9 +107,11 @@ class Stream():
                 for obj in objects:
                     yield obj
 
-                    # You know you're at the end when the current page has
-                    # less than the request size limits you set.
+                # You know you're at the end when the current page has
+                # less than the request size limits you set.
                 if len(objects) < RESULTS_PER_PAGE:
+                    # Save the updated_at_max as our bookmark as we've synced all rows up in our
+                    # window and can move forward
                     self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
