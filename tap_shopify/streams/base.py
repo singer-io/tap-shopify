@@ -35,12 +35,12 @@ def shopify_error_handling():
                     if resp.code == 429:
                         # Retry-After is an undocumented header. But honoring
                         # it was proven to work in our spikes.
-                        sleep_time_str = resp.headers['Retry-After']
+                        sleep_time_str = resp.headers.get('Retry-After') or resp.headers.get('retry-after', 2)
                         LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
                         time.sleep(math.floor(float(sleep_time_str)))
                         continue
                     else:
-                        LOGGER.ERROR("Received a %s error.", resp.code)
+                        LOGGER.error("Received a %s error.", resp.code)
                         raise
         return wrapped
     return decorator
