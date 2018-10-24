@@ -7,6 +7,12 @@
         "string"
       ]
     },
+    "currency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "email": {
       "type": [
         "null",
