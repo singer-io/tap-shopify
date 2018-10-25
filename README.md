@@ -33,7 +33,7 @@ This tap:
    ```json
     {
         "start_date": "2010-01-01",
-        "api_key": "<Shopify API Key>"
+        "api_key": "<Shopify API Key>",
         "shop": "test_shop"
     }
     ```
