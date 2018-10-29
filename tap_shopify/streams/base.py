@@ -20,7 +20,7 @@ DATE_WINDOW_SIZE = 30
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
 
-def giveup_generator(status_code):
+def is_not_status_code_fn(status_code):
     def fn(e):
         return e.response.code != status_code
     return fn
@@ -31,28 +31,31 @@ def leaky_bucket_handler(details):
 def retry_handler(details):
     LOGGER.info("Received 500 error -- Retry %s/%s", details['tries'], MAX_RETRIES)
 
-def wait_gen(**kwargs):
+def retry_after_wait_gen(**kwargs):
+    # This is called in an except block so we can retrieve the exception
+    # and check it.
     exc_info = sys.exc_info()
     resp = exc_info[1].response
-    sleep_time_str = resp.headers.get('Retry-After') or resp.headers.get('retry-after', '2')
+    # Retry-After is an undocumented header. But honoring
+    # it was proven to work in our spikes.
+    sleep_time_str = resp.headers.get('Retry-After')
     yield math.floor(float(sleep_time_str))
 
-def shopify_error_handling():
-    def decorator(fnc):
-        @backoff.on_exception(backoff.expo,
-                              pyactiveresource.connection.ServerError,
-                              giveup=giveup_generator(500),
-                              on_backoff=retry_handler,
-                              max_tries=MAX_RETRIES)
-        @backoff.on_exception(wait_gen,
-                              pyactiveresource.connection.ClientError,
-                              giveup=giveup_generator(429),
-                              on_backoff=leaky_bucket_handler,
-                              jitter=None)
-        def wrapper(*args, **kwargs):
-            return fnc(*args, **kwargs)
-        return wrapper
-    return decorator
+def shopify_error_handling(fnc):
+    @backoff.on_exception(backoff.expo,
+                          pyactiveresource.connection.ServerError,
+                          giveup=is_not_status_code_fn(500),
+                          on_backoff=retry_handler,
+                          max_tries=MAX_RETRIES)
+    @backoff.on_exception(retry_after_wait_gen,
+                          pyactiveresource.connection.ClientError,
+                          giveup=is_not_status_code_fn(429),
+                          on_backoff=leaky_bucket_handler,
+                          jitter=None) # No jitter as we want a constant value
+    @functools.wraps(fnc)
+    def wrapper(*args, **kwargs):
+        return fnc(*args, **kwargs)
+    return wrapper
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
@@ -87,7 +90,8 @@ class Stream():
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
-    @shopify_error_handling()
+    # with shopify_error_handling to get 429 and 500 handling.
+    @shopify_error_handling
     def call_api(self, query_params):
         return self.replication_object.find(**query_params)
 

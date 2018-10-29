@@ -10,7 +10,7 @@ def get_selected_parents():
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
-@shopify_error_handling()
+@shopify_error_handling
 def get_metafields(parent_object, page):
     return parent_object.metafields(
         limit=RESULTS_PER_PAGE,
