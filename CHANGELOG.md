@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.2
+  * Reduce query window to 1 week
+
 ## 0.4.1
   * Reduce query window to 1 month
 
