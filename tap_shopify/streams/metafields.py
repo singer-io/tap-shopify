@@ -1,18 +1,16 @@
 import json
 import shopify
-
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       shopify_error_handling)
-
 
 def get_selected_parents():
     for parent_stream in ['orders', 'customers', 'products']:
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
-@shopify_error_handling()
+@shopify_error_handling
 def get_metafields(parent_object, page):
     return parent_object.metafields(
         limit=RESULTS_PER_PAGE,

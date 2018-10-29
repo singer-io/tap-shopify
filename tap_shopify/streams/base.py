@@ -1,7 +1,8 @@
-import time
 import math
 import functools
 import datetime
+import sys
+import backoff
 import pyactiveresource
 import singer
 from singer import utils
@@ -15,40 +16,46 @@ RESULTS_PER_PAGE = 250
 # large for a customer)
 DATE_WINDOW_SIZE = 7
 
-# This seems unnecessarily complicated. Rewriting it as a contextmanager
-# doesn't work initially because of the looping logic which is forbidden
-# in a context manager. There's probably another way to structure it so
-# the looping is encapsulated with the decorator but the error handling is
-# encapsulated with a contextmanager.
-def shopify_error_handling():
-    def decorator(fnc):
-        @functools.wraps(fnc)
-        def wrapped(*args, **kwargs):
-            # Shopify returns 429s when their leaky bucket rate limiting
-            # algorithm has been tripped. This will retry those
-            # indefinitely. At some point we could consider adding a
-            # max_retry configuration into this loop. So far that has
-            # proven unnecessary
-            while True:
-                try:
-                    return fnc(*args, **kwargs)
-                except pyactiveresource.connection.ClientError as client_error:
-                    # We have never seen this be anything _but_ a 429. Other
-                    # states should be consider untested.
-                    resp = client_error.response
-                    if resp.code == 429:
-                        # Retry-After is an undocumented header. But honoring
-                        # it was proven to work in our spikes.
-                        sleep_time_str = resp.headers.get('Retry-After') \
-                                         or resp.headers.get('retry-after', 2)
-                        LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
-                        time.sleep(math.floor(float(sleep_time_str)))
-                        continue
-                    else:
-                        LOGGER.error("Received a %s error.", resp.code)
-                        raise
-        return wrapped
-    return decorator
+# We will retry a 500 error a maximum of 5 times before giving up
+MAX_RETRIES = 5
+
+def is_not_status_code_fn(status_code):
+    def gen_fn(exc):
+        return exc.response.code != status_code
+    return gen_fn
+
+def leaky_bucket_handler(details):
+    LOGGER.info("Received 429 -- sleeping for %s seconds", details['wait'])
+
+def retry_handler(details):
+    LOGGER.info("Received 500 error -- Retry %s/%s", details['tries'], MAX_RETRIES)
+
+#pylint: disable=unused-argument
+def retry_after_wait_gen(**kwargs):
+    # This is called in an except block so we can retrieve the exception
+    # and check it.
+    exc_info = sys.exc_info()
+    resp = exc_info[1].response
+    # Retry-After is an undocumented header. But honoring
+    # it was proven to work in our spikes.
+    sleep_time_str = resp.headers.get('Retry-After')
+    yield math.floor(float(sleep_time_str))
+
+def shopify_error_handling(fnc):
+    @backoff.on_exception(backoff.expo,
+                          pyactiveresource.connection.ServerError,
+                          giveup=is_not_status_code_fn(500),
+                          on_backoff=retry_handler,
+                          max_tries=MAX_RETRIES)
+    @backoff.on_exception(retry_after_wait_gen,
+                          pyactiveresource.connection.ClientError,
+                          giveup=is_not_status_code_fn(429),
+                          on_backoff=leaky_bucket_handler,
+                          jitter=None) # No jitter as we want a constant value
+    @functools.wraps(fnc)
+    def wrapper(*args, **kwargs):
+        return fnc(*args, **kwargs)
+    return wrapper
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
@@ -83,8 +90,8 @@ class Stream():
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
-    # with shopify_error_handling to get 429 handling.
-    @shopify_error_handling()
+    # with shopify_error_handling to get 429 and 500 handling.
+    @shopify_error_handling
     def call_api(self, query_params):
         return self.replication_object.find(**query_params)
 
