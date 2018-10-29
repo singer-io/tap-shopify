@@ -11,9 +11,9 @@ LOGGER = singer.get_logger()
 
 RESULTS_PER_PAGE = 250
 
-# We've observed 500 errors returned if this is too large (60 days was too
+# We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
-DATE_WINDOW_SIZE = 30
+DATE_WINDOW_SIZE = 7
 
 # This seems unnecessarily complicated. Rewriting it as a contextmanager
 # doesn't work initially because of the looping logic which is forbidden
