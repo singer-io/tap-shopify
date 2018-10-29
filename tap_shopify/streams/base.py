@@ -99,11 +99,12 @@ class Stream():
 
         updated_at_min = self.get_bookmark()
         stop_time = singer.utils.now()
+        date_window_size = int(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
             page = 1
-            updated_at_max = updated_at_min + datetime.timedelta(days=DATE_WINDOW_SIZE)
+            updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
