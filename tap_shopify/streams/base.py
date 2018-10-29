@@ -1,11 +1,10 @@
-import time
 import math
 import functools
 import datetime
+import sys
 import backoff
 import pyactiveresource
 import singer
-import sys
 from singer import utils
 from tap_shopify.context import Context
 
@@ -21,9 +20,9 @@ DATE_WINDOW_SIZE = 30
 MAX_RETRIES = 5
 
 def is_not_status_code_fn(status_code):
-    def fn(e):
-        return e.response.code != status_code
-    return fn
+    def gen_fn(exc):
+        return exc.response.code != status_code
+    return gen_fn
 
 def leaky_bucket_handler(details):
     LOGGER.info("Received 429 -- sleeping for %s seconds", details['wait'])
@@ -31,6 +30,7 @@ def leaky_bucket_handler(details):
 def retry_handler(details):
     LOGGER.info("Received 500 error -- Retry %s/%s", details['tries'], MAX_RETRIES)
 
+#pylint: disable=unused-argument
 def retry_after_wait_gen(**kwargs):
     # This is called in an except block so we can retrieve the exception
     # and check it.

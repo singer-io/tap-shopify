@@ -2,7 +2,7 @@ from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
 
-@shopify_error_handling()
+@shopify_error_handling
 def get_transactions(parent_object):
     return parent_object.transactions()
 
