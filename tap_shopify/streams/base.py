@@ -25,10 +25,12 @@ def is_not_status_code_fn(status_code):
     return gen_fn
 
 def leaky_bucket_handler(details):
-    LOGGER.info("Received 429 -- sleeping for %s seconds", details['wait'])
+    LOGGER.info("Received 429 -- sleeping for %s seconds",
+                details['wait'])
 
 def retry_handler(details):
-    LOGGER.info("Received 500 error -- Retry %s/%s", details['tries'], MAX_RETRIES)
+    LOGGER.info("Received 500 error -- Retry %s/%s",
+                details['tries'], MAX_RETRIES)
 
 #pylint: disable=unused-argument
 def retry_after_wait_gen(**kwargs):
@@ -51,7 +53,8 @@ def shopify_error_handling(fnc):
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn(429),
                           on_backoff=leaky_bucket_handler,
-                          jitter=None) # No jitter as we want a constant value
+                          # No jitter as we want a constant value
+                          jitter=None)
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
