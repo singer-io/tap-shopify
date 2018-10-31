@@ -57,6 +57,9 @@
   },
   "line_item": {
     "properties": {
+      "total_discount_set": {},
+      "pre_tax_price_set": {},
+      "price_set": {},
       "grams": {
         "type": [
           "null",
@@ -152,6 +155,7 @@
                 "integer"
               ]
             },
+            "amount_set": {},
             "amount": {
               "type": [
                 "null",
@@ -386,6 +390,8 @@
   "tax_lines": {
     "items": {
       "properties": {
+        "price_set": {
+        },
         "price": {
           "type": [
             "null",

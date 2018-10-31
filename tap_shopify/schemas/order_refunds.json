@@ -37,10 +37,7 @@
       ]
     },
     "created_at": {
-      "type": [
-        "null",
-        "string"
-      ]
+      "type": "string"
     },
     "admin_graphql_api_id": {
       "type": [

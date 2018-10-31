@@ -9,6 +9,7 @@ from tap_shopify.streams.base import (Stream,
 class OrderRefunds(Stream):
     name = 'order_refunds'
     replication_object = shopify.Refund
+    replication_key = 'created_at'
 
     @shopify_error_handling
     def get_refunds(self, parent_object, page):
