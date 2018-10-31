@@ -11,13 +11,13 @@ setup(
     py_modules=["tap_shopify"],
     install_requires=[
         "ShopifyAPI==3.1.0",
-        "requests==2.19.1",
         "singer-python==5.2.2",
     ],
     extras_require={
         'dev': [
             'pylint',
             'ipdb',
+            'requests==2.20.0',
         ]
     },
     entry_points="""
