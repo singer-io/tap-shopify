@@ -58,7 +58,12 @@
     }
   },
   "properties": {
-    "presentment_currency": {},
+    "presentment_currency": {
+        "type": [
+          "null",
+          "string"
+        ]
+    },
     "subtotal_price_set": {},
     "total_discounts_set": {},
     "total_line_items_price_set": {},
