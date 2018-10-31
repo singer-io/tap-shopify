@@ -25,10 +25,12 @@ def is_not_status_code_fn(status_code):
     return gen_fn
 
 def leaky_bucket_handler(details):
-    LOGGER.info("Received 429 -- sleeping for %s seconds", details['wait'])
+    LOGGER.info("Received 429 -- sleeping for %s seconds",
+                details['wait'])
 
 def retry_handler(details):
-    LOGGER.info("Received 500 error -- Retry %s/%s", details['tries'], MAX_RETRIES)
+    LOGGER.info("Received 500 error -- Retry %s/%s",
+                details['tries'], MAX_RETRIES)
 
 #pylint: disable=unused-argument
 def retry_after_wait_gen(**kwargs):
@@ -51,7 +53,8 @@ def shopify_error_handling(fnc):
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn(429),
                           on_backoff=leaky_bucket_handler,
-                          jitter=None) # No jitter as we want a constant value
+                          # No jitter as we want a constant value
+                          jitter=None)
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
@@ -96,14 +99,17 @@ class Stream():
         return self.replication_object.find(**query_params)
 
     def get_objects(self):
+        # Temporarily translate untruncated state to truncated
+        # state. Can be removed once all state has migrated.
+        updated_at_min = self.get_bookmark().replace(microsecond=0)
 
-        updated_at_min = self.get_bookmark()
-        stop_time = singer.utils.now()
+        stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = int(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
             page = 1
+            # It's important that this has microseconds truncated
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
             if updated_at_max > stop_time:
                 updated_at_max = stop_time

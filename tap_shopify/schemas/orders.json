@@ -58,6 +58,18 @@
     }
   },
   "properties": {
+    "presentment_currency": {
+        "type": [
+          "null",
+          "string"
+        ]
+    },
+    "subtotal_price_set": {},
+    "total_discounts_set": {},
+    "total_line_items_price_set": {},
+    "total_price_set": {},
+    "total_shipping_price_set": {},
+    "total_tax_set": {},
     "total_price": {
       "type": [
         "null",
@@ -112,6 +124,8 @@
               "string"
             ]
           },
+          "discounted_price_set": {},
+          "price_set": {},
           "price": {
             "type": [
               "null",
@@ -404,6 +418,7 @@
     },
     "customer": {
       "properties": {
+        "currency": {},
         "verified_email": {
           "type": [
             "null",
