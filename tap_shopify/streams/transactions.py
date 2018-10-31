@@ -5,7 +5,7 @@ from tap_shopify.streams.base import (Stream,
 
 # https://help.shopify.com/en/api/reference/orders/transaction An
 # order can have no more than 100 transactions associated with it.
-TRANSACTIONS_RESULTS_PER_PAGE=100
+TRANSACTIONS_RESULTS_PER_PAGE = 100
 
 class Transactions(Stream):
     name = 'transactions'
