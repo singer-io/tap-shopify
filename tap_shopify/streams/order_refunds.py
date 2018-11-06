@@ -12,11 +12,12 @@ class OrderRefunds(Stream):
     replication_key = 'created_at'
 
     @shopify_error_handling
-    def get_refunds(self, parent_object, page):
+    def get_refunds(self, parent_object, since_id):
         return self.replication_object.find(
             order_id=parent_object.id,
             limit=RESULTS_PER_PAGE,
-            page=page)
+            since_id=since_id,
+            order='id asc')
 
     def get_objects(self):
         selected_parent = Context.stream_objects['orders']()
@@ -24,14 +25,14 @@ class OrderRefunds(Stream):
 
         # Page through all `orders`, bookmarking at `refund_orders`
         for parent_object in selected_parent.get_objects():
-            page = 1
+            since_id = 1
             while True:
-                refunds = self.get_refunds(parent_object, page)
+                refunds = self.get_refunds(parent_object, since_id)
                 for refund in refunds:
                     yield refund
                 if len(refunds) < RESULTS_PER_PAGE:
                     break
-                page += 1
+                since_id = refunds[-1].id
 
     def sync(self):
         for refund in self.get_objects():

@@ -108,14 +108,14 @@ class Stream():
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
-            page = 1
+            since_id = 1
             # It's important that this has microseconds truncated
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
                 query_params = {
-                    "page": page,
+                    "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
                     "limit": RESULTS_PER_PAGE,
@@ -133,7 +133,8 @@ class Stream():
                     self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
-                page += 1
+                since_id = objects[-1].id
+
             updated_at_min = updated_at_max
 
     def sync(self):

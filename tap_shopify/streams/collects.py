@@ -11,12 +11,12 @@ class Collects(Stream):
     replication_key = 'updated_at'
 
     def get_objects(self):
-        page = 1
+        since_id = 1
         bookmark = self.get_bookmark()
         max_bookmark = utils.strftime(utils.now())
         while True:
             query_params = {
-                "page": page,
+                "since_id": since_id,
                 "limit": RESULTS_PER_PAGE,
             }
 
@@ -32,7 +32,7 @@ class Collects(Stream):
                 # Update the bookmark at the end of the last page
                 self.update_bookmark(max_bookmark)
                 break
-            page += 1
+            since_id = objects[-1].id
 
 
 Context.stream_objects['collects'] = Collects
