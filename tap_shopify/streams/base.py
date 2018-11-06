@@ -21,7 +21,7 @@ MAX_RETRIES = 5
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
-        return exc.response.code != status_code
+        return exc.code != status_code
     return gen_fn
 
 def leaky_bucket_handler(details):
