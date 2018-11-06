@@ -11,11 +11,10 @@ def get_selected_parents():
             yield Context.stream_objects[parent_stream]()
 
 @shopify_error_handling
-def get_metafields(parent_object, page):
+def get_metafields(parent_object, since_id):
     return parent_object.metafields(
         limit=RESULTS_PER_PAGE,
-        page=page,
-        order="updated_at asc")
+        since_id=since_id)
 
 class Metafields(Stream):
     name = 'metafields'
@@ -32,14 +31,14 @@ class Metafields(Stream):
             # to make resetting individual streams easier.
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
-                page = 1
+                since_id = 1
                 while True:
-                    metafields = get_metafields(parent_object, page)
+                    metafields = get_metafields(parent_object, since_id)
                     for metafield in metafields:
                         yield metafield
                     if len(metafields) < RESULTS_PER_PAGE:
                         break
-                    page += 1
+                    since_id += metafields[-1].id
 
     def sync(self):
         # Shop metafields
