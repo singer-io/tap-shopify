@@ -1,9 +1,10 @@
 import json
 import shopify
+
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
                                       shopify_error_handling,
+                                      RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
 
 def get_selected_parents():
