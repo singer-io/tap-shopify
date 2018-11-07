@@ -21,7 +21,7 @@ MAX_RETRIES = 5
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
-        return exc.code != status_code
+        return exc.code not in status_code
     return gen_fn
 
 def leaky_bucket_handler(details):
@@ -46,12 +46,12 @@ def retry_after_wait_gen(**kwargs):
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           pyactiveresource.connection.ServerError,
-                          giveup=is_not_status_code_fn(500),
+                          giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
-                          giveup=is_not_status_code_fn(429),
+                          giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
                           # No jitter as we want a constant value
                           jitter=None)
@@ -59,6 +59,12 @@ def shopify_error_handling(fnc):
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
     return wrapper
+
+class Error(Exception):
+    """Base exception for the API interaction module"""
+
+class OutOfOrderIdsError(Error):
+    """Raised if our expectation of ordering by ID is violated"""
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
@@ -123,6 +129,9 @@ class Stream():
                 }
                 objects = self.call_api(query_params)
                 for obj in objects:
+                    if obj.id < since_id:
+                        raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
+                            obj.id, since_id))
                     yield obj
 
                 # You know you're at the end when the current page has
@@ -133,6 +142,9 @@ class Stream():
                     self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
+                if objects[-1].id != max([o.id for o in objects]):
+                    raise OutOfOrderIdsError("{} is not the max id in objects ({})".format(
+                        objects[-1].id, max([o.id for o in objects])))
                 since_id = objects[-1].id
 
             updated_at_min = updated_at_max

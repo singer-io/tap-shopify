@@ -3,7 +3,8 @@ import shopify
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
-                                      shopify_error_handling)
+                                      shopify_error_handling,
+                                      OutOfOrderIdsError)
 
 
 class OrderRefunds(Stream):
@@ -29,9 +30,15 @@ class OrderRefunds(Stream):
             while True:
                 refunds = self.get_refunds(parent_object, since_id)
                 for refund in refunds:
+                    if refund.id < since_id:
+                        raise OutOfOrderIdsError("refund.id < since_id: {} < {}".format(
+                            refund.id, since_id))
                     yield refund
                 if len(refunds) < RESULTS_PER_PAGE:
                     break
+                if refunds[-1].id != max([o.id for o in refunds]):
+                    raise OutOfOrderIdsError("{} is not the max id in refunds ({})".format(
+                        refunds[-1].id, max([o.id for o in refunds])))
                 since_id = refunds[-1].id
 
     def sync(self):
