@@ -27,7 +27,8 @@
     },
     "note": {
       "type": [
-        "null"
+        "null",
+        "string"
       ]
     },
     "id": {
