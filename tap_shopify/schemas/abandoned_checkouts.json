@@ -1,6 +1,7 @@
 {
   "type": "object",
   "properties": {
+    "note_attributes": {},
     "location_id": {
       "type": [
         "null",
@@ -308,6 +309,8 @@
           "object"
         ],
         "properties": {
+          "applied_discounts": {},
+          "custom_tax_lines": {},
           "phone": {
             "type": [
               "null",

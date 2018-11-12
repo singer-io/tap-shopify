@@ -410,6 +410,7 @@
   },
   "line_item": {
     "properties": {
+      "applied_discounts": {},
       "total_discount_set": {},
       "pre_tax_price_set": {},
       "price_set": {},
