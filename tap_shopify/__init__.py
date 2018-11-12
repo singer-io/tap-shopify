@@ -138,16 +138,16 @@ def sync():
             Context.state['bookmarks'] = {}
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
-        with Transformer() as transformer:
-            for rec in stream.sync():
-                extraction_time = singer.utils.now()
-                record_schema = catalog_entry['schema']
-                record_metadata = metadata.to_map(catalog_entry['metadata'])
+        for rec in stream.sync():
+            extraction_time = singer.utils.now()
+            record_schema = catalog_entry['schema']
+            record_metadata = metadata.to_map(catalog_entry['metadata'])
+            with Transformer() as transformer:
                 rec = transformer.transform(rec, record_schema, record_metadata)
-                singer.write_record(stream_id,
-                                    rec,
-                                    time_extracted=extraction_time)
-                Context.counts[stream_id] += 1
+            singer.write_record(stream_id,
+                                rec,
+                                time_extracted=extraction_time)
+            Context.counts[stream_id] += 1
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
