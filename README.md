@@ -24,9 +24,7 @@ This tap:
 
 1. Install
 
-   ```sh
-   pip install tap-shopify
-   ```
+    pip install tap-shopify
 
 2. Create the config file
 
