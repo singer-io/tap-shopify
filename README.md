@@ -24,7 +24,9 @@ This tap:
 
 1. Install
 
-    pip install tap-shopify
+   ```sh
+   pip install tap-shopify
+   ```
 
 2. Create the config file
 
@@ -44,6 +46,17 @@ This tap:
    The `api_key` is the API key for your Shopify shop generated via an OAuth flow.
 
    The `shop` is your Shopify shop which will be the value `test_shop` in the string `https://test_shop.myshopify.com`
+   
+   (Optional) If you have a **private** Shopify app, add the app password using `password` in `config.json`
+
+   ```json
+    {
+        "start_date": "2010-01-01",
+        "api_key": "<Shopify API Key>",
+        "password": "<Shopify Private App Password>",
+        "shop": "test_shop"
+    }
+    ```
 
 4. Run the Tap in Discovery Mode
 
