@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0
+  * Releasing a beta for more general availability
+
 ## 0.4.2
   * Reduce query window to 1 week
 
