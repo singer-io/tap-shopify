@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.1
+  * Updates the orders and order_refunds schemas [#17](https://github.com/singer-io/tap-shopify/pull/17)
+
 ## 1.0.0
   * Releasing a beta for more general availability
 
