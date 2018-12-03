@@ -1,62 +1,4 @@
 {
-  "definitions": {
-    "order_adjustments": {
-      "items": {
-        "properties": {
-          "order_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "tax_amount": {
-            "type": [
-              "null",
-              "number"
-            ]
-          },
-          "refund_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "amount": {
-            "type": [
-              "null",
-              "number"
-            ]
-          },
-          "kind": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "reason": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "type": [
-          "null",
-          "object"
-        ]
-      },
-      "type": [
-        "null",
-        "array"
-      ]
-    }
-  },
   "properties": {
     "presentment_currency": {
         "type": [
@@ -110,7 +52,7 @@
       ]
     },
     "order_adjustments": {
-      "$ref": "#/definitions/order_adjustments"
+      "$ref": "definitions.json#/order_adjustments"
     },
     "shipping_lines": {
       "items": {
@@ -1127,7 +1069,7 @@
             "format": "date-time"
           },
           "order_adjustments": {
-            "$ref": "#/definitions/order_adjustments"
+            "$ref": "definitions.json#/order_adjustments"
           }
         },
         "type": [

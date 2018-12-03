@@ -13,6 +13,9 @@
         "boolean"
       ]
     },
+    "order_adjustments": {
+      "$ref": "definitions.json#/order_adjustments"
+    },
     "processed_at": {
       "type": [
         "null",
