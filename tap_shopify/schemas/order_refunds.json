@@ -13,6 +13,9 @@
         "boolean"
       ]
     },
+    "order_adjustments": {
+      "$ref": "definitions.json#/order_adjustments"
+    },
     "processed_at": {
       "type": [
         "null",
@@ -38,7 +41,8 @@
       ]
     },
     "created_at": {
-      "type": "string"
+      "type": ["null", "string"],
+      "format": "date-time"
     },
     "admin_graphql_api_id": {
       "type": [
