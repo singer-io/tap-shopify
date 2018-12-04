@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.2
+  * Fixes some retry logic to retry JSON Decode errors from weird Shopify responses [#18](https://github.com/singer-io/tap-shopify/pull/18)
+
 ## 1.0.1
   * Updates the orders and order_refunds schemas [#17](https://github.com/singer-io/tap-shopify/pull/17)
 
