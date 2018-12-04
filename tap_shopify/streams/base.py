@@ -5,6 +5,7 @@ import sys
 import backoff
 import pyactiveresource
 import singer
+import simplejson
 from singer import utils
 from tap_shopify.context import Context
 
@@ -21,7 +22,11 @@ MAX_RETRIES = 5
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
-        return exc.code not in status_code
+        if getattr(exc, 'code', None):
+            return exc.code not in status_code
+        else:
+            # Retry a simplejson error
+            return False
     return gen_fn
 
 def leaky_bucket_handler(details):
@@ -45,7 +50,7 @@ def retry_after_wait_gen(**kwargs):
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
-                          pyactiveresource.connection.ServerError,
+                          (pyactiveresource.connection.ServerError, simplejson.scanner.JSONDecodeError),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
