@@ -22,8 +22,8 @@ MAX_RETRIES = 5
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
-        if getattr(exc, 'code', None):
-            return exc.code not in status_code
+        if getattr(exc, 'code', None) and exc.code not in status_code:
+            return True
         # Retry other errors up to the max
         return False
     return gen_fn
@@ -33,7 +33,7 @@ def leaky_bucket_handler(details):
                 details['wait'])
 
 def retry_handler(details):
-    LOGGER.info("Received 500 error -- Retry %s/%s",
+    LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
                 details['tries'], MAX_RETRIES)
 
 #pylint: disable=unused-argument
