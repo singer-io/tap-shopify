@@ -4,6 +4,7 @@ import datetime
 import sys
 import backoff
 import pyactiveresource
+import pyactiveresource.formats
 import simplejson
 import singer
 from singer import utils
@@ -50,6 +51,7 @@ def retry_after_wait_gen(**kwargs):
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
+                           pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
