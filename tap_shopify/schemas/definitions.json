@@ -634,7 +634,7 @@
       "id": {
         "type": [
           "null",
-          "string"
+          "number"
         ]
       },
       "taxable": {
