@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4
+  * Uses anyOf schema for the shared line_item id [#21](https://github.com/singer-io/tap-shopify/pull/21)
+
 ## 1.0.3
   * Adds more retry logic for JSON errors [#19](https://github.com/singer-io/tap-shopify/pull/19)
   * Sets the line_item definition's id field to a number [#20](https://github.com/singer-io/tap-shopify/pull/20)
