@@ -12,7 +12,8 @@
           "type": [
             "null",
             "number"
-          ]
+          ],
+          "multipleOf": 1e-06
         },
         "refund_id": {
           "type": [
@@ -24,7 +25,8 @@
           "type": [
             "null",
             "number"
-          ]
+          ],
+          "multipleOf": 1e-06
         },
         "kind": {
           "type": [
@@ -611,7 +613,8 @@
         "type": [
           "null",
           "number"
-        ]
+        ],
+        "multipleOf": 1e-06
       },
       "name": {
         "type": [
@@ -663,7 +666,8 @@
         "type": [
           "null",
           "number"
-        ]
+        ],
+        "multipleOf": 1e-06
       },
       "requires_shipping": {
         "type": [
@@ -810,7 +814,8 @@
           "type": [
             "null",
             "number"
-          ]
+          ],
+          "multipleOf": 1e-06
         },
         "title": {
           "type": [
@@ -822,7 +827,8 @@
           "type": [
             "null",
             "number"
-          ]
+          ],
+          "multipleOf": 1e-06
         },
         "compare_at": {
           "type": [
