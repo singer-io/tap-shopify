@@ -635,14 +635,7 @@
         ]
       },
       "id": {
-        "anyOf": [
-          {
-            "type": ["null", "number"]
-          },
-          {
-            "type": ["null", "string"]
-          }
-        ]
+        "type": ["null", "integer", "string"]
       },
       "taxable": {
         "type": [
