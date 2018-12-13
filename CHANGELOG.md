@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.0
+  * Updates a number of schema fields to validate and load as Decimals [#22](https://github.com/singer-io/tap-shopify/pull/22)
+
 ## 1.0.4
   * Uses anyOf schema for the shared line_item id [#21](https://github.com/singer-io/tap-shopify/pull/21)
 
