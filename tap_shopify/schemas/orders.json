@@ -16,7 +16,8 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -43,13 +44,15 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "total_line_items_price": {
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "order_adjustments": {
       "$ref": "definitions.json#/order_adjustments"
@@ -72,7 +75,8 @@
             "type": [
               "null",
               "number"
-            ]
+            ],
+            "multipleOf": 1e-06
           },
           "title": {
             "type": [
@@ -371,7 +375,8 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "payment_details": {
       "properties": {
@@ -537,7 +542,8 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "closed_at": {
       "type": [
@@ -642,7 +648,8 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "billing_address": {
       "properties": {
@@ -791,7 +798,8 @@
             "type": [
               "null",
               "number"
-            ]
+            ],
+            "multipleOf": 1e-06
           },
           "type": {
             "type": [

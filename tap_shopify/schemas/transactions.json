@@ -46,7 +46,8 @@
       "type": [
         "null",
         "number"
-      ]
+      ],
+      "multipleOf": 1e-06
     },
     "authorization": {
       "type": [
@@ -145,7 +146,29 @@
         "null",
         "object"
       ],
-      "properties": {}
+      "properties": {
+        "fee_amount": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "multipleOf": 1e-06
+        },
+        "gross_amount": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "multipleOf": 1e-06
+        },
+        "tax_amount": {
+          "type": [
+            "null",
+            "number"
+          ],
+          "multipleOf": 1e-06
+        }
+      }
     },
     "location_id": {
       "type": [
