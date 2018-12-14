@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.1
+  * Updates bookmarking code to capture the since_id in case an interruption occurs while syncing a window with large amounts of data [#23](https://github.com/singer-io/tap-shopify/pull/23)
+
 ## 1.1.0
   * Updates a number of schema fields to validate and load as Decimals [#22](https://github.com/singer-io/tap-shopify/pull/22)
 
