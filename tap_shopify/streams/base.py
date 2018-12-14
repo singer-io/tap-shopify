@@ -152,6 +152,9 @@ class Stream():
                 objects = self.call_api(query_params)
                 for obj in objects:
                     if obj.id < since_id:
+                        # This verifies the api behavior expectation we
+                        # have that all results actually honor the
+                        # since_id parameter.
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
                     yield obj
@@ -167,6 +170,9 @@ class Stream():
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
+                    # This verifies the api behavior expectation we have
+                    # that all pages are internally ordered by the
+                    # `since_id`.
                     raise OutOfOrderIdsError("{} is not the max id in objects ({})".format(
                         objects[-1].id, max([o.id for o in objects])))
                 since_id = objects[-1].id
