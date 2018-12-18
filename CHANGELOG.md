@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.2
+  * Sets the default paging window to 1 day at a time to account for large volumes [#24](https://github.com/singer-io/tap-shopify/pull/24)
+
 ## 1.1.1
   * Updates bookmarking code to capture the since_id in case an interruption occurs while syncing a window with large amounts of data [#23](https://github.com/singer-io/tap-shopify/pull/23)
 
