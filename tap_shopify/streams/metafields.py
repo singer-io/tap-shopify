@@ -14,6 +14,8 @@ def get_selected_parents():
 
 @shopify_error_handling
 def get_metafields(parent_object, since_id):
+    # This call results in an HTTP request - the parent object never has a
+    # cache of this data so we have to issue that request.
     return parent_object.metafields(
         limit=RESULTS_PER_PAGE,
         since_id=since_id)
