@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.3
+  * Reset local `since_id` to 1 after the date window finishes on normal syncs [#25](https://github.com/singer-io/tap-shopify/pull/25)
+
 ## 1.1.2
   * Sets the default paging window to 1 day at a time to account for large volumes [#24](https://github.com/singer-io/tap-shopify/pull/24)
 
