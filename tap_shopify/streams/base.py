@@ -121,17 +121,16 @@ class Stream():
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 
-        # Bookmarking can also occur on the since_id
-        since_id = self.get_since_id() or 1
-
-        if since_id != 1:
-            LOGGER.info("Resuming sync from since_id %d", since_id)
-
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = int(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
+            # Bookmarking can also occur on the since_id
+            since_id = self.get_since_id() or 1
+
+            if since_id != 1:
+                LOGGER.info("Resuming sync from since_id %d", since_id)
 
             # It's important that `updated_at_min` has microseconds
             # truncated. Why has been lost to the mists of time but we
@@ -167,7 +166,6 @@ class Stream():
                     # restart at 1.
                     Context.state.get(self.name, {}).pop('since_id', None)
                     self.update_bookmark(utils.strftime(updated_at_max))
-                    since_id = 1
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
