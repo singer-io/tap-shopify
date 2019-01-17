@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.4
+  * Update the JSON Schema for "number" elements to use a higher "multipleOf" precision [#27](https://github.com/singer-io/tap-shopify/pull/27)
+
 ## 1.1.3
   * Reset local `since_id` to 1 after the date window finishes on normal syncs [#25](https://github.com/singer-io/tap-shopify/pull/25)
 
