@@ -180,7 +180,7 @@
               "null",
               "number"
             ],
-            "multipleOf": 1e-06
+            "multipleOf": 1e-08
           },
           "image_id": {
             "type": [
@@ -253,7 +253,7 @@
               "null",
               "number"
             ],
-            "multipleOf": 1e-06
+            "multipleOf": 1e-08
           },
           "updated_at": {
             "type": [
