@@ -47,7 +47,7 @@
         "null",
         "number"
       ],
-      "multipleOf": 1e-06
+      "multipleOf": 1e-08
     },
     "authorization": {
       "type": [
@@ -152,21 +152,21 @@
             "null",
             "number"
           ],
-          "multipleOf": 1e-06
+          "multipleOf": 1e-08
         },
         "gross_amount": {
           "type": [
             "null",
             "number"
           ],
-          "multipleOf": 1e-06
+          "multipleOf": 1e-08
         },
         "tax_amount": {
           "type": [
             "null",
             "number"
           ],
-          "multipleOf": 1e-06
+          "multipleOf": 1e-08
         }
       }
     },
