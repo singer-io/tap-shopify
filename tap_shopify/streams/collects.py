@@ -1,10 +1,12 @@
 import shopify
+import singer
 from singer import utils
 from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
 from tap_shopify.context import Context
 
+LOGGER = singer.get_logger()
 
 class Collects(Stream):
     name = 'collects'
@@ -26,7 +28,9 @@ class Collects(Stream):
             for obj in objects:
                 # Syncing Collects is a full sync every time but emitting records that have
                 # an updated_date greater than the bookmark
-                if utils.strptime_with_tz(obj.updated_at) > bookmark:
+                if not obj.updated_at and obj.id:
+                    LOGGER.info('Collect with id: %d does not have an updated_at, syncing it!', obj.id)
+                if not obj.updated_at or utils.strptime_with_tz(obj.updated_at) > bookmark:
                     if obj.id < since_id:
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
