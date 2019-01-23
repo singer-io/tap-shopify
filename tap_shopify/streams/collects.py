@@ -26,10 +26,12 @@ class Collects(Stream):
             objects = self.call_api(query_params)
 
             for obj in objects:
-                # Syncing Collects is a full sync every time but emitting records that have
-                # an updated_date greater than the bookmark
+                # Syncing Collects is a full sync every time but emitting
+                # records that have an updated_date greater than the
+                # bookmark
                 if not obj.updated_at and obj.id:
-                    LOGGER.info('Collect with id: %d does not have an updated_at, syncing it!', obj.id)
+                    LOGGER.info('Collect with id: %d does not have an updated_at, syncing it!',
+                                obj.id)
                 if not obj.updated_at or utils.strptime_with_tz(obj.updated_at) > bookmark:
                     if obj.id < since_id:
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
