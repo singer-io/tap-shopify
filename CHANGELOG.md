@@ -1,6 +1,9 @@
 # Changelog
 
 ## 1.1.5
+  * Fix bookmark resetting for `since_id` after date window finishes [#29](https://github.com/singer-io/tap-shopify/pull/29)
+
+## 1.1.5
   * Check for `updated_at` field in `collect` records.  If absent, sync it [#28](https://github.com/singer-io/tap-shopify/pull/28)
 
 ## 1.1.4
