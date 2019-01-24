@@ -166,7 +166,6 @@ class Stream():
                     # restart at 1.
                     Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
                     self.update_bookmark(utils.strftime(updated_at_max))
-
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
