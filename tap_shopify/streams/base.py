@@ -164,7 +164,7 @@ class Stream():
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
-                    Context.state.get(self.name, {}).pop('since_id', None)
+                    Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
                     self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
