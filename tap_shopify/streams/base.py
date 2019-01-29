@@ -122,7 +122,8 @@ class Stream():
         updated_at_min = self.get_bookmark()
 
         stop_time = singer.utils.now().replace(microsecond=0)
-        date_window_size = int(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+        results_per_page = int(Context.config.get("results_per_page", RESULTS_PER_PAGE))
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -145,7 +146,7 @@ class Stream():
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
-                    "limit": RESULTS_PER_PAGE,
+                    "limit": results_per_page,
                     "status": "any"
                 }
                 objects = self.call_api(query_params)
@@ -160,7 +161,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
-                if len(objects) < RESULTS_PER_PAGE:
+                if len(objects) < results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
