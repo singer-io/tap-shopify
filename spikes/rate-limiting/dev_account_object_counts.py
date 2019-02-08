@@ -22,7 +22,8 @@ shopify_objects = [
     'customers',
     'products',
     'collects',
-    'custom_collections'
+    'custom_collections',
+    'smart_collections',
 ]
 
 def shopify_request(endpoint,req_params={}):
