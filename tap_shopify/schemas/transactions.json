@@ -168,7 +168,8 @@
           ],
           "multipleOf": 1e-08
         }
-      }
+      },
+      "patternProperties": {".+": {}}
     },
     "location_id": {
       "type": [
