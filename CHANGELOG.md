@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.8
+  * Uses patternProperties to match extra fields on transactions receipts [#33](https://github.com/singer-io/tap-shopify/pull/33)
+
 ## 1.1.7
   * Add `results_per_page` as a config param and allow float values for `date_window_size` [#30](https://github.com/singer-io/tap-shopify/pull/30)
 
