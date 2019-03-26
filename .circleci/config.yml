@@ -8,13 +8,13 @@ jobs:
       - run:
           name: 'Setup virtual env'
           command: |
-            virtualenv -p python3 ~/.virtualenvs/tap-shopify
-            source ~/.virtualenvs/tap-shopify/bin/activate
+            virtualenv -p python3 /usr/local/share/virtualenvs/tap-shopify
+            source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             pip install .[dev]
       - run:
           name: 'pylint'
           command: |
-            source ~/.virtualenvs/tap-shopify/bin/activate
+            source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             make test
       - add_ssh_keys
       - run:
@@ -22,7 +22,7 @@ jobs:
           command: |
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/sandbox dev_env.sh
             source dev_env.sh
-            source ~/.virtualenvs/tap-tester/bin/activate
+            source /usr/local/share/virtualenvs/tap-tester/bin/activate
             run-a-test --tap=tap-shopify \
                        --target=target-stitch \
                        --orchestrator=stitch-orchestrator \
