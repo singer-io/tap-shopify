@@ -82,6 +82,9 @@ class Stream():
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
+    replication_object_async = None
+    endpoint = None
+    result_key = None
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -120,8 +123,8 @@ class Stream():
 
     def get_objects(self):
         updated_at_min = self.get_bookmark()
-
-        stop_time = singer.utils.now().replace(microsecond=0)
+        end_date = Context.config.get("end_date", None)
+        stop_time = utils.strptime_with_tz(end_date) if end_date is not None else singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
         results_per_page = int(Context.config.get("results_per_page", RESULTS_PER_PAGE))
 
@@ -182,11 +185,40 @@ class Stream():
 
             updated_at_min = updated_at_max
 
+    def get_objects_async(self):
+        updated_at_min = self.get_bookmark()
+        end_date = Context.config.get("end_date", None)
+        updated_at_max = utils.strptime_with_tz(end_date) if end_date is not None else singer.utils.now().replace(microsecond=0)
+        results_per_page = int(Context.config.get("results_per_page", RESULTS_PER_PAGE))
+        
+        DT_FMT = '%Y-%m-%dT%H:%M:%S'
+        query_params = {
+            "updated_at_min": utils.strftime(updated_at_min, format_str=DT_FMT),
+            "updated_at_max": utils.strftime(updated_at_max, format_str=DT_FMT),
+            "status": "any"
+        }
+
+        objects = self.replication_object_async.find(
+            endpoint = self.endpoint,
+            retry_limit = MAX_RETRIES, 
+            results_per_page = results_per_page,
+            **query_params
+        )
+
+        for obj in objects:
+            yield obj
+        
+        self.update_bookmark(utils.strftime(updated_at_max))
+
     def sync(self):
         """Yield's processed SDK object dicts to the caller.
 
         This is the default implementation. Get's all of self's objects
         and calls to_dict on them with no further processing.
         """
-        for obj in self.get_objects():
-            yield obj.to_dict()
+        if self.name in ['orders'] and Context.config.get("use_async", False):
+            for obj in self.get_objects_async():
+                yield obj
+        else:
+            for obj in self.get_objects():
+                yield obj.to_dict()

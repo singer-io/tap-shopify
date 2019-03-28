@@ -1,5 +1,10 @@
 # tap-shopify
 
+## Source Repository
+* Git Repo: https://github.com/singer-io/tap-bing-ads
+* To Sync Fork: https://help.github.com/articles/syncing-a-fork/
+
+## Information
 This is a [Singer](https://singer.io) tap that produces JSON-formatted data
 following the [Singer
 spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
@@ -21,7 +26,6 @@ This tap:
 - When Metafields are selected, this tap will sync the Shopify store's top-level Metafields and any additional Metafields for selected tables that also have them (ie: Orders, Products, Customers)
 
 ## Quick Start
-
 1. Install
 
     pip install tap-shopify
@@ -32,9 +36,13 @@ This tap:
 
    ```json
     {
-        "start_date": "2010-01-01",
-        "api_key": "<Shopify API Key>",
-        "shop": "test_shop"
+        "start_date": "2019-01-01T00:00:00Z",
+        "end_date": "2019-01-31T00:00:00Z",
+        "shop": "test_shop",
+        "is_private_app": true,
+        "api_key": "<<Shopify API Key>>",
+        "api_password": "<<Shopify API Password (if private app)>>",
+        "use_async": true
     }
     ```
 

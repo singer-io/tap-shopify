@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+  * Updated Tap to get orders asynchronously, using asyncio and aiohttp libraries. To use Async method can be configured in the tap-config.
+
+## 1.1.9
+  * Updated Tap to allow for Private Shopify App which can be configured in the tap-config.
+
 ## 1.1.8
   * Uses patternProperties to match extra fields on transactions receipts [#33](https://github.com/singer-io/tap-shopify/pull/33)
 

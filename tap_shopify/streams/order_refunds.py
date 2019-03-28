@@ -23,6 +23,8 @@ class OrderRefunds(Stream):
     def get_objects(self):
         selected_parent = Context.stream_objects['orders']()
         selected_parent.name = "refund_orders"
+        selected_parent.endpoint = ""
+        selected_parent.result_key = "refunds"
 
         # Page through all `orders`, bookmarking at `refund_orders`
         for parent_object in selected_parent.get_objects():

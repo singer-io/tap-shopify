@@ -1,4 +1,9 @@
 {
+  "start_date": "2019-01-01T00:00:00Z",
+  "end_date": "2019-01-31T00:00:00Z",
+  "shop": "someshop",
+  "is_private_app": true,
   "api_key": "foobarcharnockbat",
-  "start_date": "2017-01-01T00:00:00Z"
+  "api_password": "batnockcharbarfoo",
+  "use_async": true
 }

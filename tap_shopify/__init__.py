@@ -14,14 +14,23 @@ from singer import Transformer
 from tap_shopify.context import Context
 import tap_shopify.streams # Load stream objects into Context
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["start_date", "shop", "api_key"]
+
 LOGGER = singer.get_logger()
 
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    session = shopify.Session(shop, api_key)
-    shopify.ShopifyResource.activate_session(session)
+
+    if Context.config.get('is_private_app', False):
+        api_password = Context.config['api_password']
+        shop_url = "https://{}:{}@{}.myshopify.com/admin".format(api_key, api_password, shop)
+        shopify.ShopifyResource.set_site(shop_url)
+        shopify.Shop.current()
+    else:
+        session = shopify.Session(shop, api_key)
+        shopify.ShopifyResource.activate_session(session)
+
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -162,6 +171,12 @@ def main():
 
     # Parse command line arguments
     args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+
+    # Check if Private App and has required Password in Config
+    if Context.config.get('is_private_app', False) and 'api_password' not in Context.config:
+        error_message = "Config is missing required key 'api_password'. "
+        error_message += "If the 'is_private_key' is set to True, 'api_password' is a required Config key."
+        raise Exception(error_message)
 
     # If discover flag was passed, run discovery mode and dump output to stdout
     if args.discover:
