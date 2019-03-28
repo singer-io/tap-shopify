@@ -102,3 +102,4 @@ rsa-key
 tags
 singer-check-tap-data
 state.json
+publish_to_artifactory.sh
