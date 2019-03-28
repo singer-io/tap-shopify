@@ -64,6 +64,32 @@ This tap:
 
     tap-shopify -c config.json --catalog catalog-file.json
 
+## Performance
+
+### Shopify Constraints
+Shopify API's throttle is designed to allow your app to make unlimited requests at a steady rate over time while also having the capacity to make infrequent bursts. The throttle operates using a [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) algorithm. The bucket size and leak rate properties determine the API's burst behavior and call rate.
+
+|                 | Bucket Size | Leak Rate  | Max. Results/Call  |
+| --------------- |------------:| ----------:| ------------------:|
+| Shopify Regular | 40          | 2/second   | 250                |
+| Shopify Plus    | 80          | 4/second   | 250                |
+
+### Async Logic
+1. I found that using Shopify's SDK is slower by almost a factor of 10 compared to calling the REST endpoints.
+    * So, we scrap that, and just make calls directly to the REST endpoints.
+2. Check if Shop is Regular or Plus to determine Bucket Size.
+3. Check the total number of orders for the date range you are pulling data for.
+4. Num. Pages = Total Number of Orders/250
+5. Each call you can get one page and you are allowed to make 40 calls (or 80 calls).
+    *  Num. orders you can retrieve by making all 40 calls (or 80 calls) asynchronously = 10,000 (or 20,000)
+
+6. Say, total number of orders = 100,000.
+    * Then, Num. Pages = 100,000/250 = 400
+    * We cannot make 400 calls asynchronously, so we chunk them into 40 calls each, which gives us a list A that contains nested lists of 40 calls.
+    * We iterate through list A, and using `asyncio` and `aiohttp` we make 40 asynchronous calls, retrieve the results. Then, move onto the next 40 calls.
+    * Then, finally return all the results by page order.
+
+
 ---
 
 Copyright &copy; 2019 Stitch
