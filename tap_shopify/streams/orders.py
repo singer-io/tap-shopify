@@ -6,8 +6,8 @@ from tap_shopify.streams.base import Stream, RunAsync
 class Orders(Stream):
     name = 'orders'
     replication_object = shopify.Order
-    replication_object_async = RunAsync
     endpoint = "/orders"
     result_key = "orders"
+    async_available = True
 
 Context.stream_objects['orders'] = Orders

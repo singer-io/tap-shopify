@@ -13,6 +13,7 @@ import asyncio
 import aiohttp
 import shopify
 from urllib.parse import urlencode
+from singer import Transformer
 
 LOGGER = singer.get_logger()
 
@@ -24,9 +25,6 @@ DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
-
-# Streams that can run Async
-ASYNC_AVAILABLE_STREAMS = ['orders', 'products', 'customers', 'abandoned_checkouts']
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -92,6 +90,8 @@ class Stream():
     replication_object_async = None
     endpoint = None
     result_key = None
+    schema = None
+    async_available = False
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -192,7 +192,23 @@ class Stream():
 
             updated_at_min = updated_at_max
 
-    def get_objects_async(self):
+
+    def sync(self):
+        """Yield's processed SDK object dicts to the caller.
+
+        This is the default implementation. Get's all of self's objects
+        and calls to_dict on them with no further processing.
+        """
+        for obj in self.get_objects():
+            yield obj.to_dict()
+
+
+    def sync_async(self):
+        """
+            Gets objects for endpoint, and writes singer records.
+            Returns the total number of records received and
+            emitted to target.
+        """
         updated_at_min = self.get_bookmark()
         end_date = Context.config.get("end_date", None)
         updated_at_max = utils.strptime_with_tz(end_date) if end_date is not None else singer.utils.now().replace(microsecond=0)
@@ -205,46 +221,37 @@ class Stream():
             "status": "any"
         }
 
-        objects = self.replication_object_async.find(
+        recs_count = RunAsync.sync(
+            schema = self.schema,
+            stream_id = self.name,
             endpoint = self.endpoint,
             result_key = self.result_key,
-            retry_limit = MAX_RETRIES, 
-            results_per_page = results_per_page,
-            **query_params
+            params = query_params,
+            retry_limit = MAX_RETRIES,
+            results_per_page = results_per_page
         )
 
-        for obj in objects:
-            yield obj
-        
         self.update_bookmark(utils.strftime(updated_at_max))
 
-    def sync(self):
-        """Yield's processed SDK object dicts to the caller.
-
-        This is the default implementation. Get's all of self's objects
-        and calls to_dict on them with no further processing.
-        """
-        if Context.config.get("use_async", False) and self.name in ASYNC_AVAILABLE_STREAMS:
-            for obj in self.get_objects_async():
-                yield obj
-        else:
-            for obj in self.get_objects():
-                yield obj.to_dict()
+        return recs_count
 
 
 class RunAsync():
-    def __init__(self, endpoint, result_key, retry_limit, results_per_page, params):
-        super()
+    def __init__(self, schema, stream_id, endpoint, result_key, params, retry_limit, results_per_page):
+        self.schema = schema
+        self.stream_id = stream_id
+        self.endpoint = endpoint
+        self.result_key = result_key
+        self.params = params
         self.retry_limit = retry_limit
         self.results_per_page = results_per_page
-        self.params = params
+        
         self.params['limit'] = str(self.results_per_page)
         self.base_url = shopify.ShopifyResource.get_site()
         self.current_shop = shopify.Shop.current()
         self.bucket_size = 80 if self.current_shop.plan_name == "shopify_plus" else 40
         self.shop_display_url = "https://{}".format(self.current_shop.myshopify_domain)
-        self.endpoint = endpoint
-        self.result_key = result_key
+        self.rec_count = 0
 
     async def _get_async(self, url, headers=None, params=None, retry_attempt=0):
         async with aiohttp.ClientSession() as session:
@@ -257,10 +264,7 @@ class RunAsync():
                 if response.status in range(500, 599):
                     return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
                 else:
-                    resp = await response.json()
-                    if 'page' in params:
-                        resp['page'] = params['page']
-                    return resp
+                    return await response.json()
 
     async def _request_count(self):
         endpoint = '{}/count.json'.format(self.endpoint)
@@ -282,24 +286,25 @@ class RunAsync():
         jobs = [{'params': { **self.params, 'page': p+1 }} for p in range(num_pages)]
         chunked_jobs = utils.chunk(jobs, self.bucket_size)
 
-        all_jobs_results_dict = {}
         for chunk_of_jobs in chunked_jobs:
             futures = [self._request(i) for i in chunk_of_jobs]
-            resp_dict = {}
             for i, future in enumerate(asyncio.as_completed(futures)):
                 result = await future
-                resp_dict[result['page']] = result[self.result_key] if self.result_key in result else []
-            all_jobs_results_dict = {**all_jobs_results_dict, **resp_dict}
-        ordered_results = []
-        for k,v in sorted(all_jobs_results_dict.items()):
-            if len(v) > 0:
-                ordered_results += v
-        return ordered_results
+                if self.result_key in result:
+                    self._write_singer_records(result[self.result_key])
+
+    def _write_singer_records(self, recs):
+        with Transformer() as transformer:
+            for rec in recs:
+                extraction_time = singer.utils.now()
+                transformed_rec = transformer.transform(rec, self.schema)
+                singer.write_record(self.stream_id, transformed_rec, time_extracted=extraction_time)
+                self.rec_count += 1
 
     def Run(self):
-        result = asyncio.run(self._runner())
-        return result
+        asyncio.run(self._runner())
+        return self.rec_count
 
     @classmethod
-    def find(cls, endpoint, result_key, retry_limit=5, results_per_page=250, **kwargs):
-        return RunAsync(endpoint, result_key, retry_limit, results_per_page, params=kwargs).Run()
+    def sync(cls, schema, stream_id, endpoint, result_key, params, retry_limit=5, results_per_page=250):
+        return RunAsync(schema, stream_id, endpoint, result_key, params, retry_limit, results_per_page).Run()

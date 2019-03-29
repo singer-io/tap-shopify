@@ -7,6 +7,7 @@ class Context():
     stream_map = {}
     stream_objects = {}
     counts = {}
+    durations = {}
 
     @classmethod
     def get_catalog_entry(cls, stream_name):
