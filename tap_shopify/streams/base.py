@@ -1,6 +1,7 @@
 import math
 import functools
 import datetime
+from datetime import datetime, timedelta
 import sys
 import backoff
 import pyactiveresource
@@ -252,46 +253,95 @@ class RunAsync():
         self.bucket_size = 80 if self.current_shop.plan_name == "shopify_plus" else 40
         self.shop_display_url = "https://{}".format(self.current_shop.myshopify_domain)
         self.rec_count = 0
+        self.DT_FMT = '%Y-%m-%dT%H:%M:%S'
+
+    def get_hourly_chunks(self, start, end, num_hours=1):
+        ranges = []
+        NUM_SECONDS = num_hours * 60 * 60
+        st = utils.strptime_with_tz(start)
+        ed = utils.strptime_with_tz(end)
+        
+        while st < ed:
+            curr_ed = st + timedelta(seconds=NUM_SECONDS)
+            if curr_ed > ed:
+                curr_ed = ed
+            ranges.append({'updated_at_min': st, 'updated_at_max': curr_ed})
+            st = curr_ed + timedelta(seconds=1)
+
+        return ranges
 
     async def _get_async(self, url, headers=None, params=None, retry_attempt=0):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=url, headers=headers, params=params) as response:
-                if response.status == 429:
-                    sleep_time_str = math.floor(float(response.headers.get('Retry-After')))
-                    LOGGER.info("Received 429 -- sleeping for {} seconds".format(sleep_time_str))
-                    await asyncio.sleep(sleep_time_str)
-                    return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
-                if response.status in range(500, 599):
-                    return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
-                else:
-                    return await response.json()
-
-    async def _request_count(self):
-        endpoint = '{}/count.json'.format(self.endpoint)
-        url = self.base_url + endpoint
-        resp = await self._get_async(url, params=self.params)
-        LOGGER.info("GET {}{}?{}".format(self.shop_display_url, endpoint, urlencode(self.params)))
-        return resp['count']
+        headers = {**headers, "Connection": "close"} if headers else {"Connection": "close"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url=url, headers=headers, params=params) as response:
+                        if response.status == 200:
+                            return await response.json()
+                        elif response.status == 429:
+                            sleep_time_str = math.floor(float(response.headers.get('Retry-After')))
+                            LOGGER.info("Received 429 -- sleeping for {} seconds".format(sleep_time_str))
+                            await asyncio.sleep(sleep_time_str)
+                            return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
+                        elif response.status in range(500, 599):
+                            if retry_attempt <= self.retry_limit:
+                                return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
+                            else:
+                                msg = "Failed after {} retry attempts".format(self.retry_limit)
+                                LOGGER.error(msg)
+                                raise Exception(msg)
+        except Exception as e:
+            if retry_attempt <= self.retry_limit:
+                return await self._get_async(url, headers, params, retry_attempt=retry_attempt+1)
+            else:
+                msg = "Failed after {} retry attempts.\nError:\n{}\n".format(self.retry_limit, e)
+                LOGGER.error(msg)
+                raise Exception(msg)
 
     async def _request(self, job):
         endpoint = '{}.json'.format(self.endpoint)
         url = self.base_url + endpoint
-        resp = await self._get_async(url, params=job['params'])
-        LOGGER.info("GET {}{}?{}".format(self.shop_display_url, endpoint, urlencode(job['params'])))
-        return resp
+        since_id = 1
+        DT_FMT = '%Y-%m-%dT%H:%M:%S'
+        results = []
+        while True:
+            params = {
+                **self.params,
+                "since_id": since_id,
+                "updated_at_min": utils.strftime(job['updated_at_min'], format_str=DT_FMT),
+                "updated_at_max": utils.strftime(job['updated_at_max'], format_str=DT_FMT)
+            }
+            resp = await self._get_async(url, params=params)
+            LOGGER.info("GET {}{}?{}".format(self.shop_display_url, endpoint, urlencode(params)))
+
+            objects = []
+            if self.result_key in resp:
+                for obj in resp[self.result_key]:
+                    if obj['id'] < since_id:
+                        err_msg = "obj['id'] < since_id: {} < {}".format(obj['id'], since_id)
+                        raise OutOfOrderIdsError(err_msg)
+                    objects.append(obj)
+            results += objects
+
+            if len(objects) < self.results_per_page:
+                break
+
+            max_id = max([o['id'] for o in objects])
+            if objects[-1]['id'] != max_id:
+                err_msg = "{} is not the max id in objects ({})".format(objects[-1]['id'], max_id)
+                raise OutOfOrderIdsError(err_msg)
+
+            since_id = objects[-1]['id']
+        return results
 
     async def _runner(self):
-        result_set_size = await self._request_count()
-        num_pages = math.ceil(result_set_size/self.results_per_page)
-        jobs = [{'params': { **self.params, 'page': p+1 }} for p in range(num_pages)]
-        chunked_jobs = utils.chunk(jobs, self.bucket_size)
+        hour_windows = [h for h in self.get_hourly_chunks(self.params['updated_at_min'], self.params['updated_at_max'])]
+        chunked_jobs = utils.chunk(hour_windows, self.bucket_size)
 
         for chunk_of_jobs in chunked_jobs:
             futures = [self._request(i) for i in chunk_of_jobs]
             for i, future in enumerate(asyncio.as_completed(futures)):
-                result = await future
-                if self.result_key in result:
-                    self._write_singer_records(result[self.result_key])
+                results = await future
+                self._write_singer_records(results)
 
     def _write_singer_records(self, recs):
         with Transformer() as transformer:
