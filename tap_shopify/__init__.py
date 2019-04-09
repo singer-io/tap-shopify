@@ -14,14 +14,23 @@ from singer import Transformer
 from tap_shopify.context import Context
 import tap_shopify.streams # Load stream objects into Context
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["start_date", "shop", "api_key"]
+
 LOGGER = singer.get_logger()
 
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    session = shopify.Session(shop, api_key)
-    shopify.ShopifyResource.activate_session(session)
+
+    if Context.config.get('is_private_app', False):
+        api_password = Context.config['api_password']
+        shop_url = "https://{}:{}@{}.myshopify.com/admin".format(api_key, api_password, shop)
+        shopify.ShopifyResource.set_site(shop_url)
+        shopify.Shop.current()
+    else:
+        session = shopify.Session(shop, api_key)
+        shopify.ShopifyResource.activate_session(session)
+
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -116,6 +125,7 @@ def sync():
                                 stream["key_properties"],
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
+            Context.durations[stream["tap_stream_id"]] = None
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
@@ -125,8 +135,10 @@ def sync():
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
+        stream_start_time = time.time()
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
+        stream.schema = catalog_entry['schema']
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
@@ -138,30 +150,45 @@ def sync():
             Context.state['bookmarks'] = {}
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
-        with Transformer() as transformer:
-            for rec in stream.sync():
-                extraction_time = singer.utils.now()
-                record_schema = catalog_entry['schema']
-                record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform(rec, record_schema, record_metadata)
-                singer.write_record(stream_id,
-                                    rec,
-                                    time_extracted=extraction_time)
-                Context.counts[stream_id] += 1
+        if Context.config.get("use_async", False) and stream.async_available:
+            Context.counts[stream_id] = stream.sync_async()
+        else:
+            with Transformer() as transformer:
+                for rec in stream.sync():
+                    extraction_time = singer.utils.now()
+                    record_metadata = metadata.to_map(catalog_entry['metadata'])
+                    rec = transformer.transform(rec, stream.schema, record_metadata)
+                    singer.write_record(stream_id,
+                                        rec,
+                                        time_extracted=extraction_time)
+                    Context.counts[stream_id] += 1
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
+        stream_job_duration = time.strftime("%H:%M:%S", time.gmtime(time.time() - stream_start_time))
+        Context.durations[stream_id] = stream_job_duration
 
-    LOGGER.info('----------------------')
+    div = "-"*50
+    info_msg = "\n{d}".format(d=div)
+    info_msg += "\nShop: {}".format(Context.config['shop'])
+    info_msg += "\n{d}\n".format(d=div)
     for stream_id, stream_count in Context.counts.items():
-        LOGGER.info('%s: %d', stream_id, stream_count)
-    LOGGER.info('----------------------')
+        info_msg += "\n{}: {}".format(stream_id, stream_count)
+        info_msg += "\nDuration: {}".format(Context.durations[stream_id])
+    info_msg += "\n{d}\n".format(d=div)
+    LOGGER.info(info_msg)
 
 @utils.handle_top_exception(LOGGER)
 def main():
 
     # Parse command line arguments
     args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+
+    # Check if Private App and has required Password in Config
+    if Context.config.get('is_private_app', False) and 'api_password' not in Context.config:
+        error_message = "Config is missing required key 'api_password'. "
+        error_message += "If the 'is_private_key' is set to True, 'api_password' is a required Config key."
+        raise Exception(error_message)
 
     # If discover flag was passed, run discovery mode and dump output to stdout
     if args.discover:

@@ -11,6 +11,8 @@ class OrderRefunds(Stream):
     name = 'order_refunds'
     replication_object = shopify.Refund
     replication_key = 'created_at'
+    result_key = "refunds"
+    async_available = False
 
     @shopify_error_handling
     def get_refunds(self, parent_object, since_id):
@@ -41,9 +43,22 @@ class OrderRefunds(Stream):
                         refunds[-1].id, max([o.id for o in refunds])))
                 since_id = refunds[-1].id
 
+    def get_objects_async(self):
+        selected_parent = Context.stream_objects['orders']()
+        selected_parent.name = "refund_orders"
+
+        for parent_object in selected_parent.get_objects_async():
+            for refund in parent_object['refunds']:
+                yield refund
+
     def sync(self):
-        for refund in self.get_objects():
-            refund_dict = refund.to_dict()
-            yield refund_dict
+        if Context.config.get("use_async", False):
+            for obj in self.get_objects_async():
+                yield obj
+        else:
+            for refund in self.get_objects():
+                refund_dict = refund.to_dict()
+                yield refund_dict
+
 
 Context.stream_objects['order_refunds'] = OrderRefunds
