@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.9
+  * Retry pattern will now fall back to lowercase if `Retry-After` not present [#35](https://github.com/singer-io/tap-shopify/pull/35)
+
 ## 1.1.8
   * Uses patternProperties to match extra fields on transactions receipts [#33](https://github.com/singer-io/tap-shopify/pull/33)
 
