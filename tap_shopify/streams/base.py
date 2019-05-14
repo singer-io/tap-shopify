@@ -45,8 +45,8 @@ def retry_after_wait_gen(**kwargs):
     resp = exc_info[1].response
     # Retry-After is an undocumented header. But honoring
     # it was proven to work in our spikes.
-    # It's been observed to come through as lowercase, so fallback if falsy
-    sleep_time_str = resp.headers.get('Retry-After') or resp.headers.get('retry-after')
+    # It's been observed to come through as lowercase, so fallback if not present
+    sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
     yield math.floor(float(sleep_time_str))
 
 def shopify_error_handling(fnc):
