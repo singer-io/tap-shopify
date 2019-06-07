@@ -1,7 +1,10 @@
 import shopify
+import singer
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
+
+LOGGER = singer.get_logger()
 
 # https://help.shopify.com/en/api/reference/orders/transaction An
 # order can have no more than 100 transactions associated with it.
@@ -46,9 +49,34 @@ class Transactions(Stream):
             for transaction in transactions:
                 yield transaction
 
+    # We have observed transactions with receipt objects that contain both
+    # `token` and `Token` keys for transactions where PayPal is the
+    # payment type. We reached out to PayPal support and they told us the
+    # values should be the same, so one can be safely ignored since its a
+    # duplicate. The logic is to prefer `token` if both are present and
+    # equal, convert `Token` -> `token` if only `Token` is present, and
+    # throw an error if both are present and their values are not equal
+    def canonicalize(self, transaction_dict):
+        token = transaction_dict.get('receipt', {}).get('token')
+        Token = transaction_dict.get('receipt', {}).get('Token')
+        if token and Token:
+            if token == Token:
+                LOGGER.info(("Transaction (id={}) contains a receipt that "
+                "has `Token` and `token` keys with the same value. "
+                "Removing the `Token` key.").format(transaction_dict['id']))
+                transaction_dict['receipt'].pop('Token')
+            else:
+                raise ValueError(("Found Transaction (id={}) with a receipt "
+                "that has `Token` and `token` keys with the different values. "
+                "Contact Shopify/PayPal support.").format(
+                    transaction_dict['id']))
+        elif Token:
+            transaction_dict['token'] = transaction_dict.pop('Token')
+
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
+            self.canonicalize(transaction_dict)
             yield transaction_dict
 
 Context.stream_objects['transactions'] = Transactions
