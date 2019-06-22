@@ -1,13 +1,14 @@
-import math
-import functools
 import datetime
+import functools
+import math
 import sys
+
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
 import simplejson
 import singer
-from singer import utils
+from singer import metrics, utils
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
@@ -150,7 +151,10 @@ class Stream():
                     "limit": results_per_page,
                     "status": "any"
                 }
-                objects = self.call_api(query_params)
+
+                with metrics.http_request_timer(self.name):
+                    objects = self.call_api(query_params)
+
                 for obj in objects:
                     if obj.id < since_id:
                         # This verifies the api behavior expectation we
