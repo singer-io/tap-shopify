@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.10
+ * Canonicalize `transaction__receipt__token` to always use `token` instead of `Token` [#37](https://github.com/singer-io/tap-shopify/pull/37)
+
 ## 1.1.9
   * Retry pattern will now fall back to lowercase if `Retry-After` not present [#35](https://github.com/singer-io/tap-shopify/pull/35)
 
