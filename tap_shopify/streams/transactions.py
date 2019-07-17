@@ -11,31 +11,38 @@ LOGGER = singer.get_logger()
 TRANSACTIONS_RESULTS_PER_PAGE = 100
 
 # We have observed transactions with receipt objects that contain both
-# `token` and `Token` keys for transactions where PayPal is the
-# payment type. We reached out to PayPal support and they told us the
-# values should be the same, so one can be safely ignored since its a
-# duplicate. The logic is to prefer `token` if both are present and
-# equal, convert `Token` -> `token` if only `Token` is present, and
-# throw an error if both are present and their values are not equal
-def canonicalize(transaction_dict):
-    token_lower = transaction_dict.get('receipt', {}).get('token')
-    token_upper = transaction_dict.get('receipt', {}).get('Token')
-    if token_lower and token_upper:
-        if token_lower == token_upper:
+# `token` and `Token` keys and `version` and `Version` keys for
+# transactions where PayPal is the payment type. We reached out to PayPal
+# support and they told us the values should be the same, so one can be
+# safely ignored since its a duplicate. Example: The logic is to prefer
+# `token` if both are present and equal, convert `Token` -> `token` if
+# only `Token` is present, and throw an error if both are present and
+# their values are not equal
+def canonicalize(transaction_dict, field_name):
+    field_name_upper = field_name.capitalize()
+    value_lower = transaction_dict.get('receipt', {}).get(field_name)
+    value_upper = transaction_dict.get('receipt', {}).get(field_name_upper)
+    if value_lower and value_upper:
+        if value_lower == value_upper:
             LOGGER.info((
                 "Transaction (id=%d) contains a receipt "
-                "that has `Token` and `token` keys with the same "
-                "value. Removing the `Token` key."),
-                        transaction_dict['id'])
-            transaction_dict['receipt'].pop('Token')
+                "that has `%s` and `%s` keys with the same "
+                "value. Removing the `%s` key."),
+                        transaction_dict['id'],
+                        field_name,
+                        field_name_upper,
+                        field_name_upper)
+            transaction_dict['receipt'].pop(field_name_upper)
         else:
             raise ValueError((
                 "Found Transaction (id={}) with a receipt that has "
-                "`Token` and `token` keys with the different "
+                "`{}` and `{}` keys with the different "
                 "values. Contact Shopify/PayPal support.").format(
-                    transaction_dict['id']))
-    elif token_upper:
-        transaction_dict['token'] = transaction_dict.pop('Token')
+                    transaction_dict['id'],
+                    field_name_upper,
+                    field_name))
+    elif value_upper:
+        transaction_dict["receipt"][field_name] = transaction_dict['receipt'].pop(field_name_upper)
 
 
 class Transactions(Stream):
@@ -80,7 +87,8 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            canonicalize(transaction_dict)
+            for field_name in ['token', 'version']:
+                canonicalize(transaction_dict, field_name)
             yield transaction_dict
 
 Context.stream_objects['transactions'] = Transactions
