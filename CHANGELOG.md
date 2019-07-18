@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.12
+ * Canonicalize `transaction__receipt__version` to always prefer and coerce to `version` [#41](https://github.com/singer-io/tap-shopify/pull/41)
+
+## 1.1.11
+ * Add `http_request_timer` metrics to HTTP requests [#39](https://github.com/singer-io/tap-shopify/pull/39)
+
 ## 1.1.10
  * Canonicalize `transaction__receipt__token` to always use `token` instead of `Token` [#37](https://github.com/singer-io/tap-shopify/pull/37)
 
