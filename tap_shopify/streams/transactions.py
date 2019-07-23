@@ -10,13 +10,15 @@ LOGGER = singer.get_logger()
 # order can have no more than 100 transactions associated with it.
 TRANSACTIONS_RESULTS_PER_PAGE = 100
 
-# We have observed transactions with receipt objects that contain both
-# `token` and `Token` keys and `version` and `Version` keys for
-# transactions where PayPal is the payment type. We reached out to PayPal
-# support and they told us the values should be the same, so one can be
-# safely ignored since its a duplicate. Example: The logic is to prefer
-# `token` if both are present and equal, convert `Token` -> `token` if
-# only `Token` is present, and throw an error if both are present and
+# We have observed transactions with receipt objects that contain both:
+#   - `token` and `Token`
+#   - `version` and `Version`
+#   - `ack` and `Ack`
+# keys transactions where PayPal is the payment type. We reached out to
+# PayPal support and they told us the values should be the same, so one
+# can be safely ignored since its a duplicate. Example: The logic is to
+# prefer `token` if both are present and equal, convert `Token` -> `token`
+# if only `Token` is present, and throw an error if both are present and
 # their values are not equal
 def canonicalize(transaction_dict, field_name):
     field_name_upper = field_name.capitalize()
@@ -87,7 +89,7 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            for field_name in ['token', 'version']:
+            for field_name in ['token', 'version', 'ack']:
                 canonicalize(transaction_dict, field_name)
             yield transaction_dict
 
