@@ -14,23 +14,35 @@ from singer import Transformer
 from tap_shopify.context import Context
 import tap_shopify.streams # Load stream objects into Context
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["shop"]
 LOGGER = singer.get_logger()
 
 def initialize_shopify_client():
-    api_key = Context.config['api_key']
     shop = Context.config['shop']
 
-    if 'password' in Context.config:
-        password = Context.config['password']
-        shop_url = 'https://{}:{}@{}.myshopify.com/admin'.format(
-            api_key,
-            password,
-            shop)
+    if 'api_key' in Context.config:
+        LOGGER.info('Using public app token based authentication from config["api_key"]')
+        session = shopify.Session(shop, Context.config['api_key'])
+        shopify.ShopifyResource.activate_session(session)
+    elif 'private_app_api_key' in Context.config and 'private_app_password' in Context.config:
+        LOGGER.info(
+            'Using private app basic authentication from config["private_app_api_key"] '
+            'and config["private_app_password"]'
+        )
+
+        api_key = Context.config['private_app_api_key']
+        password = Context.config['private_app_password']
+        shop_url = 'https://{}:{}@{}/admin'.format(api_key, password, shop)
+
         shopify.ShopifyResource.set_site(shop_url)
     else:
-        session = shopify.Session(shop, api_key)
-        shopify.ShopifyResource.activate_session(session)
+        raise Exception(
+            'Config is missing Shopify auth information.'
+            'Either pass the `api_key` option for a public app authenticated using an'
+            ' access_token via the Shopify OAuth flow, or pass the `private_app_api_key`'
+            ' and `private_app_password` config options for a private app.'
+        )
+
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
