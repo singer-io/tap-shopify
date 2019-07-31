@@ -44,17 +44,19 @@ This tap:
    The `api_key` is the API key for your Shopify shop generated via an OAuth flow.
 
    The `shop` is your Shopify shop which will be the value `test_shop` in the string `https://test_shop.myshopify.com`
-   
-   (Optional) If you have a **private** Shopify app, add the app password using `password` in `config.json`
+
+   Alternatively, if you have a **private** Shopify app, add the app's API Key and password using `private_app_api_key` and `private_app_password` in `config.json`:
 
    ```json
     {
         "start_date": "2010-01-01",
-        "api_key": "<Shopify API Key>",
-        "password": "<Shopify Private App Password>",
+        "private_app_api_key": "<Shopify API Key>",
+        "private_app_password": "<Shopify Private App Password>",
         "shop": "test_shop"
     }
     ```
+
+    Private apps are managed by individual merchants and don't use the normal OAuth configuration flow. Read more here: https://help.shopify.com/en/manual/apps/private-apps
 
 4. Run the Tap in Discovery Mode
 
