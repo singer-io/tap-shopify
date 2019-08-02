@@ -468,7 +468,18 @@
   },
   "line_item": {
     "properties": {
-      "applied_discounts": {},
+      "applied_discounts": {
+        "items": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
+        ]
+      },
       "total_discount_set": {},
       "pre_tax_price_set": {},
       "price_set": {},
