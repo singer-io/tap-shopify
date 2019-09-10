@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.14
+ * Bump minimum value for numbers to 1e-10 [commit](https://github.com/singer-io/tap-shopify/commit/a2abf49be96b07f80610d63c514241f829780dcf)
+
 ## 1.1.12
  * Canonicalize `transaction__receipt__version` to always prefer and coerce to `version` [#41](https://github.com/singer-io/tap-shopify/pull/41)
 
