@@ -13,7 +13,7 @@ from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 250
+RESULTS_PER_PAGE = 175
 
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
