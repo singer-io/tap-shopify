@@ -159,7 +159,7 @@
               "null",
               "number"
             ],
-            "multipleOf": 1e-08
+            "multipleOf": 1e-10
           },
           "code": {
             "type": [
@@ -222,7 +222,7 @@
         "null",
         "number"
       ],
-      "multipleOf": 1e-08
+      "multipleOf": 1e-10
     },
     "closed_at": {
       "type": [
@@ -266,14 +266,14 @@
         "null",
         "number"
       ],
-      "multipleOf": 1e-08
+      "multipleOf": 1e-10
     },
     "subtotal_price": {
       "type": [
         "null",
         "number"
       ],
-      "multipleOf": 1e-08
+      "multipleOf": 1e-10
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -289,7 +289,7 @@
         "null",
         "number"
       ],
-      "multipleOf": 1e-08
+      "multipleOf": 1e-10
     },
     "note": {
       "type": [
@@ -351,7 +351,7 @@
               "null",
               "number"
             ],
-            "multipleOf": 1e-08
+            "multipleOf": 1e-10
           },
           "requested_fulfillment_service_id": {
             "type": [
@@ -531,7 +531,7 @@
         "null",
         "number"
       ],
-      "multipleOf": 1e-08
+      "multipleOf": 1e-10
     },
     "cart_token": {
       "type": [
