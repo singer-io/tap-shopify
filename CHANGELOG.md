@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.16
+ * Handles null/non-integer values for `results_per_page` [#48](https://github.com/singer-io/tap-shopify/pull/48)
+
 ## 1.1.15
  * Lowering the page size from 250 to 175 as per recommendation from
    Shopify to mitigate receiving 500s [#45](https://github.com/singer-io/tap-shopify/pull/45)
