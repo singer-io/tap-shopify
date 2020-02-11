@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.17
+  * Use try/except around JSON metafield's data and fallback to string [#50](https://github.com/singer-io/tap-shopify/pull/50)
+
 ## 1.1.16
  * Handles null/non-integer values for `results_per_page` [#48](https://github.com/singer-io/tap-shopify/pull/48)
 
