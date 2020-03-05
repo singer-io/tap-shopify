@@ -20,7 +20,7 @@ TRANSACTIONS_RESULTS_PER_PAGE = 100
 # prefer `token` if both are present and equal, convert `Token` -> `token`
 # if only `Token` is present, and throw an error if both are present and
 # their values are not equal
-def canonicalize(transaction_dict):
+def canonicalize_receipts(transaction_dict):
     dict_keys = list(transaction_dict.get('receipt', {}).keys())
     for field_name in dict_keys:
         if field_name.capitalize() == field_name:
@@ -94,7 +94,7 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            canonicalize(transaction_dict)
+            canonicalize_receipts(transaction_dict)
             yield transaction_dict
 
 Context.stream_objects['transactions'] = Transactions
