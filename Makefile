@@ -2,4 +2,4 @@
 
 test:
 	pylint tap_shopify -d missing-docstring
-	nosetests
+	nosetests tests/unittests
