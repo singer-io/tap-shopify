@@ -20,7 +20,8 @@ LOGGER = singer.get_logger()
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    session = shopify.Session(shop, api_key)
+    version = '2019-10'
+    session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
 
 def get_abs_path(path):
