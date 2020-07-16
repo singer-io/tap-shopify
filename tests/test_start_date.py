@@ -94,7 +94,7 @@ class StartDateTest(BaseTapTest):
             with self.subTest(stream=stream):
 
                 # verify that each stream has less records than the first connection sync
-                self.assertGreater(
+                self.assertGreaterEqual(
                     first_sync_record_count.get(stream, 0),
                     second_sync_record_count.get(stream, 0),
                     msg="second had more records, start_date usage not verified")
