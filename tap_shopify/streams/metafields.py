@@ -1,11 +1,14 @@
 import json
 import shopify
+import singer
 
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling,
                                       RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
+
+LOGGER = singer.get_logger()
 
 def get_selected_parents():
     for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
@@ -57,7 +60,12 @@ class Metafields(Stream):
             value_type = metafield.get("value_type")
             if value_type and value_type == "json_string":
                 value = metafield.get("value")
-                metafield["value"] = json.loads(value) if value is not None else value
+                try:
+                    metafield["value"] = json.loads(value) if value is not None else value
+                except json.decoder.JSONDecodeError:
+                    LOGGER.info("Failed to decode JSON value for metafield %s", metafield.get('id'))
+                    metafield["value"] = value
+
             yield metafield
 
 Context.stream_objects['metafields'] = Metafields
