@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.2
+  * Fixes issue where `products` returns 0 records due to a change in the `status` parameter, Shopify now requires `published_status` [#59](https://github.com/singer-io/tap-shopify/pull/59)
+
 ## 1.2.1
   * Update the line_item schema to allow an object under the properties key [#58](https://github.com/singer-io/tap-shopify/pull/58)
 
