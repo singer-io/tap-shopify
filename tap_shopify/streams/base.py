@@ -84,6 +84,8 @@ class Stream():
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
+    # Status parameter override option
+    status_key = None
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -144,12 +146,13 @@ class Stream():
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
+                status_key = self.status_key or "status"
                 query_params = {
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
                     "limit": results_per_page,
-                    "status": "any"
+                    status_key: "any"
                 }
 
                 with metrics.http_request_timer(self.name):
