@@ -22,8 +22,14 @@ def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
     version = '2021-04'
-    session = shopify.Session(shop, version, api_key)
-    shopify.ShopifyResource.activate_session(session)
+
+    if 'password' in Context.config:
+        password = Context.config['password']
+        shop_url = 'https://{}:{}@{}.myshopify.com/admin'.format(api_key, password, shop)
+        shopify.ShopifyResource.set_site(shop_url)
+    else:
+        session = shopify.Session(shop, version, api_key)
+        shopify.ShopifyResource.activate_session(session)
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
