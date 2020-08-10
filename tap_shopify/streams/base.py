@@ -17,7 +17,7 @@ RESULTS_PER_PAGE = 175
 
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
-DATE_WINDOW_SIZE = 1
+DATE_WINDOW_SIZE = 14
 
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
