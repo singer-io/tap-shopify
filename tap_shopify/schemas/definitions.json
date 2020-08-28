@@ -401,6 +401,13 @@
           "boolean"
         ]
       },
+      "accepts_marketing_updated_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
       "created_at": {
         "type": [
           "null",
