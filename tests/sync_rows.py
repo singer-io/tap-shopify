@@ -1,12 +1,13 @@
 import os
 import uuid
 import singer
-from tap_tester.scenario import (SCENARIOS)
+import unittest
+
 import tap_tester.connections as connections
 import tap_tester.menagerie   as menagerie
 import tap_tester.runner      as runner
 from base import ShopifyTest
-import unittest
+
 from functools import reduce
 from singer import metadata
 
@@ -18,7 +19,9 @@ LOGGER = singer.get_logger()
 # login creds, setup a Shopify integration on your VM, and copy the new
 # token out of the connections credentials into the environments repo.
 class ShopifySyncRows(ShopifyTest):
-    def name(self):
+
+    @staticmethod
+    def name():
         return "tap_tester_shopify_sync_rows"
 
     def expected_sync_streams(self):
@@ -31,7 +34,9 @@ class ShopifySyncRows(ShopifyTest):
             'orders': {'id'},
         }
 
-    def do_test(self, conn_id):
+    def test_run(self):
+        conn_id = self.create_connection()
+
         # Select our catalogs
         our_catalogs = [c for c in self.found_catalogs if c.get('tap_stream_id') in self.expected_sync_streams()]
         for c in our_catalogs:
@@ -67,6 +72,3 @@ class ShopifySyncRows(ShopifyTest):
         bookmarks = menagerie.get_state(conn_id)['bookmarks']
 
         self.assertTrue('orders' in bookmarks)
-
-
-SCENARIOS.add(ShopifySyncRows)

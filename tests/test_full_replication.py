@@ -5,17 +5,17 @@ import json
 
 from tap_tester import menagerie, runner
 
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class FullReplicationTest(BaseTapTest):
     """Test tap gets all records for streams with full replication"""
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_full_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """
         Verify that a bookmark doesn't exist for the stream
         Verify that the second sync includes the same number or more records than the first sync
@@ -26,6 +26,8 @@ class FullReplicationTest(BaseTapTest):
         For EACH stream that is fully replicated there are multiple rows of data with
             different values for the replication key
         """
+        conn_id = self.create_connection()
+
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         full_streams = {key for key, value in self.expected_replication_method().items()
@@ -90,6 +92,3 @@ class FullReplicationTest(BaseTapTest):
 
                 self.assertEqual(len(first_data), same_records,
                                  msg="Not all data from the first sync was in the second sync")
-
-
-SCENARIOS.add(FullReplicationTest)
