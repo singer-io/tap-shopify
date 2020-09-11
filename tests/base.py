@@ -26,11 +26,6 @@ class BaseTapTest(unittest.TestCase):
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
     @staticmethod
-    def name():
-        """The name of the test within the suite"""
-        return "test_name"
-
-    @staticmethod
     def tap_name():
         """The name of the tap"""
         return "tap-shopify"
@@ -147,18 +142,6 @@ class BaseTapTest(unittest.TestCase):
         missing_envs = [x for x in [os.getenv('TAP_SHOPIFY_API_KEY')] if x is None]
         if missing_envs:
             raise Exception("set environment variables")
-
-    def test_run(self):
-        """
-        Default Test Setup
-        Remove previous connections (with the same name)
-        Create a new connection (with the properties and credentials above)
-        Run discovery and ensure it completes successfully
-        """
-        self.do_test(self.create_connection())
-
-    def do_test(self, conn_id):
-        """A placeholder test to override in sub-class tests"""
 
     #########################
     #   Helper Methods      #

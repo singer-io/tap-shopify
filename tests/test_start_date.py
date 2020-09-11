@@ -8,15 +8,14 @@ from dateutil.parser import parse
 
 from tap_tester import menagerie, runner
 
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class StartDateTest(BaseTapTest):
     """
     Test that the start_date configuration is respected
-    
-    • verify that a sync with a later start date has at least one record synced 
+
+    • verify that a sync with a later start date has at least one record synced
       and less records than the 1st sync with a previous start date
     • verify that each stream has less records than the earlier start date sync
     • verify all data from later start data has bookmark values >= start_date
@@ -24,11 +23,13 @@ class StartDateTest(BaseTapTest):
       is greater than or equal to the start date
     """
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_start_date_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """Test we get a lot of data back based on the start date configured in base"""
+        conn_id = self.create_connection()
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
@@ -117,6 +118,3 @@ class StartDateTest(BaseTapTest):
                     except (OverflowError, ValueError, TypeError):
                         print("bookmarks cannot be converted to dates, "
                               "can't test start_date for {}".format(stream))
-
-
-SCENARIOS.add(StartDateTest)

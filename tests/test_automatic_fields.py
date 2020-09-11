@@ -4,17 +4,17 @@ Test that with no fields selected for a stream automatic fields are still replic
 
 from tap_tester import runner, menagerie
 
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class MinimumSelectionTest(BaseTapTest):
     """Test that with no fields selected for a stream automatic fields are still replicated"""
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_no_fields_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """
         Verify that for each stream you can get multiple pages of data
         when no fields are selected and only the automatic fields are replicated.
@@ -24,6 +24,8 @@ class MinimumSelectionTest(BaseTapTest):
         fetch of data.  For instance if you have a limit of 250 records ensure
         that 251 (or more) records have been posted for that stream.
         """
+        conn_id = self.create_connection()
+
         incremental_streams = {key for key, value in self.expected_replication_method().items()
                                if value == self.INCREMENTAL}
 
@@ -61,6 +63,3 @@ class MinimumSelectionTest(BaseTapTest):
                     self.expected_foreign_keys().get(stream, set()),
                     msg="The fields sent to the target are not the automatic fields"
                 )
-
-
-SCENARIOS.add(MinimumSelectionTest)
