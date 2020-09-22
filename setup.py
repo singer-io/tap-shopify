@@ -10,7 +10,7 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_shopify"],
     install_requires=[
-        "ShopifyAPI==7.0.1",
+        "ShopifyAPI==8.0.1",
         "singer-python==5.4.1",
     ],
     extras_require={
