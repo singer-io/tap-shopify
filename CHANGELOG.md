@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.4
+  * Adds `accepts_marketing_updated_at` to shared `customer` schema [#61](https://github.com/singer-io/tap-shopify/pull/61/)
+
 ## 1.2.3
   * Bumped Shopify API version to 2020-07 (SDK version 8.0.1) [#63](https://github.com/singer-io/tap-shopify/pull/63/)
 
