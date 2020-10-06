@@ -3,17 +3,17 @@ Test tap pagination of streams
 """
 from tap_tester import menagerie, runner
 
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class PaginationTest(BaseTapTest):
     """ Test the tap pagination to get multiple pages of data """
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_pagination_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """
         Verify that for each stream you can get multiple pages of data
         and that when all fields are selected more than the automatic fields are replicated.
@@ -23,6 +23,8 @@ class PaginationTest(BaseTapTest):
         fetch of data.  For instance if you have a limit of 250 records ensure
         that 251 (or more) records have been posted for that stream.
         """
+        conn_id = self.create_connection()
+
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
@@ -33,7 +35,7 @@ class PaginationTest(BaseTapTest):
                         catalog.get('tap_stream_id') in incremental_streams.difference(
                             untested_streams)]
 
-        
+
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
         # Run a sync job using orchestrator
         record_count_by_stream = self.run_sync(conn_id)
@@ -66,6 +68,3 @@ class PaginationTest(BaseTapTest):
                         self.expected_foreign_keys().get(stream, set())),
                     msg="The fields sent to the target don't include non-automatic fields"
                 )
-
-
-SCENARIOS.add(PaginationTest)

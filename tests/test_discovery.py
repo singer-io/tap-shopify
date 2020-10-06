@@ -5,17 +5,17 @@ import re
 
 from tap_tester import menagerie
 
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class DiscoveryTest(BaseTapTest):
     """ Test the tap discovery """
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_discovery_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """
         Verify that discover creates the appropriate catalog, schema, metadata, etc.
 
@@ -32,6 +32,7 @@ class DiscoveryTest(BaseTapTest):
           are given the inclusion of automatic (metadata and annotated schema).
         • verify that all other fields have inclusion of available (metadata and schema)
         """
+        conn_id = self.create_connection()
 
         # Verify number of actual streams discovered match expected
         found_catalogs = menagerie.get_catalogs(conn_id)
@@ -159,6 +160,3 @@ class DiscoveryTest(BaseTapTest):
                          and item.get("breadcrumb", ["properties", None])[1]
                          not in actual_automatic_fields}),
                     msg="Not all non key properties are set to available in metadata")
-
-
-SCENARIOS.add(DiscoveryTest)

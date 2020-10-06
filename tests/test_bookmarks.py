@@ -6,17 +6,16 @@ from datetime import datetime as dt
 from dateutil.parser import parse
 
 from tap_tester import menagerie, runner
-from tap_tester.scenario import SCENARIOS
 from base import BaseTapTest
 
 
 class BookmarkTest(BaseTapTest):
     """Test tap sets a bookmark and respects it for the next sync of a stream"""
-
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_bookmark_test"
 
-    def do_test(self, conn_id):
+    def test_run(self):
         """
         Verify that for each stream you can do a sync which records bookmarks.
         That the bookmark is the maximum value sent to the target for the replication key.
@@ -33,6 +32,8 @@ class BookmarkTest(BaseTapTest):
         For EACH stream that is incrementally replicated there are multiple rows of data with
             different values for the replication key
         """
+        conn_id = self.create_connection()
+
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
@@ -134,5 +135,3 @@ class BookmarkTest(BaseTapTest):
 
                 except (OverflowError, ValueError, TypeError):
                     print("bookmarks cannot be converted to dates, comparing values directly")
-
-SCENARIOS.add(BookmarkTest)
