@@ -11,7 +11,7 @@ setup(
     py_modules=["tap_shopify"],
     install_requires=[
         "ShopifyAPI==8.0.1",
-        "singer-python==5.4.1",
+        "singer-python==5.9.1",
     ],
     extras_require={
         'dev': [
