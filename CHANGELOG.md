@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.5
+  * Bumps `singer-python` from `5.4.1` to `5.9.1` [#67](https://github.com/singer-io/tap-shopify/pull/67)
+
 ## 1.2.4
   * Adds `accepts_marketing_updated_at` to shared `customer` schema [#61](https://github.com/singer-io/tap-shopify/pull/61/)
 
