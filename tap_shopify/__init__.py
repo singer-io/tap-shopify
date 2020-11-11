@@ -12,10 +12,11 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
-import tap_shopify.streams # Load stream objects into Context
+import tap_shopify.streams  # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
+
 
 def initialize_shopify_client():
     api_key = Context.config['api_key']
@@ -24,8 +25,10 @@ def initialize_shopify_client():
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
 
+
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
+
 
 # Load schemas from schemas folder
 def load_schemas():
@@ -58,6 +61,7 @@ def get_discovery_metadata(stream, schema):
 
     return metadata.to_list(mdata)
 
+
 def load_schema_references():
     shared_schema_file = "definitions.json"
     shared_schema_path = get_abs_path('schemas/')
@@ -67,6 +71,7 @@ def load_schema_references():
         refs[shared_schema_file] = json.load(data_file)
 
     return refs
+
 
 def discover():
     raw_schemas = load_schemas()
@@ -84,7 +89,7 @@ def discover():
             'stream': schema_name,
             'tap_stream_id': schema_name,
             'schema': singer.resolve_schema_references(schema, refs),
-            'metadata' : get_discovery_metadata(stream, schema),
+            'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
@@ -92,6 +97,7 @@ def discover():
         streams.append(catalog_entry)
 
     return {'streams': streams}
+
 
 def shuffle_streams(stream_name):
     '''
@@ -105,6 +111,7 @@ def shuffle_streams(stream_name):
     top_half = Context.catalog["streams"][matching_index:]
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
+
 
 def sync():
     initialize_shopify_client()
@@ -158,27 +165,32 @@ def sync():
         LOGGER.info('%s: %d', stream_id, stream_count)
     LOGGER.info('----------------------')
 
+
+def check_api():
+    initialize_shopify_client()
+    shopify.Order.count()
+
 @utils.handle_top_exception(LOGGER)
 def main():
-
     # Parse command line arguments
     args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+    Context.tap_start = utils.now()
+    Context.config = args.config
 
     # If discover flag was passed, run discovery mode and dump output to stdout
     if args.discover:
+        check_api()
         catalog = discover()
-        print(json.dumps(catalog, indent=2))
+        # print(json.dumps(catalog, indent=2))
     # Otherwise run in sync mode
     else:
-        Context.tap_start = utils.now()
         if args.catalog:
             Context.catalog = args.catalog.to_dict()
         else:
             Context.catalog = discover()
-
-        Context.config = args.config
         Context.state = args.state
         sync()
+
 
 if __name__ == "__main__":
     main()
