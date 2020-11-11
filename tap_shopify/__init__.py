@@ -181,7 +181,7 @@ def main():
     if args.discover:
         check_api()
         catalog = discover()
-        # print(json.dumps(catalog, indent=2))
+        print(json.dumps(catalog, indent=2))
     # Otherwise run in sync mode
     else:
         if args.catalog:
