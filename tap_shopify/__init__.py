@@ -4,7 +4,6 @@ import datetime
 import json
 import time
 import math
-import datetime
 
 import pyactiveresource
 import shopify
