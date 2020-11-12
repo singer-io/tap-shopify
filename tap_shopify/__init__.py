@@ -168,7 +168,12 @@ def sync():
 
 def check_api():
     initialize_shopify_client()
-    shopify.Order.count()
+    stream = Context.stream_objects["orders"]()
+    query_params = {
+        "limit": 1,
+    }
+    stream.call_api(query_params)
+
 
 @utils.handle_top_exception(LOGGER)
 def main():
