@@ -24,6 +24,7 @@ class BaseTapTest(unittest.TestCase):
     INCREMENTAL = "INCREMENTAL"
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    SELECTED = "selected"
 
     @staticmethod
     def tap_name():
@@ -66,7 +67,8 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250}
+                self.API_LIMIT: 250,
+                self.SELECTED: False}
 
         meta = default.copy()
         meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
@@ -81,7 +83,8 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"created_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250},
+                self.API_LIMIT: 250,
+                self.SELECTED: False},
             "products": default,
             "metafields": meta,
             "transactions": {
@@ -89,7 +92,8 @@ class BaseTapTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250}
+                self.API_LIMIT: 250,
+                self.SELECTED: False}
         }
 
     def expected_streams(self):

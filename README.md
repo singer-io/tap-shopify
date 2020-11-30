@@ -54,6 +54,8 @@ This tap:
 
 5. Run the Tap in Sync Mode
 
+   Make sure to set the `selected` metadata field to true for streams that should sync. 
+
     tap-shopify -c config.json --catalog catalog-file.json
 
 ---

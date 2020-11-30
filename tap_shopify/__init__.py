@@ -46,6 +46,7 @@ def get_discovery_metadata(stream, schema):
     mdata = metadata.new()
     mdata = metadata.write(mdata, (), 'table-key-properties', stream.key_properties)
     mdata = metadata.write(mdata, (), 'forced-replication-method', stream.replication_method)
+    mdata = metadata.write(mdata, (), 'selected', False)
 
     if stream.replication_key:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [stream.replication_key])
