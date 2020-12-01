@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "customer_selection": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "usage_limit": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "value": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "value_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "once_per_customer": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "ends_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "starts_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "entitled_variant_ids": {
+      "type": [
+        "null",
+        "array"
+      ]
+    }
+  },
+  "type": "object"
+}
