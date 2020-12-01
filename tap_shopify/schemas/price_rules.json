@@ -127,14 +127,8 @@
     "allocation_limit": {
       "type": [
         "null",
-        "array"
-      ],
-      "items": {
-        "type": [
-          "null",
-          "integer"
-        ]
-      }
+        "integer"
+      ]
     }
   },
   "type": "object"
