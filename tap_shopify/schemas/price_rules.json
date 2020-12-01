@@ -6,6 +6,12 @@
         "string"
       ]
     },
+    "allocation_method": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "title": {
       "type": [
         "null",
@@ -71,6 +77,54 @@
       ]
     },
     "entitled_variant_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_country_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_collection_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_product_ids": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "allocation_limit": {
       "type": [
         "null",
         "array"
