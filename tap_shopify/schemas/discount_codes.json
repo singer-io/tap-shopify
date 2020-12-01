@@ -1,0 +1,43 @@
+{
+  "properties": {
+    "code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "price_rule_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "usage_count": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "type": "object"
+}
