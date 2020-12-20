@@ -80,7 +80,7 @@ class Stream():
     # subclasses to change the bookmark key.
     name = None
     replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
+    replication_key = 'created_at'
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
@@ -149,8 +149,8 @@ class Stream():
                 status_key = self.status_key or "status"
                 query_params = {
                     "since_id": since_id,
-                    "updated_at_min": updated_at_min,
-                    "updated_at_max": updated_at_max,
+                    "created_at_min": updated_at_min,
+                    "created_at_max": updated_at_max,
                     "limit": results_per_page,
                     status_key: "any"
                 }
@@ -188,7 +188,7 @@ class Stream():
                 # Put since_id into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
-            updated_at_min = updated_at_max
+            updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
 
     def sync(self):
         """Yield's processed SDK object dicts to the caller.
