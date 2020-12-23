@@ -194,7 +194,14 @@ def main():
         else:
             Context.catalog = discover()
         Context.state = args.state
-        sync()
+        try:
+            sync()
+        except Exception as ex:
+            # stop importing flag for the target
+            singer.write_state({
+                'stop_importing': True
+            })
+            raise ex
 
 
 if __name__ == "__main__":
