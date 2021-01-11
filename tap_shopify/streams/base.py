@@ -2,6 +2,7 @@ import datetime
 import functools
 import math
 import sys
+import http
 
 import backoff
 import pyactiveresource
@@ -54,7 +55,10 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
-                           simplejson.scanner.JSONDecodeError),
+                           simplejson.scanner.JSONDecodeError,
+                           http.client.IncompleteRead,
+                           ConnectionResetError
+                          ),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
