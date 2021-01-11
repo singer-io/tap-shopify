@@ -2,6 +2,7 @@ import datetime
 import functools
 import math
 import sys
+import http
 
 import backoff
 import pyactiveresource
@@ -54,12 +55,15 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
-                           simplejson.scanner.JSONDecodeError),
+                           simplejson.scanner.JSONDecodeError,
+                          ),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
     @backoff.on_exception(retry_after_wait_gen,
-                          pyactiveresource.connection.ClientError,
+                          (pyactiveresource.connection.ClientError,
+                           http.client.IncompleteRead,
+                          ),
                           giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
                           # No jitter as we want a constant value
