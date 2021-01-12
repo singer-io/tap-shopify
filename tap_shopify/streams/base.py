@@ -20,7 +20,7 @@ RESULTS_PER_PAGE = 250
 DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
-MAX_RETRIES = 5
+MAX_RETRIES = 10
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -52,12 +52,12 @@ def retry_after_wait_gen(**kwargs):
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
-                          (pyactiveresource.connection.ServerError,
+                          (pyactiveresource.connection.Error,
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError),
-                          giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
-                          max_tries=MAX_RETRIES)
+                          max_tries=MAX_RETRIES,
+                          jitter=None)
     @backoff.on_exception(backoff.expo,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
