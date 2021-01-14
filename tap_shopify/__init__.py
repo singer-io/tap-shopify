@@ -8,6 +8,7 @@ import math
 import pyactiveresource
 import shopify
 import singer
+import logging
 from singer import utils
 from singer import metadata
 from singer import Transformer
@@ -15,6 +16,10 @@ from tap_shopify.context import Context
 import tap_shopify.streams  # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+
+if not os.getenv("SHOPIFY_DEBUG_HTTP", False):
+    http_logger = logging.getLogger("pyactiveresource.connection")
+    http_logger.setLevel(logging.WARNING)
 LOGGER = singer.get_logger()
 
 
