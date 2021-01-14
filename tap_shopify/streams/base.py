@@ -11,6 +11,7 @@ import simplejson
 import singer
 from singer import metrics, utils
 from tap_shopify.context import Context
+import urllib
 
 LOGGER = singer.get_logger()
 
@@ -54,10 +55,13 @@ def retry_after_wait_gen(**kwargs):
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
+                           pyactiveresource.connection.Error,
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError,
                            http.client.IncompleteRead,
-                           ConnectionResetError
+                           ConnectionResetError,
+                           TimeoutError,
+                           urllib.error.URLError,
                           ),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
