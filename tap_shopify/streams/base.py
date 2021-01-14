@@ -11,6 +11,7 @@ import simplejson
 import singer
 from singer import metrics, utils
 from tap_shopify.context import Context
+import urllib
 
 LOGGER = singer.get_logger()
 
@@ -60,6 +61,7 @@ def shopify_error_handling(fnc):
                            http.client.IncompleteRead,
                            ConnectionResetError,
                            TimeoutError,
+                           urllib.error.URLError,
                           ),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
