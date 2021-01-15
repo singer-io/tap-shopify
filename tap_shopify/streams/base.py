@@ -23,7 +23,7 @@ RESULTS_PER_PAGE = 250
 DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
-MAX_RETRIES = 10
+MAX_RETRIES = 5
 
 
 def is_not_status_code_fn(status_code):
@@ -239,7 +239,6 @@ class Stream():
                                              child_parameters,
                                              results_per_page,
                                              after=after)
-
                 with metrics.http_request_timer(self.name):
                     data = self.excute_graph_ql(query)
 
@@ -266,9 +265,11 @@ class Stream():
             if "errors" in response:
                 errors = response["errors"]
                 if errors[0]["extensions"]["code"] == "THROTTLED":
+                    singer.log_info(errors)
                     raise pyactiveresource.connection.Error("THROTTLED", code=429)
                 else:
-                    raise pyactiveresource.connection.Error("THROTTLED", code=500)
+                    singer.log_info(errors)
+                    raise pyactiveresource.connection.Error("Failed", code=500)
 
             singer.log_critical(response)
             raise Exception("Got error while loading data")
@@ -306,6 +307,7 @@ class Stream():
             if stream["tap_stream_id"] == self.name:
                 schema = stream["schema"]
                 break
+
         return schema
 
     def get_graph_ql_prop(self, schema):

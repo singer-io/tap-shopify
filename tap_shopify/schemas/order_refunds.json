@@ -85,48 +85,54 @@
       "items": {
         "properties": {
           "amountSet": {
-            "presentmentMoney": {
-              "properties": {
-                "currencyCode": {
-                  "type": [
-                    "null",
-                    "string"
-                  ]
+            "properties": {
+              "presentmentMoney": {
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
                 },
-                "amount": {
-                  "type": [
-                    "null",
-                    "number"
-                  ]
-                }
+                "type": [
+                  "null",
+                  "object"
+                ]
               },
-              "type": [
-                "null",
-                "object"
-              ]
+              "shopMoney": {
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
+              }
             },
-            "shopMoney": {
-              "properties": {
-                "currencyCode": {
-                  "type": [
-                    "null",
-                    "string"
-                  ]
-                },
-                "amount": {
-                  "type": [
-                    "null",
-                    "number"
-                  ]
-                }
-              },
-              "type": [
-                "null",
-                "object"
-              ]
-            }
+            "type": [
+              "null",
+              "object"
+            ]
           },
-          "duty": {
+          "originalDuty": {
             "properties": {
               "id": {
                 "type": [
