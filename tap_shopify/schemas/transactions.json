@@ -1,28 +1,35 @@
 {
   "properties": {
-    "error_code": {
+    "accountNumber": {
       "type": [
         "null",
         "string"
       ]
     },
-    "device_id": {
+    "authorizationCode": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
-    "user_id": {
+    "errorCode": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
-    "parent_id": {
+    "manuallyCapturable": {
       "type": [
         "null",
-        "integer"
+        "boolean"
       ]
+    },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     },
     "test": {
       "type": [
@@ -36,50 +43,69 @@
         "string"
       ]
     },
-    "order_id": {
+    "order": {
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
       "type": [
         "null",
-        "integer"
+        "object"
       ]
     },
-    "amount": {
+    "amountSet": {
+      "properties": {
+        "presentmentMoney": {
+          "properties": {
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "amount": {
+              "type": [
+                "null",
+                "number"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "shopMoney": {
+          "properties": {
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "amount": {
+              "type": [
+                "null",
+                "number"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        }
+      },
       "type": [
         "null",
-        "number"
-      ],
-      "multipleOf": 1e-10
-    },
-    "authorization": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "currency": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "source_name": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "message": {
-      "type": [
-        "null",
-        "string"
+        "object"
       ]
     },
     "id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "created_at": {
       "type": [
         "null",
         "string"
@@ -91,90 +117,16 @@
         "string"
       ]
     },
-    "payment_details": {
-      "properties": {
-        "cvv_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_bin": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_company": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_number": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "avs_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        }
-      },
-      "type": [
-        "null",
-        "object"
-      ]
-    },
     "gateway": {
       "type": [
         "null",
         "string"
       ]
     },
-    "admin_graphql_api_id": {
+    "formattedGateway": {
       "type": [
         "null",
         "string"
-      ]
-    },
-    "receipt": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": {
-        "fee_amount": {
-          "type": [
-            "null",
-            "number"
-          ],
-          "multipleOf": 1e-10
-        },
-        "gross_amount": {
-          "type": [
-            "null",
-            "number"
-          ],
-          "multipleOf": 1e-10
-        },
-        "tax_amount": {
-          "type": [
-            "null",
-            "number"
-          ],
-          "multipleOf": 1e-10
-        }
-      },
-      "patternProperties": {".+": {}}
-    },
-    "location_id": {
-      "type": [
-        "null",
-        "integer"
       ]
     }
   },

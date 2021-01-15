@@ -75,22 +75,38 @@ class Transactions(Stream):
         # This is where you would need to add the behavior for enforcing
         # that 'orders' is selected if we want to go that route in the
         # future.
-
-        # Get transactions, bookmarking at `transaction_orders`
         selected_parent = Context.stream_objects['orders']()
-        selected_parent.name = "transaction_orders"
-
-        # Page through all `orders`, bookmarking at `transaction_orders`
-        for parent_object in selected_parent.get_objects():
-            transactions = self.get_transactions(parent_object)
-            for transaction in transactions:
+        selected_parent.name = "orders"
+        schema = self.get_table_schema()
+        ql_properties = self.get_graph_ql_prop(schema)
+        for parent_obj in selected_parent.getChildrenByGraphQL("transactions", ql_properties):
+            for transaction in parent_obj["transactions"]:
                 yield transaction
+
+        # # Get transactions, bookmarking at `transaction_orders`
+        # selected_parent = Context.stream_objects['orders']()
+        # selected_parent.name = "transaction_orders"
+        #
+        # # Page through all `orders`, bookmarking at `transaction_orders`
+        # for parent_object in selected_parent.get_objects():
+        #     transactions = self.get_transactions(parent_object)
+        #     for transaction in transactions:
+        #         yield transaction
+
+
+    def get_objects_with_graphQl(self):
+        selected_parent = Context.stream_objects['orders']()
+        selected_parent.name = "orders"
+        schema = self.get_table_schema()
+        ql_properties = self.get_graph_ql_prop(schema)
+        for parent_obj in selected_parent.getChildrenByGraphQL("transactions", ql_properties):
+            for transaction in parent_obj["transactions"]:
+                yield transaction
+
+
 
     def sync(self):
         for transaction in self.get_objects():
-            transaction_dict = transaction.to_dict()
-            for field_name in ['token', 'version', 'ack']:
-                canonicalize(transaction_dict, field_name)
-            yield transaction_dict
+            yield transaction
 
 Context.stream_objects['transactions'] = Transactions
