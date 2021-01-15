@@ -119,6 +119,7 @@ class Stream():
         # NOTE: Bookmarking can never be updated to not get the most
         # recent thing it saw the next time you run, because the querying
         # only allows greater than or equal semantics.
+
         singer.write_bookmark(
             Context.state,
             # name is overridden by some substreams
@@ -212,7 +213,7 @@ class Stream():
         for obj in self.get_objects():
             yield obj.to_dict()
 
-    def getChildrenByGraphQL(self, child, child_parameters):
+    def get_children_by_graph_ql(self, child, child_parameters):
         LOGGER.info("Getting data with GraphQL")
 
         updated_at_min = self.get_bookmark()
@@ -225,11 +226,11 @@ class Stream():
         while updated_at_min < stop_time:
             after = None
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
-            singer.log_info("getting from %s-%s", updated_at_min,
-                            updated_at_max)
 
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
+            singer.log_info("getting from %s - %s", updated_at_min,
+                            updated_at_max)
             while True:
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
@@ -250,6 +251,8 @@ class Stream():
                     node = edge["node"]
                     yield node
                 if not page_info["hasNextPage"]:
+                    Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
+                    self.update_bookmark(utils.strftime(updated_at_max + datetime.timedelta(seconds=1)))
                     break
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
@@ -269,6 +272,7 @@ class Stream():
 
             singer.log_critical(response)
             raise Exception("Got error while loading data")
+
     def get_graph_query(self, created_at_min, created_at_max, limit, child, child_parameters, child_limit=100,
                         after=None):
         query = """{
