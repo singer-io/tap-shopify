@@ -23,7 +23,7 @@ RESULTS_PER_PAGE = 250
 DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
-MAX_RETRIES = 5
+MAX_RETRIES = 10
 
 
 def is_not_status_code_fn(status_code):
