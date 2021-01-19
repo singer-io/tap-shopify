@@ -15,6 +15,7 @@ from singer import Transformer
 from tap_shopify.context import Context
 import tap_shopify.streams  # Load stream objects into Context
 
+
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 
 if not os.getenv("SHOPIFY_DEBUG_HTTP", False):
