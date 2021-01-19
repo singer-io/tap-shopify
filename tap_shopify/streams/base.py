@@ -237,7 +237,7 @@ class Stream():
             while True:
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
-                                             150,
+                                             100,
                                              child,
                                              child_parameters,
                                              results_per_page,
