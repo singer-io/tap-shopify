@@ -264,7 +264,12 @@ class Stream():
 
     @shopify_error_handling
     def excute_graph_ql(self, query):
-        response = json.loads(shopify.GraphQL().execute(query))
+
+        try:
+            response = json.loads(shopify.GraphQL().execute(query))
+        except Exception as ex:
+            raise pyactiveresource.connection.Error(str(ex), code=500)
+
         if 'data' in response:
             return response['data']
         else:
