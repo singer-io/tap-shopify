@@ -66,14 +66,17 @@ def shopify_error_handling(fnc):
                            simplejson.scanner.JSONDecodeError),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
-                          jitter=None)
+                          jitter=None,
+                          max_value=4)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ClientError,
                            pyactiveresource.connection.Error),
                           giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
                           # No jitter as we want a constant value
-                          jitter=None)
+                          jitter=None,
+                          max_value=4
+                          )
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
