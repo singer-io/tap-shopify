@@ -63,14 +63,15 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.Error,
                            pyactiveresource.formats.Error,
-                           simplejson.scanner.JSONDecodeError),
+                           simplejson.scanner.JSONDecodeError,
+                           GraphQLGeneralError),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
                           jitter=None,
-                          max_value=4)
+                          max_value=120)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ClientError,
-                           pyactiveresource.connection.Error),
+                           GraphQLThrottledError),
                           giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
                           # No jitter as we want a constant value
@@ -86,6 +87,22 @@ def shopify_error_handling(fnc):
 
 class Error(Exception):
     """Base exception for the API interaction module"""
+
+
+class GraphQLThrottledError(Exception):
+    def __init__(self, msg=None, code=None):
+        Exception.__init__(self, msg)
+        self.code = code
+
+    """Base exception for the API interaction module"""
+
+
+class GraphQLGeneralError(Exception):
+    """Base exception for the API interaction module"""
+
+    def __init__(self, msg=None, code=None):
+        Exception.__init__(self, msg)
+        self.code = code
 
 
 class OutOfOrderIdsError(Error):
@@ -268,7 +285,7 @@ class Stream():
         try:
             response = json.loads(shopify.GraphQL().execute(query))
         except Exception as ex:
-            raise pyactiveresource.connection.Error(str(ex), code=500)
+            raise GraphQLGeneralError(str(ex), code=500)
 
         if 'data' in response:
             return response['data']
@@ -277,10 +294,10 @@ class Stream():
                 errors = response["errors"]
                 if errors[0]["extensions"]["code"] == "THROTTLED":
                     singer.log_info(errors)
-                    raise pyactiveresource.connection.Error("THROTTLED", code=429)
+                    raise GraphQLThrottledError("THROTTLED", code=429)
                 else:
                     singer.log_info(errors)
-                    raise pyactiveresource.connection.Error("Failed", code=500)
+                    raise GraphQLGeneralError("Failed", code=500)
 
             singer.log_critical(response)
             raise Exception("Got error while loading data")
