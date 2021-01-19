@@ -10,6 +10,9 @@ import simplejson
 import singer
 from singer import metrics, utils
 from tap_shopify.context import Context
+import shopify
+import json
+import pyactiveresource.connection
 
 LOGGER = singer.get_logger()
 
@@ -20,7 +23,8 @@ RESULTS_PER_PAGE = 250
 DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
-MAX_RETRIES = 10
+MAX_RETRIES = 5
+
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -28,17 +32,21 @@ def is_not_status_code_fn(status_code):
             return True
         # Retry other errors up to the max
         return False
+
     return gen_fn
+
 
 def leaky_bucket_handler(details):
     LOGGER.info("Received 429 -- sleeping for %s seconds",
                 details['wait'])
 
+
 def retry_handler(details):
     LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
                 details['tries'], MAX_RETRIES)
 
-#pylint: disable=unused-argument
+
+# pylint: disable=unused-argument
 def retry_after_wait_gen(**kwargs):
     # This is called in an except block so we can retrieve the exception
     # and check it.
@@ -50,6 +58,7 @@ def retry_after_wait_gen(**kwargs):
     sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
     yield math.floor(float(sleep_time_str))
 
+
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.Error,
@@ -59,7 +68,8 @@ def shopify_error_handling(fnc):
                           max_tries=MAX_RETRIES,
                           jitter=None)
     @backoff.on_exception(backoff.expo,
-                          pyactiveresource.connection.ClientError,
+                          (pyactiveresource.connection.ClientError,
+                           pyactiveresource.connection.Error),
                           giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
                           # No jitter as we want a constant value
@@ -67,13 +77,17 @@ def shopify_error_handling(fnc):
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
+
     return wrapper
+
 
 class Error(Exception):
     """Base exception for the API interaction module"""
 
+
 class OutOfOrderIdsError(Error):
     """Raised if our expectation of ordering by ID is violated"""
+
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
@@ -105,6 +119,7 @@ class Stream():
         # NOTE: Bookmarking can never be updated to not get the most
         # recent thing it saw the next time you run, because the querying
         # only allows greater than or equal semantics.
+
         singer.write_bookmark(
             Context.state,
             # name is overridden by some substreams
@@ -113,7 +128,6 @@ class Stream():
             bookmark_value
         )
         singer.write_state(Context.state)
-
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
@@ -145,6 +159,9 @@ class Stream():
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
+
+            singer.log_info("getting from %s - %s", updated_at_min,
+                            updated_at_max)
             while True:
                 status_key = self.status_key or "status"
                 query_params = {
@@ -198,3 +215,116 @@ class Stream():
         """
         for obj in self.get_objects():
             yield obj.to_dict()
+
+    def get_children_by_graph_ql(self, child, child_parameters):
+        LOGGER.info("Getting data with GraphQL")
+
+        updated_at_min = self.get_bookmark()
+
+        stop_time = singer.utils.now().replace(microsecond=0)
+        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+        results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+
+        # Page through till the end of the resultset
+        while updated_at_min < stop_time:
+            after = None
+            updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
+
+            if updated_at_max > stop_time:
+                updated_at_max = stop_time
+            singer.log_info("getting from %s - %s", updated_at_min,
+                            updated_at_max)
+            while True:
+                query = self.get_graph_query(updated_at_min,
+                                             updated_at_max,
+                                             150,
+                                             child,
+                                             child_parameters,
+                                             results_per_page,
+                                             after=after)
+                with metrics.http_request_timer(self.name):
+                    data = self.excute_graph_ql(query)
+
+                data = data[self.name]
+                page_info = data['pageInfo']
+                edges = data["edges"]
+                for edge in edges:
+                    after = edge["cursor"]
+                    node = edge["node"]
+                    yield node
+                if not page_info["hasNextPage"]:
+                    Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
+                    self.update_bookmark(utils.strftime(updated_at_max + datetime.timedelta(seconds=1)))
+                    break
+
+            updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+
+    @shopify_error_handling
+    def excute_graph_ql(self, query):
+        response = json.loads(shopify.GraphQL().execute(query))
+        if 'data' in response:
+            return response['data']
+        else:
+            if "errors" in response:
+                errors = response["errors"]
+                if errors[0]["extensions"]["code"] == "THROTTLED":
+                    singer.log_info(errors)
+                    raise pyactiveresource.connection.Error("THROTTLED", code=429)
+                else:
+                    singer.log_info(errors)
+                    raise pyactiveresource.connection.Error("Failed", code=500)
+
+            singer.log_critical(response)
+            raise Exception("Got error while loading data")
+
+    def get_graph_query(self, created_at_min, created_at_max, limit, child, child_parameters, child_limit=100,
+                        after=None):
+        query = """{
+                      orders(first:%i %s ,query:"created_at:>'%s' AND created_at:<'%s'") {
+                        pageInfo { # Returns details about the current page of results
+                          hasNextPage # Whether there are more results after this page
+                          hasPreviousPage # Whether there are more results before this page
+                        }
+                        edges{
+                          cursor
+                          node{
+                            id,
+                            %s(first:%i){
+                              %s
+                            }
+                            createdAt
+                          }
+                        }
+                      }
+                }"""
+        after_str = ''
+        if after:
+            after_str = ',after:"%s"' % after
+        query = query % (limit, after_str, created_at_min, created_at_max, child, child_limit, child_parameters)
+        return query
+
+    def get_table_schema(self):
+        streams = Context.catalog["streams"]
+        schema = None
+        for stream in streams:
+            if stream["tap_stream_id"] == self.name:
+                schema = stream["schema"]
+                break
+
+        return schema
+
+    def get_graph_ql_prop(self, schema):
+        properties = schema["properties"]
+        ql_fields = []
+        for prop in properties:
+            if 'object' in properties[prop]['type']:
+                if properties[prop]["properties"]:
+                    ql_field = "%s{%s}" % (prop, self.get_graph_ql_prop(properties[prop]))
+                    ql_fields.append(ql_field)
+            elif 'array' in properties[prop]['type']:
+                if properties[prop]["items"]["properties"]:
+                    ql_field = "%s{%s}" % (prop, self.get_graph_ql_prop(properties[prop]["items"]))
+                    ql_fields.append(ql_field)
+            else:
+                ql_fields.append(prop)
+        return ','.join(ql_fields)
