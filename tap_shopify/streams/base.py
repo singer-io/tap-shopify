@@ -1,6 +1,7 @@
 import datetime
 import functools
 import math
+import os
 import sys
 
 import backoff
@@ -68,7 +69,7 @@ def shopify_error_handling(fnc):
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
                           jitter=None,
-                          max_value=120)
+                          max_value=60)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ClientError,
                            GraphQLThrottledError),
@@ -107,6 +108,16 @@ class GraphQLGeneralError(Exception):
 
 class OutOfOrderIdsError(Error):
     """Raised if our expectation of ordering by ID is violated"""
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 
 class Stream():
@@ -283,9 +294,11 @@ class Stream():
     def excute_graph_ql(self, query):
 
         try:
-            response = json.loads(shopify.GraphQL().execute(query))
-        except Exception as ex:
-            raise GraphQLGeneralError(str(ex), code=500)
+            # the execute function sometimes prints and this causes errors for the target, so I block printing for it
+            with HiddenPrints():
+                response = json.loads(shopify.GraphQL().execute(query))
+        except Exception:
+            raise GraphQLGeneralError("Execution failed", code=500)
 
         if 'data' in response:
             return response['data']
@@ -297,10 +310,8 @@ class Stream():
                     raise GraphQLThrottledError("THROTTLED", code=429)
                 else:
                     singer.log_info(errors)
-                    raise GraphQLGeneralError("Failed", code=500)
 
-            singer.log_critical(response)
-            raise Exception("Got error while loading data")
+            raise GraphQLGeneralError("Failed", code=500)
 
     def get_graph_query(self, created_at_min, created_at_max, limit, child, child_parameters, child_limit=100,
                         after=None):
