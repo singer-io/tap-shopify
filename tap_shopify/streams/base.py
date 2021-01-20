@@ -305,11 +305,9 @@ class Stream():
         else:
             if "errors" in response:
                 errors = response["errors"]
+                singer.log_info(errors)
                 if errors[0]["extensions"]["code"] == "THROTTLED":
-                    singer.log_info(errors)
                     raise GraphQLThrottledError("THROTTLED", code=429)
-                else:
-                    singer.log_info(errors)
 
             raise GraphQLGeneralError("Failed", code=500)
 
