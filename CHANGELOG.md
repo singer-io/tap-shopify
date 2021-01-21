@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.7
+  * Bumped Shopify API version to 2021-01 (SDK version 8.2.0) [#79](https://github.com/singer-io/tap-shopify/pull/79/)
+
 ## 1.2.6
   * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69] (https://github.com/singer-io/tap-shopify/pull/69)
 
