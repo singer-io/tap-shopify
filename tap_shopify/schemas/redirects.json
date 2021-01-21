@@ -1,0 +1,23 @@
+{
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "path": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "target": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    }
+}

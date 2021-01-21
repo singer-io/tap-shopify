@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.0
+  * Adds a `redirects` stream [#80] (https://github.com/singer-io/tap-shopify/pull/80)
+
 ## 1.2.6
   * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69] (https://github.com/singer-io/tap-shopify/pull/69)
 
