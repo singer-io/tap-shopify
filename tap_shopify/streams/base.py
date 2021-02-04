@@ -15,6 +15,7 @@ import shopify
 import json
 import pyactiveresource.connection
 from socket import error as SocketError
+from http.client import IncompleteRead
 
 LOGGER = singer.get_logger()
 
@@ -67,6 +68,7 @@ def shopify_error_handling(fnc):
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError,
                            SocketError,
+                           IncompleteRead,
                            ConnectionResetError,
                            GraphQLGeneralError),
                           on_backoff=retry_handler,
