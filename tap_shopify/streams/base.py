@@ -14,6 +14,7 @@ from tap_shopify.context import Context
 import shopify
 import json
 import pyactiveresource.connection
+from socket import error as SocketError
 
 LOGGER = singer.get_logger()
 
@@ -65,6 +66,8 @@ def shopify_error_handling(fnc):
                           (pyactiveresource.connection.Error,
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError,
+                           SocketError,
+                           ConnectionResetError,
                            GraphQLGeneralError),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
