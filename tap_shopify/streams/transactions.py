@@ -13,6 +13,7 @@ class Transactions(GraphQlChildStream):
     replication_object = shopify.Transaction
     parent_key_access = "transactions"
     parent_name = "orders"
+    parent_id_ql_prefix = 'gid://shopify/Order/'
 
 
 Context.stream_objects['transactions'] = Transactions

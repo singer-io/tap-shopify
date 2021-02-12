@@ -10,6 +10,7 @@ class OrderRefunds(GraphQlChildStream):
     replication_object = shopify.Refund
     parent_key_access = "refunds"
     parent_name = "orders"
+    parent_id_ql_prefix = 'gid://shopify/Order/'
 
 
 Context.stream_objects['order_refunds'] = OrderRefunds
