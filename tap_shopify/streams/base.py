@@ -356,6 +356,8 @@ class Stream():
         properties = schema["properties"]
         ql_fields = []
         for prop in properties:
+            if "generated" in properties[prop]["type"]:
+                continue
             if 'object' in properties[prop]['type']:
                 if properties[prop]["properties"]:
                     ql_field = "%s{%s}" % (prop, self.get_graph_ql_prop(properties[prop]))

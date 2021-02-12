@@ -6,6 +6,13 @@
         "string"
       ]
     },
+    "parentId": {
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ]
+    },
     "authorizationCode": {
       "type": [
         "null",

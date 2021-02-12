@@ -156,6 +156,13 @@
         "null",
         "array"
       ]
+    },
+    "parentId": {
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ]
     }
   }
 }
