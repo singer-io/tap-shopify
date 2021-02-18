@@ -16,6 +16,7 @@ import json
 import pyactiveresource.connection
 from socket import error as SocketError
 from http.client import IncompleteRead
+from tap_shopify.remember_errors_backoff import RememberErrorsBackoff
 
 LOGGER = singer.get_logger()
 
@@ -62,6 +63,8 @@ def retry_after_wait_gen(**kwargs):
     yield math.floor(float(sleep_time_str))
 
 
+remember_errors = RememberErrorsBackoff()
+
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.Error,
@@ -75,14 +78,14 @@ def shopify_error_handling(fnc):
                           max_tries=MAX_RETRIES,
                           jitter=None,
                           max_value=60)
-    @backoff.on_exception(backoff.expo,
+    @backoff.on_exception(remember_errors.get_yield,
                           (pyactiveresource.connection.ClientError,
                            GraphQLThrottledError),
                           giveup=is_not_status_code_fn([429]),
-                          on_backoff=leaky_bucket_handler,
+                          on_backoff=remember_errors.on_error,
+                          on_success=remember_errors.on_success,
                           # No jitter as we want a constant value
-                          jitter=None,
-                          max_value=4
+                          jitter=None
                           )
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
