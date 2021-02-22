@@ -26,7 +26,6 @@ class RememberErrorsBackoff:
 
     def on_success(self, details):
         idx = self._get_idx()
-        logging.info("success {}".format(idx))
         if idx != self.last_idx:
             self.last_idx = idx
             self.errors_in_minutes[idx] = 0
