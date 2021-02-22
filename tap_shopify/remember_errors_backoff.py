@@ -1,26 +1,41 @@
 import os
 import logging
+import math
+import time
+import random
 
 
 class RememberErrorsBackoff:
     def __init__(self):
-        self.errors = 0
-        self.sleep_steps = float(os.getenv("BACKOFF_STEPS", 0.1))
-        self.max_sleep = float(os.getenv("BACKOFF_MAX_SECONDS", 10))
-        self.success_without_error = 0
+        self.modulo = 6
+        self.errors_in_minutes = [0] * self.modulo
+        self.last_idx = None
+        self.sleep_steps = float(os.getenv("BACKOFF_STEPS", 0.5))
+        self.max_sleep = float(os.getenv("BACKOFF_MAX_SECONDS", 120))
 
     def on_error(self, details):
-        self.success_without_error = 0
-        logging.info("Received 429 -- sleeping for %s seconds", details['wait'])
-        self.errors += 1
+        idx = self._get_idx()
+        if idx != self.last_idx:
+            self.last_idx = idx
+            self.errors_in_minutes[idx] = 0
+
+        self.errors_in_minutes[idx] += 1
+
+    def _get_idx(self) -> int:
+        return int(math.ceil(time.time() / 10) % self.modulo)
 
     def on_success(self, details):
-        self.success_without_error += 1
-        self.errors -= self.success_without_error
-        self.errors = max(0, self.errors)
+        idx = self._get_idx()
+        logging.info("success {}".format(idx))
+        if idx != self.last_idx:
+            self.last_idx = idx
+            self.errors_in_minutes[idx] = 0
 
     def get_yield(self):
         while True:
-            errors = max(self.errors, 1)
-            sleep_time = errors * self.sleep_steps
-            yield min(self.max_sleep, sleep_time)
+            errors_last_minutes = sum(self.errors_in_minutes)
+            sleep_for = math.ceil(self.sleep_steps * errors_last_minutes) + 1
+            logging.info("had {} errors within the last minute, max sleep {}".format(errors_last_minutes, sleep_for))
+
+            sleep_for = min(sleep_for, self.max_sleep)
+            yield random.randint(1,sleep_for)
