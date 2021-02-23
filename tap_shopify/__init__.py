@@ -151,6 +151,8 @@ def sync():
                                         rec,
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
+            except pyactiveresource.connection.ResourceNotFound as e:
+                raise ShopifyError(e, 'Ensure shop is entered correctly')
             except pyactiveresource.connection.ConnectionError as e:
                 msg = ''
                 try:
