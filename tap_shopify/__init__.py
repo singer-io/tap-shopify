@@ -12,6 +12,7 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
+from tap_shopify.exceptions import ShopifyError
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
@@ -140,15 +141,27 @@ def sync():
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
         with Transformer() as transformer:
-            for rec in stream.sync():
-                extraction_time = singer.utils.now()
-                record_schema = catalog_entry['schema']
-                record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform(rec, record_schema, record_metadata)
-                singer.write_record(stream_id,
-                                    rec,
-                                    time_extracted=extraction_time)
-                Context.counts[stream_id] += 1
+            try:
+                for rec in stream.sync():
+                    extraction_time = singer.utils.now()
+                    record_schema = catalog_entry['schema']
+                    record_metadata = metadata.to_map(catalog_entry['metadata'])
+                    rec = transformer.transform(rec, record_schema, record_metadata)
+                    singer.write_record(stream_id,
+                                        rec,
+                                        time_extracted=extraction_time)
+                    Context.counts[stream_id] += 1
+            except pyactiveresource.connection.ConnectionError as e:
+                msg = ''
+                try:
+                    body_json = e.response.body.decode()
+                    body = json.loads(body_json)
+                    msg = body.get('errors')
+                finally:
+                    raise ShopifyError(e, msg) from e
+            except pyactiveresource.connection.ServerError as e:
+                raise ShopifyError(e) from e
+
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
