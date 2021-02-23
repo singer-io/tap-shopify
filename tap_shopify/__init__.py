@@ -159,7 +159,7 @@ def sync():
                     msg = body.get('errors')
                 finally:
                     raise ShopifyError(e, msg) from e
-            except pyactiveresource.connection.ServerError as e:
+            except Exception as e:
                 raise ShopifyError(e) from e
 
 
