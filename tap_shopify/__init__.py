@@ -151,20 +151,21 @@ def sync():
                                         rec,
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
-            except pyactiveresource.connection.ResourceNotFound as e:
-                raise ShopifyError(e, 'Ensure shop is entered correctly')
-            except pyactiveresource.connection.UnauthorizedAccess as e:
-                raise ShopifyError(e, 'Invalid access token - Re-authorize the connection')
-            except pyactiveresource.connection.ConnectionError as e:
+            except pyactiveresource.connection.ResourceNotFound as exc:
+                raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
+            except pyactiveresource.connection.UnauthorizedAccess as exc:
+                raise ShopifyError(exc, 'Invalid access token - Re-authorize the connection') \
+                    from exc
+            except pyactiveresource.connection.ConnectionError as exc:
                 msg = ''
                 try:
-                    body_json = e.response.body.decode()
+                    body_json = exc.response.body.decode()
                     body = json.loads(body_json)
                     msg = body.get('errors')
                 finally:
-                    raise ShopifyError(e, msg) from e
-            except Exception as e:
-                raise ShopifyError(e) from e
+                    raise ShopifyError(exc, msg) from exc
+            except Exception as exc:
+                raise ShopifyError(exc) from exc
 
 
         Context.state['bookmarks'].pop('currently_sync_stream')
@@ -195,10 +196,10 @@ def main():
             Context.config = args.config
             Context.state = args.state
             sync()
-    except Exception as e:
-        for line in str(e).splitlines():
+    except Exception as exc:
+        for line in str(exc).splitlines():
             LOGGER.critical(line)
-        raise e
+        raise exc
 
 if __name__ == "__main__":
     main()
