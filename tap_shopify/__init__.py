@@ -153,6 +153,8 @@ def sync():
                     Context.counts[stream_id] += 1
             except pyactiveresource.connection.ResourceNotFound as e:
                 raise ShopifyError(e, 'Ensure shop is entered correctly')
+            except pyactiveresource.connection.UnauthorizedAccess as e:
+                raise ShopifyError(e, 'Invalid access token - Re-authorize the connection')
             except pyactiveresource.connection.ConnectionError as e:
                 msg = ''
                 try:
