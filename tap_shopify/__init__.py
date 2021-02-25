@@ -176,30 +176,26 @@ def sync():
         LOGGER.info('%s: %d', stream_id, stream_count)
     LOGGER.info('----------------------')
 
+@utils.handle_top_exception(LOGGER)
 def main():
-    try:
-        # Parse command line arguments
-        args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+    # Parse command line arguments
+    args = utils.parse_args(REQUIRED_CONFIG_KEYS)
 
-        # If discover flag was passed, run discovery mode and dump output to stdout
-        if args.discover:
-            catalog = discover()
-            print(json.dumps(catalog, indent=2))
-        # Otherwise run in sync mode
+    # If discover flag was passed, run discovery mode and dump output to stdout
+    if args.discover:
+        catalog = discover()
+        print(json.dumps(catalog, indent=2))
+    # Otherwise run in sync mode
+    else:
+        Context.tap_start = utils.now()
+        if args.catalog:
+            Context.catalog = args.catalog.to_dict()
         else:
-            Context.tap_start = utils.now()
-            if args.catalog:
-                Context.catalog = args.catalog.to_dict()
-            else:
-                Context.catalog = discover()
+            Context.catalog = discover()
 
-            Context.config = args.config
-            Context.state = args.state
-            sync()
-    except Exception as exc:
-        for line in str(exc).splitlines():
-            LOGGER.critical(line)
-        raise exc
+        Context.config = args.config
+        Context.state = args.state
+        sync()
 
 if __name__ == "__main__":
     main()
