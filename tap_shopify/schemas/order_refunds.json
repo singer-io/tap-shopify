@@ -168,8 +168,9 @@
           "total_tax": {
             "type": [
               "null",
-              "number"
-            ]
+              "string"
+            ],
+            "format": "singer.decimal"
           },
           "quantity": {
             "type": [
@@ -268,7 +269,8 @@
                       "type": [
                         "null",
                         "number"
-                      ]
+                      ],
+                      "format": "singer.decimal"
                     }
                   },
                   "type": [
@@ -650,8 +652,9 @@
           "subtotal": {
             "type": [
               "null",
-              "number"
-            ]
+              "string"
+            ],
+            "format": "singer.decimal"
           },
           "restock_type": {
             "type": [
