@@ -25,7 +25,6 @@ jobs:
           command: |
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
             stitch-validate-json /usr/local/share/virtualenvs/tap-shopify/lib/python3.5/site-packages/tap_shopify/schemas/*.json
-            stitch-validate-json /usr/local/share/virtualenvs/tap-shopify/lib/python3.5/site-packages/tap_shopify/schemas/shared/*.json
       - add_ssh_keys
       - run:
           name: 'Integration Tests'
