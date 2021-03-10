@@ -268,7 +268,7 @@
                     "rate": {
                       "type": [
                         "null",
-                        "number"
+                        "string"
                       ],
                       "format": "singer.decimal"
                     }
