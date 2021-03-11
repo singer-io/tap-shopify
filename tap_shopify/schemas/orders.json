@@ -1,4 +1,4 @@
- {
+{
   "properties": {
     "presentment_currency": {
         "type": [
@@ -96,9 +96,8 @@
                 "amount": {
                   "type": [
                     "null",
-                    "string"
-                  ],
-                  "format": "singer.decimal"
+                    "number"
+                  ]
                 }
               },
               "type": [
@@ -120,9 +119,8 @@
           "discounted_price": {
             "type": [
               "null",
-              "string"
-            ],
-            "format": "singer.decimal"
+              "number"
+            ]
           },
           "code": {
             "type": [
@@ -471,9 +469,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "address2": {
           "type": [
@@ -514,9 +511,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "country_code": {
           "type": [
@@ -610,9 +606,8 @@
           "value": {
             "type": [
               "null",
-              "string"
-            ],
-            "format": "singer.decimal"
+              "number"
+            ]
           }
         },
         "type": [
@@ -685,9 +680,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "address2": {
           "type": [
@@ -728,9 +722,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "country_code": {
           "type": [
@@ -1019,9 +1012,8 @@
                 "total_tax": {
                   "type": [
                     "null",
-                    "string"
-                  ],
-                  "format": "singer.decimal"
+                    "number"
+                  ]
                 },
                 "restock_type": {
                   "type": [
@@ -1032,9 +1024,8 @@
                 "subtotal": {
                   "type": [
                     "null",
-                    "string"
-                  ],
-                  "format": "singer.decimal"
+                    "number"
+                  ]
                 }
               },
               "type": [

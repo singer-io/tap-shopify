@@ -66,9 +66,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "zip": {
           "type": [
@@ -127,9 +126,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         }
       }
     },
@@ -448,9 +446,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "zip": {
           "type": [
@@ -509,9 +506,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         }
       }
     },

@@ -221,9 +221,8 @@
           "weight": {
             "type": [
               "null",
-              "string"
-            ],
-            "format": "singer.decimal"
+              "number"
+            ]
           },
           "inventory_management": {
             "type": [
