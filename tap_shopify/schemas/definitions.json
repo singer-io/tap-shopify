@@ -593,9 +593,8 @@
             "amount": {
               "type": [
                 "null",
-                "string"
-              ],
-              "format": "singer.decimal"
+                "number"
+              ]
             }
           },
           "type": [
@@ -617,9 +616,8 @@
       "pre_tax_price": {
         "type": [
           "null",
-          "string"
-        ],
-        "format": "singer.decimal"
+          "number"
+        ]
       },
       "sku": {
         "type": [
