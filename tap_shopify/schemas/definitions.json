@@ -11,9 +11,9 @@
         "tax_amount": {
           "type": [
             "null",
-            "string"
+            "number"
           ],
-          "format": "singer.decimal"
+          "multipleOf": 1e-10
         },
         "refund_id": {
           "type": [
@@ -24,9 +24,9 @@
         "amount": {
           "type": [
             "null",
-            "string"
+            "number"
           ],
-          "format": "singer.decimal"
+          "multipleOf": 1e-10
         },
         "kind": {
           "type": [
@@ -593,9 +593,8 @@
             "amount": {
               "type": [
                 "null",
-                "string"
-              ],
-              "format": "singer.decimal"
+                "number"
+              ]
             }
           },
           "type": [
@@ -617,9 +616,8 @@
       "pre_tax_price": {
         "type": [
           "null",
-          "string"
-        ],
-        "format": "singer.decimal"
+          "number"
+        ]
       },
       "sku": {
         "type": [
@@ -636,9 +634,9 @@
       "total_discount": {
         "type": [
           "null",
-          "string"
+          "number"
         ],
-        "format": "singer.decimal"
+        "multipleOf": 1e-10
       },
       "name": {
         "type": [
@@ -682,9 +680,9 @@
       "price": {
         "type": [
           "null",
-          "string"
+          "number"
         ],
-        "format": "singer.decimal"
+        "multipleOf": 1e-10
       },
       "requires_shipping": {
         "type": [
@@ -830,9 +828,9 @@
         "price": {
           "type": [
             "null",
-            "string"
+            "number"
           ],
-          "format": "singer.decimal"
+          "multipleOf": 1e-10
         },
         "title": {
           "type": [
@@ -843,9 +841,9 @@
         "rate": {
           "type": [
             "null",
-            "string"
+            "number"
           ],
-          "format": "singer.decimal"
+          "multipleOf": 1e-10
         },
         "compare_at": {
           "type": [

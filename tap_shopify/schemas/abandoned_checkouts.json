@@ -66,9 +66,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "zip": {
           "type": [
@@ -127,9 +126,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         }
       }
     },
@@ -159,9 +157,9 @@
           "amount": {
             "type": [
               "null",
-              "string"
+              "number"
             ],
-            "format": "singer.decimal"
+            "multipleOf": 1e-10
           },
           "code": {
             "type": [
@@ -222,9 +220,9 @@
     "total_line_items_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ],
-      "format": "singer.decimal"
+      "multipleOf": 1e-10
     },
     "closed_at": {
       "type": [
@@ -266,16 +264,16 @@
     "total_tax": {
       "type": [
         "null",
-        "string"
+        "number"
       ],
-      "format": "singer.decimal"
+      "multipleOf": 1e-10
     },
     "subtotal_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ],
-      "format": "singer.decimal"
+      "multipleOf": 1e-10
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -289,9 +287,9 @@
     "total_discounts": {
       "type": [
         "null",
-        "string"
+        "number"
       ],
-      "format": "singer.decimal"
+      "multipleOf": 1e-10
     },
     "note": {
       "type": [
@@ -351,9 +349,9 @@
           "price": {
             "type": [
               "null",
-              "string"
+              "number"
             ],
-            "format": "singer.decimal"
+            "multipleOf": 1e-10
           },
           "requested_fulfillment_service_id": {
             "type": [
@@ -448,9 +446,8 @@
         "latitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         },
         "zip": {
           "type": [
@@ -509,9 +506,8 @@
         "longitude": {
           "type": [
             "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+            "number"
+          ]
         }
       }
     },
@@ -533,9 +529,9 @@
     "total_price": {
       "type": [
         "null",
-        "string"
+        "number"
       ],
-      "format": "singer.decimal"
+      "multipleOf": 1e-10
     },
     "cart_token": {
       "type": [

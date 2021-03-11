@@ -178,9 +178,9 @@
           "price": {
             "type": [
               "null",
-              "string"
+              "number"
             ],
-            "format": "singer.decimal"
+            "multipleOf": 1e-10
           },
           "image_id": {
             "type": [
@@ -221,9 +221,8 @@
           "weight": {
             "type": [
               "null",
-              "string"
-            ],
-            "format": "singer.decimal"
+              "number"
+            ]
           },
           "inventory_management": {
             "type": [
@@ -252,9 +251,9 @@
           "compare_at_price": {
             "type": [
               "null",
-              "string"
+              "number"
             ],
-            "format": "singer.decimal"
+            "multipleOf": 1e-10
           },
           "updated_at": {
             "type": [
