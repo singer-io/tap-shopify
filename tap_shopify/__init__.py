@@ -89,7 +89,7 @@ def discover():
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method,
-            'order': [str(column) for column in schema['properties']]
+            'column_order': [str(column) for column in schema['properties']]
         }
         streams.append(catalog_entry)
 
@@ -179,7 +179,7 @@ def main():
             for stream in streams:
                 new_properties = {}
                 old_properties = stream['schema']['properties']
-                order = stream['order']
+                order = stream['column_order']
 
                 for column in order:
                     new_properties[column] = old_properties[column]
