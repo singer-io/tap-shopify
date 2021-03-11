@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.8
+  * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
+
 ## 1.2.7
   * Change how exceptions are logged to make the error messages more consistent [#84](https://github.com/singer-io/tap-shopify/pull/84)
 
