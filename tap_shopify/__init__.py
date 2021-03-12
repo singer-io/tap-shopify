@@ -11,6 +11,7 @@ import singer
 from singer import utils
 from singer import metadata
 from singer import Transformer
+from singer import Catalog
 from tap_shopify.context import Context
 import tap_shopify.streams # Load stream objects into Context
 
@@ -77,16 +78,18 @@ def discover():
             continue
 
         stream = Context.stream_objects[schema_name]()
+        schema = singer.resolve_schema_references(schema, refs)
 
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
             'tap_stream_id': schema_name,
-            'schema': singer.resolve_schema_references(schema, refs),
+            'schema': schema,
             'metadata' : get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
-            'replication_method': stream.replication_method
+            'replication_method': stream.replication_method,
+            'column_order': [str(column) for column in schema['properties']]
         }
         streams.append(catalog_entry)
 
@@ -170,8 +173,20 @@ def main():
     # Otherwise run in sync mode
     else:
         Context.tap_start = utils.now()
-        if args.catalog:
-            Context.catalog = args.catalog.to_dict()
+        if args.properties:
+            # Sort the properties
+            streams = args.properties['streams']
+            for stream in streams:
+                new_properties = {}
+                old_properties = stream['schema']['properties']
+                order = stream['column_order']
+
+                for column in order:
+                    new_properties[column] = old_properties[column]
+
+                stream['schema']['properties'] = new_properties
+
+            Context.catalog = Catalog.from_dict(args.properties)
         else:
             Context.catalog = discover()
 

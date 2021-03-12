@@ -54,7 +54,7 @@ This tap:
 
 5. Run the Tap in Sync Mode
 
-    tap-shopify -c config.json --catalog catalog-file.json
+    tap-shopify -c config.json --properties catalog-file.json
 
 ---
 
