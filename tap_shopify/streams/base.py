@@ -30,10 +30,21 @@ DATE_WINDOW_SIZE = 1
 MAX_RETRIES = 10
 
 
-def is_not_status_code_fn(status_code):
+def is_status_code_fn(blacklist=None, whitelist=None):
     def gen_fn(exc):
-        if getattr(exc, 'code', None) and exc.code not in status_code:
+        status_code = getattr(exc, 'code', None)
+        if status_code is None:
+            return False
+        status_code = getattr(exc, 'code', None)
+        if status_code is None:
+            return False
+
+        if blacklist is not None and status_code not in blacklist:
             return True
+
+        if whitelist is not None and status_code in whitelist:
+            return True
+
         # Retry other errors up to the max
         return False
 
@@ -76,12 +87,13 @@ def shopify_error_handling(fnc):
                            GraphQLGeneralError),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
+                          giveup=is_status_code_fn(whitelist=[401, 403]),
                           jitter=None,
                           max_value=60)
     @backoff.on_exception(remember_errors.get_yield,
                           (pyactiveresource.connection.ClientError,
                            GraphQLThrottledError),
-                          giveup=is_not_status_code_fn([429]),
+                          giveup=is_status_code_fn(blacklist=[429]),
                           on_backoff=remember_errors.on_error,
                           on_success=remember_errors.on_success,
                           # No jitter as we want a constant value
