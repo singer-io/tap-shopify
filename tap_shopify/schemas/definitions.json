@@ -402,18 +402,11 @@
         ]
       },
       "accepts_marketing_updated_at": {
-        "anyOf": [
-          {
-            "type": "string" ,
-            "format": "date-time"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "type": "null"
-          }
-        ]
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
       },
       "created_at": {
         "type": [
