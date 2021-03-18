@@ -45,6 +45,3 @@ class InventoryItem(ChildStream):
             "ids": value
         }
         return self.replication_object.find(**params)
-
-
-Context.stream_objects['inventory_items'] = InventoryItem
