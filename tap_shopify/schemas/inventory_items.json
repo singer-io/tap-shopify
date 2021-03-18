@@ -1,0 +1,87 @@
+{
+  "properties": {
+    "cost": {
+      "type": [
+        "null",
+        "number"
+      ]
+    },
+    "country_code_of_origin": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "country_harmonized_system_codes": {
+      "items": {
+        "harmonized_system_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "country_code": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "array"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "province_code_of_origin": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "sku": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "tracked": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "requires_shipping": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "admin_graphql_api_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  },
+  "type": "object"
+}

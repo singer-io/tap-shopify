@@ -76,6 +76,7 @@ def retry_after_wait_gen(**kwargs):
 
 remember_errors = RememberErrorsBackoff()
 
+
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.Error,
@@ -384,3 +385,7 @@ class Stream():
             else:
                 ql_fields.append(prop)
         return ','.join(ql_fields)
+
+    @shopify_error_handling
+    def get_next_page(self, resource_find):
+        return resource_find.next_page()

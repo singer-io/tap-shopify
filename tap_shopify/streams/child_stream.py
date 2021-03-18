@@ -11,13 +11,14 @@ from abc import abstractmethod
 class ChildStream(Stream):
 
     @shopify_error_handling
-    def get_children(self, parent_object, since_id):
+    def get_children(self, value, since_id, include_since_id=True):
         params = {
             "limit": RESULTS_PER_PAGE,
             "order": 'id asc',
-            "since_id": since_id,
-            self.get_parent_field_name(): parent_object.id
+            self.get_parent_field_name(): value.id
         }
+        if include_since_id:
+            params["since_id"] = since_id
         return self.replication_object.find(**params)
 
     def get_objects(self):

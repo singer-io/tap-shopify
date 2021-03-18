@@ -15,7 +15,6 @@ from singer import Transformer
 from tap_shopify.context import Context
 import tap_shopify.streams  # Load stream objects into Context
 
-
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 
 if not os.getenv("SHOPIFY_DEBUG_HTTP", False):
@@ -133,6 +132,7 @@ def sync():
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
+
     currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
     if currently_sync_stream_name:
         shuffle_streams(currently_sync_stream_name)
