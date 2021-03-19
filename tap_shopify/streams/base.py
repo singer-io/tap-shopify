@@ -301,7 +301,6 @@ class Stream():
 
     @shopify_error_handling
     def excute_graph_ql(self, query):
-
         try:
             # the execute function sometimes prints and this causes errors for the target, so I block printing for it
             with HiddenPrints():

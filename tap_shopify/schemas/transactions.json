@@ -124,6 +124,12 @@
         "string"
       ]
     },
+    "receipt": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "gateway": {
       "type": [
         "null",
