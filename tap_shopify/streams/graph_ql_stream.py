@@ -22,6 +22,7 @@ class GraphQlChildStream(Stream):
         ql_properties = self.get_graph_ql_prop(schema)
         for parent_obj in selected_parent.get_children_by_graph_ql(self.parent_key_access, ql_properties):
             for child_obj in parent_obj[self.parent_key_access]:
+                child_obj = self.transform_obj(child_obj)
                 child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
                 yield child_obj
 
@@ -32,3 +33,6 @@ class GraphQlChildStream(Stream):
     def transform_parent_id(self, parent_id):
         parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
         return parent_id
+
+    def transform_obj(self, obj):
+        return obj

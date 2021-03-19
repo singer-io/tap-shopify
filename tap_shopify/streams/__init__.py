@@ -9,6 +9,5 @@ import tap_shopify.streams.collects
 import tap_shopify.streams.custom_collections
 import tap_shopify.streams.discounts_codes
 import tap_shopify.streams.price_rules
-import tap_shopify.streams.inventory_items
 import tap_shopify.streams.inventroy_levels
 import tap_shopify.streams.locations
