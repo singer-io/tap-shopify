@@ -6,6 +6,12 @@
         "string"
       ]
     },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "country": {
       "type": [
         "null",
