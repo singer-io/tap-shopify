@@ -7,7 +7,7 @@ from tap_shopify.streams.base import Stream
 class Location(Stream):
     name = 'locations'
     replication_object = shopify.Location
-    key_properties = []
+    key_properties = ['id']
     replication_method = 'FULL_TABLE'
 
     def get_objects(self):
