@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.9
+  * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
+
 ## 1.2.8
   * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
 
