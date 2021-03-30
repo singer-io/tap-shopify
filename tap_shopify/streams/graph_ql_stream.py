@@ -34,6 +34,11 @@ class GraphQlChildStream(Stream):
                 child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
                 yield child_obj
 
+    def transform_obj(self, obj):
+        for col in self.need_edges_cols:
+            obj[col] = [trans_obj["node"] for trans_obj in obj[col]["edges"]]
+        return obj
+
     def sync(self):
         for child_obj in self.get_objects():
             yield child_obj
@@ -41,9 +46,6 @@ class GraphQlChildStream(Stream):
     def transform_parent_id(self, parent_id):
         parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
         return parent_id
-
-    def transform_obj(self, obj):
-        return obj
 
     def get_children_by_graph_ql(self, parent, child, child_parameters):
         LOGGER.info("Getting data with GraphQL")
