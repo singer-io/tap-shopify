@@ -13,12 +13,8 @@ class OrderRefunds(GraphQlChildStream):
     parent_name = "orders"
     parent_id_ql_prefix = 'gid://shopify/Order/'
     child_per_page = 5
-    parent_per_page = 15
+    parent_per_page = 25
     need_edges_cols = ["refundLineItems"]
-
-    def transform_obj(self, obj):
-        obj["refundLineItems"] = [trans_obj["node"] for trans_obj in obj["refundLineItems"]["edges"]]
-        return obj
 
 
 Context.stream_objects['order_refunds'] = OrderRefunds
