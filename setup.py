@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="tap-shopify",
-    version="1.2.6",
+    version="1.2.9",
     description="Singer.io tap for extracting Shopify data",
     author="Stitch",
     url="http://github.com/singer-io/tap-shopify",
@@ -11,7 +11,7 @@ setup(
     py_modules=["tap_shopify"],
     install_requires=[
         "ShopifyAPI==8.0.1",
-        "singer-python==5.9.1",
+        "singer-python==5.12.1",
     ],
     extras_require={
         'dev': [

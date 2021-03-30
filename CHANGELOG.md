@@ -1,7 +1,16 @@
 # Changelog
 
+## 1.2.9
+  * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
+
+## 1.2.8
+  * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
+
+## 1.2.7
+  * Change how exceptions are logged to make the error messages more consistent [#84](https://github.com/singer-io/tap-shopify/pull/84)
+
 ## 1.2.6
-  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69] (https://github.com/singer-io/tap-shopify/pull/69)
+  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69](https://github.com/singer-io/tap-shopify/pull/69)
 
 ## 1.2.5
   * Bumps `singer-python` from `5.4.1` to `5.9.1` [#67](https://github.com/singer-io/tap-shopify/pull/67)
