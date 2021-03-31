@@ -12,7 +12,7 @@ class OrderRefunds(GraphQlChildStream):
     parent_key_access = "refunds"
     parent_name = "orders"
     parent_id_ql_prefix = 'gid://shopify/Order/'
-    child_per_page = 5
+    child_per_page = 100
     parent_per_page = 25
     need_edges_cols = ["refundLineItems"]
 
