@@ -14,6 +14,7 @@ from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
 import tap_shopify.streams # Load stream objects into Context
+from tap_shopify.streams import disputes
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
