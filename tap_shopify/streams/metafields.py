@@ -30,7 +30,7 @@ class Metafields(Stream):
 
     def __init__(self, *args, **kwargs):
         super(*args, **kwargs)
-        self.should_parse_json_string = Context.config.get('should_parse_json_string', True)
+        self.should_parse_json_string = Context.config.get('metafields_value_should_parse_json_string', True)
 
     def get_objects(self):
         # Get top-level shop metafields
