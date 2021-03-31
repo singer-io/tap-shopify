@@ -239,13 +239,13 @@
     "current_total_price": {
       "type": [
         "null",
-        "integer"
+        "number"
       ]
     },
     "current_subtotal_price": {
       "type": [
         "null",
-        "integer"
+        "number"
       ]
     },
     "fulfillments": {
