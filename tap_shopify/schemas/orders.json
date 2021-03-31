@@ -1,10 +1,10 @@
 {
   "properties": {
     "presentment_currency": {
-        "type": [
-          "null",
-          "string"
-        ]
+      "type": [
+        "null",
+        "string"
+      ]
     },
     "subtotal_price_set": {},
     "total_discounts_set": {},
@@ -236,6 +236,18 @@
         "integer"
       ]
     },
+    "current_total_price": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "current_subtotal_price": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
     "fulfillments": {
       "items": {
         "properties": {
@@ -246,13 +258,22 @@
             ]
           },
           "receipt": {
-            "type": ["null", "object"],
+            "type": [
+              "null",
+              "object"
+            ],
             "properties": {
               "testcase": {
-                "type": ["null", "boolean"]
+                "type": [
+                  "null",
+                  "boolean"
+                ]
               },
               "authorization": {
-                "type": ["null", "string"]
+                "type": [
+                  "null",
+                  "string"
+                ]
               }
             }
           },
