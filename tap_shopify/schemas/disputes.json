@@ -36,7 +36,7 @@
     "network_reason_code": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "status": {
