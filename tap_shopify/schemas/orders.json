@@ -6,12 +6,42 @@
           "string"
         ]
     },
-    "subtotal_price_set": {},
-    "total_discounts_set": {},
-    "total_line_items_price_set": {},
-    "total_price_set": {},
-    "total_shipping_price_set": {},
-    "total_tax_set": {},
+    "subtotal_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "total_discounts_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "total_line_items_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "total_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "total_shipping_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "total_tax_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
     "total_price": {
       "type": [
         "null",
