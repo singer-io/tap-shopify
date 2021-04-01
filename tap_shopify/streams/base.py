@@ -122,6 +122,16 @@ class Stream():
     def call_api(self, query_params):
         return self.replication_object.find(**query_params)
 
+    def get_query_params(self, since_id, updated_at_min, updated_at_max, results_per_page):
+        status_key = self.status_key or "status"
+        return {
+            "since_id": since_id,
+            "updated_at_min": updated_at_min,
+            "updated_at_max": updated_at_max,
+            "limit": results_per_page,
+            status_key: "any"
+        }
+
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 
@@ -146,15 +156,7 @@ class Stream():
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
-                status_key = self.status_key or "status"
-                query_params = {
-                    "since_id": since_id,
-                    "updated_at_min": updated_at_min,
-                    "updated_at_max": updated_at_max,
-                    "limit": results_per_page,
-                    status_key: "any"
-                }
-
+                query_params = self.get_query_params(since_id, updated_at_min, updated_at_max, results_per_page)
                 with metrics.http_request_timer(self.name):
                     objects = self.call_api(query_params)
 
