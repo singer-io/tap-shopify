@@ -134,7 +134,7 @@ class Stream():
     # subclasses to change the bookmark key.
     name = None
     replication_method = 'INCREMENTAL'
-    replication_key = 'created_at'
+    replication_key = 'updated_at'
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
@@ -202,12 +202,16 @@ class Stream():
 
             singer.log_info("getting from %s - %s", updated_at_min,
                             updated_at_max)
+
+            min_filer_key = self.get_max_replication_key()
+            max_filer_key = self.get_max_replication_key()
+
             while True:
                 status_key = self.status_key or "status"
                 query_params = {
                     "since_id": since_id,
-                    "created_at_min": updated_at_min,
-                    "created_at_max": updated_at_max,
+                    min_filer_key: updated_at_min,
+                    max_filer_key: updated_at_max,
                     "limit": results_per_page,
                     status_key: "any"
                 }
@@ -259,3 +263,17 @@ class Stream():
     @shopify_error_handling
     def get_next_page(self, resource_find):
         return resource_find.next_page()
+
+    def get_max_replication_key(self):
+        switch = {
+            "created_at": "created_at_max",
+            "updated_at": "updated_at_max"
+        }
+        return switch[self.replication_key]
+
+    def get_min_replication_key(self):
+        switch = {
+            "created_at": "created_at_min",
+            "updated_at": "updated_at_min"
+        }
+        return switch[self.replication_key]
