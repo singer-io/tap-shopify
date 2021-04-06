@@ -203,7 +203,7 @@ class Stream():
             singer.log_info("getting from %s - %s", updated_at_min,
                             updated_at_max)
 
-            min_filer_key = self.get_max_replication_key()
+            min_filer_key = self.get_min_replication_key()
             max_filer_key = self.get_max_replication_key()
 
             while True:
