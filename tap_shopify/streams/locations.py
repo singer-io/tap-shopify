@@ -11,7 +11,7 @@ class Location(Stream):
     replication_method = 'FULL_TABLE'
 
     def get_objects(self):
-        return self.replication_object.find()
+        return self.call_api({})
 
 
 Context.stream_objects['locations'] = Location
