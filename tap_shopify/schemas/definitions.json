@@ -58,7 +58,10 @@
     ]
   },
   "customer": {
-    "type": "object",
+    "type": [
+      "null",
+      "object"
+    ],
     "properties": {
       "last_order_name": {
         "type": [
