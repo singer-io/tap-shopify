@@ -12,11 +12,11 @@ import json
 
 class GraphQlChildStream(Stream):
     name = None
-    replication_key = 'createdAt'
+    replication_key = 'updatedAt'
     replication_object = shopify.Transaction
     parent_key_access = None
     parent_name = None
-    parent_replication_key = 'createdAt'
+    parent_replication_key = 'updatedAt'
     parent_id_ql_prefix = ''
     child_per_page = 250
     parent_per_page = 100
@@ -75,7 +75,6 @@ class GraphQlChildStream(Stream):
                                              after=after)
                 with metrics.http_request_timer(parent.name):
                     data = self.excute_graph_ql(query)
-
                 data = data[parent.name]
                 page_info = data['pageInfo']
                 edges = data["edges"]
@@ -113,7 +112,7 @@ class GraphQlChildStream(Stream):
                         child_limit=100,
                         after=None):
         query = """{
-                      %s(first:%i %s ,query:"created_at:>'%s' AND created_at:<'%s' %s") {
+                      %s(first:%i %s ,query:"%s:>'%s' AND %s:<'%s' %s") {
                         pageInfo { # Returns details about the current page of results
                           hasNextPage # Whether there are more results after this page
                           hasPreviousPage # Whether there are more results before this page
@@ -134,7 +133,16 @@ class GraphQlChildStream(Stream):
         if after:
             after_str = ',after:"%s"' % after
         query = query % (
-            parent_name, limit, after_str, created_at_min, created_at_max, self.get_extra_query(), child, child_limit,
+            parent_name,
+            limit,
+            after_str,
+            self.get_min_replication_key(),
+            created_at_min,
+            self.get_max_replication_key(),
+            created_at_max,
+            self.get_extra_query(),
+            child,
+            child_limit,
             child_parameters)
         return query
 
@@ -172,3 +180,17 @@ class GraphQlChildStream(Stream):
 
     def get_extra_query(self):
         return ""
+
+    def get_max_replication_key(self):
+        switch = {
+            "createdAt": "created_at",
+            "updatedAt": "updated_at"
+        }
+        return switch[self.replication_key]
+
+    def get_min_replication_key(self):
+        switch = {
+            "createdAt": "created_at",
+            "updatedAt": "updated_at"
+        }
+        return switch[self.replication_key]
