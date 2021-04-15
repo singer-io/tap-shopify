@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.10
+  * Add `null, object` to customer schema definition [#94](https://github.com/singer-io/tap-shopify/pull/94)
+
 ## 1.2.9
   * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
 
