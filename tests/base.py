@@ -40,7 +40,8 @@ class BaseTapTest(unittest.TestCase):
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
-            'date_window_size': 30
+            'date_window_size': 30,
+            'results_per_page': '50'
         }
 
         if original:
@@ -50,13 +51,19 @@ class BaseTapTest(unittest.TestCase):
         assert self.start_date > return_value["start_date"]
 
         return_value["start_date"] = self.start_date
+        return_value['shop'] = 'talenddatawearhouse'
         return return_value
 
     @staticmethod
-    def get_credentials():
+    def get_credentials(original_credentials: bool = True):
         """Authentication information for the test account"""
+        if original_credentials:
+            return {
+            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_1')
+            }
+
         return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY')
+            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_2')
         }
 
     def expected_metadata(self):
@@ -66,13 +73,17 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250}
+                self.API_LIMIT: 175}
 
         meta = default.copy()
         meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
 
         return {
-            "abandoned_checkouts": default,
+            "abandoned_checkouts": {
+                self.REPLICATION_KEYS: {"updated_at"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50},
             "collects": default,
             "custom_collections": default,
             "customers": default,
@@ -81,7 +92,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"created_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250},
+                self.API_LIMIT: 175},
             "products": default,
             "metafields": meta,
             "transactions": {
@@ -89,7 +100,7 @@ class BaseTapTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250}
+                self.API_LIMIT: 100}
         }
 
     def expected_streams(self):
@@ -139,7 +150,9 @@ class BaseTapTest(unittest.TestCase):
 
     def setUp(self):
         """Verify that you have set the prerequisites to run the tap (creds, etc.)"""
-        missing_envs = [x for x in [os.getenv('TAP_SHOPIFY_API_KEY')] if x is None]
+        missing_envs = [x
+                        for x in [os.getenv('TAP_SHOPIFY_API_KEY_1'), os.getenv('TAP_SHOPIFY_API_KEY_2')]
+                        if x is None]
         if missing_envs:
             raise Exception("set environment variables")
 
@@ -147,10 +160,10 @@ class BaseTapTest(unittest.TestCase):
     #   Helper Methods      #
     #########################
 
-    def create_connection(self, original_properties: bool = True):
+    def create_connection(self, original_properties: bool = True, original_credentials: bool = True):
         """Create a new connection with the test name"""
         # Create the connection
-        conn_id = connections.ensure_connection(self, original_properties)
+        conn_id = connections.ensure_connection(self, original_properties, original_credentials)
 
         # Run a check job using orchestrator (discovery)
         check_job_name = runner.run_check_mode(self, conn_id)
