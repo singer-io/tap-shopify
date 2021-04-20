@@ -65,8 +65,13 @@ class Transactions(Stream):
         # support limit overrides.
         #
         # https://github.com/Shopify/shopify_python_api/blob/e8c475ccc84b1516912b37f691d00ecd24921e9b/shopify/resources/order.py#L17-L18
-        return self.replication_object.find(
-            limit=TRANSACTIONS_RESULTS_PER_PAGE, order_id=parent_object.id)
+
+        page = self.replication_object.find(limit=TRANSACTIONS_RESULTS_PER_PAGE, order_id=parent_object.id)
+        yield from page
+
+        while page.has_next_page():
+            page = page.next_page()
+            yield from page
 
     def get_objects(self):
         # Right now, it's ok for the user to select 'transactions' but not
