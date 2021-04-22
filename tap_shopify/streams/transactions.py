@@ -56,6 +56,9 @@ class Transactions(Stream):
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
     @shopify_error_handling
+    def call_api(self, parent_object):
+        return self.replication_object.find(limit=TRANSACTIONS_RESULTS_PER_PAGE, order_id=parent_object.id)
+
     def get_transactions(self, parent_object):
         # We do not need to support paging on this substream. If that
         # were to become untrue, reference Metafields.
@@ -66,7 +69,7 @@ class Transactions(Stream):
         #
         # https://github.com/Shopify/shopify_python_api/blob/e8c475ccc84b1516912b37f691d00ecd24921e9b/shopify/resources/order.py#L17-L18
 
-        page = self.replication_object.find(limit=TRANSACTIONS_RESULTS_PER_PAGE, order_id=parent_object.id)
+        page = self.call_api(parent_object)
         yield from page
 
         while page.has_next_page():
