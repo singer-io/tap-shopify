@@ -1,11 +1,10 @@
 import shopify
-
+from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       shopify_error_handling,
                                       OutOfOrderIdsError)
-from singer.utils import strftime, strptime_to_utc
 
 class OrderRefunds(Stream):
     name = 'order_refunds'
