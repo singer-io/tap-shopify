@@ -272,3 +272,5 @@ class BaseTapTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
+        self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers'}
+        self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products'}
