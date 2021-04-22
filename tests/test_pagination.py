@@ -18,13 +18,11 @@ class PaginationTest(BaseTapTest):
 
 
     def test_run(self):
-        # conn_id = self.create_connection(original_credentials=True)
-        testable_streams = {'custom_collections', 'orders', 'products', 'customers'}
-        # self.pagination_test(conn_id, testable_streams)
+        conn_id = self.create_connection(original_credentials=True)
+        self.pagination_test(conn_id, self.store_1_streams)
 
         conn_id = self.create_connection(original_properties=False, original_credentials=False)
-        testable_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products'}
-        self.pagination_test(conn_id, testable_streams)
+        self.pagination_test(conn_id, self.store_2_streams)
 
     
     def pagination_test(self, conn_id, testable_streams):
@@ -37,12 +35,11 @@ class PaginationTest(BaseTapTest):
         fetch of data.  For instance if you have a limit of 250 records ensure
         that 251 (or more) records have been posted for that stream.
         """
-        conn_id = self.create_connection()
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL}
+                               if value == self.INCREMENTAL and key in testable_streams}
 
 
         # our_catalogs = [catalog for catalog in found_catalogs if
