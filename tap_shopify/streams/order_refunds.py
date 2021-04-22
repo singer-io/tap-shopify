@@ -5,7 +5,7 @@ from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       shopify_error_handling,
                                       OutOfOrderIdsError)
-
+from singer.utils import strftime, strptime_to_utc
 
 class OrderRefunds(Stream):
     name = 'order_refunds'
@@ -42,8 +42,18 @@ class OrderRefunds(Stream):
                 since_id = refunds[-1].id
 
     def sync(self):
+        bookmark = self.get_bookmark()
+        max_bookmark = bookmark
         for refund in self.get_objects():
             refund_dict = refund.to_dict()
-            yield refund_dict
+            replication_value = strptime_to_utc(refund_dict[self.replication_key])
+            if replication_value >= bookmark:
+                yield refund_dict
+
+            if replication_value > max_bookmark:
+                max_bookmark = replication_value
+
+        self.update_bookmark(strftime(max_bookmark))
+
 
 Context.stream_objects['order_refunds'] = OrderRefunds
