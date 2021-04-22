@@ -59,7 +59,7 @@ class BaseTapTest(unittest.TestCase):
         """Authentication information for the test account"""
         if original_credentials:
             return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_1')
+                'api_key': os.getenv('TAP_SHOPIFY_API_KEY_1')
             }
 
         return {
