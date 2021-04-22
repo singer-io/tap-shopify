@@ -20,11 +20,13 @@ class BookmarkTest(BaseTapTest):
         self.start_date = '2021-04-01T00:00:00Z'
 
     def test_run(self):
-        conn_id = self.create_connection(original_credentials=True)
-        self.bookmarks_test(conn_id, self.store_1_streams)
+        with self.subTest(store="store_1"):
+            conn_id = self.create_connection(original_credentials=True)
+            self.bookmarks_test(conn_id, self.store_1_streams)
 
-        conn_id = self.create_connection(original_properties=False, original_credentials=False)
-        self.bookmarks_test(conn_id, self.store_2_streams)
+        with self.subTest(store="store_2"):
+            conn_id = self.create_connection(original_properties=False, original_credentials=False)
+            self.bookmarks_test(conn_id, self.store_2_streams)
 
     def bookmarks_test(self, conn_id, testable_streams):
         """

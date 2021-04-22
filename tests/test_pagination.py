@@ -18,11 +18,13 @@ class PaginationTest(BaseTapTest):
 
 
     def test_run(self):
-        conn_id = self.create_connection(original_credentials=True)
-        self.pagination_test(conn_id, self.store_1_streams)
+        with self.subTest(store="store_1"):
+            conn_id = self.create_connection(original_credentials=True)
+            self.pagination_test(conn_id, self.store_1_streams)
 
-        conn_id = self.create_connection(original_properties=False, original_credentials=False)
-        self.pagination_test(conn_id, self.store_2_streams)
+        with self.subTest(store="store_2"):
+            conn_id = self.create_connection(original_properties=False, original_credentials=False)
+            self.pagination_test(conn_id, self.store_2_streams)
 
     
     def pagination_test(self, conn_id, testable_streams):
