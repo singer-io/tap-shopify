@@ -59,11 +59,11 @@ class BaseTapTest(unittest.TestCase):
         """Authentication information for the test account"""
         if original_credentials:
             return {
-                'api_key': os.getenv('TAP_SHOPIFY_API_KEY_1')
+                'api_key': os.getenv('TAP_SHOPIFY_API_KEY_STITCHDATAWEARHOUSE')
             }
 
         return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_2')
+            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
         }
 
     def expected_metadata(self):
@@ -151,7 +151,8 @@ class BaseTapTest(unittest.TestCase):
     def setUp(self):
         """Verify that you have set the prerequisites to run the tap (creds, etc.)"""
         missing_envs = [x
-                        for x in [os.getenv('TAP_SHOPIFY_API_KEY_1'), os.getenv('TAP_SHOPIFY_API_KEY_2')]
+                        for x in [os.getenv('TAP_SHOPIFY_API_KEY_STITCHDATAWEARHOUSE'),
+                                  os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')]
                         if x is None]
         if missing_envs:
             raise Exception("set environment variables")
