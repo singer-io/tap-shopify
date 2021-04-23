@@ -1,7 +1,7 @@
 import unittest
 from tap_shopify.streams.transactions import canonicalize_receipts
 
-class TestTransactionCanonicalize_Receipts(unittest.TestCase):
+class TestTransactionCanonicalizeReceipts(unittest.TestCase):
     def test_unmodified_if_not_present(self):
         # Note: Canonicalize_Receipts has a side effect with pop(), must copy test
         # record to compare
