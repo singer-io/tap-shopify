@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.2.10
+  * Add `null, object` to customer schema definition [#94](https://github.com/singer-io/tap-shopify/pull/94)
+
+## 1.2.9
+  * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
+
+## 1.2.8
+  * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
+
+## 1.2.7
+  * Change how exceptions are logged to make the error messages more consistent [#84](https://github.com/singer-io/tap-shopify/pull/84)
+
+## 1.2.6
+  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69](https://github.com/singer-io/tap-shopify/pull/69)
+
+## 1.2.5
+  * Bumps `singer-python` from `5.4.1` to `5.9.1` [#67](https://github.com/singer-io/tap-shopify/pull/67)
+
+## 1.2.4
+  * Adds `accepts_marketing_updated_at` to shared `customer` schema [#61](https://github.com/singer-io/tap-shopify/pull/61/)
+
+## 1.2.3
+  * Bumped Shopify API version to 2020-07 (SDK version 8.0.1) [#63](https://github.com/singer-io/tap-shopify/pull/63/)
+
+## 1.2.2
+  * Fixes issue where `products` returns 0 records due to a change in the `status` parameter, Shopify now requires `published_status` [#59](https://github.com/singer-io/tap-shopify/pull/59)
+
+## 1.2.1
+  * Update the line_item schema to allow an object under the properties key [#58](https://github.com/singer-io/tap-shopify/pull/58)
+
+## 1.2.0
+  * Bump ShopifyAPI version from 3.1.0 -> 7.0.1 [#54](https://github.com/singer-io/tap-shopify/pull/54/)
+  * Explicitly specify Shopify API version as `2019-10` [#54](https://github.com/singer-io/tap-shopify/pull/54/)
+
 ## 1.1.17
   * Use try/except around JSON metafield's data and fallback to string [#50](https://github.com/singer-io/tap-shopify/pull/50)
 

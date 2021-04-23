@@ -12,6 +12,7 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
+from tap_shopify.exceptions import ShopifyError
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
@@ -20,7 +21,8 @@ LOGGER = singer.get_logger()
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    session = shopify.Session(shop, api_key)
+    version = '2020-07'
+    session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
 
 def get_abs_path(path):
@@ -139,15 +141,32 @@ def sync():
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
         with Transformer() as transformer:
-            for rec in stream.sync():
-                extraction_time = singer.utils.now()
-                record_schema = catalog_entry['schema']
-                record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform(rec, record_schema, record_metadata)
-                singer.write_record(stream_id,
-                                    rec,
-                                    time_extracted=extraction_time)
-                Context.counts[stream_id] += 1
+            try:
+                for rec in stream.sync():
+                    extraction_time = singer.utils.now()
+                    record_schema = catalog_entry['schema']
+                    record_metadata = metadata.to_map(catalog_entry['metadata'])
+                    rec = transformer.transform(rec, record_schema, record_metadata)
+                    singer.write_record(stream_id,
+                                        rec,
+                                        time_extracted=extraction_time)
+                    Context.counts[stream_id] += 1
+            except pyactiveresource.connection.ResourceNotFound as exc:
+                raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
+            except pyactiveresource.connection.UnauthorizedAccess as exc:
+                raise ShopifyError(exc, 'Invalid access token - Re-authorize the connection') \
+                    from exc
+            except pyactiveresource.connection.ConnectionError as exc:
+                msg = ''
+                try:
+                    body_json = exc.response.body.decode()
+                    body = json.loads(body_json)
+                    msg = body.get('errors')
+                finally:
+                    raise ShopifyError(exc, msg) from exc
+            except Exception as exc:
+                raise ShopifyError(exc) from exc
+
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
@@ -159,7 +178,6 @@ def sync():
 
 @utils.handle_top_exception(LOGGER)
 def main():
-
     # Parse command line arguments
     args = utils.parse_args(REQUIRED_CONFIG_KEYS)
 
