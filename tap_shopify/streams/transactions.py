@@ -24,9 +24,9 @@ def canonicalize_receipts(transaction_dict):
     dict_keys = list(transaction_dict.get('receipt', {}).keys())
     for field_name in dict_keys:
         if field_name.capitalize() == field_name:
-            canonicalize_field(transaction_dict, field_name.lower())
+            canonicalize_receipt_field(transaction_dict, field_name.lower())
 
-def canonicalize_field(transaction_dict, field_name):
+def canonicalize_receipt_field(transaction_dict, field_name):
     field_name_upper = field_name.capitalize()
     value_lower = transaction_dict.get('receipt', {}).get(field_name)
     value_upper = transaction_dict.get('receipt', {}).get(field_name_upper)
