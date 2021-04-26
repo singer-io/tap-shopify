@@ -24,6 +24,7 @@ class BaseTapTest(unittest.TestCase):
     INCREMENTAL = "INCREMENTAL"
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    DEFAULT_RESULTS_PER_PAGE = 175
 
     @staticmethod
     def tap_name():
@@ -41,6 +42,7 @@ class BaseTapTest(unittest.TestCase):
             'start_date': '2017-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
             'date_window_size': 30,
+            # BUG: https://jira.talendforge.org/browse/TDL-13180
             'results_per_page': '50'
         }
 
@@ -57,6 +59,7 @@ class BaseTapTest(unittest.TestCase):
     @staticmethod
     def get_credentials(original_credentials: bool = True):
         """Authentication information for the test account"""
+
         if original_credentials:
             return {
                 'api_key': os.getenv('TAP_SHOPIFY_API_KEY_STITCHDATAWEARHOUSE')
@@ -73,7 +76,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 175}
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
 
         meta = default.copy()
         meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
@@ -83,6 +86,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
+                # BUG: https://jira.talendforge.org/browse/TDL-13180
                 self.API_LIMIT: 50},
             "collects": default,
             "custom_collections": default,
@@ -92,7 +96,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"created_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 175},
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
             "products": default,
             "metafields": meta,
             "transactions": {
@@ -100,7 +104,7 @@ class BaseTapTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 100}
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
         }
 
     def expected_streams(self):
