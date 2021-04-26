@@ -9,11 +9,25 @@ from base import BaseTapTest
 class PaginationTest(BaseTapTest):
     """ Test the tap pagination to get multiple pages of data """
 
-    @staticmethod
-    def name():
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_date = '2021-04-01T00:00:00Z'        
+
+    def name(self):
         return "tap_tester_shopify_pagination_test"
 
+
     def test_run(self):
+        with self.subTest(store="store_1"):
+            conn_id = self.create_connection(original_credentials=True)
+            self.pagination_test(conn_id, self.store_1_streams)
+
+        with self.subTest(store="store_2"):
+            conn_id = self.create_connection(original_properties=False, original_credentials=False)
+            self.pagination_test(conn_id, self.store_2_streams)
+
+    
+    def pagination_test(self, conn_id, testable_streams):
         """
         Verify that for each stream you can get multiple pages of data
         and that when all fields are selected more than the automatic fields are replicated.
@@ -23,17 +37,18 @@ class PaginationTest(BaseTapTest):
         fetch of data.  For instance if you have a limit of 250 records ensure
         that 251 (or more) records have been posted for that stream.
         """
-        conn_id = self.create_connection()
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL}
+                               if value == self.INCREMENTAL and key in testable_streams}
 
-        untested_streams = self.child_streams().union({'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds'})
+
+        # our_catalogs = [catalog for catalog in found_catalogs if
+        #                 catalog.get('tap_stream_id') in incremental_streams.difference(
+        #                     untested_streams)]
         our_catalogs = [catalog for catalog in found_catalogs if
-                        catalog.get('tap_stream_id') in incremental_streams.difference(
-                            untested_streams)]
+                        catalog.get('tap_stream_id') in testable_streams]
 
 
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
@@ -41,13 +56,18 @@ class PaginationTest(BaseTapTest):
         record_count_by_stream = self.run_sync(conn_id)
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
-        for stream in self.expected_streams().difference(untested_streams):
+        for stream in testable_streams:
             with self.subTest(stream=stream):
 
                 # verify that we can paginate with all fields selected
+                stream_metadata = self.expected_metadata().get(stream, {})
+                minimum_record_count = stream_metadata.get(
+                    self.API_LIMIT,
+                    self.get_properties().get('result_per_page', self.DEFAULT_RESULTS_PER_PAGE)
+                )
                 self.assertGreater(
                     record_count_by_stream.get(stream, -1),
-                    self.expected_metadata().get(stream, {}).get(self.API_LIMIT, 0),
+                    minimum_record_count,
                     msg="The number of records is not over the stream max limit")
 
                 # verify that the automatic fields are sent to the target
