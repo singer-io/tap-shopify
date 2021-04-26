@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.1
+  * Canonicalize `Timestamp` to `timestamp` on `Transactions.receipt` [#98](https://github.com/singer-io/tap-shopify/pull/98)
+
 ## 1.3.0
   This version ships both [#96][PR#96] and [#97][PR#97].
 
