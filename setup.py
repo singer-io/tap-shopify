@@ -15,7 +15,7 @@ setup(
     ],
     extras_require={
         'dev': [
-            'pylint',
+            'pylint==2.7.4',
             'ipdb',
             'requests==2.20.0',
             'nose',
