@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.3.0
+  This version ships both [#96][PR#96] and [#97][PR#97].
+
+  From [#97][PR#97]:
+  * removes the "untestable streams" list from all tests.
+  * makes the test match the tap and expect the default page size to be 175, not 250
+  * adds bookmarking to order_refunds
+  * adds bookmarking to transactions
+  * adds shopify error handling to transactions
+    * The tests would fail with unhandled 429s
+  * adds pagination to transactions
+
+  From [#96][PR#96]:
+  * Update the API version from `2020-10` to `2021-04`
+
+  [PR#97]: https://github.com/singer-io/tap-shopify/pull/97/
+  [PR#96]: https://github.com/singer-io/tap-shopify/pull/96
+
 ## 1.2.10
   * Add `null, object` to customer schema definition [#94](https://github.com/singer-io/tap-shopify/pull/94)
 
