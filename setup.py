@@ -8,7 +8,7 @@ setup(
     author="Stitch",
     url="http://github.com/singer-io/tap-shopify",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
-    python_requires='>=3.5.2',
+    python_requires='>=3.8.0',
     py_modules=["tap_shopify"],
     install_requires=[
         "ShopifyAPI==8.4.1",
