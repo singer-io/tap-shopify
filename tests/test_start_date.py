@@ -88,10 +88,7 @@ class StartDateTest(BaseTapTest):
             # REMOVE CODE TO FIND A START DATE AND ENTER ONE MANUALLY
             raise ValueError
 
-        largest_bookmark = reduce(lambda a, b: a if a > b else b, bookmark_dates)
-        self.start_date = self.local_to_utc(largest_bookmark) \
-                              .replace(hour=0, minute=0, second=0) \
-                              .strftime(self.START_DATE_FORMAT)
+        self.start_date = self.get_properties(original=False)["start_date"]
 
         # create a new connection with the new start_date
         conn_id = self.create_connection(original_properties=False)

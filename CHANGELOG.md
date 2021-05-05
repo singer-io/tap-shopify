@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2
+  * Add `python_requires` to `setup.py` [#101](https://github.com/singer-io/tap-shopify/pull/101)
+    * We've tested the tap on `python 3.5.2` and `python 3.8.0`
+
 ## 1.3.1
   * Canonicalize `Timestamp` to `timestamp` on `Transactions.receipt` [#98](https://github.com/singer-io/tap-shopify/pull/98)
 
