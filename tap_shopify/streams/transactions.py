@@ -105,7 +105,7 @@ class Transactions(Stream):
             transaction_dict = transaction.to_dict()
             replication_value = strptime_to_utc(transaction_dict[self.replication_key])
             if replication_value >= bookmark:
-                for field_name in ['token', 'version', 'ack', 'timestamp']:
+                for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
                     canonicalize(transaction_dict, field_name)
                 yield transaction_dict
 
