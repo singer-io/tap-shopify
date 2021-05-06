@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.3.
+  * Add `build` to the list of fields we canonicalize for the Transactions stream [#103](https://github.com/singer-io/tap-shopify/pull/103)
+
 ## 1.3.2
   * Add `python_requires` to `setup.py` [#101](https://github.com/singer-io/tap-shopify/pull/101)
     * We've tested the tap on `python 3.5.2` and `python 3.8.0`
