@@ -15,7 +15,7 @@ class CollectionProducts(Stream):
     def get_objects(self):
         
         while True:
-            for collection in replication_object.find():
+            for collection in self.replication_object.find():
                 for product in collection.products():
                     yield product
             if collection.has_next_page():
