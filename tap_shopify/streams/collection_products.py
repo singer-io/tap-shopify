@@ -28,4 +28,3 @@ class CollectionProducts(Stream):
             yield product.to_dict()
 
 Context.stream_objects['collection_products'] = CollectionProducts
-print('XXXXXXXXXXXX')

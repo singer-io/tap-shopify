@@ -107,6 +107,7 @@ def shuffle_streams(stream_name):
     Context.catalog["streams"] = top_half + bottom_half
 
 def sync():
+    print('XXXXXXXXXX')
     initialize_shopify_client()
 
     # Emit all schemas first so we have them for child streams
