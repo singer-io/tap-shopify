@@ -107,7 +107,6 @@ def shuffle_streams(stream_name):
     Context.catalog["streams"] = top_half + bottom_half
 
 def sync():
-    print('XXXXXXXXXX')
     initialize_shopify_client()
 
     # Emit all schemas first so we have them for child streams
@@ -128,7 +127,9 @@ def sync():
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
-        # stream = Context.stream_objects[stream_id]()
+        stream = Context.stream_objects[stream_id]()
+        print('XXXXXX')
+        print(stream)
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
