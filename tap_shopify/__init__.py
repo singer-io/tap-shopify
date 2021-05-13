@@ -128,8 +128,6 @@ def sync():
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         stream = Context.stream_objects[stream_id]()
-        print('XXXXXX')
-        print(stream)
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
