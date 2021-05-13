@@ -15,11 +15,12 @@ class CollectionProducts(Stream):
     def get_objects(self):
         
         while True:
-            for collection in self.replication_object.find():
+            page = self.replication_object.find()
+            for collection in page:
                 for product in collection.products():
                     yield product
-            if collection.has_next_page():
-                collection = collection.next_page()
+            if page.has_next_page():
+                page = page.next_page()
             else:
                 break
 
