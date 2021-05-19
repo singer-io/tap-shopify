@@ -1,5 +1,80 @@
 # Changelog
 
+## 1.3.3.
+  * Add `build` to the list of fields we canonicalize for the Transactions stream [#103](https://github.com/singer-io/tap-shopify/pull/103)
+
+## 1.3.2
+  * Add `python_requires` to `setup.py` [#101](https://github.com/singer-io/tap-shopify/pull/101)
+    * We've tested the tap on `python 3.5.2` and `python 3.8.0`
+
+## 1.3.1
+  * Canonicalize `Timestamp` to `timestamp` on `Transactions.receipt` [#98](https://github.com/singer-io/tap-shopify/pull/98)
+
+## 1.3.0
+  This version ships both [#96][PR#96] and [#97][PR#97].
+
+  From [#97][PR#97]:
+  * removes the "untestable streams" list from all tests.
+  * makes the test match the tap and expect the default page size to be 175, not 250
+  * adds bookmarking to order_refunds
+  * adds bookmarking to transactions
+  * adds shopify error handling to transactions
+    * The tests would fail with unhandled 429s
+  * adds pagination to transactions
+
+  From [#96][PR#96]:
+  * Update the API version from `2020-10` to `2021-04`
+
+  [PR#97]: https://github.com/singer-io/tap-shopify/pull/97/
+  [PR#96]: https://github.com/singer-io/tap-shopify/pull/96
+
+## 1.2.10
+  * Add `null, object` to customer schema definition [#94](https://github.com/singer-io/tap-shopify/pull/94)
+
+## 1.2.9
+  * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
+
+## 1.2.8
+  * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
+
+## 1.2.7
+  * Change how exceptions are logged to make the error messages more consistent [#84](https://github.com/singer-io/tap-shopify/pull/84)
+
+## 1.2.6
+  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69](https://github.com/singer-io/tap-shopify/pull/69)
+
+## 1.2.5
+  * Bumps `singer-python` from `5.4.1` to `5.9.1` [#67](https://github.com/singer-io/tap-shopify/pull/67)
+
+## 1.2.4
+  * Adds `accepts_marketing_updated_at` to shared `customer` schema [#61](https://github.com/singer-io/tap-shopify/pull/61/)
+
+## 1.2.3
+  * Bumped Shopify API version to 2020-07 (SDK version 8.0.1) [#63](https://github.com/singer-io/tap-shopify/pull/63/)
+
+## 1.2.2
+  * Fixes issue where `products` returns 0 records due to a change in the `status` parameter, Shopify now requires `published_status` [#59](https://github.com/singer-io/tap-shopify/pull/59)
+
+## 1.2.1
+  * Update the line_item schema to allow an object under the properties key [#58](https://github.com/singer-io/tap-shopify/pull/58)
+
+## 1.2.0
+  * Bump ShopifyAPI version from 3.1.0 -> 7.0.1 [#54](https://github.com/singer-io/tap-shopify/pull/54/)
+  * Explicitly specify Shopify API version as `2019-10` [#54](https://github.com/singer-io/tap-shopify/pull/54/)
+
+## 1.1.17
+  * Use try/except around JSON metafield's data and fallback to string [#50](https://github.com/singer-io/tap-shopify/pull/50)
+
+## 1.1.16
+ * Handles null/non-integer values for `results_per_page` [#48](https://github.com/singer-io/tap-shopify/pull/48)
+
+## 1.1.15
+ * Lowering the page size from 250 to 175 as per recommendation from
+   Shopify to mitigate receiving 500s [#45](https://github.com/singer-io/tap-shopify/pull/45)
+
+## 1.1.14
+ * Bump minimum value for numbers to 1e-10 [commit](https://github.com/singer-io/tap-shopify/commit/a2abf49be96b07f80610d63c514241f829780dcf)
+
 ## 1.1.12
  * Canonicalize `transaction__receipt__version` to always prefer and coerce to `version` [#41](https://github.com/singer-io/tap-shopify/pull/41)
 

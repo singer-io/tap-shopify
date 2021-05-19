@@ -1,8 +1,11 @@
-version: 2
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
+
 jobs:
   build:
     docker:
-      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:tap-tester
+      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:tap-tester-v4
     steps:
       - checkout
       - run:
@@ -10,13 +13,18 @@ jobs:
           command: |
             python3 -mvenv /usr/local/share/virtualenvs/tap-shopify
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pip install -U 'pip<19.2' setuptools
+            pip install -U 'pip<19.2' 'setuptools<51.0.0'
             pip install .[dev]
       - run:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             make test
+      - run:
+          name: 'JSON Validator'
+          command: |
+            source /usr/local/share/virtualenvs/tap-tester/bin/activate
+            stitch-validate-json tap_shopify/schemas/*.json
       - add_ssh_keys
       - run:
           name: 'Integration Tests'
@@ -24,25 +32,30 @@ jobs:
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/sandbox dev_env.sh
             source dev_env.sh
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
-            run-a-test --tap=tap-shopify \
-                       --target=target-stitch \
-                       --orchestrator=stitch-orchestrator \
-                       --email=harrison+sandboxtest@stitchdata.com \
-                       --password=$SANDBOX_PASSWORD \
-                       --client-id=50 \
-                       tap_tester.suites.shopify
+            run-test --tap=tap-shopify \
+                     --target=target-stitch \
+                     --orchestrator=stitch-orchestrator \
+                     --email=harrison+sandboxtest@stitchdata.com \
+                     --password=$SANDBOX_PASSWORD \
+                     --client-id=50 \
+                     tests
+      - slack/notify-on-failure:
+          only_for_branches: master
+
 workflows:
   version: 2
   commit:
     jobs:
-      - build
+      - build:
+          context: circleci-user
   build_daily:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 14 * * *"
           filters:
             branches:
               only:
                 - master
     jobs:
-      - build
+      - build:
+          context: circleci-user

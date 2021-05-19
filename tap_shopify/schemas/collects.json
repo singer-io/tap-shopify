@@ -20,12 +20,6 @@
       ],
       "format": "date-time"
     },
-    "featured": {
-      "type": [
-        "null",
-        "boolean"
-      ]
-    },
     "position": {
       "type": [
         "null",

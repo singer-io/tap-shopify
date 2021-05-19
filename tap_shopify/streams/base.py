@@ -13,7 +13,7 @@ from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 250
+RESULTS_PER_PAGE = 175
 
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
@@ -84,6 +84,8 @@ class Stream():
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
+    # Status parameter override option
+    status_key = None
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -125,7 +127,7 @@ class Stream():
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-        results_per_page = int(Context.config.get("results_per_page", RESULTS_PER_PAGE))
+        results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -144,12 +146,13 @@ class Stream():
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
+                status_key = self.status_key or "status"
                 query_params = {
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
                     "limit": results_per_page,
-                    "status": "any"
+                    status_key: "any"
                 }
 
                 with metrics.http_request_timer(self.name):

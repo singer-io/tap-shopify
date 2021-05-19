@@ -182,9 +182,9 @@
           "amount": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-08
+            "format": "singer.decimal"
           },
           "code": {
             "type": [
@@ -245,9 +245,9 @@
     "total_line_items_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "closed_at": {
       "type": [
@@ -289,16 +289,16 @@
     "total_tax": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "subtotal_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -312,9 +312,9 @@
     "total_discounts": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "note": {
       "type": [
@@ -396,9 +396,9 @@
           "price": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-08
+            "format": "singer.decimal"
           },
           "requested_fulfillment_service_id": {
             "type": [
@@ -576,9 +576,9 @@
     "total_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "cart_token": {
       "type": [
