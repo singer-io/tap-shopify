@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.4
+  * Correct abandoned_checkouts schema to correctly reflect some properties as arrays [#44](https://github.com/singer-io/tap-shopify/pull/44)
+
 ## 1.3.3.
   * Add `build` to the list of fields we canonicalize for the Transactions stream [#103](https://github.com/singer-io/tap-shopify/pull/103)
 
