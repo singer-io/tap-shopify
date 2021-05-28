@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.5
+  * Add `status` field to `Products` stream [#108](https://github.com/singer-io/tap-shopify/pull/108)
+
 ## 1.3.4
   * Correct abandoned_checkouts schema to correctly reflect some properties as arrays [#44](https://github.com/singer-io/tap-shopify/pull/44)
 
