@@ -1,5 +1,11 @@
 {
   "properties": {
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "published_at": {
       "type": [
         "null",
