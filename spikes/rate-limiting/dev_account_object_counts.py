@@ -22,6 +22,7 @@ shopify_objects = [
     'customers',
     'products',
     'collects',
+    'custom_collections_products',
     'custom_collections'
 ]
 

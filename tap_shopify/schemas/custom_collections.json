@@ -6,12 +6,6 @@
         "string"
       ]
     },
-    "collection_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "sort_order": {
       "type": [
         "null",
