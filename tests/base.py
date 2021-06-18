@@ -75,6 +75,9 @@ class BaseTapTest(unittest.TestCase):
             "abandoned_checkouts": default,
             "collects": default,
             "custom_collections": default,
+            "smart_collections": default,
+            "custom_collections_products": default,
+            "smart_collections_products": default,
             "customers": default,
             "orders": default,
             "order_refunds": {

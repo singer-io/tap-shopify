@@ -11,7 +11,7 @@ from tap_shopify.streams.base import (Stream,
 LOGGER = singer.get_logger()
 
 def get_selected_parents():
-    for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
+    for parent_stream in ['orders', 'customers', 'products', 'custom_collections_prodcuts', 'custom_collections', 'smart_collections', 'smart_collections_products']:
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
