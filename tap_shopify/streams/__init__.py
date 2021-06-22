@@ -12,4 +12,5 @@ import tap_shopify.streams.price_rules
 import tap_shopify.streams.inventroy_levels
 import tap_shopify.streams.locations
 import tap_shopify.streams.inventory_items
+import tap_shopify.streams.payouts
 
