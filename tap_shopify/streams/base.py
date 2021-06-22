@@ -140,6 +140,8 @@ class Stream():
     replication_object = None
     # Status parameter override option
     status_key = None
+    add_status = True
+    time_interval = datetime.timedelta(seconds=1)
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -213,8 +215,10 @@ class Stream():
                     min_filer_key: updated_at_min,
                     max_filer_key: updated_at_max,
                     "limit": results_per_page,
-                    status_key: "any"
                 }
+
+                if self.add_status:
+                    query_params[status_key] = "any"
 
                 with metrics.http_request_timer(self.name):
                     objects = self.call_api(query_params)
@@ -249,7 +253,7 @@ class Stream():
                 # Put since_id into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
-            updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+            updated_at_min = updated_at_max + self.time_interval
 
     def sync(self):
         """Yield's processed SDK object dicts to the caller.
