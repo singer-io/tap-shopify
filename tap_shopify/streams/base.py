@@ -153,7 +153,7 @@ class Stream():
     # Status parameter override option
     status_key = None
     add_status = True
-    time_interval = datetime.timedelta(seconds=1)
+    skip_day = False
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -251,7 +251,10 @@ class Stream():
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
                     Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
-                    self.update_bookmark(utils.strftime(updated_at_max))
+                    state_val = updated_at_max
+                    if self.skip_day:
+                        state_val = state_val + datetime.timedelta(days=1)
+                    self.update_bookmark(utils.strftime(state_val))
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
@@ -265,7 +268,10 @@ class Stream():
                 # Put since_id into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
-            updated_at_min = updated_at_max + self.time_interval
+            updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+
+            if self.skip_day:
+                updated_at_min = updated_at_min + datetime.timedelta(days=1)
 
     def sync(self):
         """Yield's processed SDK object dicts to the caller.

@@ -9,8 +9,7 @@ class Payouts(Stream):
     name = 'payouts'
     replication_object = shopify.Payouts
     add_status = False
-    time_interval = datetime.timedelta(days=1)
-
+    skip_day = True
     def get_max_replication_key(self):
         return "date_max"
 
