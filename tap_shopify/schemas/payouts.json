@@ -25,6 +25,80 @@
         "null",
         "string"
       ]
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "summary": {
+      "properties": {
+        "adjustments_fee_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "adjustments_gross_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "charges_fee_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "charges_gross_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "refunds_fee_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "refunds_gross_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "reserved_funds_gross_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "reserved_funds_fee_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "retried_payouts_fee_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "retried_payouts_gross_amount": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "object"
+      ]
     }
   }
 }
