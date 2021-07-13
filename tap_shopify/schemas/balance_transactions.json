@@ -1,0 +1,90 @@
+{
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "test": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "payout_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "payout_status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "currency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "amount": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "fee": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "net": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "source_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "source_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "source_order_transaction_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "source_order_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "processed_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    }
+  },
+  "type": "object"
+}
