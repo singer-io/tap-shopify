@@ -11,7 +11,8 @@ class Redirects(Stream):
     # Redirects have no timestamps, but can be updated after creation
     # So the only option is to use full table replication
     replication_method = 'FULL_TABLE'
-    replication_key = 'id'
+    key_properties = ['id']
+    replication_key = None
 
     def get_objects(self):
         # Override base function as this is a full sync every time
