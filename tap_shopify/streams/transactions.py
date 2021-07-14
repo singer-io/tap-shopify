@@ -1,5 +1,6 @@
 import shopify
 import singer
+from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
@@ -56,6 +57,12 @@ class Transactions(Stream):
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
     @shopify_error_handling
+    def call_api_for_transactions(self, parent_object):
+        return self.replication_object.find(
+            limit=TRANSACTIONS_RESULTS_PER_PAGE,
+            order_id=parent_object.id,
+        )
+
     def get_transactions(self, parent_object):
         # We do not need to support paging on this substream. If that
         # were to become untrue, reference Metafields.
@@ -65,8 +72,13 @@ class Transactions(Stream):
         # support limit overrides.
         #
         # https://github.com/Shopify/shopify_python_api/blob/e8c475ccc84b1516912b37f691d00ecd24921e9b/shopify/resources/order.py#L17-L18
-        return self.replication_object.find(
-            limit=TRANSACTIONS_RESULTS_PER_PAGE, order_id=parent_object.id)
+
+        page = self.call_api_for_transactions(parent_object)
+        yield from page
+
+        while page.has_next_page():
+            page = page.next_page()
+            yield from page
 
     def get_objects(self):
         # Right now, it's ok for the user to select 'transactions' but not
@@ -87,10 +99,19 @@ class Transactions(Stream):
                 yield transaction
 
     def sync(self):
+        bookmark = self.get_bookmark()
+        max_bookmark = bookmark
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            for field_name in ['token', 'version', 'ack']:
-                canonicalize(transaction_dict, field_name)
-            yield transaction_dict
+            replication_value = strptime_to_utc(transaction_dict[self.replication_key])
+            if replication_value >= bookmark:
+                for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
+                    canonicalize(transaction_dict, field_name)
+                yield transaction_dict
+
+            if replication_value > max_bookmark:
+                max_bookmark = replication_value
+
+        self.update_bookmark(strftime(max_bookmark))
 
 Context.stream_objects['transactions'] = Transactions

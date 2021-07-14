@@ -4,6 +4,8 @@ Test that the start_date configuration is respected
 
 from functools import reduce
 
+import os
+
 from dateutil.parser import parse
 
 from tap_tester import menagerie, runner
@@ -23,6 +25,27 @@ class StartDateTest(BaseTapTest):
       is greater than or equal to the start date
     """
 
+    def get_properties(self, original: bool = True):
+        return_value = {
+            'start_date': '2021-04-01T00:00:00Z',
+            'shop': 'talenddatawearhouse',
+            'date_window_size': 30,
+            # BUG: https://jira.talendforge.org/browse/TDL-13180
+            'results_per_page': '50'
+        }
+
+        if original:
+            return return_value
+
+        return_value["start_date"] = '2021-04-21T00:00:00Z'
+        return return_value
+
+    @staticmethod
+    def get_credentials(original_credentials: bool = True):
+        return {
+            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
+        }
+
     @staticmethod
     def name():
         return "tap_tester_shopify_start_date_test"
@@ -38,10 +61,9 @@ class StartDateTest(BaseTapTest):
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED
         # REPLACE THE EMPTY SET BELOW WITH THOSE STREAMS
-        untested_streams = self.child_streams().union({'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds'})
+
         our_catalogs = [catalog for catalog in found_catalogs if
-                        catalog.get('tap_stream_id') in incremental_streams.difference(
-                            untested_streams)]
+                        catalog.get('tap_stream_id') in incremental_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
 
         # Run a sync job using orchestrator
@@ -66,10 +88,7 @@ class StartDateTest(BaseTapTest):
             # REMOVE CODE TO FIND A START DATE AND ENTER ONE MANUALLY
             raise ValueError
 
-        largest_bookmark = reduce(lambda a, b: a if a > b else b, bookmark_dates)
-        self.start_date = self.local_to_utc(largest_bookmark) \
-                              .replace(hour=0, minute=0, second=0) \
-                              .strftime(self.START_DATE_FORMAT)
+        self.start_date = self.get_properties(original=False)["start_date"]
 
         # create a new connection with the new start_date
         conn_id = self.create_connection(original_properties=False)
@@ -77,8 +96,7 @@ class StartDateTest(BaseTapTest):
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         our_catalogs = [catalog for catalog in found_catalogs if
-                        catalog.get('tap_stream_id') in incremental_streams.difference(
-                            untested_streams)]
+                        catalog.get('tap_stream_id') in incremental_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
 
         # Run a sync job using orchestrator
@@ -91,7 +109,7 @@ class StartDateTest(BaseTapTest):
         self.assertGreater(second_total_records, 0)
         self.assertLess(second_total_records, first_total_records)
 
-        for stream in incremental_streams.difference(untested_streams):
+        for stream in incremental_streams:
             with self.subTest(stream=stream):
 
                 # verify that each stream has less records than the first connection sync
