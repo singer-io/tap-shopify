@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "tap-shopify"
-version = "1.1.12"
-description = ""
-authors = ["Your Name <you@example.com>"]
+version = "1.1.13"
+description = "Singer.io tap for extracting Shopify data"
+authors = ["Stitch"]
+homepage = "https://singer.io"
+repository = "http://github.com/singer-io/tap-shopify"
+classifiers = ["Programming Language :: Python :: 3 :: Only"]
 
 [tool.poetry.dependencies]
 python = "~3.7"
@@ -10,6 +13,9 @@ ShopifyAPI = "~3.1.0"
 singer-python = "~5.4.1"
 
 [tool.poetry.dev-dependencies]
+
+[tool.poetry.plugins."console_scripts"]
+tap-shopify = "tap_shopify:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
