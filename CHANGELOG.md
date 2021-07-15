@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.4.0
+  * Adds a `redirects` stream [#80] (https://github.com/singer-io/tap-shopify/pull/80)
+
 ## 1.3.5
   * Add `status` field to `Products` stream [#108](https://github.com/singer-io/tap-shopify/pull/108)
 
