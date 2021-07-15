@@ -104,6 +104,10 @@ class BaseTapTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "redirects": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
         }
 
