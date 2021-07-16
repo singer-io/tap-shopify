@@ -18,6 +18,7 @@ class GraphQlChildStream(Stream):
     parent_name = None
     parent_replication_key = 'updatedAt'
     parent_id_ql_prefix = ''
+    node_argument = True
     child_per_page = 250
     parent_per_page = 100
     need_edges_cols = []
@@ -29,10 +30,16 @@ class GraphQlChildStream(Stream):
         schema = self.get_table_schema()
         ql_properties = self.get_graph_ql_prop(schema)
         for parent_obj in self.get_children_by_graph_ql(selected_parent, self.parent_key_access, ql_properties):
-            for child_obj in parent_obj[self.parent_key_access]:
-                child_obj = self.transform_obj(child_obj)
-                child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
-                yield child_obj
+            if isinstance(parent_obj[self.parent_key_access], dict):
+                parent_obj[self.parent_key_access] = [parent_obj[self.parent_key_access]]
+            try:
+                for child_obj in parent_obj[self.parent_key_access]:
+                    child_obj = self.transform_obj(child_obj)
+                    child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
+                    yield child_obj
+            except Exception as e:
+                # print("Exception raised: ", e)
+                pass
 
     def transform_obj(self, obj):
         for col in self.need_edges_cols:
@@ -72,6 +79,7 @@ class GraphQlChildStream(Stream):
                                              child_parameters,
                                              parent.name,
                                              self.child_per_page,
+                                             self.node_argument,
                                              after=after)
                 with metrics.http_request_timer(parent.name):
                     data = self.excute_graph_ql(query)
@@ -109,8 +117,12 @@ class GraphQlChildStream(Stream):
             raise GraphQLGeneralError("Failed", code=500)
 
     def get_graph_query(self, created_at_min, created_at_max, limit, child, child_parameters, parent_name,
-                        child_limit=100,
+                        child_limit=100, node_argument=True,
                         after=None):
+        argument = ''
+        if node_argument:
+            argument = "(first:%i)" % (
+                child_limit)
         query = """{
                       %s(first:%i %s ,query:"%s:>'%s' AND %s:<'%s' %s") {
                         pageInfo { # Returns details about the current page of results
@@ -121,7 +133,7 @@ class GraphQlChildStream(Stream):
                           cursor
                           node{
                             id,
-                            %s(first:%i){
+                            %s """ + argument + """{
                               %s
                             }
                             createdAt
@@ -142,7 +154,6 @@ class GraphQlChildStream(Stream):
             created_at_max,
             self.get_extra_query(),
             child,
-            child_limit,
             child_parameters)
         return query
 
