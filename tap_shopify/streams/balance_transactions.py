@@ -4,7 +4,7 @@ from tap_shopify.streams.child_stream import ChildStream
 
 
 class BalanceTransactions(ChildStream):
-    name = 'transactions'
+    name = 'balance_transactions'
     replication_object = shopify.Transactions
 
     def get_parent_field_name(self):
