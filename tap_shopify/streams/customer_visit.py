@@ -6,7 +6,7 @@ from tap_shopify.streams.graph_ql_stream import GraphQlChildStream
 LOGGER = singer.get_logger()
 
 
-class CustomerVisit(GraphQlChildStream):
+class CustomerJourney(GraphQlChildStream):
     name = 'customer_visit'
 
     replication_object = shopify.Order
@@ -15,8 +15,6 @@ class CustomerVisit(GraphQlChildStream):
     parent_id_ql_prefix = 'gid://shopify/Order/'
     parent_per_page = 25
     node_argument = False
-    # should be represented by one relation key-value in dict
-    inline_fragments = {'moments': 'CustomerVisit'}
 
 
-Context.stream_objects['customer_visit'] = CustomerVisit
+Context.stream_objects['customer_visit'] = CustomerJourney

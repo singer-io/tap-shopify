@@ -14,5 +14,4 @@ import tap_shopify.streams.locations
 import tap_shopify.streams.inventory_items
 import tap_shopify.streams.payouts
 import tap_shopify.streams.balance_transactions
-import tap_shopify.streams.customer_journey
 import tap_shopify.streams.customer_visit

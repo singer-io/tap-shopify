@@ -22,25 +22,19 @@ class GraphQlChildStream(Stream):
     child_per_page = 250
     parent_per_page = 100
     need_edges_cols = []
-    inline_fragments = []
 
     def get_objects(self):
         selected_parent = Context.stream_objects[self.parent_name]()
         selected_parent.replication_key = self.parent_replication_key
 
         schema = self.get_table_schema()
-        ql_properties = self.check_inline_fragments(self.get_graph_ql_prop(schema))
+        ql_properties = self.get_graph_ql_prop(schema)
         for parent_obj in self.get_children_by_graph_ql(selected_parent, self.parent_key_access, ql_properties):
             if isinstance(parent_obj[self.parent_key_access], dict):
                 parent_obj[self.parent_key_access] = [parent_obj[self.parent_key_access]]
 
-            selected_object = parent_obj[self.parent_key_access]
             try:
-                if self.inline_fragments:
-                    for fragment in self.inline_fragments.keys():
-                        selected_object = parent_obj[self.parent_key_access][0][fragment]
-
-                for child_obj in selected_object:
+                for child_obj in parent_obj[self.parent_key_access]:
                     child_obj = self.transform_obj(child_obj)
                     child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
                     yield child_obj
@@ -173,13 +167,6 @@ class GraphQlChildStream(Stream):
                 break
 
         return schema
-
-    def check_inline_fragments(self, properties):
-        if self.inline_fragments:
-            key_field = list(self.inline_fragments)[0]
-            entity_value = list(self.inline_fragments.values())[0]
-            properties = "%s{ ...on %s {%s}}" % (key_field, entity_value, properties)
-        return properties
 
     def get_graph_ql_prop(self, schema):
         properties = schema["properties"]
