@@ -19,6 +19,7 @@ setup(
             'ipdb',
             'requests==2.20.0',
             'nose',
+            'gql-query-builder'
         ]
     },
     entry_points="""

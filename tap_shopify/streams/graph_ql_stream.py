@@ -8,12 +8,13 @@ from singer import metrics, utils
 from tap_shopify.context import Context
 import shopify
 import json
+from gql_query_builder import GqlQuery
 
 
 class GraphQlChildStream(Stream):
     name = None
     replication_key = 'updatedAt'
-    replication_object = shopify.Transaction
+    replication_object = None
     parent_key_access = None
     parent_name = None
     parent_replication_key = 'updatedAt'
@@ -29,7 +30,7 @@ class GraphQlChildStream(Stream):
 
         schema = self.get_table_schema()
         ql_properties = self.get_graph_ql_prop(schema)
-        for parent_obj in self.get_children_by_graph_ql(selected_parent, self.parent_key_access, ql_properties):
+        for parent_obj in self.get_children_by_graph_ql(selected_parent, ql_properties):
             if isinstance(parent_obj[self.parent_key_access], dict):
                 parent_obj[self.parent_key_access] = [parent_obj[self.parent_key_access]]
 
@@ -55,7 +56,7 @@ class GraphQlChildStream(Stream):
         parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
         return parent_id
 
-    def get_children_by_graph_ql(self, parent, child, child_parameters):
+    def get_children_by_graph_ql(self, parent, child_parameters):
         LOGGER.info("Getting data with GraphQL")
 
         updated_at_min = parent.get_bookmark()
@@ -75,12 +76,8 @@ class GraphQlChildStream(Stream):
             while True:
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
-                                             self.parent_per_page,
-                                             child,
                                              child_parameters,
                                              parent.name,
-                                             self.child_per_page,
-                                             self.node_argument,
                                              after=after)
                 with metrics.http_request_timer(parent.name):
                     data = self.excute_graph_ql(query)
@@ -117,13 +114,17 @@ class GraphQlChildStream(Stream):
 
             raise GraphQLGeneralError("Failed", code=500)
 
-    def get_graph_query(self, created_at_min, created_at_max, limit, child, child_parameters, parent_name,
-                        child_limit=100, node_argument=True,
+    def get_graph_query(self,
+                        created_at_min,
+                        created_at_max,
+                        child_parameters,
+                        parent_name,
                         after=None):
         argument = ''
-        if node_argument:
+        if self.node_argument:
             argument = "(first:%i)" % (
-                child_limit)
+                self.child_per_page)
+
         query = """{
                       %s(first:%i %s ,query:"%s:>'%s' AND %s:<'%s' %s") {
                         pageInfo { # Returns details about the current page of results
@@ -147,14 +148,14 @@ class GraphQlChildStream(Stream):
             after_str = ',after:"%s"' % after
         query = query % (
             parent_name,
-            limit,
+            self.parent_per_page,
             after_str,
             self.get_min_replication_key(),
             created_at_min,
             self.get_max_replication_key(),
             created_at_max,
             self.get_extra_query(),
-            child,
+            self.parent_key_access,
             child_parameters)
         return query
 
