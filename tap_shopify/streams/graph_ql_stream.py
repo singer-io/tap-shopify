@@ -28,9 +28,7 @@ class GraphQlChildStream(Stream):
         selected_parent = Context.stream_objects[self.parent_name]()
         selected_parent.replication_key = self.parent_replication_key
 
-        schema = self.get_table_schema()
-        ql_properties = self.get_graph_ql_prop(schema)
-        for parent_obj in self.get_children_by_graph_ql(selected_parent, ql_properties):
+        for parent_obj in self.get_children_by_graph_ql(selected_parent):
             if isinstance(parent_obj[self.parent_key_access], dict):
                 parent_obj[self.parent_key_access] = [parent_obj[self.parent_key_access]]
 
@@ -56,7 +54,7 @@ class GraphQlChildStream(Stream):
         parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
         return parent_id
 
-    def get_children_by_graph_ql(self, parent, child_parameters):
+    def get_children_by_graph_ql(self, parent):
         LOGGER.info("Getting data with GraphQL")
 
         updated_at_min = parent.get_bookmark()
@@ -76,7 +74,6 @@ class GraphQlChildStream(Stream):
             while True:
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
-                                             child_parameters,
                                              parent.name,
                                              after=after)
                 with metrics.http_request_timer(parent.name):
@@ -103,63 +100,50 @@ class GraphQlChildStream(Stream):
                 response = json.loads(shopify.GraphQL().execute(query))
         except Exception:
             raise GraphQLGeneralError("Execution failed", code=500)
+
         if 'data' in response and response['data'] is not None:
             return response['data']
-        else:
-            if "errors" in response:
-                errors = response["errors"]
-                singer.log_info(errors)
-                if errors[0]["extensions"]["code"] == "THROTTLED":
-                    raise GraphQLThrottledError("THROTTLED", code=429)
 
-            raise GraphQLGeneralError("Failed", code=500)
+        if "errors" in response:
+            errors = response["errors"]
+            singer.log_info(errors)
+            if errors[0]["extensions"]["code"] == "THROTTLED":
+                raise GraphQLThrottledError("THROTTLED", code=429)
+
+        raise GraphQLGeneralError("Failed", code=500)
 
     def get_graph_query(self,
                         created_at_min,
                         created_at_max,
-                        child_parameters,
                         parent_name,
                         after=None):
-        argument = ''
-        if self.node_argument:
-            argument = "(first:%i)" % (
-                self.child_per_page)
 
-        query = """{
-                      %s(first:%i %s ,query:"%s:>'%s' AND %s:<'%s' %s") {
-                        pageInfo { # Returns details about the current page of results
-                          hasNextPage # Whether there are more results after this page
-                          hasPreviousPage # Whether there are more results before this page
-                        }
-                        edges{
-                          cursor
-                          node{
-                            id,
-                            %s """ + argument + """{
-                              %s
-                            }
-                            createdAt
-                          }
-                        }
-                      }
-                }"""
-        after_str = ''
+        input = {
+            "first": self.parent_per_page,
+            "query": "\"{min_key}:>'{min_val}' AND {max_key}:<'{max_val}'\"".format(
+                min_key=self.get_min_replication_key(),
+                max_key=self.get_max_replication_key(),
+                min_val=created_at_min,
+                max_val=created_at_max),
+        }
+        child_fields = self.get_graph_ql_prop(self.get_child_table_schema())
+
         if after:
-            after_str = ',after:"%s"' % after
-        query = query % (
-            parent_name,
-            self.parent_per_page,
-            after_str,
-            self.get_min_replication_key(),
-            created_at_min,
-            self.get_max_replication_key(),
-            created_at_max,
-            self.get_extra_query(),
-            self.parent_key_access,
-            child_parameters)
-        return query
+            input["after"] = "\"{}\"".format(after)
 
-    def get_table_schema(self):
+        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
+
+        child_limit_arg = "(first:{})".format(self.child_per_page) if self.node_argument else ''
+        child = GqlQuery().fields(child_fields, name='{child}{limit}'.format(child=self.parent_key_access,
+                                                                               limit=child_limit_arg)).generate()
+        node = GqlQuery().fields(['id', child, "createdAt", "updatedAt"], name='node').generate()
+        edges = GqlQuery().fields(['cursor', node], name='edges').generate()
+
+        generate_query = GqlQuery().query(parent_name, input=input).fields([pageInfo, edges]).generate()
+
+        return "{%s}" % generate_query
+
+    def get_child_table_schema(self):
         streams = Context.catalog["streams"]
         schema = None
         for stream in streams:
@@ -172,25 +156,30 @@ class GraphQlChildStream(Stream):
     def get_graph_ql_prop(self, schema):
         properties = schema["properties"]
         ql_fields = []
-        for prop in properties:
-            if "generated" in properties[prop]["type"]:
+        for prop_name in properties:
+            prop_obj = properties[prop_name]
+            prop_type = prop_obj["type"]
+            if "generated" in prop_type:
                 continue
-            if 'object' in properties[prop]['type']:
-                if properties[prop]["properties"]:
-                    ql_field = "%s{%s}" % (prop, self.get_graph_ql_prop(properties[prop]))
+            if 'object' in prop_type:
+                if prop_obj["properties"]:
+                    ql_field = GqlQuery().fields(self.get_graph_ql_prop(prop_obj), name=prop_name).generate()
                     ql_fields.append(ql_field)
-            elif 'array' in properties[prop]['type']:
-                if properties[prop]["items"]["properties"]:
-                    ql_append = "%s{%s}"
-                    if prop in self.need_edges_cols:
-                        ql_append = "%s(first:5){edges{node{%s}}}"
-                    ql_field = ql_append % (
-                        prop, self.get_graph_ql_prop(properties[prop]["items"]))
+            elif 'array' in prop_type:
+                if prop_obj["items"]["properties"]:
+                    ql_field = GqlQuery().fields(self.get_graph_ql_prop(prop_obj["items"]), name=prop_name).generate()
+                    if prop_name in self.need_edges_cols:
+                        node = GqlQuery().fields(self.get_graph_ql_prop(prop_obj["items"]), name='node').generate()
+                        edges = GqlQuery().fields([node], "edges").generate()
+                        ql_field = GqlQuery().query(prop_name, input={
+                            "first": 5
+                        }).fields([edges]).generate()
+
                     ql_fields.append(ql_field)
             else:
-                ql_fields.append(prop)
+                ql_fields.append(prop_name)
 
-        return ','.join(ql_fields)
+        return ql_fields
 
     def get_extra_query(self):
         return ""
