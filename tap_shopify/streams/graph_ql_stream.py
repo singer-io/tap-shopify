@@ -9,6 +9,7 @@ from tap_shopify.context import Context
 import shopify
 import json
 from gql_query_builder import GqlQuery
+import typing
 
 
 class GraphQlStream(Stream):
@@ -23,7 +24,7 @@ class GraphQlStream(Stream):
         for obj in self.get_graph_ql_data(self):
             yield self.transform_obj(obj)
 
-    def transform_obj(self, obj):
+    def transform_obj(self, obj: dict) -> dict:
         for col in self.need_edges_cols:
             obj[col] = [trans_obj["node"] for trans_obj in obj[col]["edges"]]
         return obj
@@ -32,7 +33,7 @@ class GraphQlStream(Stream):
         for obj in self.get_objects():
             yield obj
 
-    def get_graph_ql_data(self, replication_obj):
+    def get_graph_ql_data(self, replication_obj: Stream):
         LOGGER.info("Getting data with GraphQL")
         updated_at_min = replication_obj.get_bookmark()
 
@@ -70,7 +71,7 @@ class GraphQlStream(Stream):
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
 
     @shopify_error_handling
-    def excute_graph_ql(self, query):
+    def excute_graph_ql(self, query: str) -> dict:
         try:
             # the execute function sometimes prints and this causes errors for the target, so I block printing for it
             with HiddenPrints():
@@ -90,24 +91,28 @@ class GraphQlStream(Stream):
         raise GraphQLGeneralError("Failed", code=500)
 
     def get_graph_query(self,
-                        created_at_min,
-                        created_at_max,
-                        name,
-                        after=None):
+                        created_at_min: str,
+                        created_at_max: str,
+                        name: str,
+                        after: typing.Optional[str] = None) -> str:
 
+        edges = self.get_graph_edges()
 
+        page_info = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
+
+        query_input = self.get_query_input(created_at_min, created_at_max, after)
+        generate_query = GqlQuery().query(name, input=query_input).fields([page_info, edges]).generate()
+
+        return "{%s}" % generate_query
+
+    def get_graph_edges(self) -> str:
         fields = self.get_graph_ql_prop(self.get_table_schema())
-
-        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
 
         node = GqlQuery().fields([fields], name='node').generate()
         edges = GqlQuery().fields(['cursor', node], name='edges').generate()
+        return edges
 
-        query_input = self.get_query_input(created_at_min, created_at_max, after)
-        generate_query = GqlQuery().query(name, input=query_input).fields([pageInfo, edges]).generate()
-        return "{%s}" % generate_query
-
-    def get_query_input(self, created_at_min, created_at_max, after):
+    def get_query_input(self, created_at_min: str, created_at_max: str, after: typing.Optional[str]) -> dict:
         inputs = {
             "first": self.parent_per_page,
             "query": "\"{min_key}:>'{min_val}' AND {max_key}:<'{max_val}'\"".format(
@@ -122,7 +127,7 @@ class GraphQlStream(Stream):
 
         return inputs
 
-    def get_table_schema(self):
+    def get_table_schema(self) -> dict:
         streams = Context.catalog["streams"]
         schema = None
         for stream in streams:
@@ -132,7 +137,7 @@ class GraphQlStream(Stream):
 
         return schema
 
-    def get_graph_ql_prop(self, schema):
+    def get_graph_ql_prop(self, schema: dict) -> list:
         properties = schema["properties"]
         ql_fields = []
         for prop_name in properties:
@@ -163,14 +168,14 @@ class GraphQlStream(Stream):
     def get_extra_query(self):
         return ""
 
-    def get_max_replication_key(self):
+    def get_max_replication_key(self) -> str:
         switch = {
             "createdAt": "created_at",
             "updatedAt": "updated_at"
         }
         return switch[self.replication_key]
 
-    def get_min_replication_key(self):
+    def get_min_replication_key(self) -> str:
         switch = {
             "createdAt": "created_at",
             "updatedAt": "updated_at"
@@ -203,28 +208,15 @@ class GraphQlChildStream(GraphQlStream):
 
                 yield child_obj
 
-    def transform_parent_id(self, parent_id):
+    def transform_parent_id(self, parent_id: str) -> str:
         parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
         return parent_id
 
-    def get_graph_query(self,
-                        created_at_min,
-                        created_at_max,
-                        parent_name,
-                        after=None):
-
-
+    def get_graph_edges(self) -> str:
         child_fields = self.get_graph_ql_prop(self.get_table_schema())
-
-        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
-
         child_limit_arg = "(first:{})".format(self.child_per_page) if self.node_argument else ''
         child = GqlQuery().fields(child_fields, name='{child}{limit}'.format(child=self.parent_key_access,
                                                                              limit=child_limit_arg)).generate()
         node = GqlQuery().fields(['id', child, "createdAt", "updatedAt"], name='node').generate()
         edges = GqlQuery().fields(['cursor', node], name='edges').generate()
-
-        query_input = self.get_query_input(created_at_min, created_at_max, after)
-        generate_query = GqlQuery().query(parent_name, input=query_input).fields([pageInfo, edges]).generate()
-
-        return "{%s}" % generate_query
+        return edges
