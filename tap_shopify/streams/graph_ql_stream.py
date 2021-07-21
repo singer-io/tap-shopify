@@ -11,35 +11,17 @@ import json
 from gql_query_builder import GqlQuery
 
 
-class GraphQlChildStream(Stream):
+class GraphQlStream(Stream):
     name = None
     replication_key = 'updatedAt'
     replication_object = None
-    parent_key_access = None
-    parent_name = None
-    parent_replication_key = 'updatedAt'
-    parent_id_ql_prefix = ''
     node_argument = True
-    child_per_page = 250
     parent_per_page = 100
     need_edges_cols = []
 
     def get_objects(self):
-        selected_parent = Context.stream_objects[self.parent_name]()
-        selected_parent.replication_key = self.parent_replication_key
-
-        for parent_obj in self.get_children_by_graph_ql(selected_parent):
-            if isinstance(parent_obj[self.parent_key_access], dict):
-                parent_obj[self.parent_key_access] = [parent_obj[self.parent_key_access]]
-
-            try:
-                for child_obj in parent_obj[self.parent_key_access]:
-                    child_obj = self.transform_obj(child_obj)
-                    child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
-                    yield child_obj
-            except Exception as e:
-                # None type is not iterable
-                pass
+        for obj in self.get_graph_ql_data(self):
+            yield self.transform_obj(obj)
 
     def transform_obj(self, obj):
         for col in self.need_edges_cols:
@@ -47,22 +29,17 @@ class GraphQlChildStream(Stream):
         return obj
 
     def sync(self):
-        for child_obj in self.get_objects():
-            yield child_obj
+        for obj in self.get_objects():
+            yield obj
 
-    def transform_parent_id(self, parent_id):
-        parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
-        return parent_id
-
-    def get_children_by_graph_ql(self, parent):
+    def get_graph_ql_data(self, replication_obj):
         LOGGER.info("Getting data with GraphQL")
-
-        updated_at_min = parent.get_bookmark()
+        updated_at_min = replication_obj.get_bookmark()
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
-        # Page through till the end of the resultset
+        # Page through till the end of the result set
         while updated_at_min < stop_time:
             after = None
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
@@ -74,11 +51,11 @@ class GraphQlChildStream(Stream):
             while True:
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
-                                             parent.name,
+                                             replication_obj.name,
                                              after=after)
-                with metrics.http_request_timer(parent.name):
+                with metrics.http_request_timer(replication_obj.name):
                     data = self.excute_graph_ql(query)
-                data = data[parent.name]
+                data = data[replication_obj.name]
                 page_info = data['pageInfo']
                 edges = data["edges"]
                 for edge in edges:
@@ -86,8 +63,8 @@ class GraphQlChildStream(Stream):
                     node = edge["node"]
                     yield node
                 if not page_info["hasNextPage"]:
-                    Context.state.get('bookmarks', {}).get(parent.name, {}).pop('since_id', None)
-                    parent.update_bookmark(utils.strftime(updated_at_max + datetime.timedelta(seconds=1)))
+                    Context.state.get('bookmarks', {}).get(replication_obj.name, {}).pop('since_id', None)
+                    replication_obj.update_bookmark(utils.strftime(updated_at_max + datetime.timedelta(seconds=1)))
                     break
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
@@ -115,10 +92,23 @@ class GraphQlChildStream(Stream):
     def get_graph_query(self,
                         created_at_min,
                         created_at_max,
-                        parent_name,
+                        name,
                         after=None):
 
-        input = {
+
+        fields = self.get_graph_ql_prop(self.get_table_schema())
+
+        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
+
+        node = GqlQuery().fields([fields], name='node').generate()
+        edges = GqlQuery().fields(['cursor', node], name='edges').generate()
+
+        query_input = self.get_query_input(created_at_min, created_at_max, after)
+        generate_query = GqlQuery().query(name, input=query_input).fields([pageInfo, edges]).generate()
+        return "{%s}" % generate_query
+
+    def get_query_input(self, created_at_min, created_at_max, after):
+        inputs = {
             "first": self.parent_per_page,
             "query": "\"{min_key}:>'{min_val}' AND {max_key}:<'{max_val}'\"".format(
                 min_key=self.get_min_replication_key(),
@@ -126,24 +116,13 @@ class GraphQlChildStream(Stream):
                 min_val=created_at_min,
                 max_val=created_at_max),
         }
-        child_fields = self.get_graph_ql_prop(self.get_child_table_schema())
 
         if after:
-            input["after"] = "\"{}\"".format(after)
+            inputs["after"] = "\"{}\"".format(after)
 
-        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
+        return inputs
 
-        child_limit_arg = "(first:{})".format(self.child_per_page) if self.node_argument else ''
-        child = GqlQuery().fields(child_fields, name='{child}{limit}'.format(child=self.parent_key_access,
-                                                                               limit=child_limit_arg)).generate()
-        node = GqlQuery().fields(['id', child, "createdAt", "updatedAt"], name='node').generate()
-        edges = GqlQuery().fields(['cursor', node], name='edges').generate()
-
-        generate_query = GqlQuery().query(parent_name, input=input).fields([pageInfo, edges]).generate()
-
-        return "{%s}" % generate_query
-
-    def get_child_table_schema(self):
+    def get_table_schema(self):
         streams = Context.catalog["streams"]
         schema = None
         for stream in streams:
@@ -197,3 +176,55 @@ class GraphQlChildStream(Stream):
             "updatedAt": "updated_at"
         }
         return switch[self.replication_key]
+
+
+class GraphQlChildStream(GraphQlStream):
+    parent_key_access = None
+    parent_name = None
+    parent_replication_key = 'updatedAt'
+    parent_id_ql_prefix = ''
+    child_per_page = 250
+    parent_per_page = 100
+
+    def get_objects(self):
+        parent = Context.stream_objects[self.parent_name]()
+        parent.replication_key = self.parent_replication_key
+        for parent_obj in self.get_graph_ql_data(parent):
+
+            if isinstance(parent_obj[self.parent_key_access], dict):
+                child_obj = self.transform_obj(parent_obj[self.parent_key_access])
+                child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
+                yield child_obj
+                continue
+
+            for child_obj in parent_obj[self.parent_key_access]:
+                child_obj = self.transform_obj(child_obj)
+                child_obj["parentId"] = self.transform_parent_id(parent_obj["id"])
+
+                yield child_obj
+
+    def transform_parent_id(self, parent_id):
+        parent_id = parent_id.replace(self.parent_id_ql_prefix, '')
+        return parent_id
+
+    def get_graph_query(self,
+                        created_at_min,
+                        created_at_max,
+                        parent_name,
+                        after=None):
+
+
+        child_fields = self.get_graph_ql_prop(self.get_table_schema())
+
+        pageInfo = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
+
+        child_limit_arg = "(first:{})".format(self.child_per_page) if self.node_argument else ''
+        child = GqlQuery().fields(child_fields, name='{child}{limit}'.format(child=self.parent_key_access,
+                                                                             limit=child_limit_arg)).generate()
+        node = GqlQuery().fields(['id', child, "createdAt", "updatedAt"], name='node').generate()
+        edges = GqlQuery().fields(['cursor', node], name='edges').generate()
+
+        query_input = self.get_query_input(created_at_min, created_at_max, after)
+        generate_query = GqlQuery().query(parent_name, input=query_input).fields([pageInfo, edges]).generate()
+
+        return "{%s}" % generate_query
