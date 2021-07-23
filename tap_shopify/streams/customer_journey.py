@@ -7,7 +7,7 @@ LOGGER = singer.get_logger()
 
 
 class CustomerJourney(GraphQlChildStream):
-    name = 'customer_visit'
+    name = 'customer_journey'
 
     replication_object = shopify.Order
     parent_key_access = "customerJourney"
@@ -17,4 +17,4 @@ class CustomerJourney(GraphQlChildStream):
     node_argument = False
 
 
-Context.stream_objects['customer_visit'] = CustomerJourney
+Context.stream_objects['customer_journey'] = CustomerJourney
