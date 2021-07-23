@@ -16,9 +16,9 @@ class GraphQlStream(Stream):
     name = None
     replication_key = 'updatedAt'
     replication_object = None
-    node_argument = True
     parent_per_page = 100
     need_edges_cols = []
+    fragment_cols = {}
 
     def get_objects(self):
         for obj in self.get_graph_ql_data(self):
@@ -143,17 +143,22 @@ class GraphQlStream(Stream):
         for prop_name in properties:
             prop_obj = properties[prop_name]
             prop_type = prop_obj["type"]
+
             if "generated" in prop_type:
                 continue
+
             if 'object' in prop_type:
                 if prop_obj["properties"]:
-                    ql_field = GqlQuery().fields(self.get_graph_ql_prop(prop_obj), name=prop_name).generate()
+                    fields = self.get_fragment_fields(prop_name, self.get_graph_ql_prop(prop_obj))
+                    ql_field = GqlQuery().fields(fields, name=prop_name).generate()
                     ql_fields.append(ql_field)
+
             elif 'array' in prop_type:
                 if prop_obj["items"]["properties"]:
-                    ql_field = GqlQuery().fields(self.get_graph_ql_prop(prop_obj["items"]), name=prop_name).generate()
+                    fields = self.get_fragment_fields(prop_name, self.get_graph_ql_prop(prop_obj["items"]))
+                    ql_field = GqlQuery().fields(fields, name=prop_name).generate()
                     if prop_name in self.need_edges_cols:
-                        node = GqlQuery().fields(self.get_graph_ql_prop(prop_obj["items"]), name='node').generate()
+                        node = GqlQuery().fields(fields, name='node').generate()
                         edges = GqlQuery().fields([node], "edges").generate()
                         ql_field = GqlQuery().query(prop_name, input={
                             "first": 5
@@ -164,6 +169,12 @@ class GraphQlStream(Stream):
                 ql_fields.append(prop_name)
 
         return ql_fields
+
+    def get_fragment_fields(self, prop_name: str, fields: list) -> list:
+        if prop_name in self.fragment_cols:
+            fragment_name = self.fragment_cols[prop_name]
+            fields = [GqlQuery().fields(fields, name="... on {}".format(fragment_name)).generate()]
+        return fields
 
     def get_extra_query(self):
         return ""
@@ -190,11 +201,15 @@ class GraphQlChildStream(GraphQlStream):
     parent_id_ql_prefix = ''
     child_per_page = 250
     parent_per_page = 100
+    child_is_list = True
 
     def get_objects(self):
         parent = Context.stream_objects[self.parent_name]()
         parent.replication_key = self.parent_replication_key
         for parent_obj in self.get_graph_ql_data(parent):
+
+            if not parent_obj[self.parent_key_access]:
+                continue
 
             if isinstance(parent_obj[self.parent_key_access], dict):
                 child_obj = self.transform_obj(parent_obj[self.parent_key_access])
@@ -214,7 +229,7 @@ class GraphQlChildStream(GraphQlStream):
 
     def get_graph_edges(self) -> str:
         child_fields = self.get_graph_ql_prop(self.get_table_schema())
-        child_limit_arg = "(first:{})".format(self.child_per_page) if self.node_argument else ''
+        child_limit_arg = "(first:{})".format(self.child_per_page) if self.child_is_list else ''
         child = GqlQuery().fields(child_fields, name='{child}{limit}'.format(child=self.parent_key_access,
                                                                              limit=child_limit_arg)).generate()
         node = GqlQuery().fields(['id', child, "createdAt", "updatedAt"], name='node').generate()

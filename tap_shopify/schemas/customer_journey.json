@@ -13,168 +13,359 @@
       ]
     },
     "parentId": {
-            "type": [
-              "null",
-              "string",
-              "generated"
-            ]
-          },
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ]
+    },
     "firstVisit": {
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "parentId": {
+          "type": [
+            "null",
+            "string",
+            "generated"
+          ]
+        },
+        "landingPage": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "landingPageHtml": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "marketingEvent": {
+          "properties": {
+            "id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "description": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "scheduledToEndAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "startedAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "endedAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "remoteId": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceAndMedium": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "utmCampaign": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "utmMedium": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "utmSource": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "occurredAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "referralCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "referralInfoHtml": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "referrerUrl": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "source": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sourceDescription": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sourceType": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "utmParameters": {
+          "properties": {
+            "campaign": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "content": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "medium": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "term": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "lastVisit": {
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "parentId": {
+          "type": [
+            "null",
+            "string",
+            "generated"
+          ]
+        },
+        "landingPage": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "landingPageHtml": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "occurredAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "referralCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "referralInfoHtml": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "referrerUrl": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "source": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sourceDescription": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "sourceType": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "utmParameters": {
+          "properties": {
+            "campaign": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "content": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "medium": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "term": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "null",
+            "object"
+          ]
+        }
+      },
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "moments": {
+      "items": {
         "properties": {
-          "id": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "parentId": {
-            "type": [
-              "null",
-              "string",
-              "generated"
-            ]
-          },
-          "landingPage": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "landingPageHtml": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "marketingEvent": {
-            "properties": {
               "id": {
                 "type": [
                   "null",
                   "string"
                 ]
               },
-              "description": {
+              "parentId": {
+                "type": [
+                  "null",
+                  "string",
+                  "generated"
+                ]
+              },
+              "landingPage": {
                 "type": [
                   "null",
                   "string"
                 ]
               },
-              "scheduledToEndAt": {
+              "landingPageHtml": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "occurredAt": {
                 "type": [
                   "null",
                   "string"
                 ],
                 "format": "date-time"
               },
-              "startedAt": {
-                "type": [
-                  "null",
-                  "string"
-                ],
-                "format": "date-time"
-              },
-              "endedAt": {
-                "type": [
-                  "null",
-                  "string"
-                ],
-                "format": "date-time"
-              },
-              "remoteId": {
+              "referralCode": {
                 "type": [
                   "null",
                   "string"
                 ]
               },
-              "sourceAndMedium": {
+              "referralInfoHtml": {
                 "type": [
                   "null",
                   "string"
                 ]
               },
-              "utmCampaign": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "utmMedium": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "utmSource": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              }
-            },
-            "type": [
-              "null",
-              "object"
-            ]
-          },
-          "occurredAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "referralCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "referralInfoHtml": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "referrerUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "source": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sourceDescription": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sourceType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "utmParameters": {
-            "properties": {
-              "campaign": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "content": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "medium": {
+              "referrerUrl": {
                 "type": [
                   "null",
                   "string"
@@ -186,138 +377,66 @@
                   "string"
                 ]
               },
-              "term": {
+              "sourceDescription": {
                 "type": [
                   "null",
                   "string"
                 ]
+              },
+              "sourceType": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "utmParameters": {
+                "properties": {
+                  "campaign": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "content": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "medium": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "source": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "term": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                },
+                "type": [
+                  "null",
+                  "object"
+                ]
               }
             },
-            "type": [
-              "null",
-              "object"
-            ]
-          }
-          },
         "type": [
           "null",
           "object"
         ]
-
-    },
-    "lastVisit": {
-        "properties": {
-          "id": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "parentId": {
-            "type": [
-              "null",
-              "string",
-              "generated"
-            ]
-          },
-          "landingPage": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "landingPageHtml": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "occurredAt": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "referralCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "referralInfoHtml": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "referrerUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "source": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sourceDescription": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sourceType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "utmParameters": {
-            "properties": {
-              "campaign": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "content": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "medium": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "source": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              },
-              "term": {
-                "type": [
-                  "null",
-                  "string"
-                ]
-              }
-            },
-            "type": [
-              "null",
-              "object"
-            ]
-          }
-          },
-        "type": [
-          "null",
-          "object"
-        ]
+      },
+      "type": [
+        "null",
+        "array"
+      ]
     }
   },
   "type": "object"
