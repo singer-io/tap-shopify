@@ -14,7 +14,8 @@ class CustomerJourney(GraphQlChildStream):
     parent_name = "orders"
     parent_id_ql_prefix = 'gid://shopify/Order/'
     parent_per_page = 25
-    node_argument = False
+    child_is_list = False
+    fragment_cols = {"moments": "CustomerVisit"}
 
 
 Context.stream_objects['customer_journey'] = CustomerJourney
