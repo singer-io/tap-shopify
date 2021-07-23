@@ -12,14 +12,14 @@ setup(
     install_requires=[
         "ShopifyAPI==8.4.1",
         "singer-python==5.9.1",
+        'gql-query-builder'
     ],
     extras_require={
         'dev': [
             'pylint',
             'ipdb',
             'requests==2.20.0',
-            'nose',
-            'gql-query-builder'
+            'nose'
         ]
     },
     entry_points="""
