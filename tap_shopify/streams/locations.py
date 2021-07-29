@@ -6,7 +6,7 @@ from tap_shopify.context import Context
 class Locations(Stream):
     name = 'locations'
     replication_object = shopify.Location
-    replication_key = ""
+    replication_key = None
     replication_method = "FULL_TABLE"
 
     def get_locations_data(self):
