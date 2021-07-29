@@ -8,12 +8,12 @@ class Locations(Stream):
     replication_object = shopify.Location
 
     def get_locations_data(self):
-        page = self.replication_object.find()
-        yield from page
+        location_page = self.replication_object.find()
+        yield from location_page
 
-        while page.has_next_page():
-            page = page.next_page()
-            yield from page
+        while location_page.has_next_page():
+            location_page = location_page.next_page()
+            yield from location_page
 
     def get_objects(self):
         # get all locations data as it is used for child streams
