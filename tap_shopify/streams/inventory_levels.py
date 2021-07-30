@@ -1,11 +1,9 @@
 import shopify
 from singer.utils import strftime, strptime_to_utc
-from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       shopify_error_handling)
-import singer
-LOGGER = singer.get_logger()
+from tap_shopify.context import Context
 
 class InventoryLevels(Stream):
     name = 'inventory_levels'
@@ -37,7 +35,7 @@ class InventoryLevels(Stream):
 
         # Get all locations data as location id is used for Inventory Level
         # If we get locations updated after a bookmark
-        # then there is possibility of data loss for Inventory Level 
+        # then there is possibility of data loss for Inventory Level
         # because location is not updated when any Inventory Level is updated inside it.
         for parent_object in selected_parent.get_locations_data():
             inventory_levels = self.get_inventory_levels(parent_object.id, bookmark)
