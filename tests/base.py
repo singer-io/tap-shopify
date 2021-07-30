@@ -109,7 +109,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: None},
+                self.API_LIMIT: 0},
         }
 
     def expected_streams(self):
