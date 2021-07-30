@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "available": {
+      "type": ["null", "integer"]
+    },
+    "inventory_item_id": {
+      "type": ["null", "integer"]
+    },
+    "updated_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "location_id": {
+      "type": ["null", "integer"]
+    },
+    "admin_graphql_api_id": {
+      "type": ["null", "string"]
+    }
+  },
+  "type": "object"
+}
