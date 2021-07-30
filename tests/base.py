@@ -104,7 +104,12 @@ class BaseTapTest(unittest.TestCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "locations": {
+                self.REPLICATION_KEYS: {"updated_at"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: None},
         }
 
     def expected_streams(self):
@@ -277,5 +282,5 @@ class BaseTapTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
-        self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers'}
-        self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products'}
+        self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers', 'locations'}
+        self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations'}

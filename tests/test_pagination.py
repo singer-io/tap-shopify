@@ -57,6 +57,13 @@ class PaginationTest(BaseTapTest):
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
         for stream in testable_streams:
+
+            # skip 'locations' stream as there is not much info about
+            # limit of records returned in 1 page
+            # Documentation: https://help.shopify.com/en/manual/locations/setting-up-your-locations
+            if stream in ['locations']:
+                continue
+
             with self.subTest(stream=stream):
 
                 # verify that we can paginate with all fields selected

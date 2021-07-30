@@ -2,12 +2,11 @@ import shopify
 
 from tap_shopify.streams.base import Stream
 from tap_shopify.context import Context
+from singer import utils
 
 class Locations(Stream):
     name = 'locations'
     replication_object = shopify.Location
-    replication_key = None
-    replication_method = "FULL_TABLE"
 
     def get_locations_data(self):
         location_page = self.replication_object.find()
@@ -18,10 +17,12 @@ class Locations(Stream):
             yield from location_page
 
     def get_objects(self):
-        # get all locations data as it is used for child streams
-        # if we get locations updated after a date
-        # then there is possibility of data loss for child streams
+        bookmark = self.get_bookmark()
+        max_bookmark = utils.strftime(utils.now())
+
         for obj in self.get_locations_data():
-            yield obj
+            if utils.strptime_with_tz(obj.updated_at) > bookmark:
+                yield obj
+        self.update_bookmark(max_bookmark)
 
 Context.stream_objects['locations'] = Locations
