@@ -98,6 +98,7 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
             "products": default,
+            "inventory_items": default,
             "metafields": meta,
             "transactions": {
                 self.REPLICATION_KEYS: {"created_at"},
