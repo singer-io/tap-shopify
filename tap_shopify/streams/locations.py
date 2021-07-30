@@ -1,8 +1,7 @@
 import shopify
-
+from singer import utils
 from tap_shopify.streams.base import Stream
 from tap_shopify.context import Context
-from singer import utils
 
 class Locations(Stream):
     name = 'locations'
