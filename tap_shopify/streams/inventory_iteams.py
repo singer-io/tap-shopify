@@ -2,7 +2,6 @@ import shopify
 from singer.utils import strftime,strptime_to_utc
 from tap_shopify.streams.base import (Stream, shopify_error_handling)
 from tap_shopify.context import Context
-from singer import utils
 import singer
 
 LOGGER = singer.get_logger()
@@ -30,18 +29,19 @@ class InventoryItems(Stream):
             for variant in parent_object.variants:
                 inventory_item_ids.add(variant.inventory_item_id)
 
-        str_list_of_inventory_item_ids = [str(inventory_item_id) for inventory_item_id in inventory_item_ids]
+        str_list_of_inventory_item_ids = [str(inventory_item_id) 
+            for inventory_item_id in inventory_item_ids]
         len_of_inventory_item_ids = len(str_list_of_inventory_item_ids)
 
         # count the number of iterations as max limit of ids is 100
         no_of_iteration = int(len_of_inventory_item_ids/MAX_IDS_COUNT)
         for iteration in range(no_of_iteration + 1):
             # 0-99, 100-199, ...
-            list_of_ids = ",".join(str_list_of_inventory_item_ids[(iteration * MAX_IDS_COUNT):(iteration * MAX_IDS_COUNT)+MAX_IDS_COUNT])
+            list_of_ids = ",".join(str_list_of_inventory_item_ids[(iteration * MAX_IDS_COUNT):
+                (iteration * MAX_IDS_COUNT)+MAX_IDS_COUNT])
             inventory_items = self.get_inventory_items(list_of_ids)
             for inventory_item in inventory_items:
                 yield inventory_item
-            
     
     def sync(self):
         bookmark = self.get_bookmark()
