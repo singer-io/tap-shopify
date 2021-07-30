@@ -1,8 +1,8 @@
+import singer
 import shopify
 from singer.utils import strftime,strptime_to_utc
 from tap_shopify.streams.base import (Stream, shopify_error_handling)
 from tap_shopify.context import Context
-import singer
 
 LOGGER = singer.get_logger()
 
@@ -29,7 +29,7 @@ class InventoryItems(Stream):
             for variant in parent_object.variants:
                 inventory_item_ids.add(variant.inventory_item_id)
 
-        str_list_of_inventory_item_ids = [str(inventory_item_id) 
+        str_list_of_inventory_item_ids = [str(inventory_item_id)
             for inventory_item_id in inventory_item_ids]
         len_of_inventory_item_ids = len(str_list_of_inventory_item_ids)
 
@@ -42,7 +42,7 @@ class InventoryItems(Stream):
             inventory_items = self.get_inventory_items(list_of_ids)
             for inventory_item in inventory_items:
                 yield inventory_item
-    
+
     def sync(self):
         bookmark = self.get_bookmark()
         max_bookmark = bookmark
