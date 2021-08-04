@@ -71,7 +71,7 @@ def load_schema_references():
 
     return refs
 
-def add_synthetic_keys_to_schema(schema):
+def add_synthetic_key_to_schema(schema):
     for k in SDC_KEYS:
         schema['properties']['_sdc_shop_' + k] = {'type': SDC_KEYS[k]}
     return schema
@@ -87,7 +87,7 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
 
-        catalog_schema = add_synthetic_keys_to_schema(singer.resolve_schema_references(schema, refs))
+        catalog_schema = add_synthetic_key_to_schema(singer.resolve_schema_references(schema, refs))
 
         # create and add catalog entry
         catalog_entry = {
@@ -116,6 +116,7 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+# pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
@@ -156,7 +157,9 @@ def sync():
                     extraction_time = singer.utils.now()
                     record_schema = catalog_entry['schema']
                     record_metadata = metadata.to_map(catalog_entry['metadata'])
-                    rec = transformer.transform({**rec, **sdc_fields}, record_schema, record_metadata)
+                    rec = transformer.transform({**rec, **sdc_fields},
+                                                record_schema,
+                                                record_metadata)
                     singer.write_record(stream_id,
                                         rec,
                                         time_extracted=extraction_time)
