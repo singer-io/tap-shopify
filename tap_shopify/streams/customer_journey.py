@@ -16,8 +16,7 @@ class CustomerJourney(GraphQlChildStream):
     parent_per_page = 25
     child_is_list = False
     fragment_cols = {"moments": "CustomerVisit"}
-    parent_replication_key = "createdAt"
-    key_properties = []
+    key_properties = ["parentId"]
 
 
 Context.stream_objects['customer_journey'] = CustomerJourney
