@@ -1,12 +1,13 @@
 import shopify
 from singer import utils
-from tap_shopify.streams.base import Stream
+from tap_shopify.streams.base import (Stream, shopify_error_handling)
 from tap_shopify.context import Context
 
 class Locations(Stream):
     name = 'locations'
     replication_object = shopify.Location
 
+    @shopify_error_handling
     def get_locations_data(self):
         location_page = self.replication_object.find()
         yield from location_page
