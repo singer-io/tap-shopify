@@ -23,7 +23,7 @@ class PaginationTest(BaseTapTest):
             'shop': 'stitchdatawearhouse',
             'date_window_size': 30,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
-            'results_per_page': '50'
+            'results_per_page': 50
         }
 
         if original:
@@ -75,7 +75,7 @@ class PaginationTest(BaseTapTest):
         record_count_by_stream = self.run_sync(conn_id)
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
-        api_limit = self.get_properties().get('result_per_page', self.DEFAULT_RESULTS_PER_PAGE)
+        api_limit = self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE)
 
         for stream in testable_streams:
             with self.subTest(stream=stream):
