@@ -16,25 +16,10 @@ class PaginationTest(BaseTapTest):
     def name(self):
         return "tap_tester_shopify_pagination_test"
 
-    def get_properties(self, original: bool = True):
-        """Configuration properties required for the tap."""
-        return_value = {
-            'start_date': '2017-07-01T00:00:00Z',
-            'shop': 'stitchdatawearhouse',
-            'date_window_size': 30,
-            # BUG: https://jira.talendforge.org/browse/TDL-13180
-            'results_per_page': 50
-        }
-
-        if original:
-            return return_value
-
-        # This test needs the new connections start date to be larger than the default
-        assert self.start_date > return_value["start_date"]
-
-        return_value["start_date"] = self.start_date
-        return_value['shop'] = 'talenddatawearhouse'
-        return return_value
+    def get_properties(self, *args, **kwargs):
+        props = super().get_properties(*args, **kwargs)
+        props['results_per_page'] = 50
+        return props
 
     def test_run(self):
         with self.subTest(store="store_1"):
