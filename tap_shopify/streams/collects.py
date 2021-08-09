@@ -2,7 +2,6 @@ import shopify
 import singer
 from singer import utils
 from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
 from tap_shopify.context import Context
 
