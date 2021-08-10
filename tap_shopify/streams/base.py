@@ -86,7 +86,10 @@ class Stream():
     replication_object = None
     # Status parameter override option
     status_key = None
-    results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+    results_per_page = None
+
+    def __init__(self):
+        self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
