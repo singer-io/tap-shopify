@@ -18,7 +18,7 @@ class PaginationTest(BaseTapTest):
 
     def get_properties(self, *args, **kwargs):
         props = super().get_properties(*args, **kwargs)
-        props['results_per_page'] = 50
+        props['results_per_page'] = '50'
         return props
 
     def test_run(self):
@@ -60,7 +60,7 @@ class PaginationTest(BaseTapTest):
         record_count_by_stream = self.run_sync(conn_id)
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
-        api_limit = self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE)
+        api_limit = int(self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE))
 
         for stream in testable_streams:
             with self.subTest(stream=stream):
