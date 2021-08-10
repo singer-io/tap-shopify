@@ -21,7 +21,7 @@ class Locations(Stream):
         max_bookmark = utils.strftime(utils.now())
 
         for obj in self.get_locations_data():
-            if utils.strptime_with_tz(obj.updated_at) > bookmark:
+            if obj.updated_at and utils.strptime_with_tz(obj.updated_at) > bookmark:
                 yield obj
         self.update_bookmark(max_bookmark)
 
