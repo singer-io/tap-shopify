@@ -7,39 +7,32 @@ from tap_shopify.context import Context
 LOGGER = singer.get_logger()
 
 RESULTS_PER_PAGE = 250
-MAX_IDS_COUNT = 100
 
 class InventoryItems(Stream):
     name = 'inventory_items'
     replication_object = shopify.InventoryItem
 
     @shopify_error_handling
-    def get_inventory_items(self, list_of_ids):
+    def get_inventory_items(self, inventory_items_ids):
         return self.replication_object.find(
-            ids=list_of_ids,
+            ids=inventory_items_ids,
             limit=RESULTS_PER_PAGE)
 
     def get_objects(self):
+        
         selected_parent = Context.stream_objects['products']()
-        selected_parent.name = "inventory_items_products"
-        inventory_item_ids = set()
+        selected_parent.name = "product_variants"
 
-        # Page through all `products`, bookmarking at `inventory_items_products`
+        # Page through all `products`, bookmarking at `product_variants`
         for parent_object in selected_parent.get_objects():
-            for variant in parent_object.variants:
-                inventory_item_ids.add(variant.inventory_item_id)
+            
+            product_variants = parent_object.variants
+            inventory_items_ids = ",".join([str(product_variant.inventory_item_id) for product_variant in product_variants])
 
-        str_list_of_inventory_item_ids = [str(inventory_item_id)
-            for inventory_item_id in inventory_item_ids]
-        len_of_inventory_item_ids = len(str_list_of_inventory_item_ids)
-
-        # count the number of iterations as max limit of ids is 100
-        no_of_iteration = int(len_of_inventory_item_ids/MAX_IDS_COUNT)
-        for iteration in range(no_of_iteration + 1):
-            # 0-99, 100-199, ...
-            list_of_ids = ",".join(str_list_of_inventory_item_ids[(iteration * MAX_IDS_COUNT):
-                (iteration * MAX_IDS_COUNT)+MAX_IDS_COUNT])
-            inventory_items = self.get_inventory_items(list_of_ids)
+            # Max limit of IDs is 100 and Max limit of product_variants in one product is also 100
+            # hence we can directly pass all inventory_items_ids
+            inventory_items = self.get_inventory_items(inventory_items_ids)
+                
             for inventory_item in inventory_items:
                 yield inventory_item
 
