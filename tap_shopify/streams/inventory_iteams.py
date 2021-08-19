@@ -33,7 +33,7 @@ class InventoryItems(Stream):
             # Max limit of IDs is 100 and Max limit of product_variants in one product is also 100
             # hence we can directly pass all inventory_items_ids
             inventory_items = self.get_inventory_items(inventory_items_ids)
-  
+
             for inventory_item in inventory_items:
                 yield inventory_item
 
