@@ -19,20 +19,21 @@ class InventoryItems(Stream):
             limit=RESULTS_PER_PAGE)
 
     def get_objects(self):
-        
+
         selected_parent = Context.stream_objects['products']()
         selected_parent.name = "product_variants"
 
         # Page through all `products`, bookmarking at `product_variants`
         for parent_object in selected_parent.get_objects():
-            
+
             product_variants = parent_object.variants
-            inventory_items_ids = ",".join([str(product_variant.inventory_item_id) for product_variant in product_variants])
+            inventory_items_ids = ",".join(
+                [str(product_variant.inventory_item_id) for product_variant in product_variants])
 
             # Max limit of IDs is 100 and Max limit of product_variants in one product is also 100
             # hence we can directly pass all inventory_items_ids
             inventory_items = self.get_inventory_items(inventory_items_ids)
-                
+  
             for inventory_item in inventory_items:
                 yield inventory_item
 
