@@ -131,7 +131,6 @@ class Stream():
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-        # results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:

@@ -67,10 +67,6 @@ class PaginationTest(BaseTapTest):
 
                 # verify that we can paginate with all fields selected
                 stream_metadata = self.expected_metadata().get(stream, {})
-                # minimum_record_count = stream_metadata.get(
-                #     self.API_LIMIT,
-                #     self.get_properties().get('result_per_page', self.DEFAULT_RESULTS_PER_PAGE)
-                # )
                 minimum_record_count = 100 if stream == 'transactions' else api_limit
                 self.assertGreater(
                     record_count_by_stream.get(stream, -1),
