@@ -11,6 +11,10 @@ from base import BaseTapTest
 class ShopInfoFieldsTest(BaseTapTest):
     """ Test the Shop Information Fields """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_date = '2021-04-01T00:00:00Z'
+
     @staticmethod
     def name():
         return "tap_tester_shopify_shop_info_fields_test"
@@ -20,8 +24,7 @@ class ShopInfoFieldsTest(BaseTapTest):
             Verify shop information fields are present in catalog for every streams.
             Verify shop information fields are present in every records of all streams.
         """
-        conn_id = self.create_connection()
-
+        conn_id = self.create_connection(original_properties=False, original_credentials=False)
         # Select all streams and all fields within streams and run both mode
         found_catalogs = menagerie.get_catalogs(conn_id)
 
@@ -47,7 +50,7 @@ class ShopInfoFieldsTest(BaseTapTest):
                 self.assertTrue(expected_shop_info_fields.issubset(actual_stream_fields))
 
                 # Verify that every records of stream contains shop info fields
-                stream_records = sync_records.get(stream)
+                stream_records = sync_records.get(stream, {})
                 upsert_messages = [m for m in stream_records.get('messages') if m['action'] == 'upsert']
 
                 for message in upsert_messages:
