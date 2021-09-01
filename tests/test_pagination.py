@@ -18,13 +18,17 @@ class PaginationTest(BaseTapTest):
 
 
     def test_run(self):
+        # skip 'locations' stream as there is not much info about
+        # limit of records returned in 1 page
+        # Documentation: https://help.shopify.com/en/manual/locations/setting-up-your-locations
+        excepted_streams = {'locations'}
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
-            self.pagination_test(conn_id, self.store_1_streams)
+            self.pagination_test(conn_id, self.store_1_streams - excepted_streams)
 
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
-            self.pagination_test(conn_id, self.store_2_streams)
+            self.pagination_test(conn_id, self.store_2_streams - excepted_streams)
 
     
     def pagination_test(self, conn_id, testable_streams):
@@ -57,13 +61,6 @@ class PaginationTest(BaseTapTest):
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
         for stream in testable_streams:
-
-            # skip 'locations' stream as there is not much info about
-            # limit of records returned in 1 page
-            # Documentation: https://help.shopify.com/en/manual/locations/setting-up-your-locations
-            if stream in ['locations']:
-                continue
-
             with self.subTest(stream=stream):
 
                 # verify that we can paginate with all fields selected
