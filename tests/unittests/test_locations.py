@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
-from singer.utils import strptime_to_utc
+from singer import utils
+from singer.utils import strptime_to_utc, strftime
 from tap_shopify.context import Context
 
 LOCATIONS_OBJECT = Context.stream_objects['locations']()
@@ -22,13 +23,10 @@ LOCATION_4 = Locations("i22", "2021-08-14T01:57:05-04:00")
 
 
 class TestLocations(unittest.TestCase):
-
+    @mock.patch("tap_shopify.streams.base.Stream.update_bookmark")
     @mock.patch("tap_shopify.streams.base.Stream.get_bookmark")
     @mock.patch("tap_shopify.streams.locations.Locations.get_locations_data")
-    def test_sync(self, mock_get_locations_data, mock_get_bookmark):
-        '''
-            Verify that only data updated after specific bookmark are yielded from sync.
-        '''
+    def test_sync(self, mock_get_locations_data, mock_get_bookmark, mock_update_bookmark):
 
         expected_sync = [LOCATION_3.to_dict(), LOCATION_4.to_dict()]
         mock_get_locations_data.return_value = [
@@ -41,3 +39,8 @@ class TestLocations(unittest.TestCase):
 
         # Verify that only 2 record syncs
         self.assertEqual(actual_sync, expected_sync)
+        max_bookmark = strptime_to_utc("2021-08-14T01:57:05-04:00")
+
+        # Verify that maximum replication key of all keys is updated as bookmark
+        mock_update_bookmark.assert_called_with(
+            utils.strftime(max_bookmark))
