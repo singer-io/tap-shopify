@@ -530,6 +530,16 @@
         "type": [
           "null",
           "boolean"]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"]
+      },
+      "country_name": {
+        "type": [
+          "null",
+          "string"]
       }
     },
     "type": [
