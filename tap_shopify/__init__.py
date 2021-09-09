@@ -24,6 +24,7 @@ def initialize_shopify_client():
     version = '2021-04'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
+    # Shop.current() makes a call for shop details with provided shop and api_key
     return shopify.Shop.current().attributes
 
 def get_abs_path(path):
