@@ -88,11 +88,14 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
 
-        # resolve_schema_references() is changing value of refs at a run time after adding three _sdc fields into customer stream.
+        # resolve_schema_references() is changing value of passed refs.
         # Customer is a stream and it's a nested field of orders and abandoned_checkouts streams
-        # Those three _sdc fields are also added inside nested field customer so make a  copy of refs before passing it.
+        # and those 3 _sdc fields are also added inside nested field customer for above 2 stream
+        # so create a copy of refs before passing it to resolve_schema_references().
         refs_copy = copy.deepcopy(refs)
-        catalog_schema = add_synthetic_key_to_schema(singer.resolve_schema_references(schema, refs_copy))
+        catalog_schema = add_synthetic_key_to_schema(
+            singer.resolve_schema_references(schema, refs_copy))
+
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
