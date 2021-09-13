@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.6
+  * Fixes a bug in the canonicalize function for a 'receipt' key existing with a null value [#119](https://github.com/singer-io/tap-shopify/pull/119)
+
 ## 1.3.5
   * Add `status` field to `Products` stream [#108](https://github.com/singer-io/tap-shopify/pull/108)
 
