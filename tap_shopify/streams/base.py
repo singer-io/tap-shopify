@@ -24,6 +24,9 @@ DATE_WINDOW_SIZE = 1
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
 
+# Factor to multiply the exponentiation by.
+FACTOR = 3
+
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
         if getattr(exc, 'code', None) and exc.code not in status_code:
@@ -65,7 +68,8 @@ def shopify_error_handling(fnc):
                           ),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
-                          max_tries=MAX_RETRIES)
+                          max_tries=MAX_RETRIES,
+                          factor=FACTOR)
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
