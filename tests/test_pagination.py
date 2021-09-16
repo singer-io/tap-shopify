@@ -59,6 +59,7 @@ class PaginationTest(BaseTapTest):
         # Run a sync job using orchestrator
         record_count_by_stream = self.run_sync(conn_id)
         actual_fields_by_stream = runner.examine_target_output_for_fields()
+        sync_records = runner.get_records_from_target_output()
 
         for stream in testable_streams:
             with self.subTest(stream=stream):
@@ -74,10 +75,13 @@ class PaginationTest(BaseTapTest):
                     minimum_record_count,
                     msg="The number of records is not over the stream max limit")
 
+                expected_pk = self.expected_primary_keys()
+                sync_messages = sync_records.get(stream, {'messages': []}).get('messages')
+
                 # verify that the automatic fields are sent to the target
                 self.assertTrue(
                     actual_fields_by_stream.get(stream, set()).issuperset(
-                        self.expected_primary_keys().get(stream, set()) |
+                        expected_pk.get(stream, set()) |
                         self.expected_replication_keys().get(stream, set()) |
                         self.expected_foreign_keys().get(stream, set())),
                     msg="The fields sent to the target don't include all automatic fields"
@@ -87,8 +91,18 @@ class PaginationTest(BaseTapTest):
                 # SKIP THIS ASSERTION IF ALL FIELDS ARE INTENTIONALLY AUTOMATIC FOR THIS STREAM
                 self.assertTrue(
                     actual_fields_by_stream.get(stream, set()).symmetric_difference(
-                        self.expected_primary_keys().get(stream, set()) |
+                        expected_pk.get(stream, set()) |
                         self.expected_replication_keys().get(stream, set()) |
                         self.expected_foreign_keys().get(stream, set())),
                     msg="The fields sent to the target don't include non-automatic fields"
                 )
+
+                # Verify we did not duplicate any records across pages
+                records_pks_set = {tuple([message.get('data').get(primary_key)
+                                          for primary_key in expected_pk.get(stream, set())])
+                                   for message in sync_messages}
+                records_pks_list = [tuple([message.get('data').get(primary_key)
+                                           for primary_key in expected_pk.get(stream, set())])
+                                    for message in sync_messages]
+                self.assertCountEqual(records_pks_set, records_pks_list,
+                                      msg=f"We have duplicate records for {stream}")
