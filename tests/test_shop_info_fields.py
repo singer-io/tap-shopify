@@ -44,8 +44,10 @@ class ShopInfoFieldsTest(BaseTapTest):
                 catalog = next(iter([catalog for catalog in found_catalogs
                                      if catalog["stream_name"] == stream]))
                 schema_and_metadata = menagerie.get_annotated_schema(conn_id, catalog['stream_id'])
-                schema = schema_and_metadata["annotated-schema"]
-                actual_stream_fields = set(schema["properties"].keys())
+                metadata = schema_and_metadata["metadata"]
+                actual_stream_fields = {item.get("breadcrumb", ["properties", None])[1]
+                                        for item in metadata
+                                        if item.get("breadcrumb", []) != []}
 
                 self.assertTrue(expected_shop_info_fields.issubset(actual_stream_fields))
 
