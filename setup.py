@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="tap-shopify",
-    version="1.2.6.4",
+    version="1.2.6.5",
     description="Singer.io tap for extracting Shopify data",
     author="Stitch",
     url="http://github.com/singer-io/tap-shopify",
