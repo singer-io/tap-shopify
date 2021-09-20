@@ -21,8 +21,8 @@ RESULTS_PER_PAGE = 175
 # large for a customer)
 DATE_WINDOW_SIZE = 1
 
-# We will retry a 500 error a maximum of 5 times before giving up
-MAX_RETRIES = 5
+# We will retry a 500 error a maximum of 9 times before giving up
+MAX_RETRIES = 9
 
 # Factor to multiply the exponentiation by.
 FACTOR = 3
