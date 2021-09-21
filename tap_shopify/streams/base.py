@@ -246,6 +246,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
+                singer.log_info(f"Got {len(objects)} records")
                 if len(objects) < results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
