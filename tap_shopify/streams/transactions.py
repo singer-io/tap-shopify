@@ -1,6 +1,5 @@
 import shopify
 import singer
-from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
@@ -101,7 +100,6 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            replication_value = strptime_to_utc(transaction_dict[self.replication_key])
             for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
                 canonicalize(transaction_dict, field_name)
             yield transaction_dict
