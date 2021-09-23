@@ -22,29 +22,34 @@ TRANSACTIONS_RESULTS_PER_PAGE = 100
 # their values are not equal
 def canonicalize(transaction_dict, field_name):
     field_name_upper = field_name.capitalize()
-    value_lower = transaction_dict.get('receipt', {}).get(field_name)
-    value_upper = transaction_dict.get('receipt', {}).get(field_name_upper)
-    if value_lower and value_upper:
-        if value_lower == value_upper:
-            LOGGER.info((
-                "Transaction (id=%d) contains a receipt "
-                "that has `%s` and `%s` keys with the same "
-                "value. Removing the `%s` key."),
+    # Not all Shopify transactions have receipts. Facebook has been shown
+    # to push a null receipt through the transaction
+    receipt = transaction_dict.get('receipt', {})
+    if receipt:
+        value_lower = receipt.get(field_name)
+        value_upper = receipt.get(field_name_upper)
+        if value_lower and value_upper:
+            if value_lower == value_upper:
+                LOGGER.info((
+                    "Transaction (id=%d) contains a receipt "
+                    "that has `%s` and `%s` keys with the same "
+                    "value. Removing the `%s` key."),
+                            transaction_dict['id'],
+                            field_name,
+                            field_name_upper,
+                            field_name_upper)
+                transaction_dict['receipt'].pop(field_name_upper)
+            else:
+                raise ValueError((
+                    "Found Transaction (id={}) with a receipt that has "
+                    "`{}` and `{}` keys with the different "
+                    "values. Contact Shopify/PayPal support.").format(
                         transaction_dict['id'],
-                        field_name,
                         field_name_upper,
-                        field_name_upper)
-            transaction_dict['receipt'].pop(field_name_upper)
-        else:
-            raise ValueError((
-                "Found Transaction (id={}) with a receipt that has "
-                "`{}` and `{}` keys with the different "
-                "values. Contact Shopify/PayPal support.").format(
-                    transaction_dict['id'],
-                    field_name_upper,
-                    field_name))
-    elif value_upper:
-        transaction_dict["receipt"][field_name] = transaction_dict['receipt'].pop(field_name_upper)
+                        field_name))
+        elif value_upper:
+            # pylint: disable=line-too-long
+            transaction_dict["receipt"][field_name] = transaction_dict['receipt'].pop(field_name_upper)
 
 
 class Transactions(Stream):

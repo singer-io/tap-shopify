@@ -22,6 +22,12 @@ class TestTransactionCanonicalize(unittest.TestCase):
         canonicalize(record, "foo")
         self.assertEqual(record, expected_record)
 
+    def test_null_receipt_record(self):
+        record = {"receipt": None}
+        expected_record = {"receipt": None}
+        canonicalize(record, "foo")
+        self.assertEqual(record, expected_record)
+
     def test_removes_uppercase_if_both_exist_and_are_equal(self):
         record = {"receipt": {"Foo": "bar", "foo": "bar"}, "id": 2}
         expected_record = {"receipt": {"foo": "bar"}, "id": 2}
