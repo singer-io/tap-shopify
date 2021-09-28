@@ -143,7 +143,7 @@ def sync():
         with Transformer() as transformer:
             try:
                 for rec in stream.sync():
-                    extraction_time = singer.utils.now()
+d                    extraction_time = singer.utils.now()
                     record_schema = catalog_entry['schema']
                     record_metadata = metadata.to_map(catalog_entry['metadata'])
                     rec = transformer.transform(rec, record_schema, record_metadata)
