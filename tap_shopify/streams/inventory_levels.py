@@ -38,9 +38,7 @@ class InventoryLevels(Stream):
         # then there is possibility of data loss for Inventory Level
         # because location is not updated when any Inventory Level is updated inside it.
         for parent_object in selected_parent.get_locations_data():
-            inventory_levels = self.get_inventory_levels(parent_object.id, bookmark)
-            for inventory_level in inventory_levels:
-                yield inventory_level
+            yield from self.get_inventory_levels(parent_object.id, bookmark)
 
     def sync(self):
         bookmark = self.get_bookmark()

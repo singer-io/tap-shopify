@@ -29,11 +29,9 @@ class TestLocations(unittest.TestCase):
     def test_sync(self, mock_get_locations_data, mock_get_bookmark, mock_update_bookmark):
 
         expected_sync = [LOCATION_3.to_dict(), LOCATION_4.to_dict()]
-        mock_get_locations_data.return_value = [
-            LOCATION_1, LOCATION_2, LOCATION_3, LOCATION_4]
+        mock_get_locations_data.return_value = [LOCATION_1, LOCATION_2, LOCATION_3, LOCATION_4]
 
-        mock_get_bookmark.return_value = strptime_to_utc(
-            "2021-08-13T01:05:05-04:00")
+        mock_get_bookmark.return_value = strptime_to_utc("2021-08-13T01:05:05-04:00")
 
         actual_sync = list(LOCATIONS_OBJECT.sync())
 
@@ -42,5 +40,4 @@ class TestLocations(unittest.TestCase):
         max_bookmark = strptime_to_utc("2021-08-14T01:57:05-04:00")
 
         # Verify that maximum replication key of all keys is updated as bookmark
-        mock_update_bookmark.assert_called_with(
-            utils.strftime(max_bookmark))
+        mock_update_bookmark.assert_called_with(utils.strftime(max_bookmark))
