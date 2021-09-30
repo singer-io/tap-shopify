@@ -159,7 +159,7 @@ def sync():
             except pyactiveresource.connection.ForbiddenAccess as exc:
                 raise ShopifyError(exc, 'Add read_inventory scope for access token, '
                                    're-authorize the connect to sync and '
-                                   'get Inventory levels / Inventory items streams') \
+                                   'get Inventory levels / Inventory items streams.') \
                     from exc
             except pyactiveresource.connection.ConnectionError as exc:
                 msg = ''
