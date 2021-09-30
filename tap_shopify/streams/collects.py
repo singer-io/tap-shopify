@@ -2,7 +2,6 @@ import shopify
 import singer
 from singer import utils
 from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
 from tap_shopify.context import Context
 
@@ -20,7 +19,7 @@ class Collects(Stream):
         while True:
             query_params = {
                 "since_id": since_id,
-                "limit": RESULTS_PER_PAGE,
+                "limit": self.results_per_page,
             }
 
             objects = self.call_api(query_params)
@@ -38,7 +37,7 @@ class Collects(Stream):
                             obj.id, since_id))
                     yield obj
 
-            if len(objects) < RESULTS_PER_PAGE:
+            if len(objects) < self.results_per_page:
                 # Update the bookmark at the end of the last page
                 self.update_bookmark(max_bookmark)
                 break
