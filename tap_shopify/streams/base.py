@@ -98,6 +98,10 @@ class Stream():
     replication_object = None
     # Status parameter override option
     status_key = None
+    results_per_page = None
+
+    def __init__(self):
+        self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -139,7 +143,6 @@ class Stream():
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-        results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -163,7 +166,7 @@ class Stream():
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
-                    "limit": results_per_page,
+                    "limit": self.results_per_page,
                     status_key: "any"
                 }
 
@@ -181,7 +184,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
-                if len(objects) < results_per_page:
+                if len(objects) < self.results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
