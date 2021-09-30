@@ -16,6 +16,10 @@ class PaginationTest(BaseTapTest):
     def name(self):
         return "tap_tester_shopify_pagination_test"
 
+    def get_properties(self, *args, **kwargs):
+        props = super().get_properties(*args, **kwargs)
+        props['results_per_page'] = '50'
+        return props
 
     def test_run(self):
         # As it can call for max 100 product_variants and 
@@ -59,15 +63,14 @@ class PaginationTest(BaseTapTest):
         record_count_by_stream = self.run_sync(conn_id)
         actual_fields_by_stream = runner.examine_target_output_for_fields()
 
+        api_limit = int(self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE))
+
         for stream in testable_streams:
             with self.subTest(stream=stream):
 
                 # verify that we can paginate with all fields selected
                 stream_metadata = self.expected_metadata().get(stream, {})
-                minimum_record_count = stream_metadata.get(
-                    self.API_LIMIT,
-                    self.get_properties().get('result_per_page', self.DEFAULT_RESULTS_PER_PAGE)
-                )
+                minimum_record_count = 100 if stream == 'transactions' else api_limit
                 self.assertGreater(
                     record_count_by_stream.get(stream, -1),
                     minimum_record_count,
