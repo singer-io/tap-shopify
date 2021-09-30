@@ -26,6 +26,7 @@ def initialize_shopify_client():
     version = '2021-04'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
+    # Shop.current() makes a call for shop details with provided shop and api_key
     return shopify.Shop.current().attributes
 
 def get_abs_path(path):
@@ -78,6 +79,8 @@ def add_synthetic_key_to_schema(schema):
     return schema
 
 def discover():
+    initialize_shopify_client() # Checking token in discover mode
+
     raw_schemas = load_schemas()
     streams = []
 
@@ -159,34 +162,17 @@ def sync():
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
         with Transformer() as transformer:
-            try:
-                for rec in stream.sync():
-                    extraction_time = singer.utils.now()
-                    record_schema = catalog_entry['schema']
-                    record_metadata = metadata.to_map(catalog_entry['metadata'])
-                    rec = transformer.transform({**rec, **sdc_fields},
+            for rec in stream.sync():
+                extraction_time = singer.utils.now()
+                record_schema = catalog_entry['schema']
+                record_metadata = metadata.to_map(catalog_entry['metadata'])
+                rec = transformer.transform({**rec, **sdc_fields},
                                                 record_schema,
                                                 record_metadata)
-                    singer.write_record(stream_id,
-                                        rec,
-                                        time_extracted=extraction_time)
-                    Context.counts[stream_id] += 1
-            except pyactiveresource.connection.ResourceNotFound as exc:
-                raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
-            except pyactiveresource.connection.UnauthorizedAccess as exc:
-                raise ShopifyError(exc, 'Invalid access token - Re-authorize the connection') \
-                    from exc
-            except pyactiveresource.connection.ConnectionError as exc:
-                msg = ''
-                try:
-                    body_json = exc.response.body.decode()
-                    body = json.loads(body_json)
-                    msg = body.get('errors')
-                finally:
-                    raise ShopifyError(exc, msg) from exc
-            except Exception as exc:
-                raise ShopifyError(exc) from exc
-
+                singer.write_record(stream_id,
+                                    rec,
+                                    time_extracted=extraction_time)
+                Context.counts[stream_id] += 1
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
@@ -198,24 +184,41 @@ def sync():
 
 @utils.handle_top_exception(LOGGER)
 def main():
-    # Parse command line arguments
-    args = utils.parse_args(REQUIRED_CONFIG_KEYS)
-
-    # If discover flag was passed, run discovery mode and dump output to stdout
-    if args.discover:
-        catalog = discover()
-        print(json.dumps(catalog, indent=2))
-    # Otherwise run in sync mode
-    else:
-        Context.tap_start = utils.now()
-        if args.catalog:
-            Context.catalog = args.catalog.to_dict()
-        else:
-            Context.catalog = discover()
+    try:
+        # Parse command line arguments
+        args = utils.parse_args(REQUIRED_CONFIG_KEYS)
 
         Context.config = args.config
         Context.state = args.state
-        sync()
+
+        # If discover flag was passed, run discovery mode and dump output to stdout
+        if args.discover:
+            catalog = discover()
+            print(json.dumps(catalog, indent=2))
+        # Otherwise run in sync mode
+        else:
+            Context.tap_start = utils.now()
+            if args.catalog:
+                Context.catalog = args.catalog.to_dict()
+            else:
+                Context.catalog = discover()
+
+            sync()
+    except pyactiveresource.connection.ResourceNotFound as exc:
+        raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
+    except pyactiveresource.connection.UnauthorizedAccess as exc:
+        raise ShopifyError(exc, 'Invalid access token - Re-authorize the connection') \
+            from exc
+    except pyactiveresource.connection.ConnectionError as exc:
+        msg = ''
+        try:
+            body_json = exc.response.body.decode()
+            body = json.loads(body_json)
+            msg = body.get('errors')
+        finally:
+            raise ShopifyError(exc, msg) from exc
+    except Exception as exc:
+        raise ShopifyError(exc) from exc
 
 if __name__ == "__main__":
     main()
