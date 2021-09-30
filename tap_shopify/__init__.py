@@ -75,7 +75,7 @@ def load_schema_references():
 
 def add_synthetic_key_to_schema(schema):
     for k in SDC_KEYS:
-        schema['properties']['_sdc_shop_' + k] = {'type': SDC_KEYS[k]}
+        schema['properties']['_sdc_shop_' + k] = {'type': ["null", SDC_KEYS[k]]}
     return schema
 
 def discover():
@@ -167,8 +167,8 @@ def sync():
                 record_schema = catalog_entry['schema']
                 record_metadata = metadata.to_map(catalog_entry['metadata'])
                 rec = transformer.transform({**rec, **sdc_fields},
-                                                record_schema,
-                                                record_metadata)
+                                            record_schema,
+                                            record_metadata)
                 singer.write_record(stream_id,
                                     rec,
                                     time_extracted=extraction_time)
