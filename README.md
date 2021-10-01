@@ -17,6 +17,8 @@ This tap:
   - [Products](https://help.shopify.com/en/api/reference/products)
   - [Transactions](https://help.shopify.com/en/api/reference/orders/transaction)
   - [Inventory Item](https://help.shopify.com/en/api/reference/inventory/inventoryitem)
+  - [Locations](https://help.shopify.com/en/api/reference/inventory/location)
+  - [Inventory Levels](https://help.shopify.com/en/api/reference/inventory/inventorylevel)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
 - When Metafields are selected, this tap will sync the Shopify store's top-level Metafields and any additional Metafields for selected tables that also have them (ie: Orders, Products, Customers)
