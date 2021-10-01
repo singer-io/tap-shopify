@@ -72,6 +72,8 @@ class PaginationTest(BaseTapTest):
 
         api_limit = int(self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE))
 
+        api_limit = int(self.get_properties().get('results_per_page', self.DEFAULT_RESULTS_PER_PAGE))
+
         for stream in testable_streams:
             with self.subTest(stream=stream):
 
