@@ -16,6 +16,8 @@ This tap:
   - [Orders](https://help.shopify.com/en/api/reference/orders)
   - [Products](https://help.shopify.com/en/api/reference/products)
   - [Transactions](https://help.shopify.com/en/api/reference/orders/transaction)
+  - [Locations](https://help.shopify.com/en/api/reference/inventory/location)
+  - [Inventory Levels](https://help.shopify.com/en/api/reference/inventory/inventorylevel)
   - [Inventory Item](https://help.shopify.com/en/api/reference/inventory/inventoryitem)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
