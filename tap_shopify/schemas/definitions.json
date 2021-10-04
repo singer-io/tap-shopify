@@ -476,6 +476,70 @@
           "null",
           "string"
         ]
+      },
+      "localized_province_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "localized_country_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "updated_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "province": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "phone": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "legacy": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "created_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "country": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "active": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"]
+      },
+      "country_name": {
+        "type": [
+          "null",
+          "string"]
       }
     },
     "type": [
