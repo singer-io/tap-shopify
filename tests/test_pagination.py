@@ -22,13 +22,16 @@ class PaginationTest(BaseTapTest):
         return props
 
     def test_run(self):
+        # As it can call for max 100 product_variants and 
+        # we can generate only one inventory_item for one product_variants
+        excepted_streams = {'inventory_items'} 
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
-            self.pagination_test(conn_id, self.store_1_streams)
+            self.pagination_test(conn_id, self.store_1_streams - excepted_streams)
 
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
-            self.pagination_test(conn_id, self.store_2_streams)
+            self.pagination_test(conn_id, self.store_2_streams - excepted_streams)
 
     
     def pagination_test(self, conn_id, testable_streams):
