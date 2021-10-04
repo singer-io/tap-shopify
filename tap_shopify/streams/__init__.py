@@ -7,3 +7,4 @@ import tap_shopify.streams.transactions
 import tap_shopify.streams.products
 import tap_shopify.streams.collects
 import tap_shopify.streams.custom_collections
+import tap_shopify.streams.inventory_items
