@@ -4,6 +4,7 @@ import datetime
 import json
 import time
 import math
+import copy
 
 import pyactiveresource
 import shopify
@@ -17,6 +18,7 @@ import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
+SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 
 def initialize_shopify_client():
     api_key = Context.config['api_key']
@@ -71,6 +73,11 @@ def load_schema_references():
 
     return refs
 
+def add_synthetic_key_to_schema(schema):
+    for k in SDC_KEYS:
+        schema['properties']['_sdc_shop_' + k] = {'type': ["null", SDC_KEYS[k]]}
+    return schema
+
 def discover():
     initialize_shopify_client() # Checking token in discover mode
 
@@ -84,12 +91,20 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
 
+        # resolve_schema_references() is changing value of passed refs.
+        # Customer is a stream and it's a nested field of orders and abandoned_checkouts streams
+        # and those 3 _sdc fields are also added inside nested field customer for above 2 stream
+        # so create a copy of refs before passing it to resolve_schema_references().
+        refs_copy = copy.deepcopy(refs)
+        catalog_schema = add_synthetic_key_to_schema(
+            singer.resolve_schema_references(schema, refs_copy))
+
         # create and add catalog entry
         catalog_entry = {
             'stream': schema_name,
             'tap_stream_id': schema_name,
-            'schema': singer.resolve_schema_references(schema, refs),
-            'metadata' : get_discovery_metadata(stream, schema),
+            'schema': catalog_schema,
+            'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
@@ -111,8 +126,10 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+# pylint: disable=too-many-locals
 def sync():
-    initialize_shopify_client()
+    shop_attributes = initialize_shopify_client()
+    sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
 
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
@@ -149,7 +166,9 @@ def sync():
                 extraction_time = singer.utils.now()
                 record_schema = catalog_entry['schema']
                 record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform(rec, record_schema, record_metadata)
+                rec = transformer.transform({**rec, **sdc_fields},
+                                            record_schema,
+                                            record_metadata)
                 singer.write_record(stream_id,
                                     rec,
                                     time_extracted=extraction_time)
