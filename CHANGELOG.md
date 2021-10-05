@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0
+  * Add shop info in record [#115](https://github.com/singer-io/tap-shopify/pull/115)
+  * Add inventory item data [#118] (https://github.com/singer-io/tap-shopify/pull/118)
+  * Add Locations stream and TDL-13614: Add Inventory Levels stream [#114] (https://github.com/singer-io/tap-shopify/pull/114)
+  * Added best practices [#116] (https://github.com/singer-io/tap-shopify/pull/116)
+  * Discover mode should check token [#120] (https://github.com/singer-io/tap-shopify/pull/120)
 ## 1.3.6
   * Fixes a bug in the canonicalize function for a 'receipt' key existing with a null value [#119](https://github.com/singer-io/tap-shopify/pull/119)
 
