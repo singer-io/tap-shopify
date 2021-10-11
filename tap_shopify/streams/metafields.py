@@ -1,6 +1,7 @@
 import json
 import shopify
 import singer
+from shopify import Product
 
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
@@ -10,10 +11,10 @@ from tap_shopify.streams.base import (Stream,
 
 LOGGER = singer.get_logger()
 
+
 def get_selected_parents():
     for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
-        if Context.is_selected(parent_stream):
-            yield Context.stream_objects[parent_stream]()
+        yield Context.stream_objects[parent_stream]()
 
 @shopify_error_handling
 def get_metafields(parent_object, since_id):
@@ -38,20 +39,31 @@ class Metafields(Stream):
             # to make resetting individual streams easier.
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
-                since_id = 1
-                while True:
-                    metafields = get_metafields(parent_object, since_id)
-                    for metafield in metafields:
-                        if metafield.id < since_id:
-                            raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
-                                metafield.id, since_id))
-                        yield metafield
-                    if len(metafields) < RESULTS_PER_PAGE:
-                        break
-                    if metafields[-1].id != max([o.id for o in metafields]):
-                        raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
-                            metafields[-1].id, max([o.id for o in metafields])))
-                    since_id += metafields[-1].id
+                yield from self.get_metadatafields(parent_object)
+
+
+    def get_metadatafields(self, parent_object):
+        since_id = 1
+        while True:
+            metafields = get_metafields(parent_object, since_id)
+            for metafield in metafields:
+                if metafield.id < since_id:
+                    raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
+                        metafield.id, since_id))
+                yield metafield
+
+            if isinstance(parent_object, Product) and "variants" in parent_object.attributes:
+                for variant in parent_object.attributes["variants"]:
+                    yield from self.get_metadatafields(variant)
+
+            if len(metafields) < RESULTS_PER_PAGE:
+                break
+
+            if metafields[-1].id != max([o.id for o in metafields]):
+                raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
+                    metafields[-1].id, max([o.id for o in metafields])))
+
+            since_id = metafields[-1].id
 
     def sync(self):
         # Shop metafields
