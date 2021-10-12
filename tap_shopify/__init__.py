@@ -16,12 +16,12 @@ from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
 import tap_shopify.streams # Load stream objects into Context
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["shop"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 
 def initialize_shopify_client():
-    api_key = Context.config['api_key']
+    api_key = Context.config.get('access_token', Context.config.get("api_key"))
     shop = Context.config['shop']
     version = '2021-04'
     session = shopify.Session(shop, version, api_key)
