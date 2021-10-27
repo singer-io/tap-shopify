@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-import os
 import datetime
 import json
-import time
 import math
+import os
+import time
 
 import pyactiveresource
 import shopify
 import singer
-from singer import utils
-from singer import metadata
-from singer import Transformer
-from singer import Catalog
+import tap_shopify.streams  # Load stream objects into Context
+from singer import Catalog, Transformer, metadata, utils
 from tap_shopify.context import Context
-import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
@@ -186,7 +183,7 @@ def main():
 
                 stream['schema']['properties'] = new_properties
 
-            Context.catalog = Catalog.from_dict(args.properties)
+            Context.catalog = args.properties
         else:
             Context.catalog = discover()
 
