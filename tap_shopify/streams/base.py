@@ -153,7 +153,9 @@ class Stream():
                 query_params = {
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
+                    "created_at_min": updated_at_min, # For events, which requires the `created_at_min` query param for filtering
                     "updated_at_max": updated_at_max,
+                    "created_at_max": updated_at_max,
                     "limit": self.results_per_page,
                     status_key: "any"
                 }
