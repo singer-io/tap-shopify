@@ -118,7 +118,13 @@ class BaseTapTest(unittest.TestCase):
                 self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"location_id", "inventory_item_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "events": {
+                self.REPLICATION_KEYS: {"created_at"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            }
         }
 
     def expected_streams(self):
