@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "body": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "path": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "message": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+     "subject_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "subject_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "verb": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "author": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  }
+}
