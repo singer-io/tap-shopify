@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.0
+  * Adds `events` stream [#127](https://github.com/singer-io/tap-shopify/pull/127)
+
 ## 1.4.0
   * Add shop info in record [#115](https://github.com/singer-io/tap-shopify/pull/115)
   * Add inventory item data [#118] (https://github.com/singer-io/tap-shopify/pull/118)
