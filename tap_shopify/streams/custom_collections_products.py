@@ -12,6 +12,7 @@ class CustomCollectionsProducts(Stream):
     replication_object = shopify.CustomCollection
     replication_key = 'updated_at'
 
+    @shopify_error_handling
     def get_objects(self):
         'Paginate the return and add collection_id to returned product objects'
         page = self.replication_object.find()
