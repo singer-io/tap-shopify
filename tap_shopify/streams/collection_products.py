@@ -12,6 +12,7 @@ class CollectionProducts(Stream):
     replication_object = shopify.CustomCollection
     replication_key = 'updated_at'
 
+    @shopify_error_handling
     def get_objects(self):
         
         while True:
