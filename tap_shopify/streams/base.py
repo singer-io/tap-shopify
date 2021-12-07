@@ -15,6 +15,9 @@ LOGGER = singer.get_logger()
 
 RESULTS_PER_PAGE = 175
 
+# set default timeout of 300 seconds
+REQUEST_TIMEOUT = 300
+
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
 DATE_WINDOW_SIZE = 1
@@ -50,7 +53,26 @@ def retry_after_wait_gen(**kwargs):
     sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
     yield math.floor(float(sleep_time_str))
 
+# boolean function to check if the error is 'timeout' error or not
+def is_timeout_error():
+    """
+        This function checks whether the error contains 'timed out' substring and return boolean
+        values accordingly, to decide whether to backoff or not.
+    """
+    def gen_fn(exc):
+        if str(exc).__contains__('timed out'):
+            # retry if the error string contains 'timed out'
+            return False
+        return True
+
+    return gen_fn
+
 def shopify_error_handling(fnc):
+    @backoff.on_exception(backoff.expo,
+                          pyactiveresource.connection.Error, # contains timeout error raise by Shopify
+                          giveup=is_timeout_error(),
+                          max_tries=5,
+                          factor=2)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
@@ -91,6 +113,13 @@ class Stream():
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
+        self.request_timeout = REQUEST_TIMEOUT # set default timeout
+        timeout_from_config = Context.config.get('request_timeout')
+        # updated the timeout value if timeout is passed in config and not from 0, "0", ""
+        if timeout_from_config and float(timeout_from_config):
+            # update the request timeout for the requests
+            self.request_timeout = float(timeout_from_config)
+
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
                                         # name is overridden by some substreams
@@ -124,6 +153,8 @@ class Stream():
     # with shopify_error_handling to get 429 and 500 handling.
     @shopify_error_handling
     def call_api(self, query_params):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(**query_params)
 
     def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):

@@ -25,6 +25,17 @@ jobs:
           command: |
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
             stitch-validate-json tap_shopify/schemas/*.json
+      - run:
+          name: 'Unit Tests'
+          command: |
+            source /usr/local/share/virtualenvs/tap-shopify/bin/activate
+            pip install nose coverage
+            nosetests --with-coverage --cover-erase --cover-package=tap_shopify --cover-html-dir=htmlcov tests/unittests
+            coverage html
+      - store_test_results:
+          path: test_output/report.xml
+      - store_artifacts:
+          path: htmlcov
       - add_ssh_keys
       - run:
           name: 'Integration Tests'
