@@ -188,7 +188,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
         try:
             # function call
-            get_metafields(shopify.Order, 1, 100)
+            get_metafields(shopify.Order, 1, shopify.Order, 100)
         except pyactiveresource.connection.Error:
             pass
 

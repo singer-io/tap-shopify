@@ -16,9 +16,9 @@ def get_selected_parents():
             yield Context.stream_objects[parent_stream]()
 
 @shopify_error_handling
-def get_metafields(parent_object, since_id, timeout):
+def get_metafields(parent_object, since_id, parent_replication_object, timeout):
     # set timeout
-    parent_object.set_timeout(timeout)
+    parent_replication_object.set_timeout(timeout)
     # This call results in an HTTP request - the parent object never has a
     # cache of this data so we have to issue that request.
     return parent_object.metafields(
@@ -42,7 +42,7 @@ class Metafields(Stream):
             for parent_object in selected_parent.get_objects():
                 since_id = 1
                 while True:
-                    metafields = get_metafields(parent_object, since_id, self.request_timeout)
+                    metafields = get_metafields(parent_object, since_id, selected_parent.replication_object, self.request_timeout)
                     for metafield in metafields:
                         if metafield.id < since_id:
                             raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
