@@ -42,7 +42,10 @@ class Metafields(Stream):
             for parent_object in selected_parent.get_objects():
                 since_id = 1
                 while True:
-                    metafields = get_metafields(parent_object, since_id, selected_parent.replication_object, self.request_timeout)
+                    metafields = get_metafields(parent_object,
+                                                since_id,
+                                                selected_parent.replication_object,
+                                                self.request_timeout)
                     for metafield in metafields:
                         if metafield.id < since_id:
                             raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
