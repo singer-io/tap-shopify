@@ -1,0 +1,105 @@
+{
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "balance": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "currency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "initial_value": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "disabled_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "line_item_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "api_client_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "user_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "customer_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "note": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "expires_on": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "template_suffix": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "last_characters": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "order_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "type": "object"
+}
