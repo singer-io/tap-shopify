@@ -71,7 +71,7 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
                           pyactiveresource.connection.Error,
                           giveup=is_timeout_error(),
-                          max_tries=5,
+                          max_tries=MAX_RETRIES,
                           factor=2)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
