@@ -14,18 +14,30 @@ from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
+from tap_shopify.streams.base import shopify_error_handling, REQUEST_TIMEOUT
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 
+@shopify_error_handling
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
     version = '2021-04'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
+
+    request_timeout = REQUEST_TIMEOUT # set default timeout
+    timeout_from_config = Context.config.get('request_timeout')
+    # updated the timeout value if timeout is passed in config and not from 0, "0", ""
+    if timeout_from_config and float(timeout_from_config):
+        # update the request timeout for the requests
+        request_timeout = float(timeout_from_config)
+
+    shopify.Shop.set_timeout(request_timeout)
+
     # Shop.current() makes a call for shop details with provided shop and api_key
     return shopify.Shop.current().attributes
 

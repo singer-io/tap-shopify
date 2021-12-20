@@ -1,3 +1,4 @@
+import tap_shopify
 from unittest import mock
 import pyactiveresource
 import shopify
@@ -106,6 +107,107 @@ class TestTimeoutValue(unittest.TestCase):
         stream = Stream()
         # verify the timeout is set as expected
         self.assertEquals(stream.request_timeout, 300)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_value_not_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(300)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_int_value_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50,
+            "request_timeout": 100
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(100)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_string_value_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50,
+            "request_timeout": "100"
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(100)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_empty_value_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50,
+            "request_timeout": ""
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(300)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_0_value_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50,
+            "request_timeout": 0.0
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(300)
+
+    @mock.patch("shopify.Shop.set_timeout")
+    @mock.patch("shopify.Shop.current")
+    def test_timeout_string_0_value_passed_in_config__initialize_shopify_client(self, mocked_current, mocked_set_timeout):
+        # initialize config
+        Context.config = {
+            "start_date": "2021-01-01",
+            "api_key": "test_api_key",
+            "shop": "test_shop",
+            "results_per_page": 50,
+            "request_timeout": "0.0"
+        }
+
+        # function call
+        tap_shopify.initialize_shopify_client()
+        # verify the timeout is set as expected
+        mocked_set_timeout.assert_called_with(300)
 
 class TestTimeoutBackoff(unittest.TestCase):
     """
@@ -228,3 +330,22 @@ class TestTimeoutBackoff(unittest.TestCase):
 
         # verify we backoff 5 times
         self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.Shop.current")
+    def test_Shop_timeout_backoff(self, mocked_current, mocked_sleep):
+        # mock 'Shop' call and raise timeout error
+        mocked_current.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
+
+        Context.config = {
+            "api_key": "test_api_key",
+            "shop": "test_shop"
+        }
+        try:
+            # function call
+            tap_shopify.initialize_shopify_client()
+        except pyactiveresource.connection.Error:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_current.call_count, 5)
