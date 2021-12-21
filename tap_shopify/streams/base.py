@@ -2,7 +2,7 @@ import datetime
 import functools
 import math
 import sys
-
+import socket
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
@@ -69,7 +69,7 @@ def is_timeout_error():
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
-                          pyactiveresource.connection.Error,
+                          (pyactiveresource.connection.Error, socket.timeout),
                           giveup=is_timeout_error(),
                           max_tries=MAX_RETRIES,
                           factor=2)

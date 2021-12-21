@@ -1,3 +1,4 @@
+import socket
 import tap_shopify
 from unittest import mock
 import pyactiveresource
@@ -216,7 +217,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("shopify.Checkout.find")
-    def test_AbandonedCheckouts_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_AbandonedCheckouts_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -233,7 +234,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("shopify.InventoryItem.find")
-    def test_InventoryItems_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_InventoryItems_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -250,7 +251,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
-    def test_InventoryLevels_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_InventoryLevels_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -267,7 +268,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
-    def test_Locations_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_Locations_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -284,7 +285,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("shopify.Order.metafields")
-    def test_Metafields_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_Metafields_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -299,7 +300,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("shopify.Refund.find")
-    def test_OrderRefunds_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_OrderRefunds_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -316,7 +317,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
-    def test_Transactions_timeout_backoff(self, mocked_find, mocked_sleep):
+    def test_Transactions_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         # mock 'find' and raise timeout error
         mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -333,7 +334,7 @@ class TestTimeoutBackoff(unittest.TestCase):
 
     @mock.patch("time.sleep")
     @mock.patch("shopify.Shop.current")
-    def test_Shop_timeout_backoff(self, mocked_current, mocked_sleep):
+    def test_Shop_pyactiveresource_error_timeout_backoff(self, mocked_current, mocked_sleep):
         # mock 'Shop' call and raise timeout error
         mocked_current.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
 
@@ -345,6 +346,146 @@ class TestTimeoutBackoff(unittest.TestCase):
             # function call
             tap_shopify.initialize_shopify_client()
         except pyactiveresource.connection.Error:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_current.call_count, 5)
+
+    """
+        Verify the tap backoff for 5 times when timeout error occurs
+    """
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.Checkout.find")
+    def test_AbandonedCheckouts_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize 'AbandonedCheckouts' as it calls the function 'call_api' from the base class
+        abandoned_checkouts = AbandonedCheckouts()
+        try:
+            # function call
+            abandoned_checkouts.call_api({})
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.InventoryItem.find")
+    def test_InventoryItems_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize class
+        inventory_items = InventoryItems()
+        try:
+            # function call
+            inventory_items.get_inventory_items([1, 2, 3])
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
+    def test_InventoryLevels_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize class
+        inventory_levels = InventoryLevels()
+        try:
+            # function call
+            inventory_levels.api_call_for_inventory_levels(1, 'test')
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
+    def test_Locations_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize class
+        locations = Locations()
+        try:
+            # function call
+            locations.replication_object.find()
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.Order.metafields")
+    def test_Metafields_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        try:
+            # function call
+            get_metafields(shopify.Order, 1, shopify.Order, 100)
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.Refund.find")
+    def test_OrderRefunds_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize class
+        order_refunds = OrderRefunds()
+        try:
+            # function call
+            order_refunds.get_refunds(shopify.Product, 1)
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
+    def test_Transactions_socket_timeout_backoff(self, mocked_find, mocked_sleep):
+        # mock 'find' and raise timeout error
+        mocked_find.side_effect = socket.timeout("The read operation timed out")
+
+        # initialize class
+        locations = Transactions()
+        try:
+            # function call
+            locations.replication_object.find()
+        except socket.timeout:
+            pass
+
+        # verify we backoff 5 times
+        self.assertEquals(mocked_find.call_count, 5)
+
+    @mock.patch("time.sleep")
+    @mock.patch("shopify.Shop.current")
+    def test_Shop_socket_timeout_backoff(self, mocked_current, mocked_sleep):
+        # mock 'Shop' call and raise timeout error
+        mocked_current.side_effect = socket.timeout("The read operation timed out")
+
+        Context.config = {
+            "api_key": "test_api_key",
+            "shop": "test_shop"
+        }
+        try:
+            # function call
+            tap_shopify.initialize_shopify_client()
+        except socket.timeout:
             pass
 
         # verify we backoff 5 times
