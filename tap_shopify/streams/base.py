@@ -194,6 +194,12 @@ class Stream():
         updated_at_min = self.get_bookmark()
 
         stop_time = singer.utils.now().replace(microsecond=0)
+        # Retrieve data for max 1 year. Otherwise log incremental needed.
+        diff_days = (stop_time - updated_at_min).days
+        if diff_days > 365:
+            stop_time = updated_at_min + datetime.timedelta(days=365)
+            LOGGER.info("Data will be retrieved one year from start date. Trigger incremental on finish!")
+
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
         results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
