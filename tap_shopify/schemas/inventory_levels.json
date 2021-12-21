@@ -13,6 +13,9 @@
     "location_id": {
       "type": ["null", "integer"]
     },
+    "incoming": {
+      "type": ["null", "integer"]
+    },
     "admin_graphql_api_id": {
       "type": ["null", "string"]
     }
