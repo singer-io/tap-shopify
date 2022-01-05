@@ -25,6 +25,18 @@ DATE_WINDOW_SIZE = 1
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
 
+# function to return request timeout
+def get_request_timeout():
+
+    request_timeout = REQUEST_TIMEOUT # set default timeout
+    timeout_from_config = Context.config.get('request_timeout')
+    # updated the timeout value if timeout is passed in config and not from 0, "0", ""
+    if timeout_from_config and float(timeout_from_config):
+        # update the request timeout for the requests
+        request_timeout = float(timeout_from_config)
+
+    return request_timeout
+
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
         if getattr(exc, 'code', None) and exc.code not in status_code:
@@ -113,12 +125,8 @@ class Stream():
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
-        self.request_timeout = REQUEST_TIMEOUT # set default timeout
-        timeout_from_config = Context.config.get('request_timeout')
-        # updated the timeout value if timeout is passed in config and not from 0, "0", ""
-        if timeout_from_config and float(timeout_from_config):
-            # update the request timeout for the requests
-            self.request_timeout = float(timeout_from_config)
+        # set request timeout
+        self.request_timeout = get_request_timeout()
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
