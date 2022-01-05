@@ -130,6 +130,7 @@ class BaseTapTest(unittest.TestCase):
             }
         }
 
+    # TODO : Add product_variants and metafield_products streams in the expectations and stitch docs
     def expected_streams(self):
         """A set of expected stream names"""
         return set(self.expected_metadata().keys())
@@ -300,14 +301,12 @@ class BaseTapTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
-        self.store_1_streams = {'custom_collections'}
-       # , 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
-        self.store_2_streams = {'abandoned_checkouts'}
-       # , 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+        self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+        self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
 
-    # TODO: modify this method to accommodate replication key in the current_state
+    #modified this method to accommodate replication key in the current_state
     def calculated_states_by_stream(self, current_state):
-        timedelta_by_stream = {stream: [0,0,30]  # {stream_name: [days, hours, minutes], ...}
+        timedelta_by_stream = {stream: [0,5,0]  # {stream_name: [days, hours, minutes], ...}
                                for stream in self.expected_streams()}
 
         stream_to_calculated_state = {stream: "" for stream in current_state['bookmarks'].keys()}
