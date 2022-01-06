@@ -130,7 +130,6 @@ class BaseTapTest(unittest.TestCase):
             }
         }
 
-    # TODO : Add product_variants and metafield_products streams in the expectations and stitch docs
     def expected_streams(self):
         """A set of expected stream names"""
         return set(self.expected_metadata().keys())

@@ -19,11 +19,12 @@ class BookmarkTest(BaseTapTest):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
 
-    def test_run(self):
+    def test_run_store_1(self):
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
             self.bookmarks_test(conn_id, self.store_1_streams)
 
+    def test_run_store_2(self):
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
             self.bookmarks_test(conn_id, self.store_2_streams)
@@ -107,7 +108,7 @@ class BookmarkTest(BaseTapTest):
                 self.assertIsNotNone(second_bookmark_value)
 
                 # verify the 2nd bookmark is equal to 1st sync bookmark
-                #TODO : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time, check with Dev team on the tap implementation
+                #BUG : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time
                 #self.assertEqual(first_bookmark_value, second_bookmark_value)
 
                 for record in first_sync_messages:
