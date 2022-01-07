@@ -1,0 +1,532 @@
+{
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "order_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "service": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "tracking_company": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "shipment_status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "location_id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "tracking_number": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "tracking_numbers": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "tracking_url": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "tracking_urls": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "receipt": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "testcase": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "authorization": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "line_items": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "variant_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quantity": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "sku": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "variant_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vendor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fulfillment_service": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "product_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "requires_shipping": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "taxable": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "gift_card": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "variant_inventory_management": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "properties": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "product_exists": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "fulfillable_quantity": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "grams": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "price": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total_discount": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fulfillment_status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price_set": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "shop_money": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "currency_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "presentment_money": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "currency_code": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            },
+            "total_discount_set": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "properties": {
+                "shop_money": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "amount": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "currency_code": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                },
+                "presentment_money": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "amount": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "currency_code": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              },
+              "discount_allocations": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "amount": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "discount_application_index": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "amount_set": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "shop_money": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "currency_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        },
+                        "presentment_money": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "currency_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "admin_graphql_api_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tax_lines": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "price": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "rate": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "price_set": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "shop_money": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "currency_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        },
+                        "presentment_money": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "currency_code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,7 +11,7 @@ class InventoryLevels(Stream):
     replication_key = 'updated_at'
     key_properties = ['location_id', 'inventory_item_id']
     replication_object = shopify.InventoryLevel
-    gql_query = "query inventoryLevel($id: ID!){inventoryLevel(id: $id){incoming}}"
+    gql_query = "query inventoryLevel($id: ID!){inventoryLevel(id: $id){available, item, updatedAt, location, incoming, id}}"
 
     @shopify_error_handling
     def api_call_for_inventory_levels(self, parent_object_id, bookmark):
