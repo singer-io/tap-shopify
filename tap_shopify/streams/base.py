@@ -66,23 +66,20 @@ def retry_after_wait_gen(**kwargs):
     yield math.floor(float(sleep_time_str))
 
 # boolean function to check if the error is 'timeout' error or not
-def is_timeout_error():
+def is_timeout_error(e):
     """
         This function checks whether the error contains 'timed out' substring and return boolean
         values accordingly, to decide whether to backoff or not.
     """
-    def gen_fn(exc):
-        if str(exc).__contains__('timed out'):
-            # retry if the error string contains 'timed out'
-            return False
-        return True
-
-    return gen_fn
+    # retry if the error string contains 'timed out'
+    if str(e).__contains__('timed out'):
+        return False
+    return True
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
                           (pyactiveresource.connection.Error, socket.timeout),
-                          giveup=is_timeout_error(),
+                          giveup=is_timeout_error,
                           max_tries=MAX_RETRIES,
                           factor=2)
     @backoff.on_exception(backoff.expo,
