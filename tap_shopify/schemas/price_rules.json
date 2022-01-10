@@ -107,21 +107,15 @@
     },
     "prerequisite_quantity_range": {
       "type": [
-        "array",
+        "object",
         "null"
       ],
-      "items": {
-        "type": [
-          "object",
-          "null"
-        ],
-        "properties": {
-          "greater_than_or_equal_to": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          }
+      "properties": {
+        "greater_than_or_equal_to": {
+          "type": [
+            "integer",
+            "null"
+          ]
         }
       }
     },
