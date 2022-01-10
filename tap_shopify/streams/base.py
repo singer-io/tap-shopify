@@ -66,13 +66,13 @@ def retry_after_wait_gen(**kwargs):
     yield math.floor(float(sleep_time_str))
 
 # boolean function to check if the error is 'timeout' error or not
-def is_timeout_error(e):
+def is_timeout_error(error_raised):
     """
         This function checks whether the error contains 'timed out' substring and return boolean
         values accordingly, to decide whether to backoff or not.
     """
     # retry if the error string contains 'timed out'
-    if str(e).__contains__('timed out'):
+    if str(error_raised).__contains__('timed out'):
         return False
     return True
 
