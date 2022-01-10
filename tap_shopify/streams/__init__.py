@@ -11,4 +11,6 @@ import tap_shopify.streams.locations
 import tap_shopify.streams.inventory_levels
 import tap_shopify.streams.inventory_items
 import tap_shopify.streams.shop
-import tap_shopify.streams.fulfillments
+import tap_shopify.streams.price_rules
+import tap_shopify.streams.discount_codes
+import tap_shopify.streams.incoming_items
