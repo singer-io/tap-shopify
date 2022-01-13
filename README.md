@@ -37,7 +37,8 @@ This tap:
     {
         "start_date": "2010-01-01",
         "api_key": "<Shopify API Key>",
-        "shop": "test_shop"
+        "shop": "test_shop",
+        "request_timeout": 300
     }
     ```
 
@@ -47,6 +48,8 @@ This tap:
    The `api_key` is the API key for your Shopify shop generated via an OAuth flow.
 
    The `shop` is your Shopify shop which will be the value `test_shop` in the string `https://test_shop.myshopify.com`
+
+    The `request_timeout` is the timeout for the requests. Default: 300 seconds
 
 4. Run the Tap in Discovery Mode
 

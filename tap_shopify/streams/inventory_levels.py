@@ -10,9 +10,12 @@ class InventoryLevels(Stream):
     replication_key = 'updated_at'
     key_properties = ['location_id', 'inventory_item_id']
     replication_object = shopify.InventoryLevel
+    # Added decorator over functions of shopify SDK
+    replication_object.find = shopify_error_handling(replication_object.find)
 
-    @shopify_error_handling
     def api_call_for_inventory_levels(self, parent_object_id, bookmark):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(
             updated_at_min = bookmark,
             limit = RESULTS_PER_PAGE,
