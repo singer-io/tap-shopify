@@ -6,9 +6,12 @@ from tap_shopify.context import Context
 class Locations(Stream):
     name = 'locations'
     replication_object = shopify.Location
+    # Added decorator over functions of shopify SDK
+    replication_object.find = shopify_error_handling(replication_object.find)
 
-    @shopify_error_handling
     def get_locations_data(self):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         location_page = self.replication_object.find()
         yield from location_page
 
