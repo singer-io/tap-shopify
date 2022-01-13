@@ -1,10 +1,84 @@
 {
   "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "value_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "value": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "customer_selection": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "target_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "target_selection": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "allocation_method": {
       "type": [
         "null",
         "string"
       ]
+    },
+    "allocation_limit": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "once_per_customer": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "usage_limit": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "starts_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "ends_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     },
     "created_at": {
       "type": [
@@ -14,19 +88,6 @@
       "format": "date-time"
     },
     "updated_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "customer_selection": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "ends_at": {
       "type": [
         "null",
         "string"
@@ -80,18 +141,6 @@
           "integer"
         ]
       }
-    },
-    "id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "once_per_customer": {
-      "type": [
-        "null",
-        "boolean"
-      ]
     },
     "prerequisite_customer_ids": {
       "type": [
@@ -158,125 +207,76 @@
           "null"
         ]
       }
-    },
-    "prerequisite_to_entitlement_purchase": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "properties": {
-        "prerequisite_amount": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
+    }
+  },
+  "prerequisite_to_entitlement_purchase": {
+    "type": [
+      "object",
+      "null"
+    ],
+    "properties": {
+      "prerequisite_amount": {
+        "type": [
+          "string",
+          "null"
+        ]
       }
-    },
-    "starts_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "target_type": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "target_selection": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "title": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "usage_limit": {
+    }
+  },
+  "prerequisite_product_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
       "type": [
         "null",
         "integer"
       ]
-    },
-    "prerequisite_product_ids": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": [
-          "null",
-          "integer"
-        ]
-      }
-    },
-    "prerequisite_variant_ids": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": [
-          "null",
-          "integer"
-        ]
-      }
-    },
-    "prerequisite_collection_ids": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": [
-          "null",
-          "integer"
-        ]
-      }
-    },
-    "value": {
+    }
+  },
+  "prerequisite_variant_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
       "type": [
         "null",
-        "string"
+        "integer"
       ]
-    },
-    "value_type": {
+    }
+  },
+  "prerequisite_collection_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
       "type": [
         "null",
-        "string"
+        "integer"
       ]
-    },
-    "prerequisite_to_entitlement_quantity_ratio": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "properties": {
-        "entitled_quantity": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "prerequisite_quantity": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        }
+    }
+  },
+  "prerequisite_to_entitlement_quantity_ratio": {
+    "type": [
+      "object",
+      "null"
+    ],
+    "properties": {
+      "entitled_quantity": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "prerequisite_quantity": {
+        "type": [
+          "integer",
+          "null"
+        ]
       }
-    },
-    "allocation_limit": {
-      "type": [
-        "null",
-        "string"
-      ]
     }
   },
   "type": "object"
