@@ -5,7 +5,7 @@ from tap_shopify.context import Context
 
 
 class PriceRules(Stream):
-    name = 'price_rules'
+    name = 'priceRules'
     replication_object = shopify.PriceRule
 
 

@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "usageCount": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "parentId": {
+      "type": [
+        "null",
+        "string",
+        "generated"
+      ]
+    }
+  },
+  "type": "object"
+}
