@@ -12,6 +12,8 @@ class OrderRefunds(Stream):
 
     @shopify_error_handling
     def get_refunds(self, parent_object, since_id):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(
             order_id=parent_object.id,
             limit=self.results_per_page,

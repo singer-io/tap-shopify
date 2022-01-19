@@ -57,12 +57,15 @@ class Transactions(Stream):
     name = 'transactions'
     replication_key = 'created_at'
     replication_object = shopify.Transaction
+    # Added decorator over functions of shopify SDK
+    replication_object.find = shopify_error_handling(replication_object.find)
     # Transactions have no updated_at property. Therefore we have
     # nothing to set the `replication_method` member to.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
-    @shopify_error_handling
     def call_api_for_transactions(self, parent_object):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(
             limit=TRANSACTIONS_RESULTS_PER_PAGE,
             order_id=parent_object.id,

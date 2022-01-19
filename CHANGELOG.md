@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.5.1
+  * Request Timeout Implementation [#129](https://github.com/singer-io/tap-shopify/pull/129)
 ## 1.5.0
   * Adds `events` stream [#127](https://github.com/singer-io/tap-shopify/pull/127)
 
