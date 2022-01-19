@@ -24,10 +24,14 @@ class BookmarkTest(BaseTapTest):
     #         conn_id = self.create_connection(original_credentials=True)
     #         self.bookmarks_test(conn_id, self.store_1_streams)
 
+    # creating this global variable for store 2 which is required only for this test, all the other test are referencing from base
+    global store_2_streams
+    store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'events', 'customers', 'custom_collections', 'orders'}
+
     def test_run_store_2(self):
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
-            self.bookmarks_test(conn_id, self.store_2_streams)
+            self.bookmarks_test(conn_id, store_2_streams)
 
     def bookmarks_test(self, conn_id, testable_streams):
 

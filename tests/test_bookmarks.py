@@ -69,6 +69,19 @@ class BookmarkTest(BaseTapTest):
         first_sync_records = runner.get_records_from_target_output()
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
         first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
+        #first_sync_bookmarks = menagerie.get_state(conn_id)
+        
+        #######################
+        # Update State between Syncs
+        #######################
+
+        # new_state = {'bookmarks': dict()}
+        # simulated_states = self.calculated_states_by_stream(first_sync_bookmarks)
+
+        # for stream, updated_state in simulated_states.items():
+        #     new_state['bookmarks'][stream] = updated_state
+        # menagerie.set_state(conn_id, new_state)
+
 
         # Run a second sync job using orchestrator
         second_sync_record_count = self.run_sync(conn_id)
