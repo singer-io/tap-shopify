@@ -6,7 +6,9 @@ import unittest
 import os
 from datetime import datetime as dt
 from datetime import timezone as tz
-
+import dateutil.parser
+import pytz
+from datetime import timedelta
 from tap_tester import connections, menagerie, runner
 
 
@@ -24,6 +26,7 @@ class BaseTapTest(unittest.TestCase):
     INCREMENTAL = "INCREMENTAL"
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
     DEFAULT_RESULTS_PER_PAGE = 175
 
     @staticmethod
@@ -299,3 +302,54 @@ class BaseTapTest(unittest.TestCase):
         self.start_date = self.get_properties().get("start_date")
         self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
         self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+
+    #modified this method to accommodate replication key in the current_state
+    def calculated_states_by_stream(self, current_state):
+        timedelta_by_stream = {stream: [0,5,0]  # {stream_name: [days, hours, minutes], ...}
+                               for stream in self.expected_streams()}
+
+        stream_to_calculated_state = {stream: "" for stream in current_state['bookmarks'].keys()}
+
+        for stream, state in current_state['bookmarks'].items():
+            # modified state value to accommodate the replication key
+            stream = stream
+            state_key, state_value = list(state.items())[0]
+
+            state_as_datetime = dateutil.parser.parse(list(state.values())[0])
+
+            days, hours, minutes = timedelta_by_stream[stream]
+            calculated_state_as_datetime = state_as_datetime - timedelta(days=days, hours=hours, minutes=minutes)
+
+            state_format = "%Y-%m-%dT00:00:00Z"
+            calculated_state_formatted = dt.strftime(calculated_state_as_datetime, state_format)
+            state = {state_key: calculated_state_formatted}
+            stream_to_calculated_state[stream] = state
+
+        return stream_to_calculated_state
+
+    def convert_state_to_utc(self, date_str):
+        """
+        Convert a saved bookmark value of the form '2020-08-25T13:17:36-07:00' to
+        a string formatted utc datetime,
+        in order to compare aginast json formatted datetime values
+        """
+        date_object = dateutil.parser.parse(date_str)
+        date_object_utc = date_object.astimezone(tz=pytz.UTC)
+        return dt.strftime(date_object_utc, "%Y-%m-%dT%H:%M:%SZ")
+
+    def timedelta_formatted(self, dtime, days=0):
+        try:
+            date_stripped = dt.strptime(dtime, self.START_DATE_FORMAT)
+            return_date = date_stripped + timedelta(days=days)
+
+            return dt.strftime(return_date, self.START_DATE_FORMAT)
+
+        except ValueError:
+            try:
+                date_stripped = dt.strptime(dtime, self.BOOKMARK_COMPARISON_FORMAT)
+                return_date = date_stripped + timedelta(days=days)
+
+                return dt.strftime(return_date, self.BOOKMARK_COMPARISON_FORMAT)
+
+            except ValueError:
+                return Exception("Datetime object is not of the format: {}".format(self.START_DATE_FORMAT))
