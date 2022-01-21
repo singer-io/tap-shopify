@@ -91,6 +91,13 @@ def shopify_error_handling(fnc):
                           giveup=is_status_code_fn(whitelist=[401, 403]),
                           jitter=None,
                           max_value=60)
+    @backoff.on_exception(backoff.expo,
+                          GraphQLRestoreRateError,
+                          on_backoff=retry_handler,
+                          max_tries=MAX_RETRIES,
+                          giveup=is_status_code_fn(blacklist=[429]),
+                          jitter=None,
+                          max_value=60)
     @backoff.on_exception(remember_errors.get_yield,
                           (pyactiveresource.connection.ClientError,
                            GraphQLThrottledError),
@@ -112,6 +119,14 @@ class Error(Exception):
 
 
 class GraphQLThrottledError(Exception):
+    def __init__(self, msg=None, code=None):
+        Exception.__init__(self, msg)
+        self.code = code
+
+    """Base exception for the API interaction module"""
+
+
+class GraphQLRestoreRateError(Exception):
     def __init__(self, msg=None, code=None):
         Exception.__init__(self, msg)
         self.code = code
