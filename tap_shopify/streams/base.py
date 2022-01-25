@@ -86,6 +86,7 @@ class Stream():
     replication_object = None
     # Status parameter override option
     status_key = None
+    status_value = None
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -147,12 +148,13 @@ class Stream():
                 updated_at_max = stop_time
             while True:
                 status_key = self.status_key or "status"
+                status_value = self.status_value or "any"
                 query_params = {
                     "since_id": since_id,
                     "updated_at_min": updated_at_min,
                     "updated_at_max": updated_at_max,
                     "limit": results_per_page,
-                    status_key: "any"
+                    status_key: status_value
                 }
 
                 with metrics.http_request_timer(self.name):
