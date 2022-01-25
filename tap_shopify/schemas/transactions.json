@@ -83,7 +83,8 @@
       "type": [
         "null",
         "string"
-      ]
+      ],
+      "format": "date-time"
     },
     "status": {
       "type": [

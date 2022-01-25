@@ -97,6 +97,13 @@ ENV/
 env.sh
 config.json
 .autoenv.zsh
+.autoenv_leave.zsh
+catalog.json
+catalog.*.json
+target-postgres.json
+output.txt
+output.*.txt
+debug.py
 
 rsa-key
 tags
