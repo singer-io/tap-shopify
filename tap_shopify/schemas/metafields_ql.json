@@ -1,24 +1,6 @@
 {
   "properties": {
-    "owner_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "owner_resource": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "value_type": {
+    "id": {
       "type": [
         "null",
         "string"
@@ -30,17 +12,16 @@
         "string"
       ]
     },
-    "created_at": {
+    "value": {
       "type": [
         "null",
         "string"
-      ],
-      "format": "date-time"
+      ]
     },
-    "id": {
+    "type": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "namespace": {
@@ -55,13 +36,26 @@
         "string"
       ]
     },
-    "value": {
+    "legacyResourceId": {
       "type": [
         "null",
         "string"
       ]
     },
-    "updated_at": {
+    "ownerType": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updatedAt": {
       "type": [
         "null",
         "string"

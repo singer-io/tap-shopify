@@ -11,8 +11,11 @@ from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling, HiddenPrints, GraphQLGeneralError, GraphQLThrottledError,
                                       LOGGER, GraphQLRestoreRateError)
 
+Context.stream_objects['priceRules'] = Context.stream_objects['price_rules']
+Context.stream_objects['priceRules'].name = 'priceRules'
 
-class DiscountCodes(GraphQlChildStream):
+
+class DiscountCodesQL(GraphQlChildStream):
     name = 'discount_codes_ql'
 
     replication_object = shopify.DiscountCode
@@ -172,5 +175,5 @@ class DiscountCodes(GraphQlChildStream):
         raise GraphQLGeneralError("Failed", code=500)
 
 
-Context.stream_objects['discount_codes_ql'] = DiscountCodes
+Context.stream_objects['discount_codes_ql'] = DiscountCodesQL
 Context.stream_objects['priceRules'] = Context.stream_objects['price_rules']
