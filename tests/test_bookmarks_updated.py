@@ -15,6 +15,17 @@ class BookmarkTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_bookmark_test"
 
+    # function for verifying the date format
+    def is_expected_date_format(self, date):
+        try:
+            # parse date
+            dt.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except ValueError:
+            # return False if date is in not expected format
+            return False
+        # return True in case of no error
+        return True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
@@ -112,7 +123,9 @@ class BookmarkTest(BaseTapTest):
 
                 # verify the syncs sets a bookmark of the expected form
                 self.assertIsNotNone(first_bookmark_value)
+                self.assertTrue(self.is_expected_date_format(first_bookmark_value))
                 self.assertIsNotNone(second_bookmark_value)
+                self.assertTrue(self.is_expected_date_format(second_bookmark_value))
 
                 # verify the 2nd bookmark is equal to 1st sync bookmark
                 #NOT A BUG (IS the expected behaviour for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify
