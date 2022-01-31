@@ -3,15 +3,15 @@ from setuptools import setup
 
 setup(
     name="tap-shopify",
-    version="1.2.6",
+    version="2.0.0",
     description="Singer.io tap for extracting Shopify data",
     author="Stitch",
     url="http://github.com/singer-io/tap-shopify",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_shopify"],
     install_requires=[
-        "ShopifyAPI==8.4.1",
-        "singer-python==5.9.1",
+        "ShopifyAPI==10.0.0",
+        "singer-python==5.12.2",
         'gql-query-builder'
     ],
     extras_require={
@@ -27,7 +27,7 @@ setup(
     tap-shopify=tap_shopify:main
     """,
     packages=["tap_shopify"],
-    package_data = {
+    package_data={
         "schemas": ["tap_shopify/schemas/*.json"]
     },
     include_package_data=True,
