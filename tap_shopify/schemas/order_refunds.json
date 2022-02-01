@@ -269,6 +269,12 @@
                         "null",
                         "number"
                       ]
+                    },
+                    "channel_liable": {
+                      "type": [
+                        "null",
+                        "boolean"
+                      ]
                     }
                   },
                   "type": [
