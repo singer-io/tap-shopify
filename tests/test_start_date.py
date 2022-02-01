@@ -56,7 +56,13 @@ class StartDateTest(BaseTapTest):
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
-        incremental_streams = {key for key, value in self.expected_replication_method().items()
+        # removed 'abandoned_checkouts', as per the Doc:
+        #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
+        # abandoned checkouts are saved in the Shopify admin for three months.
+        # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+        expected_replication_method = self.expected_replication_method()
+        expected_replication_method.pop("abandoned_checkouts")
+        incremental_streams = {key for key, value in expected_replication_method.items()
                                if value == self.INCREMENTAL}
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED

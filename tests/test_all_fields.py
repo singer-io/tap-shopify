@@ -93,6 +93,8 @@ class AllFieldsTest(BaseTapTest):
                 if stream == 'abandoned_checkouts':
                     expected_all_keys.remove('billing_address')
                 elif stream == 'orders':
+                    # No field named 'order_adjustments' present in the 'order' object
+                    #   Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
                     expected_all_keys.remove('order_adjustments')
 
                 self.assertSetEqual(expected_all_keys, actual_all_keys)
