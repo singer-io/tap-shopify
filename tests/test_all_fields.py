@@ -96,5 +96,9 @@ class AllFieldsTest(BaseTapTest):
                     # No field named 'order_adjustments' present in the 'order' object
                     #   Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
                     expected_all_keys.remove('order_adjustments')
+                elif stream == "metafields":
+                    # "value_type" field is deprecated from the "metafields" Stream from API v2022-01
+                    #   Documentation: https://shopify.dev/api/release-notes/2022-01#rest-admin-api-changes
+                    expected_all_keys.remove('value_type')
 
                 self.assertSetEqual(expected_all_keys, actual_all_keys)
