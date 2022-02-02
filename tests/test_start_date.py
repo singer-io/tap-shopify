@@ -60,6 +60,7 @@ class StartDateTest(BaseTapTest):
         #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+        # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
         expected_replication_method = self.expected_replication_method()
         expected_replication_method.pop("abandoned_checkouts")
         incremental_streams = {key for key, value in expected_replication_method.items()
