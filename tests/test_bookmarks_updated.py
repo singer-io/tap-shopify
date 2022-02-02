@@ -41,6 +41,7 @@ class BookmarkTest(BaseTapTest):
     #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
     # abandoned checkouts are saved in the Shopify admin for three months.
     # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+    # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
     store_2_streams = {'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'events', 'customers', 'custom_collections', 'orders'}
 
     def test_run_store_2(self):
