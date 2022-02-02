@@ -132,7 +132,11 @@ class BaseTapTest(unittest.TestCase):
 
     def expected_streams(self):
         """A set of expected stream names"""
-        return set(self.expected_metadata().keys())
+        # removed "abandoned_checkouts", as per the Doc:
+        #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
+        # abandoned checkouts are saved in the Shopify admin for three months.
+        # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+        return set(self.expected_metadata().keys()) - {"abandoned_checkouts"}
 
     def child_streams(self):
         """
@@ -301,7 +305,11 @@ class BaseTapTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
         self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
-        self.store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+        # removed 'abandoned_checkouts' from store 2 streams, as per the Doc:
+        #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
+        # abandoned checkouts are saved in the Shopify admin for three months.
+        # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+        self.store_2_streams = {'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
 
     #modified this method to accommodate replication key in the current_state
     def calculated_states_by_stream(self, current_state):
