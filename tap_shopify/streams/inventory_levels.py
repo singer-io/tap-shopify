@@ -11,7 +11,6 @@ class InventoryLevels(Stream):
     replication_key = 'updated_at'
     key_properties = ['location_id', 'inventory_item_id']
     replication_object = shopify.InventoryLevel
-    gql_query = "query inventoryLevel($id: ID!){inventoryLevel(id: $id){incoming}}"
 
     @shopify_error_handling
     def api_call_for_inventory_levels(self, parent_object_id, bookmark):
@@ -43,15 +42,10 @@ class InventoryLevels(Stream):
             yield from self.get_inventory_levels(parent_object.id, bookmark)
 
     def sync(self):
-        gql_client = shopify.GraphQL()
         bookmark = self.get_bookmark()
         max_bookmark = bookmark
         for inventory_level in self.get_objects():
             inventory_level_dict = inventory_level.to_dict()
-            variables = dict(id = inventory_level_dict.get("admin_graphql_api_id"))
-            response = gql_client.execute(self.gql_query, variables)
-            response_dict = json.loads(response)
-            inventory_level_dict["incoming"] = response_dict["data"]["inventoryLevel"].get("incoming")
             replication_value = strptime_to_utc(inventory_level_dict[self.replication_key])
             if replication_value >= bookmark:
                 yield inventory_level_dict

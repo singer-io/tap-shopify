@@ -1,0 +1,283 @@
+{
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "value_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "value": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "customer_selection": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "target_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "target_selection": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "allocation_method": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "allocation_limit": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "once_per_customer": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "usage_limit": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "starts_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "ends_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "entitled_collection_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_country_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_product_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "entitled_variant_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "prerequisite_customer_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "prerequisite_quantity_range": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "greater_than_or_equal_to": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "prerequisite_saved_search_ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "prerequisite_shipping_price_range": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "less_than_or_equal_to": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "prerequisite_subtotal_range": {
+    "type": [
+      "object",
+      "null"
+    ],
+    "properties": {
+      "greater_than_or_equal_to": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "prerequisite_to_entitlement_purchase": {
+    "type": [
+      "object",
+      "null"
+    ],
+    "properties": {
+      "prerequisite_amount": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "prerequisite_product_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "prerequisite_variant_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "prerequisite_collection_ids": {
+    "type": [
+      "array",
+      "null"
+    ],
+    "items": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    }
+  },
+  "prerequisite_to_entitlement_quantity_ratio": {
+    "type": [
+      "object",
+      "null"
+    ],
+    "properties": {
+      "entitled_quantity": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "prerequisite_quantity": {
+        "type": [
+          "integer",
+          "null"
+        ]
+      }
+    }
+  },
+  "type": "object"
+}
