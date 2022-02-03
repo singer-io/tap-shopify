@@ -4,6 +4,7 @@ import math
 import sys
 import http
 
+import socket
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
@@ -17,6 +18,9 @@ LOGGER = singer.get_logger()
 
 RESULTS_PER_PAGE = 175
 
+# set default timeout of 300 seconds
+REQUEST_TIMEOUT = 300
+
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
 DATE_WINDOW_SIZE = 1
@@ -26,6 +30,18 @@ MAX_RETRIES = 9
 
 # Factor to multiply the exponentiation by.
 FACTOR = 3
+
+# function to return request timeout
+def get_request_timeout():
+
+    request_timeout = REQUEST_TIMEOUT # set default timeout
+    timeout_from_config = Context.config.get('request_timeout')
+    # updated the timeout value if timeout is passed in config and not from 0, "0", ""
+    if timeout_from_config and float(timeout_from_config):
+        # update the request timeout for the requests
+        request_timeout = float(timeout_from_config)
+
+    return request_timeout
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -55,7 +71,23 @@ def retry_after_wait_gen(**kwargs):
     sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
     yield math.floor(float(sleep_time_str))
 
+# boolean function to check if the error is 'timeout' error or not
+def is_timeout_error(error_raised):
+    """
+        This function checks whether the error contains 'timed out' substring and return boolean
+        values accordingly, to decide whether to backoff or not.
+    """
+    # retry if the error string contains 'timed out'
+    if str(error_raised).__contains__('timed out'):
+        return False
+    return True
+
 def shopify_error_handling(fnc):
+    @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
+                          (pyactiveresource.connection.Error, socket.timeout),
+                          giveup=is_timeout_error,
+                          max_tries=MAX_RETRIES,
+                          factor=2)
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.connection.Error,
@@ -98,6 +130,13 @@ class Stream():
     replication_object = None
     # Status parameter override option
     status_key = None
+    results_per_page = None
+
+    def __init__(self):
+        self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+
+        # set request timeout
+        self.request_timeout = get_request_timeout()
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -132,14 +171,24 @@ class Stream():
     # with shopify_error_handling to get 429 and 500 handling.
     @shopify_error_handling
     def call_api(self, query_params):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(**query_params)
+
+    def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):
+        return {
+            "since_id": since_id,
+            "updated_at_min": updated_at_min,
+            "updated_at_max": updated_at_max,
+            "limit": self.results_per_page,
+            status_key: "any"
+        }
 
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-        results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -159,13 +208,10 @@ class Stream():
                 updated_at_max = stop_time
             while True:
                 status_key = self.status_key or "status"
-                query_params = {
-                    "since_id": since_id,
-                    "updated_at_min": updated_at_min,
-                    "updated_at_max": updated_at_max,
-                    "limit": results_per_page,
-                    status_key: "any"
-                }
+                query_params = self.get_query_params(since_id,
+                                                     status_key,
+                                                     updated_at_min,
+                                                     updated_at_max)
 
                 with metrics.http_request_timer(self.name):
                     objects = self.call_api(query_params)
@@ -181,7 +227,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
-                if len(objects) < results_per_page:
+                if len(objects) < self.results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.

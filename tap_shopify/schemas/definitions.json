@@ -11,9 +11,9 @@
         "tax_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "refund_id": {
           "type": [
@@ -24,9 +24,9 @@
         "amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "kind": {
           "type": [
@@ -58,7 +58,10 @@
     ]
   },
   "customer": {
-    "type": "object",
+    "type": [
+      "null",
+      "object"
+    ],
     "properties": {
       "last_order_name": {
         "type": [
@@ -473,6 +476,70 @@
           "null",
           "string"
         ]
+      },
+      "localized_province_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "localized_country_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "updated_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "province": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "phone": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "legacy": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "created_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "country": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "active": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"]
+      },
+      "country_name": {
+        "type": [
+          "null",
+          "string"]
       }
     },
     "type": [
@@ -482,7 +549,18 @@
   },
   "line_item": {
     "properties": {
-      "applied_discounts": {},
+      "applied_discounts": {
+        "items": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
+        ]
+      },
       "total_discount_set": {},
       "pre_tax_price_set": {},
       "price_set": {},
@@ -634,9 +712,9 @@
       "total_discount": {
         "type": [
           "null",
-          "number"
+          "string"
         ],
-        "multipleOf": 1e-10
+        "format": "singer.decimal"
       },
       "name": {
         "type": [
@@ -680,9 +758,9 @@
       "price": {
         "type": [
           "null",
-          "number"
+          "string"
         ],
-        "multipleOf": 1e-10
+        "format": "singer.decimal"
       },
       "requires_shipping": {
         "type": [
@@ -828,9 +906,9 @@
         "price": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "title": {
           "type": [
@@ -841,9 +919,9 @@
         "rate": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "compare_at": {
           "type": [
