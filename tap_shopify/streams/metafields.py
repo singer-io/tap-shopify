@@ -28,6 +28,11 @@ def get_metafields(parent_object, since_id, parent_replication_object, timeout):
 class Metafields(Stream):
     name = 'metafields'
     replication_object = shopify.Metafield
+    should_parse_json_string = None
+
+    def __init__(self, *args, **kwargs):
+        super(*args, **kwargs)
+        self.should_parse_json_string = Context.config.get('metafields_value_should_parse_json_string', True)
 
     def get_objects(self):
         # Get top-level shop metafields
@@ -63,7 +68,7 @@ class Metafields(Stream):
         for metafield in self.get_objects():
             metafield = metafield.to_dict()
             value_type = metafield.get("value_type")
-            if value_type and value_type == "json_string":
+            if self.should_parse_json_string and value_type and value_type == "json_string":
                 value = metafield.get("value")
                 try:
                     metafield["value"] = json.loads(value) if value is not None else value
