@@ -1,7 +1,67 @@
 # Changelog
 
+## 1.5.1
+  * Request Timeout Implementation [#129](https://github.com/singer-io/tap-shopify/pull/129)
+## 1.5.0
+  * Adds `events` stream [#127](https://github.com/singer-io/tap-shopify/pull/127)
+
+## 1.4.0
+  * Add shop info in record [#115](https://github.com/singer-io/tap-shopify/pull/115)
+  * Add inventory item data [#118] (https://github.com/singer-io/tap-shopify/pull/118)
+  * Add Locations stream and TDL-13614: Add Inventory Levels stream [#114] (https://github.com/singer-io/tap-shopify/pull/114)
+  * Added best practices [#116] (https://github.com/singer-io/tap-shopify/pull/116)
+  * Discover mode should check token [#120] (https://github.com/singer-io/tap-shopify/pull/120)
+## 1.3.6
+  * Fixes a bug in the canonicalize function for a 'receipt' key existing with a null value [#119](https://github.com/singer-io/tap-shopify/pull/119)
+
+## 1.3.5
+  * Add `status` field to `Products` stream [#108](https://github.com/singer-io/tap-shopify/pull/108)
+
+## 1.3.4
+  * Correct abandoned_checkouts schema to correctly reflect some properties as arrays [#44](https://github.com/singer-io/tap-shopify/pull/44)
+
+## 1.3.3.
+  * Add `build` to the list of fields we canonicalize for the Transactions stream [#103](https://github.com/singer-io/tap-shopify/pull/103)
+
+## 1.3.2
+  * Add `python_requires` to `setup.py` [#101](https://github.com/singer-io/tap-shopify/pull/101)
+    * We've tested the tap on `python 3.5.2` and `python 3.8.0`
+
+## 1.3.1
+  * Canonicalize `Timestamp` to `timestamp` on `Transactions.receipt` [#98](https://github.com/singer-io/tap-shopify/pull/98)
+
+## 1.3.0
+  This version ships both [#96][PR#96] and [#97][PR#97].
+
+  From [#97][PR#97]:
+  * removes the "untestable streams" list from all tests.
+  * makes the test match the tap and expect the default page size to be 175, not 250
+  * adds bookmarking to order_refunds
+  * adds bookmarking to transactions
+  * adds shopify error handling to transactions
+    * The tests would fail with unhandled 429s
+  * adds pagination to transactions
+
+  From [#96][PR#96]:
+  * Update the API version from `2020-10` to `2021-04`
+
+  [PR#97]: https://github.com/singer-io/tap-shopify/pull/97/
+  [PR#96]: https://github.com/singer-io/tap-shopify/pull/96
+
+## 1.2.10
+  * Add `null, object` to customer schema definition [#94](https://github.com/singer-io/tap-shopify/pull/94)
+
+## 1.2.9
+  * Bumps `singer-python` from `5.11.0` to `5.12.1` [#91](https://github.com/singer-io/tap-shopify/pull/91)
+
+## 1.2.8
+  * Modified schema so that all fields using `multipleOf` are now using `singer.decimal` [#88](https://github.com/singer-io/tap-shopify/pull/88)
+
+## 1.2.7
+  * Change how exceptions are logged to make the error messages more consistent [#84](https://github.com/singer-io/tap-shopify/pull/84)
+
 ## 1.2.6
-  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69] (https://github.com/singer-io/tap-shopify/pull/69)
+  * Accepts any string for `accepts_marketing_updated_at` field on the `customers` stream [#69](https://github.com/singer-io/tap-shopify/pull/69)
 
 ## 1.2.5
   * Bumps `singer-python` from `5.4.1` to `5.9.1` [#67](https://github.com/singer-io/tap-shopify/pull/67)

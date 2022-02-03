@@ -45,9 +45,9 @@
     "amount": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "authorization": {
       "type": [
@@ -150,23 +150,23 @@
         "fee_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "gross_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         },
         "tax_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-10
+          "format": "singer.decimal"
         }
       },
       "patternProperties": {".+": {}}

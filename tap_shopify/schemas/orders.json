@@ -15,9 +15,9 @@
     "total_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -43,16 +43,16 @@
     "total_discounts": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "total_line_items_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "order_adjustments": {
       "$ref": "definitions.json#/order_adjustments"
@@ -74,9 +74,9 @@
           "price": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-10
+            "format": "singer.decimal"
           },
           "title": {
             "type": [
@@ -374,9 +374,9 @@
     "total_tax": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "payment_details": {
       "properties": {
@@ -541,9 +541,9 @@
     "total_price_usd": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "closed_at": {
       "type": [
@@ -647,9 +647,9 @@
     "subtotal_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "billing_address": {
       "properties": {
@@ -797,9 +797,9 @@
           "amount": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-10
+            "format": "singer.decimal"
           },
           "type": {
             "type": [

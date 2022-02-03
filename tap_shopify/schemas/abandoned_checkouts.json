@@ -1,7 +1,32 @@
 {
   "type": "object",
   "properties": {
-    "note_attributes": {},
+    "note_attributes": {
+      "type": [
+        "null",
+        "array"
+    ],
+    "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
     "location_id": {
       "type": [
         "null",
@@ -157,9 +182,9 @@
           "amount": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-10
+            "format": "singer.decimal"
           },
           "code": {
             "type": [
@@ -220,9 +245,9 @@
     "total_line_items_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "closed_at": {
       "type": [
@@ -264,16 +289,16 @@
     "total_tax": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "subtotal_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -287,9 +312,9 @@
     "total_discounts": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "note": {
       "type": [
@@ -314,8 +339,30 @@
           "object"
         ],
         "properties": {
-          "applied_discounts": {},
-          "custom_tax_lines": {},
+          "applied_discounts": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": [
+                "null",
+                "object"
+              ]
+            }
+          },
+          "custom_tax_lines": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": [
+                "null",
+                "object"
+              ]
+            }
+          },
           "phone": {
             "type": [
               "null",
@@ -349,9 +396,9 @@
           "price": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-10
+            "format": "singer.decimal"
           },
           "requested_fulfillment_service_id": {
             "type": [
@@ -529,9 +576,9 @@
     "total_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-10
+      "format": "singer.decimal"
     },
     "cart_token": {
       "type": [
