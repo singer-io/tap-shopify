@@ -15,7 +15,20 @@ class BookmarkTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_bookmark_test"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start_date = '2021-04-01T00:00:00Z'
+
     def test_run(self):
+        with self.subTest(store="store_1"):
+            conn_id = self.create_connection(original_credentials=True)
+            self.bookmarks_test(conn_id, self.store_1_streams)
+
+        with self.subTest(store="store_2"):
+            conn_id = self.create_connection(original_properties=False, original_credentials=False)
+            self.bookmarks_test(conn_id, self.store_2_streams)
+
+    def bookmarks_test(self, conn_id, testable_streams):
         """
         Verify that for each stream you can do a sync which records bookmarks.
         That the bookmark is the maximum value sent to the target for the replication key.
@@ -32,18 +45,15 @@ class BookmarkTest(BaseTapTest):
         For EACH stream that is incrementally replicated there are multiple rows of data with
             different values for the replication key
         """
-        conn_id = self.create_connection()
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL}
+                               if value == self.INCREMENTAL and key in testable_streams}
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
-        untested_streams = self.child_streams().union({'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds'})
         our_catalogs = [catalog for catalog in found_catalogs if
-                        catalog.get('tap_stream_id') in incremental_streams.difference(
-                            untested_streams)]
+                        catalog.get('tap_stream_id') in incremental_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=False)
 
         # Run a sync job using orchestrator
@@ -51,7 +61,7 @@ class BookmarkTest(BaseTapTest):
 
         # verify that the sync only sent records to the target for selected streams (catalogs)
         self.assertEqual(set(first_sync_record_count.keys()),
-                         incremental_streams.difference(untested_streams))
+                         incremental_streams)
 
         first_sync_state = menagerie.get_state(conn_id)
 
@@ -59,6 +69,19 @@ class BookmarkTest(BaseTapTest):
         first_sync_records = runner.get_records_from_target_output()
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
         first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
+        #first_sync_bookmarks = menagerie.get_state(conn_id)
+        
+        #######################
+        # Update State between Syncs
+        #######################
+
+        # new_state = {'bookmarks': dict()}
+        # simulated_states = self.calculated_states_by_stream(first_sync_bookmarks)
+
+        # for stream, updated_state in simulated_states.items():
+        #     new_state['bookmarks'][stream] = updated_state
+        # menagerie.set_state(conn_id, new_state)
+
 
         # Run a second sync job using orchestrator
         second_sync_record_count = self.run_sync(conn_id)
@@ -69,7 +92,7 @@ class BookmarkTest(BaseTapTest):
 
         # THIS MAKES AN ASSUMPTION THAT CHILD STREAMS DO NOT HAVE BOOKMARKS.
         # ADJUST IF NECESSARY
-        for stream in incremental_streams.difference(untested_streams):
+        for stream in incremental_streams:
             with self.subTest(stream=stream):
 
                 # get bookmark values from state and target data

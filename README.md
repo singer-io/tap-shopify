@@ -16,6 +16,9 @@ This tap:
   - [Orders](https://help.shopify.com/en/api/reference/orders)
   - [Products](https://help.shopify.com/en/api/reference/products)
   - [Transactions](https://help.shopify.com/en/api/reference/orders/transaction)
+  - [Locations](https://help.shopify.com/en/api/reference/inventory/location)
+  - [Inventory Levels](https://help.shopify.com/en/api/reference/inventory/inventorylevel)
+  - [Inventory Item](https://help.shopify.com/en/api/reference/inventory/inventoryitem)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
 - When Metafields are selected, this tap will sync the Shopify store's top-level Metafields and any additional Metafields for selected tables that also have them (ie: Orders, Products, Customers)
@@ -34,7 +37,8 @@ This tap:
     {
         "start_date": "2010-01-01",
         "api_key": "<Shopify API Key>",
-        "shop": "test_shop"
+        "shop": "test_shop",
+        "request_timeout": 300
     }
     ```
 
@@ -44,6 +48,8 @@ This tap:
    The `api_key` is the API key for your Shopify shop generated via an OAuth flow.
 
    The `shop` is your Shopify shop which will be the value `test_shop` in the string `https://test_shop.myshopify.com`
+
+    The `request_timeout` is the timeout for the requests. Default: 300 seconds
 
 4. Run the Tap in Discovery Mode
 

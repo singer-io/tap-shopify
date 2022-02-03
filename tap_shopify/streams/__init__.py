@@ -11,3 +11,7 @@ import tap_shopify.streams.smart_collections_products
 import tap_shopify.streams.custom_collections
 import tap_shopify.streams.smart_collections
 import tap_shopify.streams.collection_products
+import tap_shopify.streams.locations
+import tap_shopify.streams.inventory_levels
+import tap_shopify.streams.inventory_items
+import tap_shopify.streams.events
