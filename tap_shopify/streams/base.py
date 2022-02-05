@@ -35,7 +35,7 @@ def leaky_bucket_handler(details):
                 details['wait'])
 
 def retry_handler(details):
-    LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
+    LOGGER.info("Received 500 or retryable -- Retry %s/%s",
                 details['tries'], MAX_RETRIES)
 
 #pylint: disable=unused-argument
@@ -55,15 +55,12 @@ def shopify_error_handling(fnc):
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError),
-                          giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
-                          on_backoff=leaky_bucket_handler,
-                          # No jitter as we want a constant value
-                          jitter=None)
+                          on_backoff=leaky_bucket_handler)
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
