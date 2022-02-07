@@ -8,8 +8,11 @@ class Locations(Stream):
     replication_object = shopify.Location
 
     @shopify_error_handling
+    def api_call_for_locations_data(self):
+        return self.replication_object.find()
+
     def get_locations_data(self):
-        location_page = self.replication_object.find()
+        location_page = self.api_call_for_locations_data()
         yield from location_page
 
         while location_page.has_next_page():
