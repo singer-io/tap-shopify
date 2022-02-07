@@ -5,6 +5,7 @@ import json
 import time
 import math
 import copy
+import logging
 
 import pyactiveresource
 import shopify
@@ -14,12 +15,16 @@ from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
+from tap_shopify.streams.base import shopify_error_handling
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 
+logging.getLogger('backoff').setLevel(logging.CRITICAL)
+
+@shopify_error_handling
 def initialize_shopify_client():
     api_key = Context.config.get('access_token', Context.config.get("api_key"))
     shop = Context.config['shop']
