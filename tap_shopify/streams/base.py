@@ -31,6 +31,9 @@ MAX_RETRIES = 9
 # Factor to multiply the exponentiation by.
 FACTOR = 3
 
+# If not timeout is specified/can be parsed from the response, then wait for this amount
+DEFAULT_WAIT = 20
+
 # function to return request timeout
 def get_request_timeout():
 
@@ -68,7 +71,7 @@ def retry_after_wait_gen(**kwargs):
     # Retry-After is an undocumented header. But honoring
     # it was proven to work in our spikes.
     # It's been observed to come through as lowercase, so fallback if not present
-    sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
+    sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after', DEFAULT_WAIT))
     yield math.floor(float(sleep_time_str))
 
 # boolean function to check if the error is 'timeout' error or not
@@ -98,14 +101,13 @@ def shopify_error_handling(fnc):
                            TimeoutError,
                            urllib.error.URLError,
                           ),
-                          giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES,
                           factor=FACTOR)
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
-                          giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
+                          max_tries=MAX_RETRIES,
                           # No jitter as we want a constant value
                           jitter=None)
     @functools.wraps(fnc)
