@@ -12,12 +12,21 @@ class SmartCollectionsProducts(Stream):
     replication_key = 'updated_at'
 
     @shopify_error_handling
+    def get_collection_products(self, collection):
+        return collection.products()
+
+    @shopify_error_handling
+    def get_smart_collections_products(self):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
+        return self.replication_object.find()
+
     def get_objects(self):
         'Paginate the return and add collection_id to returned product objects'
-        page = self.replication_object.find()
+        page = self.get_smart_collections_products()
         while True:
             for collection in page:
-                collection_products_page = collection.products()
+                collection_products_page = self.get_collection_products(collection)
                 while True:
                     for product in collection_products_page:
                         edit_product = product.to_dict()
