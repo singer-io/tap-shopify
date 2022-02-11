@@ -71,6 +71,10 @@ class Transactions(Stream):
             order_id=parent_object.id,
         )
 
+    @shopify_error_handling
+    def get_next_page(self, page):
+        return page.next_page()
+
     def get_transactions(self, parent_object):
         # We do not need to support paging on this substream. If that
         # were to become untrue, reference Metafields.
@@ -85,7 +89,7 @@ class Transactions(Stream):
         yield from page
 
         while page.has_next_page():
-            page = page.next_page()
+            page = self.get_next_page(page)
             yield from page
 
     def get_objects(self):

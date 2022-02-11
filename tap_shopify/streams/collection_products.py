@@ -13,15 +13,28 @@ class CollectionProducts(Stream):
     replication_key = 'updated_at'
 
     @shopify_error_handling
+    def get_collection_products(self, collection):
+        return collection.products()
+
+    @shopify_error_handling
+    def get_collections_products(self):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
+        return self.replication_object.find()
+
+    @shopify_error_handling
+    def get_next_page(self, page):
+        return page.next_page()
+
     def get_objects(self):
         
         while True:
-            page = self.replication_object.find()
+            page = self.get_collections_products()
             for collection in page:
-                for product in collection.products():
+                for product in self.get_collection_products(collection):
                     yield product
             if page.has_next_page():
-                page = page.next_page()
+                page = self.get_next_page(page)
             else:
                 break
 

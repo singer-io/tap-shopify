@@ -21,6 +21,10 @@ class SmartCollectionsProducts(Stream):
         self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find()
 
+    @shopify_error_handling
+    def get_next_page(self, page):
+        return page.next_page()
+
     def get_objects(self):
         'Paginate the return and add collection_id to returned product objects'
         page = self.get_smart_collections_products()
@@ -33,11 +37,11 @@ class SmartCollectionsProducts(Stream):
                         edit_product["collection_id"] = collection.id
                         yield edit_product
                     if collection_products_page.has_next_page():
-                        collection_products_page = collection_products_page.next_page()
+                        collection_products_page = self.get_next_page(collection_products_page)
                     else:
                         break
             if page.has_next_page():
-                page = page.next_page()
+                page = self.get_next_page(page)
             else:
                 break
 
