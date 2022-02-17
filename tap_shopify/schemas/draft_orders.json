@@ -547,6 +547,12 @@
         "null",
         "string"
       ]
+    },
+    "created_by": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "type": "object"

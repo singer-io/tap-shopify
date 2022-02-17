@@ -26,7 +26,9 @@ def initialize_shopify_client():
     if 'password' in Context.config:
         password = Context.config['password']
         shop_url = 'https://{}:{}@{}.myshopify.com/admin'.format(api_key, password, shop)
-        shopify.ShopifyResource.set_site(shop_url)
+        # shopify.ShopifyResource.set_site(shop_url)
+        session = shopify.Session(shop, version, password)
+        shopify.ShopifyResource.activate_session(session)
     else:
         session = shopify.Session(shop, version, api_key)
         shopify.ShopifyResource.activate_session(session)
