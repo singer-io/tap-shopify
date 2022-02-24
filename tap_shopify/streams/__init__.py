@@ -14,3 +14,4 @@ import tap_shopify.streams.shop
 import tap_shopify.streams.price_rules
 import tap_shopify.streams.discount_codes
 import tap_shopify.streams.incoming_items
+import tap_shopify.streams.events_products

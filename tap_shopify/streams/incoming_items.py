@@ -22,7 +22,7 @@ class IncomingItems(Stream):
 
     def get_objects(self):
         selected_parent = Context.stream_objects['inventory_levels']()
-        selected_parent.name = "incoming_items_inventory_levels"
+        selected_parent.name = "inventory_levels"
 
         for parent_object in selected_parent.get_objects():
             incoming_item = self.call_api_for_incoming_items(parent_object)
