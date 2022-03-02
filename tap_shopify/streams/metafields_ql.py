@@ -133,6 +133,7 @@ class MetafieldsQL(GraphQlChildStream):
             data = data[replication_obj.name]
             page_info = data['pageInfo']
             edges = data["edges"]
+            node = {}
 
             for edge in edges:
                 parent_pagination = edge["cursor"]
