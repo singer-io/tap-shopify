@@ -68,7 +68,8 @@ class Metafields(Stream):
             # the json_string value in "value_type" field will be
             # mapped to following "type" value in the new version
             # Reference: https://shopify.dev/apps/metafields/types
-            if metafield_type and metafield_type in ["json", "weight", "volume", "dimension", "rating"]:
+            if metafield_type and metafield_type in ["json", "weight", "volume", \
+                "dimension", "rating"]:
                 value = metafield.get("value")
                 try:
                     metafield["value"] = json.loads(value) if value is not None else value
