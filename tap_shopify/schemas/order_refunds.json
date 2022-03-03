@@ -652,56 +652,54 @@
                   "null",
                   "object"
                 ],
-                "items": {
-                  "properties": {
-                    "id": {
-                      "type": [
-                        "null",
-                        "integer"
-                      ]
-                    },
-                    "country_code": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "province_code": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "name": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "address1": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "address2": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "city": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "zip": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    }
+                "properties": {
+                  "id": {
+                    "type": [
+                      "null",
+                      "integer"
+                    ]
+                  },
+                  "country_code": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "province_code": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "address1": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "address2": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "city": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "zip": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
                   }
                 }
               },
@@ -710,56 +708,54 @@
                   "null",
                   "object"
                 ],
-                "items": {
-                  "properties": {
-                    "id": {
-                      "type": [
-                        "null",
-                        "integer"
-                      ]
-                    },
-                    "country_code": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "province_code": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "name": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "address1": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "address2": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "city": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    },
-                    "zip": {
-                      "type": [
-                        "null",
-                        "string"
-                      ]
-                    }
+                "properties": {
+                  "id": {
+                    "type": [
+                      "null",
+                      "integer"
+                    ]
+                  },
+                  "country_code": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "province_code": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "address1": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "address2": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "city": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "zip": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
                   }
                 }
               },
