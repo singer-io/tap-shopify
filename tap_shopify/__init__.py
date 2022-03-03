@@ -159,7 +159,7 @@ def discover(rule_map):
             'stream': standard_schema_name,
             'tap_stream_id': standard_schema_name,
             'schema': standard_catalog_schema,
-            'metadata': get_discovery_metadata(stream, schema, 
+            'metadata': get_discovery_metadata(stream, schema,
                             rule_map.GetStdFieldsFromApiFields[schema_name], schema_name),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
@@ -215,7 +215,7 @@ def sync(rule_map):
         stream = Context.stream_objects[stream_id]()
 
         # Fill rule_map object by original-name available in metadata
-        rule_map.fill_rule_map_object_by_catalog(stream_id, 
+        rule_map.fill_rule_map_object_by_catalog(stream_id,
                                     metadata.to_map(catalog_entry['metadata']))
 
         if not Context.is_selected(stream_id):

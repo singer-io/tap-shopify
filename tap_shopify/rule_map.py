@@ -84,9 +84,11 @@ class RuleMap:
                             # Example:
                             # GetStdFieldsFromApiFields['users'][
                             # ('properties', 'user_name')] = 'UserName'
-                            self.GetStdFieldsFromApiFields[stream_name][parent + ('properties', standard_key)] = key
+                            self.GetStdFieldsFromApiFields[stream_name][parent +
+                                                    ('properties', standard_key)] = key
 
-                            # Add key in temp_dict with value as standard_key to update in schema after
+                            # Add key in temp_dict with value as standard_key to update
+                            # in schema after
                             # iterating whole schema
                             # Because we can not update schema while iterating it.
                             temp_dict[key] = standard_key
@@ -95,7 +97,7 @@ class RuleMap:
                             # add it's standard name to
                             # roll_back_dict because we need to roll back standard field name
                             # to original field name.
-                            LOGGER.warning('Conflict found for field : {}'.format(breadcrumb))
+                            LOGGER.warning('Conflict found for field : %s', breadcrumb)
                             roll_back_dict[standard_key] = True
 
         elif schema.get('anyOf'):
@@ -117,8 +119,8 @@ class RuleMap:
             #       ]
             #
             # }
-            for sc in schema.get('anyOf'):
-                self.apply_ruleset_on_schema(sc, stream_name, parent)
+            for schema_field in schema.get('anyOf'):
+                self.apply_ruleset_on_schema(schema_field, stream_name, parent)
         elif schema and isinstance(schema, dict) and schema.get('items'):
             breadcrumb = parent + ('items',)
             self.apply_ruleset_on_schema(schema['items'], stream_name, breadcrumb)
@@ -129,7 +131,7 @@ class RuleMap:
                 # Remove key with standard name from GetStdFieldsFromApiFields for which conflict
                 # was found.
                 del self.GetStdFieldsFromApiFields[stream_name][breadcrumb]
-                LOGGER.warning('Conflict found for field : {}'.format(parent + ("properties", key)))
+                LOGGER.warning('Conflict found for field : %s', parent + ("properties", key))
             else:
                 # Replace original name of field with standard name in schema
                 schema['properties'][new_key] = schema['properties'].pop(key)
