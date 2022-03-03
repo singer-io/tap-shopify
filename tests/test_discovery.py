@@ -24,6 +24,7 @@ class DiscoveryTest(BaseTapTest):
         • Verify stream names follow naming convention
           streams should only have lowercase alphas and underscores
         • verify there is only 1 top level breadcrumb
+        • Verify there are no duplicate/conflicting metadata entries.
         • verify replication key(s)
         • verify primary key(s)
         • verify that if there is a replication key we are doing INCREMENTAL otherwise FULL

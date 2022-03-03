@@ -20,6 +20,8 @@ class StartDateTest(BaseTapTest):
     • verify that a sync with a later start date has at least one record synced
       and less records than the 1st sync with a previous start date
     • verify that each stream has less records than the earlier start date sync
+    • Verify by primary key values, that all records of the 2nd sync are included
+      in the 1st sync since 2nd sync has a later start date.
     • verify all data from later start data has bookmark values >= start_date
     • verify that the minimum bookmark sent to the target for the later start_date sync
       is greater than or equal to the start date
@@ -148,6 +150,8 @@ class StartDateTest(BaseTapTest):
                 first_sync_start_date = self.get_properties()["start_date"]
                 second_sync_start_date = self.start_date
 
+                # loop over minimum bookmark and the start date/state file date for each syncs to verify
+                # the minimum bookmark is greater then or equal to start date/state file date
                 for start_date, target_mark in zip((first_sync_start_date, second_sync_start_date), (first_sync_target_mark, second_sync_target_mark)):
                     target_value = next(iter(target_mark.values()))  # there should be only one
 
