@@ -1,7 +1,8 @@
 import re
 import singer
 
-# These are standard keys defined in the JSON Schema spec. We will not apply rules on these STANDARD_KEYS.
+# These are standard keys defined in the JSON Schema spec.
+# We will not apply rules on these STANDARD_KEYS.
 STANDARD_KEYS = [
     'selected',
     'inclusion',
@@ -29,7 +30,8 @@ class RuleMap:
 
     def fill_rule_map_object_by_catalog(self, stream_name, stream_metadata):
         """
-        Read original-name of fields available in metadata of catalog and add it in `GetStdFieldsFromApiFields` dict object.
+        Read original-name of fields available in metadata of catalog and add
+        it in `GetStdFieldsFromApiFields` dict object.
         param1:    stream_name: users
         param2:    stream_metadata
                     {
@@ -73,19 +75,27 @@ class RuleMap:
                     standard_key = self.apply_rules_to_original_field(key)
 
                     if key != standard_key: # Field name is changed after applying rules
-                        if standard_key not in temp_dict: # Check if same standard name of field is already available or not at same level
+                        # Check if same standard name of field is already available or
+                        # not at same level
+                        if standard_key not in temp_dict:
 
-                            # Add standard name of field in GetStdFieldsFromApiFields with key as tuple of breadcrumb keys
-                            # Example: GetStdFieldsFromApiFields['users'][('properties', 'user_name')] = 'UserName'
+                            # Add standard name of field in GetStdFieldsFromApiFields with
+                            # key as tuple of breadcrumb keys
+                            # Example:
+                            # GetStdFieldsFromApiFields['users'][
+                            # ('properties', 'user_name')] = 'UserName'
                             self.GetStdFieldsFromApiFields[stream_name][parent + ('properties', standard_key)] = key
 
-                            # Add key in temp_dict with value as standard_key to update in schema after iterating whole schema
+                            # Add key in temp_dict with value as standard_key to update in schema after
+                            # iterating whole schema
                             # Because we can not update schema while iterating it.
                             temp_dict[key] = standard_key
                         else:
-                            # Print Warning message for field name conflict found same level and add it's standard name to
-                            # roll_back_dict because we need to roll back standard field name to original field name.
-                            LOGGER.warning(f' Conflict found for field : {breadcrumb}')
+                            # Print Warning message for field name conflict found same level and
+                            # add it's standard name to
+                            # roll_back_dict because we need to roll back standard field name
+                            # to original field name.
+                            LOGGER.warning('Conflict found for field : {}'.format(breadcrumb))
                             roll_back_dict[standard_key] = True
 
         elif schema.get('anyOf'):
@@ -116,9 +126,10 @@ class RuleMap:
         for key, new_key in temp_dict.items():
             if roll_back_dict.get(new_key):
                 breadcrumb = parent + ('properties', new_key)
-                # Remove key with standard name from GetStdFieldsFromApiFields for which conflict was found.
+                # Remove key with standard name from GetStdFieldsFromApiFields for which conflict
+                # was found.
                 del self.GetStdFieldsFromApiFields[stream_name][breadcrumb]
-                LOGGER.warning(f' Conflict found for field : {parent + ("properties", key)}')
+                LOGGER.warning('Conflict found for field : {}'.format(parent + ("properties", key)))
             else:
                 # Replace original name of field with standard name in schema
                 schema['properties'][new_key] = schema['properties'].pop(key)
@@ -132,7 +143,6 @@ class RuleMap:
         standard_stream_name = self.apply_rules_to_original_field(stream_name)
 
         if stream_name != standard_stream_name:
-            LOGGER.info(f'{stream_name}')
             self.GetStdFieldsFromApiFields[stream_name]['stream_name'] = stream_name
             return standard_stream_name
 
@@ -143,15 +153,18 @@ class RuleMap:
     def apply_rules_to_original_field(cls, key):
         """
         Apply defined rules on field.
-        - Divide alphanumeric strings containing small letters followed by capital letters into multiple words and joined with underscores.
+        - Divide alphanumeric strings containing small letters followed by capital letters into
+        multiple words and joined with underscores.
             - However, two or more adjacent capital letters are considered a part of one word.
             - Example:
                 anotherName -> another_name
                 ANOTHERName -> anothername
-        - Divide alphanumeric strings containing letters and number into multiple words and joined with underscores.
+        - Divide alphanumeric strings containing letters and number into multiple words
+        and joined with underscores.
             - Example:
                 MyName123 -> my_name_123
-        - Convert any character that is not a letter, digit, or underscore to underscore. A space is considered a character.
+        - Convert any character that is not a letter, digit, or underscore to underscore.
+        A space is considered a character.
             - Example:
                 A0a_*A -> a_0_a_a
         - Convert multiple underscores to a single underscore
@@ -175,14 +188,12 @@ class RuleMap:
         temp_dict = {}
         if isinstance(response, dict):
             for key, value in response.items():
-                if isinstance(response, list) and value:
-                    if parent == ():
-                        parent = parent  + ('properties', key)
-                    breadcrumb = parent + ('items',)
+                if isinstance(value, list) and value:
+                    breadcrumb = parent  + ('properties', key, 'items')
                     # Iterate through each item of list
-                    for vl in value:
-                        self.apply_ruleset_on_api_response(vl, stream_name, breadcrumb)
-                elif isinstance(response, dict):
+                    for val in value:
+                        self.apply_ruleset_on_api_response(val, stream_name, breadcrumb)
+                elif isinstance(value, dict):
                     breadcrumb = parent  + ('properties', key)
                     self.apply_ruleset_on_api_response(value, stream_name, breadcrumb)
                 else:

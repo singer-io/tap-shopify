@@ -73,9 +73,11 @@ def get_discovery_metadata(stream, schema, rule_map, stream_name):
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
 
         # Add metadata for nested(child) fields also if it's name is changed from original name.
-        add_child_into_metadata(schema['properties'][field_name], metadata, mdata, rule_map, ('properties', field_name), )
+        add_child_into_metadata(schema['properties'][field_name], metadata, mdata,
+                                    rule_map, ('properties', field_name), )
         if ('properties', field_name) in rule_map:
-            mdata.get(('properties', field_name)).update({'original-name': rule_map[('properties', field_name)]})
+            mdata.get(('properties', field_name)).update(
+                {'original-name': rule_map[('properties', field_name)]})
 
     return metadata.to_list(mdata)
 
@@ -157,7 +159,8 @@ def discover(rule_map):
             'stream': standard_schema_name,
             'tap_stream_id': standard_schema_name,
             'schema': standard_catalog_schema,
-            'metadata': get_discovery_metadata(stream, schema, rule_map.GetStdFieldsFromApiFields[schema_name], schema_name),
+            'metadata': get_discovery_metadata(stream, schema, 
+                            rule_map.GetStdFieldsFromApiFields[schema_name], schema_name),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
@@ -212,7 +215,8 @@ def sync(rule_map):
         stream = Context.stream_objects[stream_id]()
 
         # Fill rule_map object by original-name available in metadata
-        rule_map.fill_rule_map_object_by_catalog(stream_id, metadata.to_map(catalog_entry['metadata']))
+        rule_map.fill_rule_map_object_by_catalog(stream_id, 
+                                    metadata.to_map(catalog_entry['metadata']))
 
         if not Context.is_selected(stream_id):
             LOGGER.info('Skipping stream: %s', stream_id)
@@ -229,7 +233,7 @@ def sync(rule_map):
                 extraction_time = singer.utils.now()
                 record_schema = catalog_entry['schema']
                 record_metadata = metadata.to_map(catalog_entry['metadata'])
- 
+
                 # Apply rule map on record
                 rec = rule_map.apply_ruleset_on_api_response(rec, stream_id)
 
