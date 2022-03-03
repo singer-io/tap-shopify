@@ -176,6 +176,12 @@
         "null",
         "integer"
       ]
+    },
+    "processed_at": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "type": "object"

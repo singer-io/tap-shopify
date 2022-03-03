@@ -2,6 +2,18 @@
   "order_adjustments": {
     "items": {
       "properties": {
+        "amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "tax_amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
         "order_id": {
           "type": [
             "null",
@@ -424,6 +436,24 @@
           "string"
         ],
         "format": "date-time"
+      },
+      "tax_exemptions": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "marketing_opt_in_level": {
+        "type": [
+          "null",
+          "string"
+        ]
       }
     }
   },
@@ -806,6 +836,202 @@
           "null",
           "integer"
         ]
+      },
+      "presentment_title": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "presentment_variant_title": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "user_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "variant_price": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "singer.decimal"
+      },
+      "duties": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "object"
+          ]
+        }
+      },
+      "rank": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "unit_price_measurement": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "measured_type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "quantity_unit": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "quantity_value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reference_unit": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reference_value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "selling_plan_application": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "selling_plan_id": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "api_client_id": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pricing_policies": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+
+            }
+          },
+          "billing_interval": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "billing_interval_count": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "billing_min_cycles": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "billing_max_cycles": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "billing_anchors": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {}
+          },
+          "delivery_interval": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "delivery_interval_count": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "delivery_anchors": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {}
+          },
+          "delivery_cutoff_period": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "delivery_pre_cutoff_behavior": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "delivery_intent": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "selling_plan_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
       }
     },
     "type": [
@@ -942,6 +1168,12 @@
           ]
         },
         "zone": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "identifier": {
           "type": [
             "null",
             "string"

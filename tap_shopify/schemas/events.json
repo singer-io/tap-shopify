@@ -55,6 +55,19 @@
         "null",
         "string"
       ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "arguments": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {}
     }
   }
 }
