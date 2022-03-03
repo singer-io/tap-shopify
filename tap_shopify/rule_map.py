@@ -177,9 +177,17 @@ class RuleMap:
 
         standard_key = re.findall('[A-Z]*[^A-Z]*', key)
         standard_key = '_'.join(standard_key)
+        standard_key = standard_key[:-1]
 
-        standard_key = re.findall(r'[A-Za-z]+|\d+', standard_key)
+        standard_key = re.findall(r'[A-Za-z_]+|\d+|\W+', standard_key)
         standard_key = '_'.join(standard_key)
+
+        standard_key = re.sub(r'[\W]', '_', standard_key)
+
+        if standard_key[0].isdigit():
+            standard_key = f'_{standard_key}'
+
+        standard_key = re.sub(r'[_]+', '_', standard_key)
 
         return standard_key.lower()
 

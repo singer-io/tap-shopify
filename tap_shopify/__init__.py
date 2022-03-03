@@ -187,13 +187,6 @@ def sync(rule_map):
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
 
-    temp_sdc_fields = {}
-    for sdc_field in sdc_fields.keys():
-        temp_sdc_fields[sdc_field] = rule_map.apply_rules_to_original_field(sdc_field)
-
-    for temp_sdc_field, temp_sdc_field_value in temp_sdc_fields.items():
-        sdc_fields[temp_sdc_field_value] = sdc_fields.pop(temp_sdc_field)
-
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
         if Context.is_selected(stream["tap_stream_id"]):
