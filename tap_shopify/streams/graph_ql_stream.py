@@ -40,6 +40,15 @@ class GraphQlStream(Stream):
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
+        # Retrieve data for max 1 year. Otherwise log incremental needed.
+        diff_days = (stop_time - updated_at_min).days
+        yearly = False
+        if diff_days > 365:
+            yearly = True
+            stop_time = updated_at_min + datetime.timedelta(days=365)
+            LOGGER.info("This import will only import the first year of historical data. "
+                        "You need to trigger further incremental imports to get the missing rows.")
+
         # Page through till the end of the result set
         while updated_at_min < stop_time:
             after = None
@@ -69,6 +78,9 @@ class GraphQlStream(Stream):
                     break
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+        if yearly:
+            LOGGER.info("This import only imported one year of historical data. "
+                        "Please trigger further incremental data to get the missing rows.")
 
     @shopify_error_handling
     def excute_graph_ql(self, query: str) -> dict:
