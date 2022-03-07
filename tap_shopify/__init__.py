@@ -94,10 +94,9 @@ def add_child_into_metadata(schema, m_data, mdata, rule_map, parent=()):
             # Iterate in recursive manner to go through each field of schema.
             add_child_into_metadata(schema['properties'][key], m_data, mdata, rule_map, breadcrumb)
 
-            if breadcrumb in rule_map:
-                # Update field name as standard name in breadcrumb if it is found in rule_map.
-                mdata = m_data.write(mdata, breadcrumb, 'inclusion', 'available')
+            mdata = m_data.write(mdata, breadcrumb, 'inclusion', 'available')
 
+            if breadcrumb in rule_map:
                 # Add `original-name` field in metadata which contain actual name of field.
                 mdata.get(breadcrumb).update({'original-name': rule_map[breadcrumb]})
 
@@ -148,8 +147,9 @@ def discover(rule_map):
         # Define stream_name in GetStdFieldsFromApiFields
         rule_map.GetStdFieldsFromApiFields[schema_name] = {}
 
+        schema_copy = copy.deepcopy(schema)
         # Get updated schema by applying rule map
-        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema, schema_name)
+        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema, schema_copy, schema_name)
 
         # Get standard name of schema
         standard_schema_name = rule_map.apply_rule_set_on_stream_name(schema_name)
@@ -159,7 +159,7 @@ def discover(rule_map):
             'stream': standard_schema_name,
             'tap_stream_id': standard_schema_name,
             'schema': standard_catalog_schema,
-            'metadata': get_discovery_metadata(stream, schema,
+            'metadata': get_discovery_metadata(stream, standard_catalog_schema,
                             rule_map.GetStdFieldsFromApiFields[schema_name], schema_name),
             'key_properties': stream.key_properties,
             'replication_key': stream.replication_key,

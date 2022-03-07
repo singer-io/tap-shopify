@@ -54,7 +54,7 @@ class RuleMap:
             if api_name and key:
                 self.GetStdFieldsFromApiFields[stream_name][key[:-1] + (api_name,)] = key[-1:][0]
 
-    def apply_ruleset_on_schema(self, schema, stream_name, parent = ()):
+    def apply_ruleset_on_schema(self, schema, schema_copy, stream_name, parent = ()):
         """
         Apply defined rule set on schema and return it.
         """
@@ -66,7 +66,7 @@ class RuleMap:
             for key in schema['properties'].keys():
                 breadcrumb = parent + ('properties', key)
 
-                self.apply_ruleset_on_schema(schema['properties'][key], stream_name, breadcrumb)
+                self.apply_ruleset_on_schema(schema['properties'][key], schema_copy['properties'].get(key), stream_name, breadcrumb)
 
                 # Skip keys available in STANDARD_KEYS
                 if key not in STANDARD_KEYS:
@@ -119,11 +119,11 @@ class RuleMap:
             #       ]
             #
             # }
-            for schema_field in schema.get('anyOf'):
-                self.apply_ruleset_on_schema(schema_field, stream_name, parent)
+            for index, schema_field in enumerate(schema.get('anyOf')):
+                self.apply_ruleset_on_schema(schema_field, schema_copy.get('anyOf')[index], stream_name, parent)
         elif schema and isinstance(schema, dict) and schema.get('items'):
             breadcrumb = parent + ('items',)
-            self.apply_ruleset_on_schema(schema['items'], stream_name, breadcrumb)
+            self.apply_ruleset_on_schema(schema['items'], schema_copy['items'], stream_name, breadcrumb)
 
         for key, new_key in temp_dict.items():
             if roll_back_dict.get(new_key):
@@ -134,9 +134,12 @@ class RuleMap:
                 LOGGER.warning('Conflict found for field : %s', parent + ("properties", key))
             else:
                 # Replace original name of field with standard name in schema
-                schema['properties'][new_key] = schema['properties'].pop(key)
-
-        return schema
+                try:
+                    schema_copy['properties'][new_key] = schema_copy['properties'].pop(key)
+                except KeyError:
+                    pass
+    
+        return schema_copy
 
     def apply_rule_set_on_stream_name(self, stream_name):
         """
