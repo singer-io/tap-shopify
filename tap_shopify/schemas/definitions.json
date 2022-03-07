@@ -862,18 +862,7 @@
         ],
         "format": "singer.decimal"
       },
-      "duties": {
-        "type": [
-          "null",
-          "array"
-        ],
-        "items": {
-          "type": [
-            "null",
-            "object"
-          ]
-        }
-      },
+      "duties": {},
       "rank": {
         "type": [
           "null",

@@ -63,11 +63,21 @@
       ]
     },
     "arguments": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {}
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {}
+        },
+        {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      ]
     }
   }
 }
