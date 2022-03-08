@@ -22,7 +22,16 @@ FIELDS_SET = {
     '53234': '_53234',
     'My_Name!': 'my_name_',
     'My_Name____c': 'my_name_c',
-    '1MyName': '_1_my_name'
+    '1MyName': '_1_my_name',
+    'blurry-green-dodo-important': 'blurry_green_dodo_important',
+    '__new__--test__': '_new_test_',
+    '-5.490030': '_5_490030',
+    '\'aa\'': '_aa_',
+    "Audience Report": 'audience_report',
+    '******': '_',
+    '``~Qo': '_qo',
+    '99j_J': '_99_j_j'
+
 
 }
 

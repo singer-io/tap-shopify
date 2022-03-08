@@ -138,7 +138,7 @@ class RuleMap:
                     schema_copy['properties'][new_key] = schema_copy['properties'].pop(key)
                 except KeyError:
                     pass
-    
+
         return schema_copy
 
     def apply_rule_set_on_stream_name(self, stream_name):
@@ -158,14 +158,14 @@ class RuleMap:
     def apply_rules_to_original_field(cls, key):
         """
         Apply defined rules on field.
-        - Divide alphanumeric strings containing small letters followed by capital letters into
-        multiple words and joined with underscores.
+        - Divide alphanumeric strings containing capital letters followed by small letters into
+        multiple words and join with underscores.
             - However, two or more adjacent capital letters are considered a part of one word.
             - Example:
                 anotherName -> another_name
                 ANOTHERName -> anothername
-        - Divide alphanumeric strings containing letters and number into multiple words
-        and joined with underscores.
+        - Divide alphanumeric strings containing letters, number and special character into multiple words
+        and join with underscores.
             - Example:
                 MyName123 -> my_name_123
         - Convert any character that is not a letter, digit, or underscore to underscore.
@@ -177,21 +177,30 @@ class RuleMap:
                 add____*LPlO -> add_lpl_o
         - Convert all upper-case letters to lower-case.
         """
-
+        # Divide alphanumeric strings containing capital letters followed by small letters into
+        # multiple words and joined with underscores. This include empty string at last
         standard_key = re.findall('[A-Z]*[^A-Z]*', key)
         standard_key = '_'.join(standard_key)
+
+        # Remove empty string from last position
         standard_key = standard_key[:-1]
 
+        # Divide alphanumeric strings containing letters, number and special character into
+        # multiple words and join with underscores.
         standard_key = re.findall(r'[A-Za-z_]+|\d+|\W+', standard_key)
         standard_key = '_'.join(standard_key)
 
+        # Replace all special character with underscore
         standard_key = re.sub(r'[\W]', '_', standard_key)
 
+        # Prepend underscore if 1st character is digit
         if standard_key[0].isdigit():
             standard_key = f'_{standard_key}'
 
+        # Convert repetitive multiple underscores to a single underscore
         standard_key = re.sub(r'[_]+', '_', standard_key)
 
+        # Convert all upper-case letters to lower-case.
         return standard_key.lower()
 
     def apply_ruleset_on_api_response(self, response, stream_name, parent = ()):
