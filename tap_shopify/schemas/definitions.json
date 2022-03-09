@@ -942,9 +942,7 @@
               "null",
               "array"
             ],
-            "items": {
-
-            }
+            "items": {}
           },
           "billing_interval": {
             "type": [
