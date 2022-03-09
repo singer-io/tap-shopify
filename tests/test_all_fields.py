@@ -1,5 +1,3 @@
-import os
-
 from tap_tester import runner, menagerie
 from base import BaseTapTest
 
@@ -9,24 +7,6 @@ class AllFieldsTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_all_fields_test"
 
-    def get_properties(self, original: bool = True):
-        """Configuration properties required for the tap."""
-        return_value = {
-            'start_date': '2021-04-01T00:00:00Z',
-            'shop': 'talenddatawearhouse',
-            'date_window_size': 30
-        }
-
-        return return_value
-
-    @staticmethod
-    def get_credentials(original_credentials: bool = True):
-        """Authentication information for the test account"""
-
-        return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
-        }
-
     def test_run(self):
         """
         Ensure running the tap with all streams and fields selected results in the
@@ -35,10 +15,11 @@ class AllFieldsTest(BaseTapTest):
         - Verify that more than just the automatic fields are replicated for each stream
         """
 
+        self.start_date = "2021-04-01T00:00:00Z"
         expected_streams = self.expected_streams()
 
-        # instantiate connection
-        conn_id = self.create_connection()
+        # instantiate connection to run on "talenddatawearhouse"
+        conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
         # run check mode
         found_catalogs = menagerie.get_catalogs(conn_id)
