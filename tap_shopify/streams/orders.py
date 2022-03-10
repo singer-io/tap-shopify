@@ -16,7 +16,7 @@ class Orders(Stream):
         """
         for obj in self.get_objects():
             record = obj.to_dict()
-            record["customer_id"] = record["customer"] and record["customer"]["id"] or False
+            record["customer_id"] = record.get("customer") and record["customer"].get("id") or False
             yield record
 
 
