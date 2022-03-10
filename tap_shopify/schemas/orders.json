@@ -386,6 +386,12 @@
     "customer": {
       "$ref": "definitions.json#/customer"
     },
+    "customer_id": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
     "test": {
       "type": [
         "null",
