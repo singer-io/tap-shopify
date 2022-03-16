@@ -208,7 +208,8 @@ class Stream():
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 
-        stop_time = singer.utils.now().replace(microsecond=0)
+        today_date = singer.utils.now().replace(microsecond=0)
+        stop_time = today_date
         # Retrieve data for max 1 year. Otherwise log incremental needed.
         diff_days = (stop_time - updated_at_min).days
         yearly = False
@@ -220,6 +221,7 @@ class Stream():
 
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
         results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+        records = 0
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -270,6 +272,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
+                records += len(objects)
                 singer.log_info(f"Got {len(objects)} records")
                 if len(objects) < results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
@@ -294,6 +297,10 @@ class Stream():
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+
+            # count records and add additional window size time if no data found
+            if not records and stop_time < today_date:
+                stop_time += datetime.timedelta(days=date_window_size)
 
             if self.skip_day:
                 updated_at_min = updated_at_min + datetime.timedelta(days=1)
