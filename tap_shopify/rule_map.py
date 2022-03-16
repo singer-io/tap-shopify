@@ -66,7 +66,9 @@ class RuleMap:
             for key in schema['properties'].keys():
                 breadcrumb = parent + ('properties', key)
 
-                self.apply_ruleset_on_schema(schema['properties'][key], schema_copy['properties'].get(key), stream_name, breadcrumb)
+                self.apply_ruleset_on_schema(schema.get('properties', {}).get(key, {}),
+                                             schema_copy.get('properties', {}).get(key, {}),
+                                             stream_name, breadcrumb)
 
                 # Skip keys available in STANDARD_KEYS
                 if key not in STANDARD_KEYS:
@@ -74,33 +76,33 @@ class RuleMap:
                     # apply rules on field
                     standard_key = self.apply_rules_to_original_field(key)
 
-                    if key != standard_key: # Field name is changed after applying rules
-                        # Check if same standard name of field is already available or
-                        # not at same level
+                    # Field name is changed after applying rules
+                    # Check if same standard name of field is already available or
+                    # not at same level
 
-                        if standard_key not in schema['properties'].keys():
-                            if standard_key not in temp_dict:
+                    if key != standard_key and standard_key not in schema['properties'].keys():
+                        if standard_key not in temp_dict:
 
-                                # Add standard name of field in GetStdFieldsFromApiFields with
-                                # key as tuple of breadcrumb keys
-                                # Example:
-                                # GetStdFieldsFromApiFields['users'][
-                                # ('properties', 'user_name')] = 'UserName'
-                                self.GetStdFieldsFromApiFields[stream_name][parent +
-                                                        ('properties', standard_key)] = key
+                            # Add standard name of field in GetStdFieldsFromApiFields with
+                            # key as tuple of breadcrumb keys
+                            # Example:
+                            # GetStdFieldsFromApiFields['users'][
+                            # ('properties', 'user_name')] = 'UserName'
+                            self.GetStdFieldsFromApiFields[stream_name][parent +
+                                                    ('properties', standard_key)] = key
 
-                                # Add key in temp_dict with value as standard_key to update
-                                # in schema after
-                                # iterating whole schema
-                                # Because we can not update schema while iterating it.
-                                temp_dict[key] = standard_key
-                            else:
-                                # Print Warning message for field name conflict found same level and
-                                # add it's standard name to
-                                # roll_back_dict because we need to roll back standard field name
-                                # to original field name.
-                                LOGGER.warning('Conflict found for field : %s', breadcrumb)
-                                roll_back_dict[standard_key] = True
+                            # Add key in temp_dict with value as standard_key to update
+                            # in schema after
+                            # iterating whole schema
+                            # Because we can not update schema while iterating it.
+                            temp_dict[key] = standard_key
+                        else:
+                            # Print Warning message for field name conflict found same level and
+                            # add it's standard name to
+                            # roll_back_dict because we need to roll back standard field name
+                            # to original field name.
+                            LOGGER.warning('Conflict found for field : %s', breadcrumb)
+                            roll_back_dict[standard_key] = True
 
         elif schema.get('anyOf'):
             # Iterate through each possible datatype of field
@@ -122,10 +124,12 @@ class RuleMap:
             #
             # }
             for index, schema_field in enumerate(schema.get('anyOf')):
-                self.apply_ruleset_on_schema(schema_field, schema_copy.get('anyOf')[index], stream_name, parent)
+                self.apply_ruleset_on_schema(schema_field, schema_copy.get('anyOf')[index],
+                                            stream_name, parent)
         elif schema and isinstance(schema, dict) and schema.get('items'):
             breadcrumb = parent + ('items',)
-            self.apply_ruleset_on_schema(schema['items'], schema_copy['items'], stream_name, breadcrumb)
+            self.apply_ruleset_on_schema(schema['items'], schema_copy['items'],
+                                        stream_name, breadcrumb)
 
         for key, new_key in temp_dict.items():
             if roll_back_dict.get(new_key):
@@ -166,8 +170,8 @@ class RuleMap:
             - Example:
                 anotherName -> another_name
                 ANOTHERName -> anothername
-        - Divide alphanumeric strings containing letters, number and special character into multiple words
-        and join with underscores.
+        - Divide alphanumeric strings containing letters, number and special character into
+        multiple words and join with underscores.
             - Example:
                 MyName123 -> my_name_123
         - Convert any character that is not a letter, digit, or underscore to underscore.

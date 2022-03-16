@@ -148,14 +148,17 @@ def discover(rule_map):
         rule_map.GetStdFieldsFromApiFields[schema_name] = {}
 
         # We face issue regarding ref. In some of the schema same ref is being used.
-        # When we change fields of one of the ref, changes reflect in all the places where the same ref is being used.
+        # When we change fields of one of the ref, changes reflect in all the places
+        # where the same ref is being used.
         # Due to this, the `original-name` field name was missing in the metadata of the catalog.
-        # So, to prevent change in the actual schema, here we are creating a deep copy of schema and updating deep copy.
+        # So, to prevent change in the actual schema, here we are creating a deep copy of schema
+        # and updating deep copy.
         # We do not update the actual schema
         schema_copy = copy.deepcopy(schema)
 
         # Get updated schema by applying rule map
-        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema, schema_copy, schema_name)
+        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema, 
+                                    schema_copy, schema_name)
 
         # Get standard name of schema
         standard_schema_name = rule_map.apply_rule_set_on_stream_name(schema_name)
