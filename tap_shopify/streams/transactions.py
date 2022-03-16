@@ -107,19 +107,11 @@ class Transactions(Stream):
                 yield transaction
 
     def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
             replication_value = strptime_to_utc(transaction_dict[self.replication_key])
-            if replication_value >= bookmark:
-                for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
-                    canonicalize(transaction_dict, field_name)
-                yield transaction_dict
-
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-
-        self.update_bookmark(strftime(max_bookmark))
+            for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
+                canonicalize(transaction_dict, field_name)
+            yield transaction_dict
 
 Context.stream_objects['transactions'] = Transactions
