@@ -109,7 +109,6 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            replication_value = strptime_to_utc(transaction_dict[self.replication_key])
             for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
                 canonicalize(transaction_dict, field_name)
             yield transaction_dict
