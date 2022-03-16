@@ -59,7 +59,7 @@ class BookmarkTest(BaseTapTest):
         first_sync_records = runner.get_records_from_target_output()
         # BUG:TDL-17087 : State has additional values which are not streams
         # Need to remove additional values from bookmark value
-        extra_stuff = {'transaction_orders', 'metafield_products', 'refund_orders', 'product_variants'}
+        extra_stuff = {'metafield_products', 'refund_orders', 'product_variants'}
         for keys in list(first_sync_bookmark['bookmarks'].keys()):
             if keys in extra_stuff:
                 first_sync_bookmark['bookmarks'].pop(keys)
@@ -72,7 +72,7 @@ class BookmarkTest(BaseTapTest):
        #simulated_states = self.calculated_states_by_stream(first_sync_bookmark)
 
         # We are hardcoding the updated state to ensure that we get atleast 1 record in second sync. These values have been provided after reviewing the max bookmark value for each of the streams
-        simulated_states = {'products': {'updated_at': '2021-12-20T05:10:05.000000Z'}, 'collects': {'updated_at': '2021-09-01T09:08:28.000000Z'}, 'abandoned_checkouts': {'updated_at': '2022-02-02T16:00:00.000000Z'}, 'inventory_levels': {'updated_at': '2021-12-20T05:09:34.000000Z'}, 'locations': {'updated_at': '2021-07-20T09:00:22.000000Z'}, 'events': {'created_at': '2021-12-20T05:09:01.000000Z'}, 'inventory_items': {'updated_at': '2021-09-15T19:44:11.000000Z'}, 'transactions': {'created_at': '2021-12-20T00:08:52-05:00'}, 'metafields': {'updated_at': '2021-09-07T21:18:05.000000Z'}, 'order_refunds': {'created_at': '2021-05-01T17:41:18.000000Z'}, 'customers': {'updated_at': '2021-12-20T05:08:17.000000Z'}, 'orders': {'updated_at': '2021-12-20T05:09:01.000000Z'}, 'custom_collections': {'updated_at': '2021-12-20T17:41:18.000000Z'}}
+        simulated_states = {'products': {'updated_at': '2021-12-20T05:10:05.000000Z'}, 'collects': {'updated_at': '2021-09-01T09:08:28.000000Z'}, 'abandoned_checkouts': {'updated_at': '2022-02-02T16:00:00.000000Z'}, 'inventory_levels': {'updated_at': '2021-12-20T05:09:34.000000Z'}, 'locations': {'updated_at': '2021-07-20T09:00:22.000000Z'}, 'events': {'created_at': '2021-12-20T05:09:01.000000Z'}, 'inventory_items': {'updated_at': '2021-09-15T19:44:11.000000Z'}, 'transaction_orders': {'updated_at': '2021-12-12T00:08:33.000000Z'}, 'metafields': {'updated_at': '2021-09-07T21:18:05.000000Z'}, 'order_refunds': {'created_at': '2021-05-01T17:41:18.000000Z'}, 'customers': {'updated_at': '2021-12-20T05:08:17.000000Z'}, 'orders': {'updated_at': '2021-12-20T05:09:01.000000Z'}, 'custom_collections': {'updated_at': '2021-12-20T17:41:18.000000Z'}}
 
         for stream, updated_state in simulated_states.items():
             new_state['bookmarks'][stream] = updated_state
@@ -99,15 +99,25 @@ class BookmarkTest(BaseTapTest):
                                        if record.get('action') == 'upsert']
                 second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
                                         if record.get('action') == 'upsert']
-                first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
+                if stream not in ('transactions'):
+                    first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
+                else: 
+                    first_bookmark_value = first_sync_bookmark.get('bookmarks').get('transaction_orders')
                 first_bookmark_value = list(first_bookmark_value.values())[0]
-                second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
+
+                if stream not in ('transactions'):
+                    second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
+                else:
+                    second_bookmark_value = second_sync_bookmark.get('bookmarks').get('transaction_orders')
                 second_bookmark_value = list(second_bookmark_value.values())[0]
 
                 replication_key = next(iter(expected_replication_keys[stream]))
                 first_bookmark_value_utc = self.convert_state_to_utc(first_bookmark_value)
                 second_bookmark_value_utc = self.convert_state_to_utc(second_bookmark_value)
-                simulated_bookmark = new_state['bookmarks'][stream]
+                if stream not in ('transactions'):
+                    simulated_bookmark = new_state['bookmarks'][stream]
+                else:
+                    simulated_bookmark = new_state['bookmarks']['transaction_orders']
                 simulated_bookmark_value = list(simulated_bookmark.values())[0]
 
                 # verify the syncs sets a bookmark of the expected form
@@ -118,24 +128,29 @@ class BookmarkTest(BaseTapTest):
                 #NOT A BUG (IS the expected behaviour for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify
                 #self.assertEqual(first_bookmark_value, second_bookmark_value)
 
-                for record in first_sync_messages:
-                    replication_key_value = record.get(replication_key)
-                    # verify 1st sync bookmark value is the max replication key value for a given stream
-                    self.assertLessEqual(replication_key_value, first_bookmark_value_utc, msg="First sync bookmark was set incorrectly, a record with a greater replication key value was synced")
+                # As the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's
+                # bookmark, hence we'd now get all the data for transactions stream without filtering on `created_at`
+                if stream not in ('transactions'):
+                    for record in first_sync_messages:
+                        replication_key_value = record.get(replication_key)
+                        # verify 1st sync bookmark value is the max replication key value for a given stream
+                        self.assertLessEqual(replication_key_value, first_bookmark_value_utc, msg="First sync bookmark was set incorrectly, a record with a greater replication key value was synced")
 
-                for record in second_sync_messages:
-                    replication_key_value = record.get(replication_key)
-                    # verify the 2nd sync replication key value is greater or equal to the 1st sync bookmarks
-                    self.assertGreaterEqual(replication_key_value, simulated_bookmark_value, msg="Second sync records do not respect the previous                                                  bookmark")
-                    # verify the 2nd sync bookmark value is the max replication key value for a given stream
-                    self.assertLessEqual(replication_key_value, second_bookmark_value_utc, msg="Second sync bookmark was set incorrectly, a record with a greater replication key value was synced")
+                    for record in second_sync_messages:
+                        replication_key_value = record.get(replication_key)
+                        # verify the 2nd sync replication key value is greater or equal to the 1st sync bookmarks
+                        self.assertGreaterEqual(replication_key_value, simulated_bookmark_value, msg="Second sync records do not respect the previous                                                  bookmark")
+                        # verify the 2nd sync bookmark value is the max replication key value for a given stream
+                        self.assertLessEqual(replication_key_value, second_bookmark_value_utc, msg="Second sync bookmark was set incorrectly, a record with a greater replication key value was synced")
 
                 # verify that we get less data in the 2nd sync
                 # collects has all the records with the same value of replication key, so we are removing from this assertion
-                if stream not in ('collects'):
+                # As the bookmark for `transactions` is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's
+                # bookmark, hence we'd now get all the data for transactions stream without filtering on `created_at`
+                if stream not in ('collects', 'transactions'):
                     self.assertLess(second_sync_count, first_sync_count,
                                     msg="Second sync does not have less records, bookmark usage not verified")
 
                 # verify that we get atleast 1 record in the second sync
-                if stream not in ('collects'):
+                if stream not in ('collects', 'transactions'):
                     self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")

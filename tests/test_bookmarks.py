@@ -101,8 +101,12 @@ class BookmarkTest(BaseTapTest):
                     stream_bookmark_key) == 1  # There shouldn't be a compound replication key
                 stream_bookmark_key = stream_bookmark_key.pop()
 
-                state_value = first_sync_state.get("bookmarks", {}).get(
-                    stream, {None: None}).get(stream_bookmark_key)
+                if stream not in ('transactions'):
+                    state_value = first_sync_state.get("bookmarks", {}).get(
+                        stream, {None: None}).get(stream_bookmark_key)
+                else:
+                    state_value = first_sync_state.get("bookmarks", {}).get(
+                        'transaction_orders').get('updated_at')
                 target_value = first_max_bookmarks.get(
                     stream, {None: None}).get(stream_bookmark_key)
                 target_min_value = first_min_bookmarks.get(

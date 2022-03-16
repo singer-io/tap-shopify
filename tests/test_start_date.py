@@ -122,7 +122,7 @@ class StartDateTest(BaseTapTest):
                 target_mark = second_min_bookmarks.get(stream, {"mark": None})
                 target_value = next(iter(target_mark.values()))  # there should be only one
 
-                if target_value:
+                if target_value and stream not in ('transactions'):
 
                     # it's okay if there isn't target data for a stream
                     try:
