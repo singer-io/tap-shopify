@@ -37,12 +37,14 @@ class GraphQlStream(Stream):
         LOGGER.info("Getting data with GraphQL")
         updated_at_min = replication_obj.get_bookmark()
 
-        stop_time = singer.utils.now().replace(microsecond=0)
+        today_date = singer.utils.now().replace(microsecond=0)
+        stop_time = today_date
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Retrieve data for max 1 year. Otherwise log incremental needed.
         diff_days = (stop_time - updated_at_min).days
         yearly = False
+        records = 0
         if diff_days > 365:
             yearly = True
             stop_time = updated_at_min + datetime.timedelta(days=365)
@@ -68,16 +70,24 @@ class GraphQlStream(Stream):
                 data = data[replication_obj.name]
                 page_info = data['pageInfo']
                 edges = data["edges"]
+                node = {}
+
                 for edge in edges:
                     after = edge["cursor"]
                     node = edge["node"]
+                    records += len(node)
                     yield node
+
                 if not page_info["hasNextPage"]:
                     Context.state.get('bookmarks', {}).get(replication_obj.name, {}).pop('since_id', None)
                     replication_obj.update_bookmark(utils.strftime(updated_at_max + datetime.timedelta(seconds=1)))
                     break
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+            # count records and add additional window size time if no data found
+            if not records and stop_time < today_date:
+                stop_time += datetime.timedelta(days=date_window_size)
+
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
                         "Please trigger further incremental data to get the missing rows.")
