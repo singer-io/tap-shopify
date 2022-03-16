@@ -1,6 +1,5 @@
 import shopify
 import singer
-from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
