@@ -157,7 +157,7 @@ def discover(rule_map):
         schema_copy = copy.deepcopy(schema)
 
         # Get updated schema by applying rule map
-        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema, 
+        standard_catalog_schema = rule_map.apply_ruleset_on_schema(catalog_schema,
                                     schema_copy, schema_name)
 
         # Get standard name of schema
