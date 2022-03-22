@@ -112,11 +112,11 @@ def discover():
             'schema': catalog_schema,
             'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
-            'replication_key': stream.replication_key,
-            'replication_method': stream.replication_method
+            # 'replication_key': stream.replication_key,
+            # 'replication_method': stream.replication_method
         }
-        if stream.name == 'transactions':
-            catalog_entry.pop('replication_key')
+        # if stream.name == 'transactions':
+        #     catalog_entry.pop('replication_key')
         streams.append(catalog_entry)
 
     return {'streams': streams}
