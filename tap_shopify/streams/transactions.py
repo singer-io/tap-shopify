@@ -55,7 +55,7 @@ def canonicalize(transaction_dict, field_name):
 class Transactions(Stream):
     name = 'transactions'
     # As it is a child of orders stream and it is incremental based on its parent.
-    replication_key = []
+    replication_key = None
     replication_object = shopify.Transaction
     # Added decorator over functions of shopify SDK
     replication_object.find = shopify_error_handling(replication_object.find)
