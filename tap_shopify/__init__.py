@@ -115,6 +115,8 @@ def discover():
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
         }
+        if stream.name == 'transactions':
+            catalog_entry.pop('replication_key')
         streams.append(catalog_entry)
 
     return {'streams': streams}
