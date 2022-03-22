@@ -101,17 +101,14 @@ class BookmarkTest(BaseTapTest):
                                         if record.get('action') == 'upsert']
                 if stream not in ('transactions'):
                     first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
+                    second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
                 else: 
                     first_bookmark_value = first_sync_bookmark.get('bookmarks').get('transaction_orders')
-                first_bookmark_value = list(first_bookmark_value.values())[0]
 
-                if stream not in ('transactions'):
-                    second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
-                else:
                     second_bookmark_value = second_sync_bookmark.get('bookmarks').get('transaction_orders')
+                first_bookmark_value = list(first_bookmark_value.values())[0]
                 second_bookmark_value = list(second_bookmark_value.values())[0]
 
-                replication_key = next(iter(expected_replication_keys[stream]))
                 first_bookmark_value_utc = self.convert_state_to_utc(first_bookmark_value)
                 second_bookmark_value_utc = self.convert_state_to_utc(second_bookmark_value)
                 if stream not in ('transactions'):
@@ -125,12 +122,13 @@ class BookmarkTest(BaseTapTest):
                 self.assertIsNotNone(second_bookmark_value)
 
                 # verify the 2nd bookmark is equal to 1st sync bookmark
-                #NOT A BUG (IS the expected behaviour for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify
+                #NOT A BUG (IS the expected behavior for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify
                 #self.assertEqual(first_bookmark_value, second_bookmark_value)
 
-                # As the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's
-                # bookmark, hence we'd now get all the data for transactions stream without filtering on `created_at`
+                # The `transactions` stream is a child of th `orders` stream. Hence the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's bookmark.
+                # Hence it doesn't have its own replication key.
                 if stream not in ('transactions'):
+                    replication_key = next(iter(expected_replication_keys[stream]))
                     for record in first_sync_messages:
                         replication_key_value = record.get(replication_key)
                         # verify 1st sync bookmark value is the max replication key value for a given stream

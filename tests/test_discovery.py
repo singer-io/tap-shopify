@@ -98,8 +98,13 @@ class DiscoveryTest(BaseTapTest):
                 # verify that if there is a replication key we are doing INCREMENTAL otherwise FULL
                 actual_replication_method = stream_properties[0].get(
                     "metadata", {self.REPLICATION_METHOD: None}).get(self.REPLICATION_METHOD)
+                # `transactions` is child stream of `orders` stream which is incremental.
+                # We are writing a separate bookmark for the child stream in which we are storing 
+                # the bookmark based on the parent's replication key.
+                # But, we are not using any fields from the child record for it.
+                # That's why the `transactions` stream does not have replication_key but still it is incremental.
                 if stream_properties[0].get(
-                        "metadata", {self.REPLICATION_KEYS: []}).get(self.REPLICATION_KEYS, []):
+                        "metadata", {self.REPLICATION_KEYS: []}).get(self.REPLICATION_KEYS, []) or stream in ('transactions'):
 
                     self.assertTrue(actual_replication_method == self.INCREMENTAL,
                                     msg="Expected INCREMENTAL replication "

@@ -48,8 +48,13 @@ class BookmarkTest(BaseTapTest):
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
+        # `transactions` is child stream of `orders` stream which is incremental.
+                # We are writing a separate bookmark for the child stream in which we are storing 
+                # the bookmark based on the parent's replication key.
+                # But, we are not using any fields from the child record for it.
+                # That's why the `transactions` stream does not have replication_key but still it is incremental.
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL and key in testable_streams}
+                               if value == self.INCREMENTAL and key in testable_streams and key not in ('transactions')}
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
@@ -101,12 +106,9 @@ class BookmarkTest(BaseTapTest):
                     stream_bookmark_key) == 1  # There shouldn't be a compound replication key
                 stream_bookmark_key = stream_bookmark_key.pop()
 
-                if stream not in ('transactions'):
-                    state_value = first_sync_state.get("bookmarks", {}).get(
-                        stream, {None: None}).get(stream_bookmark_key)
-                else:
-                    state_value = first_sync_state.get("bookmarks", {}).get(
-                        'transaction_orders').get('updated_at')
+                
+                state_value = first_sync_state.get("bookmarks", {}).get(
+                    stream, {None: None}).get(stream_bookmark_key)
                 target_value = first_max_bookmarks.get(
                     stream, {None: None}).get(stream_bookmark_key)
                 target_min_value = first_min_bookmarks.get(

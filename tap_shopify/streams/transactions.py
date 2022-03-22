@@ -54,7 +54,7 @@ def canonicalize(transaction_dict, field_name):
 
 class Transactions(Stream):
     name = 'transactions'
-    replication_key = 'created_at'
+    replication_key = None
     replication_object = shopify.Transaction
     # Added decorator over functions of shopify SDK
     replication_object.find = shopify_error_handling(replication_object.find)
