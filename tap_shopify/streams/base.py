@@ -135,8 +135,6 @@ class Stream():
         return utils.strptime_with_tz(bookmark)
 
     def get_since_id(self):
-        LOGGER.info('>>>>>> state')
-        LOGGER.info(Context.state)
         return singer.get_bookmark(Context.state,
                                    # name is overridden by some substreams
                                    self.name,

@@ -7,6 +7,7 @@ import datetime
 from tap_shopify.streams.base import DATE_WINDOW_SIZE
 
 CUSTOMER_OBJECT = Context.stream_objects['customers']()
+Context.state = {}
 
 class Customer():
     """The customer object to return in th api call"""
