@@ -245,10 +245,10 @@ class BaseTapTest(unittest.TestCase):
         max_bookmarks = {}
         for stream, batch in sync_records.items():
             # `transactions` is child stream of `orders` stream which is incremental.
-                # We are writing a separate bookmark for the child stream in which we are storing 
-                # the bookmark based on the parent's replication key.
-                # But, we are not using any fields from the child record for it.
-                # That's why the `transactions` stream does not have replication_key but still it is incremental.
+            # We are writing a separate bookmark for the child stream in which we are storing 
+            # the bookmark based on the parent's replication key.
+            # But, we are not using any fields from the child record for it.
+            # That's why the `transactions` stream does not have replication_key but still it is incremental.
             if stream not in ('transactions'):
                 upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
                 stream_bookmark_key = self.expected_replication_keys().get(stream, set())
@@ -273,10 +273,10 @@ class BaseTapTest(unittest.TestCase):
         min_bookmarks = {}
         for stream, batch in sync_records.items():
             # `transactions` is child stream of `orders` stream which is incremental.
-                # We are writing a separate bookmark for the child stream in which we are storing 
-                # the bookmark based on the parent's replication key.
-                # But, we are not using any fields from the child record for it.
-                # That's why the `transactions` stream does not have replication_key but still it is incremental.
+            # We are writing a separate bookmark for the child stream in which we are storing 
+            # the bookmark based on the parent's replication key.
+            # But, we are not using any fields from the child record for it.
+            # That's why the `transactions` stream does not have replication_key but still it is incremental.
             if stream not in ('transactions'):
                 upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
                 stream_bookmark_key = self.expected_replication_keys().get(stream, set())

@@ -125,7 +125,7 @@ class BookmarkTest(BaseTapTest):
                 #NOT A BUG (IS the expected behavior for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify
                 #self.assertEqual(first_bookmark_value, second_bookmark_value)
 
-                # The `transactions` stream is a child of th `orders` stream. Hence the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's bookmark.
+                # The `transactions` stream is a child of the `orders` stream. Hence the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's bookmark.
                 # Hence it doesn't have its own replication key.
                 if stream not in ('transactions'):
                     replication_key = next(iter(expected_replication_keys[stream]))

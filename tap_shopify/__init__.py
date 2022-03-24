@@ -142,7 +142,7 @@ def sync():
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
                                 stream["key_properties"],
-                                bookmark_properties=stream.get("replication_key", None))
+                                bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
 
     # If there is a currently syncing stream bookmark, shuffle the
