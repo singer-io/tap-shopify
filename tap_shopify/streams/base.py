@@ -9,6 +9,7 @@ import pyactiveresource.formats
 import simplejson
 import singer
 from singer import metrics, utils
+from singer.utils import strptime_to_utc
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
@@ -173,6 +174,7 @@ class Stream():
 
     def get_objects(self):
         updated_at_min = self.get_bookmark()
+        max_bookmark = updated_at_min
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
@@ -204,12 +206,16 @@ class Stream():
                     objects = self.call_api(query_params)
 
                 for obj in objects:
+                    dict_obj = obj.to_dict()
+                    replication_value = strptime_to_utc(dict_obj[self.replication_key])
                     if obj.id < since_id:
                         # This verifies the api behavior expectation we
                         # have that all results actually honor the
                         # since_id parameter.
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
+                    if replication_value > max_bookmark:
+                        max_bookmark = replication_value
                     yield obj
 
                 # You know you're at the end when the current page has
@@ -219,7 +225,8 @@ class Stream():
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
                     Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
-                    self.update_bookmark(utils.strftime(updated_at_max))
+                    bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size)))
+                    self.update_bookmark(utils.strftime(bookmark))
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
