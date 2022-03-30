@@ -4,12 +4,12 @@ import math
 import sys
 import socket
 from urllib.error import URLError
+import http
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
 import simplejson
 import singer
-import http
 from singer import metrics, utils
 from singer.utils import strptime_to_utc
 from tap_shopify.context import Context
