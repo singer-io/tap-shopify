@@ -238,8 +238,6 @@ class Stream():
 
                 # Put since_id into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
-            # bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size))) #pylint: disable=line-too-long
-            # self.update_bookmark(utils.strftime(bookmark))
 
             updated_at_min = updated_at_max
         bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size))) #pylint: disable=line-too-long
