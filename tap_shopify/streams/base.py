@@ -225,8 +225,7 @@ class Stream():
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
                     Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
-                    bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size))) #pylint: disable=line-too-long
-                    self.update_bookmark(utils.strftime(bookmark))
+                    self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
                 if objects[-1].id != max([o.id for o in objects]):
@@ -239,6 +238,8 @@ class Stream():
 
                 # Put since_id into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
+            bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size))) #pylint: disable=line-too-long
+            self.update_bookmark(utils.strftime(bookmark))
 
             updated_at_min = updated_at_max
 

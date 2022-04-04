@@ -1,6 +1,6 @@
 import unittest
 from unittest import mock
-from singer.utils import strptime_with_tz, strftime, strptime_to_utc
+from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 import datetime
 
@@ -26,7 +26,7 @@ NOW_TIME = '2021-08-16T01:56:05-04:00'
 class TestUpdateBookmark(unittest.TestCase):
 
     @mock.patch("tap_shopify.streams.base.Stream.call_api")
-    @mock.patch("tap_shopify.streams.base.Stream.get_bookmark", return_value=strptime_with_tz('2021-08-11T01:55:05-04:00'))
+    @mock.patch("tap_shopify.streams.base.Stream.get_bookmark", return_value=strptime_to_utc('2021-08-11T01:55:05-04:00'))
     @mock.patch("tap_shopify.streams.base.Stream.update_bookmark")
     @mock.patch("tap_shopify.streams.base.Stream.get_query_params")
     @mock.patch("singer.utils.now", return_value=strptime_to_utc(NOW_TIME))

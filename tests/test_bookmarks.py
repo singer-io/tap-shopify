@@ -19,6 +19,37 @@ class BookmarkTest(BaseTapTest):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
 
+    def max_bookmarks_by_stream(self, sync_records):
+        """
+        Return the maximum value for the replication key for each stream
+        which is the bookmark expected value.
+
+        Comparisons are based on the class of the bookmark value. Dates will be
+        string compared which works for ISO date-time strings
+        """
+        max_bookmarks = {}
+        for stream, batch in sync_records.items():
+            if stream != 'metafields':
+                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
+            else:
+                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert' and m.get('data').get('owner_resource') == 'shop']
+            stream_bookmark_key = self.expected_replication_keys().get(stream, set())
+            assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
+            stream_bookmark_key = stream_bookmark_key.pop()
+
+            bk_values = [message["data"].get(stream_bookmark_key) for message in upsert_messages]
+            max_bookmarks[stream] = {stream_bookmark_key: None}
+            for bk_value in bk_values:
+                if bk_value is None:
+                    continue
+
+                if max_bookmarks[stream][stream_bookmark_key] is None:
+                    max_bookmarks[stream][stream_bookmark_key] = bk_value
+
+                if bk_value > max_bookmarks[stream][stream_bookmark_key]:
+                    max_bookmarks[stream][stream_bookmark_key] = bk_value
+        return max_bookmarks
+
     def test_run(self):
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
@@ -54,7 +85,7 @@ class BookmarkTest(BaseTapTest):
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in incremental_streams]
-        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=False)
+        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
 
         # Run a sync job using orchestrator
         first_sync_record_count = self.run_sync(conn_id)
