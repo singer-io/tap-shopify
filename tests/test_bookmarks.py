@@ -29,6 +29,10 @@ class BookmarkTest(BaseTapTest):
         """
         max_bookmarks = {}
         for stream, batch in sync_records.items():
+            # The metafields fetches the fields from `products`, `customers`, `orders` and `custom_collections`
+            # if the parent streams are selected along with the `shop` fields.
+            # These different streams have its own bookmark based on its parent.
+            # Hence filtered out the main records i.e. the `shop` records from all the records.
             if stream != 'metafields':
                 upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
             else:

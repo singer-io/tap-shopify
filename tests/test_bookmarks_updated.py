@@ -96,6 +96,10 @@ class BookmarkTest(BaseTapTest):
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 second_sync_count = second_sync_record_count.get(stream, 0)
 
+                # The metafields fetches the fields from `products`, `customers`, `orders` and `custom_collections`
+                # if the parent streams are selected along with the `shop` fields.
+                # These different streams have its own bookmark based on its parent.
+                # Hence filtered out the main records i.e. the `shop` records from all the records.
                 if stream != 'metafields':
                     first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
                                            if record.get('action') == 'upsert']
