@@ -12,7 +12,7 @@ def get_selected_parents():
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
-@shopify_error_handling
+@shopify_error_handling()
 def get_metafields(parent_object, since_id):
     # This call results in an HTTP request - the parent object never has a
     # cache of this data so we have to issue that request.

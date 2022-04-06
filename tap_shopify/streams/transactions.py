@@ -15,7 +15,7 @@ class Transactions(Stream):
     # nothing to set the `replication_method` member to.
     # https://help.shopify.com/en/api/reference/orders/transaction#properties
 
-    @shopify_error_handling
+    @shopify_error_handling()
     def get_transactions(self, parent_object):
         # We do not need to support paging on this substream. If that
         # were to become untrue, reference Metafields.

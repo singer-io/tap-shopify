@@ -12,7 +12,7 @@ class OrderRefunds(Stream):
     replication_object = shopify.Refund
     replication_key = 'created_at'
 
-    @shopify_error_handling
+    @shopify_error_handling()
     def get_refunds(self, parent_object, since_id):
         return self.replication_object.find(
             order_id=parent_object.id,
