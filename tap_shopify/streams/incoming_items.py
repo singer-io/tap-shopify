@@ -1,3 +1,5 @@
+import os
+import sys
 import shopify
 import singer
 import json
@@ -9,6 +11,16 @@ from tap_shopify.streams.base import (Stream,
 LOGGER = singer.get_logger()
 
 
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
+
+
 class IncomingItems(Stream):
     name = 'incoming_items'
     replication_key = 'createdAt'
@@ -17,7 +29,8 @@ class IncomingItems(Stream):
     @shopify_error_handling
     def call_api_for_incoming_items(self, parent_object):
         gql_client = shopify.GraphQL()
-        response = gql_client.execute(self.gql_query, dict(id=parent_object.admin_graphql_api_id))
+        with HiddenPrints():
+            response = gql_client.execute(self.gql_query, dict(id=parent_object.admin_graphql_api_id))
         return json.loads(response)
 
     def get_objects(self):
