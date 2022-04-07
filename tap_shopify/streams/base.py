@@ -206,14 +206,13 @@ class Stream():
                     objects = self.call_api(query_params)
 
                 for obj in objects:
-                    dict_obj = obj.to_dict()
-                    replication_value = strptime_to_utc(dict_obj[self.replication_key])
                     if obj.id < since_id:
                         # This verifies the api behavior expectation we
                         # have that all results actually honor the
                         # since_id parameter.
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
+                    replication_value = strptime_to_utc(getattr(obj, self.replication_key))
                     if replication_value > max_bookmark:
                         max_bookmark = replication_value
                     yield obj
@@ -240,7 +239,9 @@ class Stream():
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
             updated_at_min = updated_at_max
-        bookmark = max(min(stop_time, max_bookmark), (stop_time - datetime.timedelta(days=date_window_size))) #pylint: disable=line-too-long
+        bookmark = max(min(stop_time,
+                           max_bookmark),
+                       (stop_time - datetime.timedelta(days=date_window_size)))
         self.update_bookmark(utils.strftime(bookmark))
 
     def sync(self):
