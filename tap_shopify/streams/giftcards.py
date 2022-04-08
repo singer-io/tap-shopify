@@ -68,19 +68,5 @@ class Giftcards(GraphQlStream):
         edges = GqlQuery().fields(['cursor', node], name='edges').generate()
         return edges
 
-    def get_graph_query(self,
-                        created_at_min: str,
-                        created_at_max: str,
-                        name: str,
-                        after: typing.Optional[str] = None) -> str:
-        edges = self.get_graph_edges()
-
-        page_info = GqlQuery().fields(['hasNextPage', 'hasPreviousPage'], name='pageInfo').generate()
-
-        query_input = self.get_query_input(created_at_min, created_at_max, after)
-        generate_query = GqlQuery().query(name, input=query_input).fields([page_info, edges]).generate()
-
-        return "{%s}" % generate_query
-
 
 Context.stream_objects['giftcards'] = Giftcards
