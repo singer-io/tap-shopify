@@ -3,15 +3,16 @@ import shopify
 from tap_shopify.streams.graph_ql_stream import GraphQlStream
 from tap_shopify.context import Context
 from gql_query_builder import GqlQuery
-import typing
 
 
 class Giftcards(GraphQlStream):
     name = 'giftCards'
     replication_key = 'createdAt'
     replication_object = shopify.GiftCard
+    prefix = 'gid://shopify/GiftCard/'
     fragment_cols = {"balance": "MoneyV2", "initialValue": "MoneyV2"}
     fragment_entities = {"MoneyV2": ["amount", "currencyCode"]}
+    selection_fields = {"customer": "gid://shopify/Customer/", "order": "gid://shopify/Order/"}
 
     def get_table_schema(self) -> dict:
         streams = Context.catalog["streams"]
@@ -59,6 +60,12 @@ class Giftcards(GraphQlStream):
                     ql_fields.append(ql_field)
                     continue
 
+                # used to extract id from object inside main object
+                if prop_name in list(self.selection_fields):
+                    selected_field = GqlQuery().fields(["id"], name=prop_name).generate()
+                    ql_fields.append(selected_field)
+                    continue
+
                 ql_fields.append(prop_name)
         return ql_fields
 
@@ -67,6 +74,20 @@ class Giftcards(GraphQlStream):
         node = GqlQuery().fields(fields, name='node').generate()
         edges = GqlQuery().fields(['cursor', node], name='edges').generate()
         return edges
+
+    def transform_obj(self, obj):
+        if obj.get("id", False):
+            obj["id"] = obj["id"].replace(self.prefix, '')
+        if obj.get("balance", False):
+            obj["currency"] = obj["balance"].get("currencyCode", False)
+            obj["balance"] = obj["balance"].get("amount", False)
+        if obj.get("initialValue", False):
+            obj["initialValue"] = obj["initialValue"].get("amount", False)
+        for k, v in self.selection_fields.items():
+            if obj.get(k, False):
+                obj[k] = obj[k].get("id", False) and obj[k].get("id", False).replace(v, '')
+
+        return obj
 
 
 Context.stream_objects['giftcards'] = Giftcards
