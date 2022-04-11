@@ -58,15 +58,11 @@ class StartDateTest(BaseTapTest):
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
-        # removed 'abandoned_checkouts', as per the Doc:
-        #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
-        # abandoned checkouts are saved in the Shopify admin for three months.
-        # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
-        # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        expected_replication_method = self.expected_replication_method()
-        expected_replication_method.pop("abandoned_checkouts")
-        incremental_streams = {key for key, value in expected_replication_method.items()
+        incremental_streams = {key for key, value in self.expected_replication_method().items()
                                if value == self.INCREMENTAL}
+
+        # get expected replication keys
+        expected_replication_keys = self.expected_replication_keys()
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED
         # REPLACE THE EMPTY SET BELOW WITH THOSE STREAMS
@@ -133,6 +129,14 @@ class StartDateTest(BaseTapTest):
                 primary_keys_sync_1 = set(primary_keys_list_1)
                 primary_keys_sync_2 = set(primary_keys_list_2)
 
+                # get replication key-values for all records for both syncs
+                replication_key_sync_1 = [message.get('data').get(expected_rk) for expected_rk in expected_replication_keys.get(stream)
+                                          for message in first_sync_records.get(stream).get('messages')
+                                          if message.get('action') == 'upsert']
+                replication_key_sync_2 = [message.get('data').get(expected_rk) for expected_rk in expected_replication_keys.get(stream)
+                                          for message in second_sync_records.get(stream).get('messages')
+                                          if message.get('action') == 'upsert']
+
                 # verify that each stream has less records than the first connection sync
                 self.assertGreaterEqual(
                     first_sync_record_count.get(stream, 0),
@@ -150,9 +154,12 @@ class StartDateTest(BaseTapTest):
                 first_sync_start_date = self.get_properties()["start_date"]
                 second_sync_start_date = self.start_date
 
-                # loop over minimum bookmark and the start date/state file date for each syncs to verify
-                # the minimum bookmark is greater then or equal to start date/state file date
-                for start_date, target_mark in zip((first_sync_start_date, second_sync_start_date), (first_sync_target_mark, second_sync_target_mark)):
+                # loop over minimum bookmark, the start date/state file date and replication key records for each
+                # syncs to verify the minimum bookmark is greater then or equal to start date/state file date
+                for start_date, target_mark, record_replication_keys in zip(
+                    (first_sync_start_date, second_sync_start_date),
+                    (first_sync_target_mark, second_sync_target_mark),
+                    (replication_key_sync_1, replication_key_sync_2)):
                     target_value = next(iter(target_mark.values()))  # there should be only one
 
                     if target_value:
@@ -169,3 +176,8 @@ class StartDateTest(BaseTapTest):
                         except (OverflowError, ValueError, TypeError):
                             print("bookmarks cannot be converted to dates, "
                                 "can't test start_date for {}".format(stream))
+
+                    # loop over every replication key records and verify we have
+                    # synced records greater than start date/state file date
+                    for record_replication_key in record_replication_keys:
+                        self.assertGreaterEqual(record_replication_key, start_date)

@@ -34,7 +34,7 @@ class DiscoveryTest(BaseTapTest):
         • verify that all other fields have inclusion of available (metadata and schema)
         """
         conn_id = self.create_connection()
-        expected_streams = self.expected_streams() | {"abandoned_checkouts"}
+        expected_streams = self.expected_streams()
 
         # Verify number of actual streams discovered match expected
         found_catalogs = menagerie.get_catalogs(conn_id)
