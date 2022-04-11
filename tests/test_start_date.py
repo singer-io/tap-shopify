@@ -77,7 +77,6 @@ class StartDateTest(BaseTapTest):
 
         # Count actual rows synced
         first_sync_records = runner.get_records_from_target_output()
-        first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
 
         # set the start date for a new connection based off bookmarks largest value
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
@@ -109,7 +108,6 @@ class StartDateTest(BaseTapTest):
         second_sync_record_count = self.run_sync(conn_id)
         second_total_records = reduce(lambda a, b: a + b, second_sync_record_count.values(), 0)
         second_sync_records = runner.get_records_from_target_output()
-        second_min_bookmarks = self.min_bookmarks_by_stream(second_sync_records)
 
         # verify that at least one record synced and less records synced than the 1st connection
         self.assertGreater(second_total_records, 0)
@@ -146,36 +144,15 @@ class StartDateTest(BaseTapTest):
                 # Verify by primary key values, that all records of the 2nd sync are included in the 1st sync since 2nd sync has a later start date.
                 self.assertTrue(primary_keys_sync_2.issubset(primary_keys_sync_1))
 
-                # verify all data from both syncs >= start_date
-                first_sync_target_mark = first_min_bookmarks.get(stream, {"mark": None})
-                second_sync_target_mark = second_min_bookmarks.get(stream, {"mark": None})
-
                 # get start dates for both syncs
                 first_sync_start_date = self.get_properties()["start_date"]
                 second_sync_start_date = self.start_date
 
-                # loop over minimum bookmark, the start date/state file date and replication key records for each
-                # syncs to verify the minimum bookmark is greater then or equal to start date/state file date
-                for start_date, target_mark, record_replication_keys in zip(
+                # loop over the start date/state file date and replication key records for each syncs
+                # to verify the records we synced are greater than the start date/state file date
+                for start_date, record_replication_keys in zip(
                     (first_sync_start_date, second_sync_start_date),
-                    (first_sync_target_mark, second_sync_target_mark),
                     (replication_key_sync_1, replication_key_sync_2)):
-                    target_value = next(iter(target_mark.values()))  # there should be only one
-
-                    if target_value:
-
-                        # it's okay if there isn't target data for a stream
-                        try:
-                            target_value = self.local_to_utc(parse(target_value))
-
-                            # verify that the minimum bookmark sent to the target for the second sync
-                            # is greater than or equal to the start date
-                            self.assertGreaterEqual(target_value,
-                                                    self.local_to_utc(parse(start_date)))
-
-                        except (OverflowError, ValueError, TypeError):
-                            print("bookmarks cannot be converted to dates, "
-                                "can't test start_date for {}".format(stream))
 
                     # loop over every replication key records and verify we have
                     # synced records greater than start date/state file date
