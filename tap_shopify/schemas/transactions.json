@@ -176,6 +176,26 @@
         "null",
         "integer"
       ]
+    },
+    "payments_refund_attributes": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "status": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "acquirer_reference_number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     }
   },
   "type": "object"

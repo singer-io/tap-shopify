@@ -1109,6 +1109,104 @@
         "null",
         "string"
       ]
+    },
+    "payment_terms": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "amount": {
+          "type": [
+            "null",
+            "integer",
+            "string"
+          ]
+        },
+        "currency": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "due_in_days": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "payment_schedules": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "integer",
+                  "string"
+                ]
+              },
+              "due_at": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "date-time"
+              },
+              "currency": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "issued_at": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "date-time"
+              },
+              "completed_at": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "expected_payment_method": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          }
+        },
+        "payment_terms_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "payment_terms_type": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "estimated_taxes": {
+      "type": [
+        "null",
+        "boolean"
+      ]
     }
   },
   "type": "object"
