@@ -454,6 +454,39 @@
           "null",
           "string"
         ]
+      },
+      "sms_marketing_consent": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "state": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "opt_in_level": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "consent_updated_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "consent_collected_from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
@@ -1164,6 +1197,12 @@
           "type": [
             "null",
             "string"
+          ]
+        },
+        "channel_liable": {
+          "type": [
+            "null",
+            "boolean"
           ]
         }
       },
