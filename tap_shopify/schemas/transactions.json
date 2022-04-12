@@ -177,6 +177,12 @@
         "integer"
       ]
     },
+    "processed_at": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "payments_refund_attributes": {
       "type": [
         "null",

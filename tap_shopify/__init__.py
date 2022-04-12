@@ -167,7 +167,8 @@ def sync():
             Context.state['bookmarks'] = {}
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
-        with Transformer() as transformer:
+        # some fields have epoch-time as date, hence transform into UTC date
+        with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:
             for rec in stream.sync():
                 extraction_time = singer.utils.now()
                 record_schema = catalog_entry['schema']

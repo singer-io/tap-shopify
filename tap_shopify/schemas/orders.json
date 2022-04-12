@@ -12,6 +12,42 @@
     "total_price_set": {},
     "total_shipping_price_set": {},
     "total_tax_set": {},
+    "current_subtotal_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_duties_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_discounts_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_tax_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "original_total_duties_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
     "total_price": {
       "type": [
         "null",
@@ -1109,6 +1145,41 @@
         "null",
         "string"
       ]
+    },
+    "current_subtotal_price": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_discounts": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_price": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_tax": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "total_outstanding": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
     },
     "payment_terms": {
       "type": [
