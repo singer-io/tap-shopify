@@ -549,14 +549,8 @@
   },
   "line_item": {
     "properties": {
-      "applied_discounts": {
-        "items": {
-          "$ref": "definitions.json#/applied_discount"
-        },
-        "type": [
-          "null",
-          "array"
-        ]
+      "applied_discount": {
+        "$ref": "definitions.json#/applied_discount"
       },
       "total_discount_set": {
         "$ref": "definitions.json#/price_set"
@@ -595,12 +589,6 @@
         ]
       },
       "origin_location_id": {
-        "type": [
-          "null",
-          "integer"
-        ]
-      },
-      "applied_discount": {
         "type": [
           "null",
           "integer"
