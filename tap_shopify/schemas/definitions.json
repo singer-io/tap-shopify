@@ -784,7 +784,54 @@
                 "integer"
               ]
             },
-            "amount_set": {},
+            "amount_set": {
+              "properties": {
+                "shop_money": {
+                  "properties": {
+                    "amount": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "currency_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                },
+                "presentment_money": {
+                  "properties": {
+                    "amount": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "currency_code": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  },
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                }
+              },
+              "type": [
+                "null",
+                "object"
+              ]
+            },
             "amount": {
               "type": [
                 "null",
