@@ -56,7 +56,14 @@ class StartDateTest(BaseTapTest):
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
-        incremental_streams = {key for key, value in self.expected_replication_method().items()
+        # removed 'abandoned_checkouts', as per the Doc:
+        #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
+        # abandoned checkouts are saved in the Shopify admin for three months.
+        # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+        # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
+        expected_replication_method = self.expected_replication_method()
+        expected_replication_method.pop("abandoned_checkouts")
+        incremental_streams = {key for key, value in expected_replication_method.items()
                                if value == self.INCREMENTAL}
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED
@@ -72,6 +79,7 @@ class StartDateTest(BaseTapTest):
 
         # Count actual rows synced
         first_sync_records = runner.get_records_from_target_output()
+        first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
 
         # set the start date for a new connection based off bookmarks largest value
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
@@ -112,27 +120,48 @@ class StartDateTest(BaseTapTest):
         for stream in incremental_streams:
             with self.subTest(stream=stream):
 
+                # get primary key values for both sync records
+                expected_primary_keys = self.expected_primary_keys()[stream]
+                primary_keys_list_1 = [tuple(message.get('data').get(expected_pk) for expected_pk in expected_primary_keys)
+                                       for message in first_sync_records.get(stream).get('messages')
+                                       if message.get('action') == 'upsert']
+                primary_keys_list_2 = [tuple(message.get('data').get(expected_pk) for expected_pk in expected_primary_keys)
+                                       for message in second_sync_records.get(stream).get('messages')
+                                       if message.get('action') == 'upsert']
+                primary_keys_sync_1 = set(primary_keys_list_1)
+                primary_keys_sync_2 = set(primary_keys_list_2)
+
                 # verify that each stream has less records than the first connection sync
                 self.assertGreaterEqual(
                     first_sync_record_count.get(stream, 0),
                     second_sync_record_count.get(stream, 0),
                     msg="second had more records, start_date usage not verified")
 
-                # verify all data from 2nd sync >= start_date
-                target_mark = second_min_bookmarks.get(stream, {"mark": None})
-                target_value = next(iter(target_mark.values()))  # there should be only one
+                # Verify by primary key values, that all records of the 2nd sync are included in the 1st sync since 2nd sync has a later start date.
+                self.assertTrue(primary_keys_sync_2.issubset(primary_keys_sync_1))
+
+                # verify all data from both syncs >= start_date
+                first_sync_target_mark = first_min_bookmarks.get(stream, {"mark": None})
+                second_sync_target_mark = second_min_bookmarks.get(stream, {"mark": None})
+
+                # get start dates for both syncs
+                first_sync_start_date = self.get_properties()["start_date"]
+                second_sync_start_date = self.start_date
+
+                for start_date, target_mark in zip((first_sync_start_date, second_sync_start_date), (first_sync_target_mark, second_sync_target_mark)):
+                    target_value = next(iter(target_mark.values()))  # there should be only one
 
                 if target_value and stream not in ('transactions'):
 
-                    # it's okay if there isn't target data for a stream
-                    try:
-                        target_value = self.local_to_utc(parse(target_value))
+                        # it's okay if there isn't target data for a stream
+                        try:
+                            target_value = self.local_to_utc(parse(target_value))
 
-                        # verify that the minimum bookmark sent to the target for the second sync
-                        # is greater than or equal to the start date
-                        self.assertGreaterEqual(target_value,
-                                                self.local_to_utc(parse(self.start_date)))
+                            # verify that the minimum bookmark sent to the target for the second sync
+                            # is greater than or equal to the start date
+                            self.assertGreaterEqual(target_value,
+                                                    self.local_to_utc(parse(start_date)))
 
-                    except (OverflowError, ValueError, TypeError):
-                        print("bookmarks cannot be converted to dates, "
-                              "can't test start_date for {}".format(stream))
+                        except (OverflowError, ValueError, TypeError):
+                            print("bookmarks cannot be converted to dates, "
+                                "can't test start_date for {}".format(stream))
