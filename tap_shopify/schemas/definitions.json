@@ -619,37 +619,29 @@
         ]
       },
       "properties": {
-        "anyOf": [
-          {
-            "items": {
-              "properties": {
-                "name": {
-                  "type": [
-                    "null",
-                    "string"
-                  ]
-                },
-                "value": {
-                  "type": [
-                    "null",
-                    "string"
-                  ]
-                }
-              },
+        "items": {
+          "properties": {
+            "name": {
               "type": [
                 "null",
-                "object"
+                "string"
               ]
             },
-            "type": [
-              "null",
-              "array"
-            ]
+            "value": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
           },
-          {
-            "properties": {},
-            "type": ["null", "object"]
-          }
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
         ]
       },
       "tax_code": {
