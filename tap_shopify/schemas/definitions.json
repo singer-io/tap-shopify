@@ -593,9 +593,102 @@
           "array"
         ]
       },
-      "total_discount_set": {},
-      "pre_tax_price_set": {},
-      "price_set": {},
+      "total_discount_set": {
+        "properties": {
+          "shop_money": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "presentment_money": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          }
+        },
+        "type": [
+          "null",
+          "object"
+        ]
+      },
+      "price_set": {
+        "properties": {
+          "shop_money": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "presentment_money": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "currency_code": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          }
+        },
+        "type": [
+          "null",
+          "object"
+        ]
+      },
       "grams": {
         "type": [
           "null",
