@@ -147,35 +147,64 @@
     },
     "shipping_line": {
       "properties": {
-        "handle": {
+        "tax_lines": {
+          "$ref": "definitions.json#/tax_lines"
+        },
+        "phone": {
           "type": ["null", "string"]
         },
+        "discounted_price_set": {},
+        "price_set": {},
         "price": {
-          "type": ["null", "number"]
+          "type": ["null", "string"],
+          "format": "singer.decimal"
         },
         "title": {
           "type": ["null", "string"]
         },
-        "custom": {
-          "type": ["null", "boolean"]
+        "discount_allocations": {
+          "items": {
+            "properties": {
+              "discount_application_index": {
+                "type": ["null", "integer"]
+              },
+              "amount": {
+                "type": ["null", "number"]
+              }
+            },
+            "type": ["null", "object"]
+          },
+          "type": ["null", "array"]
+        },
+        "delivery_category": {
+          "type": ["null", "string"]
+        },
+        "discounted_price": {
+          "type": ["null", "number"]
+        },
+        "code": {
+          "type": ["null", "string"]
+        },
+        "requested_fulfillment_service_id": {
+          "type": ["null", "string"]
+        },
+        "carrier_identifier": {
+          "type": ["null", "string"]
+        },
+        "id": {
+          "type": ["null", "integer"]
+        },
+        "source": {
+          "type": ["null", "string"]
         }
       },
       "type": ["null", "object"]
-    },
-    "source_name": {
-      "type": ["null", "string"]
     },
     "tags": {
       "type": ["null", "string"]
     },
     "tax_exempt": {
       "type": ["null", "boolean"]
-    },
-    "tax_exemptions": {
-      "items": {
-        "type": ["null", "string"]
-      },
-      "type": ["null", "array"]
     },
     "tax_lines": {
       "$ref": "definitions.json#/tax_lines"
@@ -188,14 +217,6 @@
     },
     "taxes_included": {
       "type": ["null", "boolean"]
-    },
-    "total_tax": {
-      "type": ["null", "string"],
-      "format": "singer.decimal"
-    },
-    "subtotal_price": {
-      "type": ["null", "string"],
-      "format": "singer.decimal"
     },
     "total_price": {
       "type": ["null", "string"],
