@@ -147,58 +147,23 @@
     },
     "shipping_line": {
       "properties": {
-        "tax_lines": {
-          "$ref": "definitions.json#/tax_lines"
-        },
-        "phone": {
-          "type": ["null", "string"]
-        },
-        "discounted_price_set": {},
-        "price_set": {},
-        "price": {
-          "type": ["null", "string"],
-          "format": "singer.decimal"
-        },
         "title": {
           "type": ["null", "string"]
         },
-        "discount_allocations": {
-          "items": {
-            "properties": {
-              "discount_application_index": {
-                "type": ["null", "integer"]
-              },
-              "amount": {
-                "type": ["null", "number"]
-              }
-            },
-            "type": ["null", "object"]
-          },
-          "type": ["null", "array"]
+        "custom": {
+          "type": ["null", "boolean"]
         },
-        "delivery_category": {
+        "handle": {
           "type": ["null", "string"]
         },
-        "discounted_price": {
+        "price": {
           "type": ["null", "number"]
-        },
-        "code": {
-          "type": ["null", "string"]
-        },
-        "requested_fulfillment_service_id": {
-          "type": ["null", "string"]
-        },
-        "carrier_identifier": {
-          "type": ["null", "string"]
-        },
-        "id": {
-          "type": ["null", "integer"]
-        },
-        "source": {
-          "type": ["null", "string"]
         }
       },
       "type": ["null", "object"]
+    },
+    "source_name": {
+      "type": ["null", "string"]
     },
     "tags": {
       "type": ["null", "string"]
@@ -219,6 +184,14 @@
       "type": ["null", "boolean"]
     },
     "total_price": {
+      "type": ["null", "string"],
+      "format": "singer.decimal"
+    },
+    "subtotal_price": {
+      "type": ["null", "string"],
+      "format": "singer.decimal"
+    },
+    "total_tax": {
       "type": ["null", "string"],
       "format": "singer.decimal"
     },
