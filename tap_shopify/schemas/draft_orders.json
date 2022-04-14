@@ -174,11 +174,8 @@
     "tax_lines": {
       "$ref": "definitions.json#/tax_lines"
     },
-    "applied_discounts": {
-      "items": {
-        "type": ["null", "object"]
-      },
-      "type": ["null", "array"]
+    "applied_discount": {
+      "$ref": "definitions.json#/applied_discount"
     },
     "taxes_included": {
       "type": ["null", "boolean"]

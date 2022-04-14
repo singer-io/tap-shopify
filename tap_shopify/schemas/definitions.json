@@ -551,42 +551,7 @@
     "properties": {
       "applied_discounts": {
         "items": {
-          "properties": {
-            "title": {
-              "type": [
-                "null",
-                "string"
-              ]
-            },
-            "description": {
-              "type": [
-                "null",
-                "string"
-              ]
-            },
-            "value": {
-              "type": [
-                "null",
-                "string"
-              ]
-            },
-            "value_type": {
-              "type": [
-                "null",
-                "string"
-              ]
-            },
-            "amount": {
-              "type": [
-                "null",
-                "string"
-              ]
-            }
-          },
-          "type": [
-            "null",
-            "object"
-          ]
+          "$ref": "definitions.json#/applied_discount"
         },
         "type": [
           "null",
@@ -967,6 +932,44 @@
         "type": [
           "null",
           "object"
+        ]
+      }
+    },
+    "type": [
+      "null",
+      "object"
+    ]
+  },
+  "applied_discount": {
+    "properties": {
+      "title": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "description": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "value": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "value_type": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "amount": {
+        "type": [
+          "null",
+          "string"
         ]
       }
     },
