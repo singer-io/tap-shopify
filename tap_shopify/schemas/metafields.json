@@ -70,6 +70,12 @@
         "string"
       ],
       "format": "date-time"
+    },
+    "type": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "type": "object"
