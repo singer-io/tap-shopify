@@ -271,6 +271,7 @@
                       ]
                     }
                   },
+                  "patternProperties": {".+": {}},
                   "type": [
                     "null",
                     "object"
@@ -778,5 +779,6 @@
       }
     },
     "duties": {}
-  }
+  },
+  "patternProperties": {".+": {}}
 }
