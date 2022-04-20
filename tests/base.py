@@ -28,6 +28,8 @@ class BaseTapTest(unittest.TestCase):
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
     DEFAULT_RESULTS_PER_PAGE = 175
+    # skipped this stream due to change in the bookmarking logic of the stream.
+    SKIPPED_STREAMS = ('transactions')
 
     @staticmethod
     def tap_name():
@@ -254,7 +256,7 @@ class BaseTapTest(unittest.TestCase):
             # the bookmark based on the parent's replication key.
             # But, we are not using any fields from the child record for it.
             # That's why the `transactions` stream does not have replication_key but still it is incremental.
-            if stream not in ('transactions'):
+            if stream not in self.SKIPPED_STREAMS:
                 upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
                 stream_bookmark_key = self.expected_replication_keys().get(stream, set())
                 assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
@@ -282,7 +284,7 @@ class BaseTapTest(unittest.TestCase):
             # the bookmark based on the parent's replication key.
             # But, we are not using any fields from the child record for it.
             # That's why the `transactions` stream does not have replication_key but still it is incremental.
-            if stream not in ('transactions'):
+            if stream not in self.SKIPPED_STREAMS:
                 upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
                 stream_bookmark_key = self.expected_replication_keys().get(stream, set())
                 assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
