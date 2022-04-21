@@ -113,7 +113,7 @@ class DiscoveryTest(BaseTapTest):
                 # But, we are not using any fields from the child record for it.
                 # That's why the `transactions` stream does not have replication_key but still it is incremental.
                 if stream_properties[0].get(
-                        "metadata", {self.REPLICATION_KEYS: []}).get(self.REPLICATION_KEYS, []) or stream in ('transactions'):
+                        "metadata", {self.REPLICATION_KEYS: []}).get(self.REPLICATION_KEYS, []) or stream in self.SKIPPED_STREAMS:
 
                     self.assertTrue(actual_replication_method == self.INCREMENTAL,
                                     msg="Expected INCREMENTAL replication "

@@ -151,7 +151,7 @@ class StartDateTest(BaseTapTest):
                 for start_date, target_mark in zip((first_sync_start_date, second_sync_start_date), (first_sync_target_mark, second_sync_target_mark)):
                     target_value = next(iter(target_mark.values()))  # there should be only one
 
-                if target_value and stream not in ('transactions'):
+                if target_value and stream not in self.SKIPPED_STREAMS:
 
                         # it's okay if there isn't target data for a stream
                         try:

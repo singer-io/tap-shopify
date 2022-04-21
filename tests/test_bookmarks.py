@@ -54,7 +54,7 @@ class BookmarkTest(BaseTapTest):
         # But, we are not using any fields from the child record for it.
         # That's why the `transactions` stream does not have replication_key but still it is incremental.
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL and key in testable_streams and key not in ('transactions')}
+                               if value == self.INCREMENTAL and key in testable_streams and key not in self.SKIPPED_STREAMS}
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if

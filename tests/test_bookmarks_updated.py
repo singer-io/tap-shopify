@@ -115,7 +115,7 @@ class BookmarkTest(BaseTapTest):
                                        if record.get('action') == 'upsert']
                 second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
                                         if record.get('action') == 'upsert']
-                if stream not in ('transactions'):
+                if stream not in self.SKIPPED_STREAMS:
                     first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
                     second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
                 else: 
@@ -127,7 +127,7 @@ class BookmarkTest(BaseTapTest):
 
                 first_bookmark_value_utc = self.convert_state_to_utc(first_bookmark_value)
                 second_bookmark_value_utc = self.convert_state_to_utc(second_bookmark_value)
-                if stream not in ('transactions'):
+                if stream not in self.SKIPPED_STREAMS:
                     simulated_bookmark = new_state['bookmarks'][stream]
                 else:
                     simulated_bookmark = new_state['bookmarks']['transaction_orders']
@@ -145,7 +145,7 @@ class BookmarkTest(BaseTapTest):
 
                 # The `transactions` stream is a child of the `orders` stream. Hence the bookmark for transactions is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's bookmark.
                 # Hence it doesn't have its own replication key.
-                if stream not in ('transactions'):
+                if stream not in self.SKIPPED_STREAMS:
                     replication_key = next(iter(expected_replication_keys[stream]))
                     for record in first_sync_messages:
                         replication_key_value = record.get(replication_key)
