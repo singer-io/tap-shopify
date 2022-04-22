@@ -168,5 +168,5 @@ class BookmarkTest(BaseTapTest):
                                     msg="Second sync does not have less records, bookmark usage not verified")
 
                 # verify that we get atleast 1 record in the second sync
-                if stream not in ('collects', 'transactions'):
+                if stream not in ('collects'):
                     self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")
