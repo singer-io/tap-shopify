@@ -163,10 +163,9 @@ class BookmarkTest(BaseTapTest):
                 # collects has all the records with the same value of replication key, so we are removing from this assertion
                 # As the bookmark for `transactions` is solely dependent on the value of bookmark in 'transaction_orders' which stores the parent record's
                 # bookmark, hence we'd now get all the data for transactions stream without filtering on `created_at`
-                if stream not in ('collects', 'transactions'):
+                if stream not in self.SKIPPED_STREAMS:
                     self.assertLess(second_sync_count, first_sync_count,
                                     msg="Second sync does not have less records, bookmark usage not verified")
 
                 # verify that we get atleast 1 record in the second sync
-                if stream not in ('collects'):
-                    self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")
+                self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")
