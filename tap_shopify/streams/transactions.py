@@ -1,6 +1,5 @@
 import shopify
 import singer
-from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
@@ -55,7 +54,8 @@ def canonicalize(transaction_dict, field_name):
 
 class Transactions(Stream):
     name = 'transactions'
-    replication_key = 'created_at'
+    # As it is a child of orders stream and it is incremental based on its parent.
+    replication_key = None
     replication_object = shopify.Transaction
     # Added decorator over functions of shopify SDK
     replication_object.find = shopify_error_handling(replication_object.find)
@@ -107,19 +107,10 @@ class Transactions(Stream):
                 yield transaction
 
     def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            replication_value = strptime_to_utc(transaction_dict[self.replication_key])
-            if replication_value >= bookmark:
-                for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
-                    canonicalize(transaction_dict, field_name)
-                yield transaction_dict
-
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-
-        self.update_bookmark(strftime(max_bookmark))
+            for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
+                canonicalize(transaction_dict, field_name)
+            yield transaction_dict
 
 Context.stream_objects['transactions'] = Transactions

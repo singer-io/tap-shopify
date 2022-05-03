@@ -111,10 +111,9 @@ def discover():
             'tap_stream_id': schema_name,
             'schema': catalog_schema,
             'metadata': get_discovery_metadata(stream, schema),
-            'key_properties': stream.key_properties,
-            'replication_key': stream.replication_key,
-            'replication_method': stream.replication_method
+            'key_properties': stream.key_properties
         }
+
         streams.append(catalog_entry)
 
     return {'streams': streams}
@@ -143,7 +142,7 @@ def sync():
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
                                 stream["key_properties"],
-                                bookmark_properties=stream["replication_key"])
+                                bookmark_properties=stream.get("replication_key", None))
             Context.counts[stream["tap_stream_id"]] = 0
 
     # If there is a currently syncing stream bookmark, shuffle the

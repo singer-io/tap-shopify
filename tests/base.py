@@ -28,6 +28,8 @@ class BaseTapTest(unittest.TestCase):
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
     DEFAULT_RESULTS_PER_PAGE = 175
+    # skipped this stream due to change in the bookmarking logic of the stream.
+    SKIPPED_STREAMS = ('transactions')
 
     @staticmethod
     def tap_name():
@@ -107,7 +109,11 @@ class BaseTapTest(unittest.TestCase):
                 self.API_LIMIT: 250},
             "metafields": meta,
             "transactions": {
-                self.REPLICATION_KEYS: {"created_at"},
+                # `transactions` is child stream of `orders` stream which is incremental.
+                # We are writing a separate bookmark for the child stream in which we are storing 
+                # the bookmark based on the parent's replication key.
+                # But, we are not using any fields from the child record for it.
+                # That's why the `transactions` stream does not have replication_key but still it is incremental.
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
@@ -245,46 +251,56 @@ class BaseTapTest(unittest.TestCase):
         """
         max_bookmarks = {}
         for stream, batch in sync_records.items():
+            # `transactions` is child stream of `orders` stream which is incremental.
+            # We are writing a separate bookmark for the child stream in which we are storing 
+            # the bookmark based on the parent's replication key.
+            # But, we are not using any fields from the child record for it.
+            # That's why the `transactions` stream does not have replication_key but still it is incremental.
+            if stream not in self.SKIPPED_STREAMS:
+                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
+                stream_bookmark_key = self.expected_replication_keys().get(stream, set())
+                assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
+                stream_bookmark_key = stream_bookmark_key.pop()
 
-            upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
-            stream_bookmark_key = self.expected_replication_keys().get(stream, set())
-            assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
-            stream_bookmark_key = stream_bookmark_key.pop()
+                bk_values = [message["data"].get(stream_bookmark_key) for message in upsert_messages]
+                max_bookmarks[stream] = {stream_bookmark_key: None}
+                for bk_value in bk_values:
+                    if bk_value is None:
+                        continue
 
-            bk_values = [message["data"].get(stream_bookmark_key) for message in upsert_messages]
-            max_bookmarks[stream] = {stream_bookmark_key: None}
-            for bk_value in bk_values:
-                if bk_value is None:
-                    continue
+                    if max_bookmarks[stream][stream_bookmark_key] is None:
+                        max_bookmarks[stream][stream_bookmark_key] = bk_value
 
-                if max_bookmarks[stream][stream_bookmark_key] is None:
-                    max_bookmarks[stream][stream_bookmark_key] = bk_value
-
-                if bk_value > max_bookmarks[stream][stream_bookmark_key]:
-                    max_bookmarks[stream][stream_bookmark_key] = bk_value
+                    if bk_value > max_bookmarks[stream][stream_bookmark_key]:
+                        max_bookmarks[stream][stream_bookmark_key] = bk_value
         return max_bookmarks
 
     def min_bookmarks_by_stream(self, sync_records):
         """Return the minimum value for the replication key for each stream"""
         min_bookmarks = {}
         for stream, batch in sync_records.items():
+            # `transactions` is child stream of `orders` stream which is incremental.
+            # We are writing a separate bookmark for the child stream in which we are storing 
+            # the bookmark based on the parent's replication key.
+            # But, we are not using any fields from the child record for it.
+            # That's why the `transactions` stream does not have replication_key but still it is incremental.
+            if stream not in self.SKIPPED_STREAMS:
+                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
+                stream_bookmark_key = self.expected_replication_keys().get(stream, set())
+                assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
+                (stream_bookmark_key, ) = stream_bookmark_key
 
-            upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
-            stream_bookmark_key = self.expected_replication_keys().get(stream, set())
-            assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
-            (stream_bookmark_key, ) = stream_bookmark_key
+                bk_values = [message["data"].get(stream_bookmark_key) for message in upsert_messages]
+                min_bookmarks[stream] = {stream_bookmark_key: None}
+                for bk_value in bk_values:
+                    if bk_value is None:
+                        continue
 
-            bk_values = [message["data"].get(stream_bookmark_key) for message in upsert_messages]
-            min_bookmarks[stream] = {stream_bookmark_key: None}
-            for bk_value in bk_values:
-                if bk_value is None:
-                    continue
+                    if min_bookmarks[stream][stream_bookmark_key] is None:
+                        min_bookmarks[stream][stream_bookmark_key] = bk_value
 
-                if min_bookmarks[stream][stream_bookmark_key] is None:
-                    min_bookmarks[stream][stream_bookmark_key] = bk_value
-
-                if bk_value < min_bookmarks[stream][stream_bookmark_key]:
-                    min_bookmarks[stream][stream_bookmark_key] = bk_value
+                    if bk_value < min_bookmarks[stream][stream_bookmark_key]:
+                        min_bookmarks[stream][stream_bookmark_key] = bk_value
         return min_bookmarks
 
     @staticmethod
