@@ -2,6 +2,18 @@
   "order_adjustments": {
     "items": {
       "properties": {
+        "amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "tax_amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
         "order_id": {
           "type": [
             "null",
@@ -11,9 +23,9 @@
         "tax_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "refund_id": {
           "type": [
@@ -24,9 +36,9 @@
         "amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "kind": {
           "type": [
@@ -58,7 +70,10 @@
     ]
   },
   "customer": {
-    "type": "object",
+    "type": [
+      "null",
+      "object"
+    ],
     "properties": {
       "last_order_name": {
         "type": [
@@ -401,12 +416,77 @@
           "boolean"
         ]
       },
+      "accepts_marketing_updated_at": {
+        "anyOf": [
+          {
+            "type": "string" ,
+            "format": "date-time"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
       "created_at": {
         "type": [
           "null",
           "string"
         ],
         "format": "date-time"
+      },
+      "tax_exemptions": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "marketing_opt_in_level": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "sms_marketing_consent": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "state": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "opt_in_level": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "consent_updated_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "consent_collected_from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
@@ -459,6 +539,70 @@
           "null",
           "string"
         ]
+      },
+      "localized_province_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "localized_country_name": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "updated_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "province": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "phone": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "legacy": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "created_at": {
+        "type": [
+          "null",
+          "string"
+        ],
+        "format": "date-time"
+      },
+      "country": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "active": {
+        "type": [
+          "null",
+          "boolean"]
+      },
+      "admin_graphql_api_id": {
+        "type": [
+          "null",
+          "string"]
+      },
+      "country_name": {
+        "type": [
+          "null",
+          "string"]
       }
     },
     "type": [
@@ -468,7 +612,18 @@
   },
   "line_item": {
     "properties": {
-      "applied_discounts": {},
+      "applied_discounts": {
+        "items": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "type": [
+          "null",
+          "array"
+        ]
+      },
       "total_discount_set": {},
       "pre_tax_price_set": {},
       "price_set": {},
@@ -527,29 +682,37 @@
         ]
       },
       "properties": {
-        "items": {
-          "properties": {
-            "name": {
+        "anyOf": [
+          {
+            "items": {
+              "properties": {
+                "name": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              },
               "type": [
                 "null",
-                "string"
+                "object"
               ]
             },
-            "value": {
-              "type": [
-                "null",
-                "string"
-              ]
-            }
+            "type": [
+              "null",
+              "array"
+            ]
           },
-          "type": [
-            "null",
-            "object"
-          ]
-        },
-        "type": [
-          "null",
-          "array"
+          {
+            "properties": {},
+            "type": ["null", "object"]
+          }
         ]
       },
       "tax_code": {
@@ -612,9 +775,9 @@
       "total_discount": {
         "type": [
           "null",
-          "number"
+          "string"
         ],
-        "multipleOf": 1e-08
+        "format": "singer.decimal"
       },
       "name": {
         "type": [
@@ -658,9 +821,9 @@
       "price": {
         "type": [
           "null",
-          "number"
+          "string"
         ],
-        "multipleOf": 1e-08
+        "format": "singer.decimal"
       },
       "requires_shipping": {
         "type": [
@@ -706,8 +869,10 @@
           "null",
           "integer"
         ]
-      }
+      },
+      "duties": {}
     },
+    "patternProperties": {".+": {}},
     "type": [
       "null",
       "object"
@@ -806,9 +971,9 @@
         "price": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "title": {
           "type": [
@@ -819,9 +984,9 @@
         "rate": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "compare_at": {
           "type": [
@@ -846,8 +1011,15 @@
             "null",
             "string"
           ]
+        },
+        "channel_liable": {
+          "type": [
+            "null",
+            "boolean"
+          ]
         }
       },
+      "patternProperties": {".+": {}},
       "type": [
         "null",
         "object"

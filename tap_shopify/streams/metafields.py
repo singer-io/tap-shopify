@@ -1,5 +1,6 @@
 import json
 import shopify
+import singer
 
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
@@ -7,17 +8,21 @@ from tap_shopify.streams.base import (Stream,
                                       RESULTS_PER_PAGE,
                                       OutOfOrderIdsError)
 
+LOGGER = singer.get_logger()
+
 def get_selected_parents():
     for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
         if Context.is_selected(parent_stream):
             yield Context.stream_objects[parent_stream]()
 
-@shopify_error_handling()
-def get_metafields(parent_object, since_id):
+@shopify_error_handling
+def get_metafields(parent_object, since_id, parent_replication_object, timeout):
+    # set timeout
+    parent_replication_object.set_timeout(timeout)
     # This call results in an HTTP request - the parent object never has a
     # cache of this data so we have to issue that request.
     return parent_object.metafields(
-        limit=RESULTS_PER_PAGE,
+        limit=Context.get_results_per_page(RESULTS_PER_PAGE),
         since_id=since_id)
 
 class Metafields(Stream):
@@ -37,13 +42,16 @@ class Metafields(Stream):
             for parent_object in selected_parent.get_objects():
                 since_id = 1
                 while True:
-                    metafields = get_metafields(parent_object, since_id)
+                    metafields = get_metafields(parent_object,
+                                                since_id,
+                                                selected_parent.replication_object,
+                                                self.request_timeout)
                     for metafield in metafields:
                         if metafield.id < since_id:
                             raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
                                 metafield.id, since_id))
                         yield metafield
-                    if len(metafields) < RESULTS_PER_PAGE:
+                    if len(metafields) < self.results_per_page:
                         break
                     if metafields[-1].id != max([o.id for o in metafields]):
                         raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
@@ -54,10 +62,21 @@ class Metafields(Stream):
         # Shop metafields
         for metafield in self.get_objects():
             metafield = metafield.to_dict()
-            value_type = metafield.get("value_type")
-            if value_type and value_type == "json_string":
+            metafield_type = metafield.get("type")
+            # create "value_type" field in the record
+            metafield["value_type"] = metafield_type
+            # the json_string value in "value_type" field will be
+            # mapped to following "type" value in the new version
+            # Reference: https://shopify.dev/apps/metafields/types
+            if metafield_type and metafield_type in ["json", "weight", "volume", \
+                "dimension", "rating"]:
                 value = metafield.get("value")
-                metafield["value"] = json.loads(value) if value is not None else value
+                try:
+                    metafield["value"] = json.loads(value) if value is not None else value
+                except json.decoder.JSONDecodeError:
+                    LOGGER.info("Failed to decode JSON value for metafield %s", metafield.get('id'))
+                    metafield["value"] = value
+
             yield metafield
 
 Context.stream_objects['metafields'] = Metafields

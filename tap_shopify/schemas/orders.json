@@ -12,12 +12,48 @@
     "total_price_set": {},
     "total_shipping_price_set": {},
     "total_tax_set": {},
+    "current_subtotal_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_duties_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_discounts_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_price_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "current_total_tax_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "original_total_duties_set": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
     "total_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "line_items": {
       "$ref": "definitions.json#/line_items"
@@ -43,16 +79,16 @@
     "total_discounts": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "total_line_items_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "order_adjustments": {
       "$ref": "definitions.json#/order_adjustments"
@@ -74,9 +110,9 @@
           "price": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-08
+            "format": "singer.decimal"
           },
           "title": {
             "type": [
@@ -374,9 +410,9 @@
     "total_tax": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "payment_details": {
       "properties": {
@@ -541,9 +577,9 @@
     "total_price_usd": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "closed_at": {
       "type": [
@@ -647,9 +683,9 @@
     "subtotal_price": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "billing_address": {
       "properties": {
@@ -797,9 +833,9 @@
           "amount": {
             "type": [
               "null",
-              "number"
+              "string"
             ],
-            "multipleOf": 1e-08
+            "format": "singer.decimal"
           },
           "type": {
             "type": [
@@ -1108,6 +1144,139 @@
       "type": [
         "null",
         "string"
+      ]
+    },
+    "current_subtotal_price": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_discounts": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_price": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "current_total_tax": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "total_outstanding": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "payment_terms": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "amount": {
+          "type": [
+            "null",
+            "integer",
+            "string"
+          ]
+        },
+        "currency": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "due_in_days": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "payment_schedules": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "integer",
+                  "string"
+                ]
+              },
+              "due_at": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "date-time"
+              },
+              "currency": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "issued_at": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "date-time"
+              },
+              "completed_at": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "expected_payment_method": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          }
+        },
+        "payment_terms_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "payment_terms_type": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "estimated_taxes": {
+      "type": [
+        "null",
+        "boolean"
       ]
     }
   },

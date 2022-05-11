@@ -9,7 +9,7 @@ classifiers = ["Programming Language :: Python :: 3 :: Only"]
 
 [tool.poetry.dependencies]
 python = "~3.7"
-ShopifyAPI = "~3.1.0"
+ShopifyAPI = "~10.0.0"
 singer-python = "~5.4.1"
 
 [tool.poetry.dev-dependencies]

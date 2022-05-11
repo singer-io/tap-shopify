@@ -1,18 +1,23 @@
-import math
-import functools
 import datetime
+import functools
+import math
 import sys
+import socket
+import backoff
 import pyactiveresource
 import pyactiveresource.formats
 import simplejson
 import singer
-from singer import utils
+from singer import metrics, utils
 from tap_shopify.context import Context
 import time
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 250
+RESULTS_PER_PAGE = 175
+
+# set default timeout of 300 seconds
+REQUEST_TIMEOUT = 300
 
 # We've observed 500 errors returned if this is too large (30 days was too
 # large for a customer)
@@ -20,6 +25,18 @@ DATE_WINDOW_SIZE = 1
 
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
+
+# function to return request timeout
+def get_request_timeout():
+
+    request_timeout = REQUEST_TIMEOUT # set default timeout
+    timeout_from_config = Context.config.get('request_timeout')
+    # updated the timeout value if timeout is passed in config and not from 0, "0", ""
+    if timeout_from_config and float(timeout_from_config):
+        # update the request timeout for the requests
+        request_timeout = float(timeout_from_config)
+
+    return request_timeout
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -49,41 +66,40 @@ def retry_after_wait_gen(**kwargs):
     sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
     yield math.floor(float(sleep_time_str))
 
-def shopify_error_handling():
-    def decorator(fnc):
-        @functools.wraps(fnc)
-        def wrapped(*args, **kwargs):
-            # Shopify returns 429s when their leaky bucket rate limiting
-            # algorithm has been tripped. This will retry those
-            # indefinitely. At some point we could consider adding a
-            # max_retry configuration into this loop. So far that has
-            # proven unnecessary
-            attempt = 0
-            i = 0
-            while i < 1000: #arbitrary big number
-                try:
-                    return fnc(*args, **kwargs)
-                except pyactiveresource.connection.ClientError as client_error:
-                    # We have never seen this be anything _but_ a 429. Other
-                    # states should be consider untested.
-                    resp = client_error.response
-                    if resp.code == 429:
-                        # Retry-After is an undocumented header. But honoring
-                        # it was proven to work in our spikes.
-                        sleep_time_str = resp.headers.get('Retry-After') \
-                                         or resp.headers.get('retry-after', 2)
-                        LOGGER.info("Received 429 -- sleeping for %s seconds", sleep_time_str)
-                        time.sleep(math.floor(float(sleep_time_str)))
-                        i += 1
-                        continue
-                    elif (resp.code == 500 or 599) and (attempt<MAX_RETRIES):
-                        attempt += 1
-                        continue
-                    else:
-                        LOGGER.error("Received a %s error.", resp.code)
-                        raise
-        return wrapped
-    return decorator
+# boolean function to check if the error is 'timeout' error or not
+def is_timeout_error(error_raised):
+    """
+        This function checks whether the error contains 'timed out' substring and return boolean
+        values accordingly, to decide whether to backoff or not.
+    """
+    # retry if the error string contains 'timed out'
+    if str(error_raised).__contains__('timed out'):
+        return False
+    return True
+
+def shopify_error_handling(fnc):
+    @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
+                          (pyactiveresource.connection.Error, socket.timeout),
+                          giveup=is_timeout_error,
+                          max_tries=MAX_RETRIES,
+                          factor=2)
+    @backoff.on_exception(backoff.expo,
+                          (pyactiveresource.connection.ServerError,
+                           pyactiveresource.formats.Error,
+                           simplejson.scanner.JSONDecodeError),
+                          giveup=is_not_status_code_fn(range(500, 599)),
+                          on_backoff=retry_handler,
+                          max_tries=MAX_RETRIES)
+    @backoff.on_exception(retry_after_wait_gen,
+                          pyactiveresource.connection.ClientError,
+                          giveup=is_not_status_code_fn([429]),
+                          on_backoff=leaky_bucket_handler,
+                          # No jitter as we want a constant value
+                          jitter=None)
+    @functools.wraps(fnc)
+    def wrapper(*args, **kwargs):
+        return fnc(*args, **kwargs)
+    return wrapper
 
 class Error(Exception):
     """Base exception for the API interaction module"""
@@ -100,6 +116,15 @@ class Stream():
     key_properties = ['id']
     # Controls which SDK object we use to call the API by default.
     replication_object = None
+    # Status parameter override option
+    status_key = None
+    results_per_page = None
+
+    def __init__(self):
+        self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+
+        # set request timeout
+        self.request_timeout = get_request_timeout()
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -132,16 +157,26 @@ class Stream():
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 and 500 handling.
-    @shopify_error_handling()
+    @shopify_error_handling
     def call_api(self, query_params):
+        # set timeout
+        self.replication_object.set_timeout(self.request_timeout)
         return self.replication_object.find(**query_params)
+
+    def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):
+        return {
+            "since_id": since_id,
+            "updated_at_min": updated_at_min,
+            "updated_at_max": updated_at_max,
+            "limit": self.results_per_page,
+            status_key: "any"
+        }
 
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-        results_per_page = int(Context.config.get("results_per_page", RESULTS_PER_PAGE))
 
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
@@ -160,14 +195,15 @@ class Stream():
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
-                query_params = {
-                    "since_id": since_id,
-                    "updated_at_min": updated_at_min,
-                    "updated_at_max": updated_at_max,
-                    "limit": results_per_page,
-                    "status": "any"
-                }
-                objects = self.call_api(query_params)
+                status_key = self.status_key or "status"
+                query_params = self.get_query_params(since_id,
+                                                     status_key,
+                                                     updated_at_min,
+                                                     updated_at_max)
+
+                with metrics.http_request_timer(self.name):
+                    objects = self.call_api(query_params)
+
                 for obj in objects:
                     if obj.id < since_id:
                         # This verifies the api behavior expectation we
@@ -179,7 +215,7 @@ class Stream():
 
                 # You know you're at the end when the current page has
                 # less than the request size limits you set.
-                if len(objects) < results_per_page:
+                if len(objects) < self.results_per_page:
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
