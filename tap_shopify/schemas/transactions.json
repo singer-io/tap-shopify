@@ -45,9 +45,9 @@
     "amount": {
       "type": [
         "null",
-        "number"
+        "string"
       ],
-      "multipleOf": 1e-08
+      "format": "singer.decimal"
     },
     "authorization": {
       "type": [
@@ -150,23 +150,23 @@
         "fee_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "gross_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         },
         "tax_amount": {
           "type": [
             "null",
-            "number"
+            "string"
           ],
-          "multipleOf": 1e-08
+          "format": "singer.decimal"
         }
       },
       "patternProperties": {".+": {}}
@@ -176,6 +176,32 @@
         "null",
         "integer"
       ]
+    },
+    "processed_at": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "payments_refund_attributes": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "status": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "acquirer_reference_number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     }
   },
   "type": "object"

@@ -271,6 +271,7 @@
                       ]
                     }
                   },
+                  "patternProperties": {".+": {}},
                   "type": [
                     "null",
                     "object"
@@ -642,6 +643,7 @@
                 ]
               }
             },
+            "patternProperties": {".+": {}},
             "type": [
               "null",
               "object"
@@ -665,6 +667,117 @@
           "object"
         ]
       }
-    }
+    },
+    "transactions": {
+      "type": ["null", "array"],
+      "items": {
+        "properties": {
+          "admin_graphql_api_id": {
+            "type": ["null", "string"]
+          },
+          "amount": {
+            "type": ["null", "string"],
+            "format": "singer.decimal"
+          },
+          "authorization": {
+            "type": ["null", "string"]
+          },
+          "created_at": {
+            "type": ["null", "string"]
+          },
+          "currency": {
+            "type": ["null", "string"]
+          },
+          "error_code": {
+            "type": ["null", "string"]
+          },
+          "device_id": {
+            "type": ["null", "integer"]
+          },
+          "gateway": {
+            "type": ["null", "string"]
+          },
+          "id": {
+            "type": ["null", "integer"]
+          },
+          "kind": {
+            "type": ["null", "string"]
+          },
+          "location_id": {
+            "type": ["null", "integer"]
+          },
+          "message": {
+            "type": ["null", "string"]
+          },
+          "order_id": {
+            "type": ["null", "integer"]
+          },
+          "parent_id": {
+            "type": ["null", "integer"]
+          },
+          "payment_details": {
+            "properties": {
+              "cvv_result_code": {
+                  "type": ["null", "string"]
+              },
+              "credit_card_bin": {
+                  "type": ["null", "string"]
+              },
+              "credit_card_company": {
+                  "type": ["null", "string"]
+              },
+              "credit_card_number": {
+                  "type": ["null", "string"]
+              },
+              "avs_result_code": {
+                  "type": ["null", "string"]
+              },
+              "payments_refund_attributes": {
+                "type": ["null", "string"]
+              },
+              "acquirer_reference_number": {
+                "type": ["null", "string"]
+              },
+              "status": {
+                "type": ["null", "string"]
+              },
+              "processed_at": {
+                "type": ["null", "string"]
+              }
+            },
+            "type": ["null", "object"]
+          },
+          "user_id": {
+            "type": ["null", "integer"]
+          },
+          "test": {
+            "type": ["null", "boolean"]
+          },
+          "source_name": {
+            "type": ["null", "string"]
+          },
+          "status": {
+            "type": ["null", "string"]
+          },
+          "receipt": {},
+          "payments_refund_attributes": {
+            "properties": {
+              "status": {
+                  "type": ["null", "string"]
+              },
+              "acquirer_reference_number": {
+                  "type": ["null", "string"]
+              }
+            },
+            "type": ["null", "object"]
+          },
+          "processed_at": {
+            "type": ["null", "string"]
+          }
+        },
+        "type": ["null", "object"]
+      }
+    },
+    "duties": {}
   }
 }

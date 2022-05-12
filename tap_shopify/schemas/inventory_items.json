@@ -1,0 +1,100 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "sku": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "requires_shipping": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "cost": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "country_code_of_origin": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "province_code_of_origin": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "harmonized_system_code": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "tracked": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "country_harmonized_system_codes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "harmonized_system_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "country_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "admin_graphql_api_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  }
+}

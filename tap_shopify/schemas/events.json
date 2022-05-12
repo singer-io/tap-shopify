@@ -1,33 +1,10 @@
 {
+  "type": "object",
   "properties": {
-    "owner_id": {
+    "id": {
       "type": [
         "null",
         "integer"
-      ]
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "owner_resource": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "value_type": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "key": {
-      "type": [
-        "null",
-        "string"
       ]
     },
     "created_at": {
@@ -37,13 +14,43 @@
       ],
       "format": "date-time"
     },
-    "id": {
+    "body": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "path": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "message": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+     "subject_id": {
       "type": [
         "null",
         "integer"
       ]
     },
-    "namespace": {
+    "subject_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "verb": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "author": {
       "type": [
         "null",
         "string"
@@ -55,28 +62,22 @@
         "string"
       ]
     },
-    "value": {
-      "type": [
-        "null",
-        "integer",
-        "object",
-        "string"
-      ],
-      "properties": {}
-    },
-    "updated_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "type": {
-      "type": [
-        "null",
-        "string"
+    "arguments": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {}
+        },
+        {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
       ]
     }
-  },
-  "type": "object"
+  }
 }

@@ -1,4 +1,7 @@
+import singer
 from singer import metadata
+
+LOGGER = singer.get_logger()
 
 class Context():
     config = {}
@@ -23,3 +26,20 @@ class Context():
 
         stream_metadata = metadata.to_map(stream['metadata'])
         return metadata.get(stream_metadata, (), 'selected')
+
+    @classmethod
+    def get_results_per_page(cls, default_results_per_page):
+        results_per_page = default_results_per_page
+        try:
+            results_per_page = int(cls.config.get("results_per_page"))
+        except TypeError:
+            # None value or no key
+            pass
+        except ValueError:
+            # non-int value
+            log_msg = ('Failed to parse results_per_page value of "%s" ' +
+                       'as an integer, falling back to default of %d')
+            LOGGER.info(log_msg,
+                        Context.config['results_per_page'],
+                        default_results_per_page)
+        return results_per_page
