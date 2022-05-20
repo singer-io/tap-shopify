@@ -308,9 +308,12 @@ class Stream():
                 updated_at_min = updated_at_min + datetime.timedelta(days=1)
 
             # Check if import start time until now exceeds max allowed hours
-            if (datetime.datetime.now() - started_at).seconds / 3600 > max_time:
+            run_hours = (datetime.datetime.now() - started_at).seconds / 3600
+            if run_hours > max_time:
+                LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
+                            "Please trigger further incremental data to get the missing rows.",
+                            int(run_hours), max_time)
                 break
-
 
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
