@@ -307,7 +307,6 @@ class Stream():
             if self.skip_day:
                 updated_at_min = updated_at_min + datetime.timedelta(days=1)
 
-            updated_at_min + datetime.timedelta(days=365)
             # Check if import start time until now exceeds max allowed hours
             if (datetime.datetime.now() - started_at).seconds / 3600 > max_time:
                 break
