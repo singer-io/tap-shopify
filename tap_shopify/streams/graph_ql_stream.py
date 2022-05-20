@@ -51,6 +51,8 @@ class GraphQlStream(Stream):
             LOGGER.info("This import will only import the first year of historical data. "
                         "You need to trigger further incremental imports to get the missing rows.")
 
+        max_time = 24
+        started_at = datetime.now()
         # Page through till the end of the result set
         while updated_at_min < stop_time:
             after = None
@@ -87,6 +89,10 @@ class GraphQlStream(Stream):
             # count records and add additional window size time if no data found
             if not records and stop_time < today_date:
                 stop_time += datetime.timedelta(days=date_window_size)
+
+            # Check if import start time until now exceeds max allowed hours
+            if (datetime.datetime.now() - started_at).seconds / 3600 > max_time:
+                break
 
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
