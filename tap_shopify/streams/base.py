@@ -223,6 +223,8 @@ class Stream():
         results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
         records = 0
 
+        max_time = 24
+        started_at = datetime.datetime.now()
         # Page through till the end of the resultset
         while updated_at_min < stop_time:
             # Bookmarking can also occur on the since_id
@@ -304,6 +306,12 @@ class Stream():
 
             if self.skip_day:
                 updated_at_min = updated_at_min + datetime.timedelta(days=1)
+
+            updated_at_min + datetime.timedelta(days=365)
+            # Check if import start time until now exceeds max allowed hours
+            if (datetime.datetime.now() - started_at).seconds / 3600 > max_time:
+                break
+
 
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
