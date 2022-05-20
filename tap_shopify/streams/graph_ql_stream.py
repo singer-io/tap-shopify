@@ -91,10 +91,11 @@ class GraphQlStream(Stream):
                 stop_time += datetime.timedelta(days=date_window_size)
 
             # Check if import start time until now exceeds max allowed hours
-            if (datetime.datetime.now() - started_at).seconds / 3600 > max_time:
+            run_hours = (datetime.datetime.now() - started_at).seconds / 3600
+            if run_hours > max_time:
                 LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
                             "Please trigger further incremental data to get the missing rows.",
-                            (datetime.datetime.now() - started_at).seconds, max_time)
+                            int(run_hours), max_time)
                 break
 
         if yearly:
