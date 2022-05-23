@@ -63,6 +63,14 @@ class GraphQlStream(Stream):
             singer.log_info("getting from %s - %s", updated_at_min,
                             updated_at_max)
             while True:
+                # Check if import start time until now exceeds max allowed hours
+                run_hours = (datetime.datetime.now() - started_at).seconds / 3600
+                if run_hours > max_time:
+                    LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
+                                "Please trigger further incremental data to get the missing rows.",
+                                int(run_hours), max_time)
+                    break
+
                 query = self.get_graph_query(updated_at_min,
                                              updated_at_max,
                                              replication_obj.name,
@@ -89,14 +97,6 @@ class GraphQlStream(Stream):
             # count records and add additional window size time if no data found
             if not records and stop_time < today_date:
                 stop_time += datetime.timedelta(days=date_window_size)
-
-            # Check if import start time until now exceeds max allowed hours
-            run_hours = (datetime.datetime.now() - started_at).seconds / 3600
-            if run_hours > max_time:
-                LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
-                            "Please trigger further incremental data to get the missing rows.",
-                            int(run_hours), max_time)
-                break
 
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
