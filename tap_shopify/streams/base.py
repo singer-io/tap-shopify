@@ -226,8 +226,6 @@ class Stream():
         max_time = 24
         started_at = datetime.datetime.now()
         # Page through till the end of the resultset
-        print("Started at: ", started_at)
-        print("Datetime now: ", datetime.datetime.now())
         while updated_at_min < stop_time and (datetime.datetime.now() - started_at).seconds / 3600 < max_time:
             # Bookmarking can also occur on the since_id
             since_id = self.get_since_id() or 1
