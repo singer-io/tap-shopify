@@ -54,7 +54,7 @@ class GraphQlStream(Stream):
         max_time = 24
         started_at = datetime.now()
         # Page through till the end of the result set
-        while updated_at_min < stop_time:
+        while updated_at_min < stop_time and (datetime.datetime.now() - started_at).seconds / 3600 < max_time:
             after = None
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
 
