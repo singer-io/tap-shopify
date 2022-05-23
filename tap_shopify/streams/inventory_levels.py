@@ -19,13 +19,17 @@ class InventoryLevels(Stream):
             limit = RESULTS_PER_PAGE,
             location_ids=parent_object_id
         )
+    
+    @shopify_error_handling
+    def get_next_page(self, inventory_page):
+        return inventory_page.next_page()
 
     def get_inventory_levels(self, parent_object, bookmark):
         inventory_page = self.api_call_for_inventory_levels(parent_object, bookmark)
         yield from inventory_page
 
         while inventory_page.has_next_page():
-            inventory_page = inventory_page.next_page()
+            inventory_page = self.get_next_page(inventory_page)
             yield from inventory_page
 
     def get_objects(self):
