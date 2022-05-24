@@ -51,10 +51,10 @@ class GraphQlStream(Stream):
             LOGGER.info("This import will only import the first year of historical data. "
                         "You need to trigger further incremental imports to get the missing rows.")
 
-        max_time = 24
+        max_time = 1
         started_at = datetime.datetime.now()
         # Page through till the end of the result set
-        while updated_at_min < stop_time and (datetime.datetime.now() - started_at).seconds / 3600 < max_time:
+        while updated_at_min < stop_time and (datetime.datetime.now() - started_at).days < max_time:
             after = None
             updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
 
@@ -64,11 +64,11 @@ class GraphQlStream(Stream):
                             updated_at_max)
             while True:
                 # Check if import start time until now exceeds max allowed hours
-                run_hours = (datetime.datetime.now() - started_at).seconds / 3600
-                if run_hours > max_time:
-                    LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
+                run_days = (datetime.datetime.now() - started_at).days
+                if run_days > max_time:
+                    LOGGER.info("Import time of %s day(s) exceeds allowed max days %s. "
                                 "Please trigger further incremental data to get the missing rows.",
-                                int(run_hours), max_time)
+                                int(run_days), max_time)
                     break
 
                 query = self.get_graph_query(updated_at_min,

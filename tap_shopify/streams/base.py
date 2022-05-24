@@ -223,10 +223,10 @@ class Stream():
         results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
         records = 0
 
-        max_time = 24
+        max_time = 1
         started_at = datetime.datetime.now()
         # Page through till the end of the resultset
-        while updated_at_min < stop_time and (datetime.datetime.now() - started_at).seconds / 3600 < max_time:
+        while updated_at_min < stop_time and (datetime.datetime.now() - started_at).days < max_time:
             # Bookmarking can also occur on the since_id
             since_id = self.get_since_id() or 1
 
@@ -250,11 +250,11 @@ class Stream():
 
             while True:
                 # Check if import start time until now exceeds max allowed hours
-                run_hours = (datetime.datetime.now() - started_at).seconds / 3600
-                if run_hours > max_time:
-                    LOGGER.info("Import time of %s hours exceeds allowed max hours %s. "
+                run_days = (datetime.datetime.now() - started_at).days
+                if run_days > max_time:
+                    LOGGER.info("Import time of %s day(s) exceeds allowed max days %s. "
                                 "Please trigger further incremental data to get the missing rows.",
-                                int(run_hours), max_time)
+                                int(run_days), max_time)
                     break
 
                 status_key = self.status_key or "status"
