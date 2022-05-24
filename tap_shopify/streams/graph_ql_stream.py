@@ -52,7 +52,7 @@ class GraphQlStream(Stream):
                         "You need to trigger further incremental imports to get the missing rows.")
 
         max_time = 24
-        started_at = datetime.now()
+        started_at = datetime.datetime.now()
         # Page through till the end of the result set
         while updated_at_min < stop_time and (datetime.datetime.now() - started_at).seconds / 3600 < max_time:
             after = None
