@@ -2,6 +2,18 @@
   "order_adjustments": {
     "items": {
       "properties": {
+        "amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
+        "tax_amount_set": {
+          "type": [
+            "null",
+            "object"
+          ]
+        },
         "order_id": {
           "type": [
             "null",
@@ -424,6 +436,57 @@
           "string"
         ],
         "format": "date-time"
+      },
+      "tax_exemptions": {
+        "type": [
+          "null",
+          "array"
+        ],
+        "items": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      },
+      "marketing_opt_in_level": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "sms_marketing_consent": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "state": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "opt_in_level": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "consent_updated_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "consent_collected_from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
@@ -1063,8 +1126,10 @@
           "null",
           "integer"
         ]
-      }
+      },
+      "duties": {}
     },
+    "patternProperties": {".+": {}},
     "type": [
       "null",
       "object"
@@ -1290,8 +1355,15 @@
             "null",
             "string"
           ]
+        },
+        "channel_liable": {
+          "type": [
+            "null",
+            "boolean"
+          ]
         }
       },
+      "patternProperties": {".+": {}},
       "type": [
         "null",
         "object"

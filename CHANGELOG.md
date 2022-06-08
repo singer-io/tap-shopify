@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.1
+  * Fixing Tranformation Issues [#149] (https://github.com/singer-io/tap-shopify/pull/149)
+## 1.6.0
+  * API/SDK Upgrade to v10.0.0 [#135] (https://github.com/singer-io/tap-shopify/pull/135)
+  * New Field Additions to Schema [#140] (https://github.com/singer-io/tap-shopify/pull/140)
+
 ## 1.5.1
   * Request Timeout Implementation [#129](https://github.com/singer-io/tap-shopify/pull/129)
 ## 1.5.0
