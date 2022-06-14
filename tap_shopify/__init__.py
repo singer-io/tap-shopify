@@ -100,6 +100,7 @@ def discover():
         group = hasattr(stream, 'group')
         if group:
             catalog_entry['group'] = stream.group
+            catalog_entry['table_name'] = stream.name
         streams.append(catalog_entry)
     return {'streams': streams}
 

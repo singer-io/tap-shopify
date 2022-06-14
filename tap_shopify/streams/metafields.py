@@ -12,9 +12,11 @@ from tap_shopify.streams.base import (Stream,
 LOGGER = singer.get_logger()
 
 
-def get_selected_parents():
-    # TODO najada: get only parent_stream of selected metafield ?
-    for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
+def get_selected_parents(name):
+    parent_streams = ['orders', 'customers', 'products', 'custom_collections']
+    if name in parent_streams:
+        parent_streams = [name]
+    for parent_stream in parent_streams:
         yield Context.stream_objects[parent_stream]()
 
 
@@ -29,13 +31,14 @@ def get_metafields(parent_object, since_id):
 
 class Metafields(Stream):
     name = 'metafields'
+    parent_name = None
     replication_object = shopify.Metafield
 
     def get_objects(self):
         # Get top-level shop metafields
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`
-        for selected_parent in get_selected_parents():
+        for selected_parent in get_selected_parents(self.parent_name):
             # The name member controls many things, but most importantly
             # the bookmark key. This switches us over to the
             # `metafield_<parent_type>` bookmark. We track that separately
@@ -85,25 +88,29 @@ class Metafields(Stream):
 
 class OrderMetafields(Metafields):
     name = 'metafields_orders'
-    group = 'metafields'
+    parent_name = 'orders'
+    group = 'all_metafields'
     replication_object = shopify.Metafield
 
 
 class ProductMetafields(Metafields):
     name = 'metafields_products'
-    group = 'metafields'
+    parent_name = 'products'
+    group = 'all_metafields'
     replication_object = shopify.Metafield
 
 
 class CustomerMetafields(Metafields):
     name = 'metafields_customers'
-    group = 'metafields'
+    parent_name = 'customers'
+    group = 'all_metafields'
     replication_object = shopify.Metafield
 
 
 class CustomCollectionsMetafields(Metafields):
     name = 'metafields_custom_collections'
-    group = 'metafields'
+    parent_name = 'custom_collections'
+    group = 'all_metafields'
     replication_object = shopify.Metafield
 
 
