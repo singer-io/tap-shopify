@@ -1,5 +1,9 @@
 # Changelog
 
+## ## 1.6.3
+
+- Dependabot bump pyjwt from 2.3.0 to 2.4.0
+
 ## ## 1.6.2
 
 - Merge latest from singer-io/tap-shopify
