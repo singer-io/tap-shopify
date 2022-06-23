@@ -18,7 +18,7 @@
         "string"
       ]
     },
-    "value_type": {
+    "type": {
       "type": [
         "null",
         "string"
