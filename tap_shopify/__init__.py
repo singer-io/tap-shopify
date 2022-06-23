@@ -96,16 +96,21 @@ def discover():
             'replication_key': stream.replication_key,
             'replication_method': stream.replication_method
         }
-        streams.append(catalog_entry)
 
+        group = hasattr(stream, 'group')
+        if group:
+            catalog_entry['group'] = stream.group
+            catalog_entry['table_name'] = stream.name
+        streams.append(catalog_entry)
     return {'streams': streams}
 
 
 def shuffle_streams(stream_name):
-    '''
-    Takes the name of the first stream to sync and reshuffles the order
-    of the list to put it at the top
-    '''
+    """
+        Takes the name of the first stream to sync and reshuffles the order
+        of the list to put it at the top
+    """
+
     matching_index = 0
     for i, catalog_entry in enumerate(Context.catalog["streams"]):
         if catalog_entry["tap_stream_id"] == stream_name:

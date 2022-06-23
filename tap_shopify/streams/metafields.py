@@ -12,9 +12,13 @@ from tap_shopify.streams.base import (Stream,
 LOGGER = singer.get_logger()
 
 
-def get_selected_parents():
-    for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
+def get_selected_parents(name):
+    parent_streams = ['orders', 'customers', 'products', 'custom_collections']
+    if name in parent_streams:
+        parent_streams = [name]
+    for parent_stream in parent_streams:
         yield Context.stream_objects[parent_stream]()
+
 
 @shopify_error_handling
 def get_metafields(parent_object, since_id):
@@ -24,15 +28,17 @@ def get_metafields(parent_object, since_id):
         limit=RESULTS_PER_PAGE,
         since_id=since_id)
 
+
 class Metafields(Stream):
     name = 'metafields'
+    parent_name = None
     replication_object = shopify.Metafield
 
     def get_objects(self):
         # Get top-level shop metafields
         yield from super().get_objects()
         # Get parent objects, bookmarking at `metafield_<object_name>`
-        for selected_parent in get_selected_parents():
+        for selected_parent in get_selected_parents(self.parent_name):
             # The name member controls many things, but most importantly
             # the bookmark key. This switches us over to the
             # `metafield_<parent_type>` bookmark. We track that separately
@@ -40,7 +46,6 @@ class Metafields(Stream):
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
                 yield from self.get_metadatafields(parent_object)
-
 
     def get_metadatafields(self, parent_object):
         since_id = 1
@@ -80,4 +85,38 @@ class Metafields(Stream):
 
             yield metafield
 
+
+class OrderMetafields(Metafields):
+    name = 'metafields_orders'
+    parent_name = 'orders'
+    group = 'all_metafields'
+    replication_object = shopify.Metafield
+
+
+class ProductMetafields(Metafields):
+    name = 'metafields_products'
+    parent_name = 'products'
+    group = 'all_metafields'
+    replication_object = shopify.Metafield
+
+
+class CustomerMetafields(Metafields):
+    name = 'metafields_customers'
+    parent_name = 'customers'
+    group = 'all_metafields'
+    replication_object = shopify.Metafield
+
+
+class CustomCollectionsMetafields(Metafields):
+    name = 'metafields_custom_collections'
+    parent_name = 'custom_collections'
+    group = 'all_metafields'
+    replication_object = shopify.Metafield
+
+
 Context.stream_objects['metafields'] = Metafields
+# add separate metafields tables
+Context.stream_objects['metafields_orders'] = OrderMetafields
+Context.stream_objects['metafields_products'] = ProductMetafields
+Context.stream_objects['metafields_customers'] = CustomerMetafields
+Context.stream_objects['metafields_custom_collections'] = CustomCollectionsMetafields
