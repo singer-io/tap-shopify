@@ -5,7 +5,7 @@ from tap_shopify.streams.graph_ql_stream import GraphQlChildStream
 
 LOGGER = singer.get_logger()
 
-
+#Graph_ql_stream -> Orders
 class CustomerJourney(GraphQlChildStream):
     name = 'customer_journey'
 

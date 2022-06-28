@@ -27,7 +27,7 @@ class ChildStream(Stream):
 
         # Page through all `orders`, bookmarking at `child_orders`
         for parent_object in selected_parent.get_objects():
-            since_id = 1
+            since_id = self.get_since_id() or 1
             while True:
                 children = self.get_children(parent_object, since_id)
                 for child in children:
@@ -41,6 +41,7 @@ class ChildStream(Stream):
                     raise OutOfOrderIdsError("{} is not the max id in children ({})".format(
                         children[-1].id, max([o.id for o in children])))
                 since_id = children[-1].id
+                self.push_id(since_id)
 
     @abstractmethod
     def get_parent_name(self):

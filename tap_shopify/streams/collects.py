@@ -14,14 +14,17 @@ class Collects(Stream):
     replication_key = 'updated_at'
 
     def get_objects(self):
-        since_id = 1
+        since_id = self.get_since_id() or 1
         bookmark = self.get_bookmark()
         max_bookmark = utils.strftime(utils.now())
+        self.last_bookmark = bookmark
         while True:
             query_params = {
                 "since_id": since_id,
                 "limit": RESULTS_PER_PAGE,
             }
+            if since_id != 1:
+                LOGGER.info("Resuming sync from since_id %d", since_id)
 
             objects = self.call_api(query_params)
 
@@ -36,16 +39,21 @@ class Collects(Stream):
                     if obj.id < since_id:
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
+                    self.compare_bookmark(obj.updated_at)
                     yield obj
+
+            self.update_bookmark(self.last_bookmark)
 
             if len(objects) < RESULTS_PER_PAGE:
                 # Update the bookmark at the end of the last page
                 self.update_bookmark(max_bookmark)
                 break
+
             if objects[-1].id != max([o.id for o in objects]):
                 raise OutOfOrderIdsError("{} is not the max id in objects ({})".format(
                     objects[-1].id, max([o.id for o in objects])))
             since_id = objects[-1].id
+            self.push_id(since_id)
 
 
 Context.stream_objects['collects'] = Collects
