@@ -41,7 +41,6 @@ class ChildStream(Stream):
                     raise OutOfOrderIdsError("{} is not the max id in children ({})".format(
                         children[-1].id, max([o.id for o in children])))
                 since_id = children[-1].id
-                self.push_id(since_id)
 
     @abstractmethod
     def get_parent_name(self):

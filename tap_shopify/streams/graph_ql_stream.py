@@ -94,6 +94,7 @@ class GraphQlStream(Stream):
                     break
 
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
+
             # count records and add additional window size time if no data found
             if not records and stop_time < today_date:
                 stop_time += datetime.timedelta(days=date_window_size)

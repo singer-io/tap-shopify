@@ -303,12 +303,6 @@ class Stream():
                         objects[-1].id, max([o.id for o in objects])))
                 since_id = objects[-1].id
 
-                # Update state for each page request and also update since_id.
-                self.update_bookmark(since_id, bookmark_key='since_id')
-                # self.push_id(since_id)
-                updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
-                self.update_bookmark(utils.strftime(updated_at_min))
-
             updated_at_min = updated_at_max + datetime.timedelta(seconds=1)
 
             # count records and add additional window size time if no data found
@@ -318,6 +312,7 @@ class Stream():
             if self.skip_day:
                 updated_at_min = updated_at_min + datetime.timedelta(days=1)
 
+            self.update_bookmark(utils.strftime(updated_at_min))
         if yearly:
             LOGGER.info("This import only imported one year of historical data. "
                         "Please trigger further incremental data to get the missing rows.")
@@ -354,6 +349,6 @@ class Stream():
         if utils.strptime_with_tz(new_bookmark) > self.last_bookmark:
             self.last_bookmark = new_bookmark
 
-    #This function in streams that accept to query by since id, push the id into the state
+    # This function in streams that accept to query by since id, push the id into the state
     def push_id(self, since_id):
         self.update_bookmark(since_id, bookmark_key='since_id')
