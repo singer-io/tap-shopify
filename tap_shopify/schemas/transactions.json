@@ -141,6 +141,111 @@
         "null",
         "string"
       ]
+    },
+    "fees": {
+      "items": {
+        "properties": {
+          "amount": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "number"
+                ]
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "flatFee": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "number"
+                ]
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "flatFeeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rate": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "rateName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "taxAmount": {
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "number"
+                ]
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": [
+          "null",
+          "object"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
+      ],
+      "needs_edges": false
     }
   },
   "type": "object"
