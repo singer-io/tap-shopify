@@ -163,5 +163,6 @@ class StartDateTest(BaseTapTest):
                                                     self.local_to_utc(parse(start_date)))
 
                     except (OverflowError, ValueError, TypeError):
-                        LOGGER.warn("bookmarks cannot be converted to dates, "
-                                    "can't test start_date for %s", stream)
+                        LOGGER.warn(
+                            "bookmarks cannot be converted to dates, can't test start_date for %s", stream
+                        )

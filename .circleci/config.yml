@@ -36,7 +36,6 @@ jobs:
           path: test_output/report.xml
       - store_artifacts:
           path: htmlcov
-      - add_ssh_keys
       - run:
           name: 'Integration Tests'
           command: |
