@@ -591,6 +591,25 @@
         "null",
         "boolean"
       ]
+    },
+    "buyer_accepts_sms_marketing": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "sms_marketing_phone": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "total_duties": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
     }
   }
 }

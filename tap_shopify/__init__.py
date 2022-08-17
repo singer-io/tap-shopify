@@ -25,7 +25,7 @@ SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    version = '2021-04'
+    version = '2022-01'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
 
@@ -167,7 +167,8 @@ def sync():
             Context.state['bookmarks'] = {}
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
 
-        with Transformer() as transformer:
+        # some fields have epoch-time as date, hence transform into UTC date
+        with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:
             for rec in stream.sync():
                 extraction_time = singer.utils.now()
                 record_schema = catalog_entry['schema']
