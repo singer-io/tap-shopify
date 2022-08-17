@@ -2,17 +2,17 @@
 Setup expectations for test sub classes
 Run discovery for as a prerequisite for most tests
 """
-import unittest
 import os
 from datetime import datetime as dt
 from datetime import timezone as tz
 import dateutil.parser
 import pytz
 from datetime import timedelta
+
 from tap_tester import connections, menagerie, runner
+from tap_tester.base_case import BaseCase
 
-
-class BaseTapTest(unittest.TestCase):
+class BaseTapTest(BaseCase):
     """
     Setup expectations for test sub classes
     Run discovery for as a prerequisite for most tests

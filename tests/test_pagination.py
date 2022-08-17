@@ -13,7 +13,8 @@ class PaginationTest(BaseTapTest):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'        
 
-    def name(self):
+    @staticmethod
+    def name():
         return "tap_tester_shopify_pagination_test"
 
     def get_properties(self, *args, **kwargs):
