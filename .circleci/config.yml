@@ -36,16 +36,19 @@ jobs:
           path: test_output/report.xml
       - store_artifacts:
           path: htmlcov
-      - add_ssh_keys
       - run:
           name: 'Integration Tests'
           command: |
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
             source dev_env.sh
+            mkdir /tmp/${CIRCLE_PROJECT_REPONAME}
+            export STITCH_CONFIG_DIR=/tmp/${CIRCLE_PROJECT_REPONAME}
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
             run-test --tap=tap-shopify tests
       - slack/notify-on-failure:
           only_for_branches: master
+      - store_artifacts:
+          path: /tmp/tap-shopify
 
 workflows:
   version: 2

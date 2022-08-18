@@ -8,7 +8,7 @@ import os
 
 from dateutil.parser import parse
 
-from tap_tester import menagerie, runner
+from tap_tester import menagerie, runner, LOGGER
 
 from base import BaseTapTest
 
@@ -163,5 +163,6 @@ class StartDateTest(BaseTapTest):
                                                     self.local_to_utc(parse(start_date)))
 
                         except (OverflowError, ValueError, TypeError):
-                            print("bookmarks cannot be converted to dates, "
-                                "can't test start_date for {}".format(stream))
+                            LOGGER.warn(
+                                "bookmarks cannot be converted to dates, can't test start_date for %s", stream
+                            )

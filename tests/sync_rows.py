@@ -11,8 +11,6 @@ from base import ShopifyTest
 from functools import reduce
 from singer import metadata
 
-LOGGER = singer.get_logger()
-
 # The token used to authenticate our requests was generated on
 # [2018-09-18](https://github.com/stitchdata/environments/commit/82609cef972fd631c628b8eb733f37eea8f5d4f4).
 # If it ever expires, you'll need to login to Shopify via the 1Password
