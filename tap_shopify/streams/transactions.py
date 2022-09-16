@@ -15,7 +15,7 @@ class Transactions(GraphQlChildStream):
     parent_id_ql_prefix = 'gid://shopify/Order/'
 
     def transform_obj(self, obj):
-        if "receipt" in obj:
+        if "receipt" in obj and obj["receipt"] is not None:
             obj["receipt"] = obj["receipt"].replace("=>", ":").replace("nil", "null")
         return obj
 
