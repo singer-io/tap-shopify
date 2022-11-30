@@ -38,17 +38,7 @@ class InventoryItems(Stream):
                 yield inventory_item
 
     def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
         for inventory_item in self.get_objects():
-            inventory_item_dict = inventory_item.to_dict()
-            replication_value = strptime_to_utc(inventory_item_dict[self.replication_key])
-            if replication_value >= bookmark:
-                yield inventory_item_dict
-
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-
-        self.update_bookmark(strftime(max_bookmark))
+            yield inventory_item.to_dict()
 
 Context.stream_objects['inventory_items'] = InventoryItems
