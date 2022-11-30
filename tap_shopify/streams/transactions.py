@@ -3,54 +3,14 @@ import singer
 from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
-                                      shopify_error_handling)
+                                      shopify_error_handling,
+                                      canonicalize)
 
 LOGGER = singer.get_logger()
 
 # https://help.shopify.com/en/api/reference/orders/transaction An
 # order can have no more than 100 transactions associated with it.
 TRANSACTIONS_RESULTS_PER_PAGE = 100
-
-# We have observed transactions with receipt objects that contain both:
-#   - `token` and `Token`
-#   - `version` and `Version`
-#   - `ack` and `Ack`
-# keys transactions where PayPal is the payment type. We reached out to
-# PayPal support and they told us the values should be the same, so one
-# can be safely ignored since its a duplicate. Example: The logic is to
-# prefer `token` if both are present and equal, convert `Token` -> `token`
-# if only `Token` is present, and throw an error if both are present and
-# their values are not equal
-def canonicalize(transaction_dict, field_name):
-    field_name_upper = field_name.capitalize()
-    # Not all Shopify transactions have receipts. Facebook has been shown
-    # to push a null receipt through the transaction
-    receipt = transaction_dict.get('receipt', {})
-    if receipt:
-        value_lower = receipt.get(field_name)
-        value_upper = receipt.get(field_name_upper)
-        if value_lower and value_upper:
-            if value_lower == value_upper:
-                LOGGER.info((
-                    "Transaction (id=%d) contains a receipt "
-                    "that has `%s` and `%s` keys with the same "
-                    "value. Removing the `%s` key."),
-                            transaction_dict['id'],
-                            field_name,
-                            field_name_upper,
-                            field_name_upper)
-                transaction_dict['receipt'].pop(field_name_upper)
-            else:
-                raise ValueError((
-                    "Found Transaction (id={}) with a receipt that has "
-                    "`{}` and `{}` keys with the different "
-                    "values. Contact Shopify/PayPal support.").format(
-                        transaction_dict['id'],
-                        field_name_upper,
-                        field_name))
-        elif value_upper:
-            # pylint: disable=line-too-long
-            transaction_dict["receipt"][field_name] = transaction_dict['receipt'].pop(field_name_upper)
 
 
 class Transactions(Stream):
