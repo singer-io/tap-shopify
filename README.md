@@ -25,9 +25,9 @@ This tap:
 
 ## Quick Start
 
-1. Install
+1. Install the tap locally
 
-    pip install tap-shopify
+    pip install -e .
 
 2. Create the config file
 

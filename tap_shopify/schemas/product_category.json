@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"]
+    },
+    "category_id": {
+      "type": ["string", "null"]
+    },
+    "full_name": {
+      "type": ["string", "null"]
+    },
+    "is_leaf": {
+      "type": ["boolean", "null"]
+    },
+    "is_root": {
+      "type": ["boolean", "null"]
+    }
+  }
+}

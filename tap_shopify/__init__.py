@@ -28,7 +28,7 @@ logging.getLogger('backoff').setLevel(logging.CRITICAL)
 def initialize_shopify_client():
     api_key = Context.config.get('access_token', Context.config.get("api_key"))
     shop = Context.config['shop']
-    version = '2021-04'
+    version = '2022-10'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
     # Shop.current() makes a call for shop details with provided shop and api_key
