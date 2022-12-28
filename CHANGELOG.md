@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+  From [#157](https://github.com/singer-io/tap-shopify/pull/157):
+  * API/SDK Upgrade to v12.0.1
+  * New Field Additions to Schema
+  * Fields removal from the schema
+
 ## 1.6.2
   * Add canonicalization of transaction receipts to OrderRefunds [#156] (https://github.com/singer-io/tap-shopify/pull/156)
 
