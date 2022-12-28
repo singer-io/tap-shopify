@@ -399,7 +399,7 @@
       ]
     },
     "customer": {
-      "$ref": "definitions.json#/customer"
+      "$ref": "definitions.json#/customer_orders"
     },
     "test": {
       "type": [
