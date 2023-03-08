@@ -15,6 +15,17 @@ class BookmarkTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_bookmark_test"
 
+    # function for verifying the date format
+    def is_expected_date_format(self, date):
+        try:
+            # parse date
+            dt.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except ValueError:
+            # return False if date is in not expected format
+            return False
+        # return True in case of no error
+        return True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
@@ -26,7 +37,12 @@ class BookmarkTest(BaseTapTest):
 
     # creating this global variable for store 2 which is required only for this test, all the other test are referencing from base
     global store_2_streams
-    store_2_streams = {'abandoned_checkouts', 'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'events', 'customers', 'custom_collections', 'orders'}
+    # removed 'abandoned_checkouts' from store 2 streams, as per the Doc:
+    #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
+    # abandoned checkouts are saved in the Shopify admin for three months.
+    # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
+    # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
+    store_2_streams = {'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'events', 'customers', 'custom_collections', 'orders'}
 
     def test_run_store_2(self):
         with self.subTest(store="store_2"):
@@ -127,7 +143,9 @@ class BookmarkTest(BaseTapTest):
 
                 # verify the syncs sets a bookmark of the expected form
                 self.assertIsNotNone(first_bookmark_value)
+                self.assertTrue(self.is_expected_date_format(first_bookmark_value))
                 self.assertIsNotNone(second_bookmark_value)
+                self.assertTrue(self.is_expected_date_format(second_bookmark_value))
 
                 # verify the 2nd bookmark is equal to 1st sync bookmark
                 #NOT A BUG (IS the expected behaviour for shopify as they are using date windowing : TDL-17096 : 2nd bookmark value is getting assigned from the execution time rather than the actual bookmark time. This is an invalid assertion for shopify

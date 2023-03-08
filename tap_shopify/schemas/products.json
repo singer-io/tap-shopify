@@ -303,6 +303,12 @@
               "null",
               "string"
             ]
+          },
+          "product_id": {
+            "type": [
+              "null",
+              "integer"
+            ]
           }
         },
         "type": [

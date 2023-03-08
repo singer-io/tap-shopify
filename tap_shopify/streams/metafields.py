@@ -62,8 +62,14 @@ class Metafields(Stream):
         # Shop metafields
         for metafield in self.get_objects():
             metafield = metafield.to_dict()
-            value_type = metafield.get("value_type")
-            if value_type and value_type == "json_string":
+            metafield_type = metafield.get("type")
+            # create "value_type" field in the record
+            metafield["value_type"] = metafield_type
+            # the json_string value in "value_type" field will be
+            # mapped to following "type" value in the new version
+            # Reference: https://shopify.dev/apps/metafields/types
+            if metafield_type and metafield_type in ["json", "weight", "volume", \
+                "dimension", "rating"]:
                 value = metafield.get("value")
                 try:
                     metafield["value"] = json.loads(value) if value is not None else value

@@ -5,7 +5,7 @@ from datetime import datetime as dt
 
 from dateutil.parser import parse
 
-from tap_tester import menagerie, runner
+from tap_tester import menagerie, runner, LOGGER
 from base import BaseTapTest
 
 
@@ -165,7 +165,7 @@ class BookmarkTest(BaseTapTest):
                                 dt.utcfromtimestamp(target_min_value))
 
                 except (OverflowError, ValueError, TypeError):
-                    print("bookmarks cannot be converted to dates, comparing values directly")
+                    LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")
 
                 # verify that there is data with different bookmark values - setup necessary
                 self.assertGreaterEqual(target_value, target_min_value,
@@ -192,4 +192,4 @@ class BookmarkTest(BaseTapTest):
                             target_value = self.local_to_utc(dt.utcfromtimestamp(target_value))
 
                 except (OverflowError, ValueError, TypeError):
-                    print("bookmarks cannot be converted to dates, comparing values directly")
+                    LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")

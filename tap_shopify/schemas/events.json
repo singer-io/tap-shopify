@@ -55,6 +55,29 @@
         "null",
         "string"
       ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "arguments": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {}
+        },
+        {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      ]
     }
   }
 }

@@ -3,7 +3,8 @@ from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling,
-                                      OutOfOrderIdsError)
+                                      OutOfOrderIdsError,
+                                      canonicalize)
 
 class OrderRefunds(Stream):
     name = 'order_refunds'
@@ -48,6 +49,9 @@ class OrderRefunds(Stream):
             refund_dict = refund.to_dict()
             replication_value = strptime_to_utc(refund_dict[self.replication_key])
             if replication_value >= bookmark:
+                for transaction_dict in refund_dict.get("transactions",[]):
+                    for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
+                        canonicalize(transaction_dict, field_name)
                 yield refund_dict
 
             if replication_value > max_bookmark:
