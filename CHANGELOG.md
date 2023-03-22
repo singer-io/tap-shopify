@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.1
+  * Update bookmarking logic [#143](https://github.com/singer-io/tap-shopify/pull/143)
+
 ## 1.7.0
   From [#157](https://github.com/singer-io/tap-shopify/pull/157):
   * API/SDK Upgrade to v12.0.1

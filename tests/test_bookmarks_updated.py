@@ -59,7 +59,7 @@ class BookmarkTest(BaseTapTest):
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in incremental_streams]
-        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=False)
+        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
 
         #################################
         # Run first sync
@@ -111,10 +111,25 @@ class BookmarkTest(BaseTapTest):
                 # information required for assertions from sync 1 and 2 based on expected values
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 second_sync_count = second_sync_record_count.get(stream, 0)
-                first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
-                                       if record.get('action') == 'upsert']
-                second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
-                                        if record.get('action') == 'upsert']
+
+                # The metafields fetches the fields from `products`, `customers`, `orders` and `custom_collections`
+                # if the parent streams are selected along with the `shop` fields.
+                # These different streams have its own bookmark based on its parent.
+                # Hence filtered out the main records i.e. the `shop` records from all the records.
+                if stream != 'metafields':
+                    first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
+                                           if record.get('action') == 'upsert']
+                else:
+                    first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
+                                           if record.get('action') == 'upsert' and record.get('data').get('owner_resource') == 'shop']
+
+                if stream != 'metafields':
+                    second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
+                                            if record.get('action') == 'upsert']
+                else:
+                    second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
+                                        if record.get('action') == 'upsert' and record.get('data').get('owner_resource') == 'shop']
+
                 first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
                 first_bookmark_value = list(first_bookmark_value.values())[0]
                 second_bookmark_value = second_sync_bookmark.get('bookmarks', {stream: None}).get(stream)

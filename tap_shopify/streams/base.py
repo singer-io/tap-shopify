@@ -9,6 +9,7 @@ import pyactiveresource.formats
 import simplejson
 import singer
 from singer import metrics, utils
+from singer.utils import strptime_to_utc
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
@@ -214,6 +215,7 @@ class Stream():
 
     def get_objects(self):
         updated_at_min = self.get_bookmark()
+        max_bookmark = updated_at_min
 
         stop_time = singer.utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
@@ -251,6 +253,9 @@ class Stream():
                         # since_id parameter.
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
+                    replication_value = strptime_to_utc(getattr(obj, self.replication_key))
+                    if replication_value > max_bookmark:
+                        max_bookmark = replication_value
                     yield obj
 
                 # You know you're at the end when the current page has
@@ -275,6 +280,10 @@ class Stream():
                 self.update_bookmark(since_id, bookmark_key='since_id')
 
             updated_at_min = updated_at_max
+        bookmark = max(min(stop_time,
+                           max_bookmark),
+                       (stop_time - datetime.timedelta(days=date_window_size)))
+        self.update_bookmark(utils.strftime(bookmark))
 
     def sync(self):
         """Yield's processed SDK object dicts to the caller.
