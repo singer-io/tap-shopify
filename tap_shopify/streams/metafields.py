@@ -1,6 +1,7 @@
 import json
 import shopify
 import singer
+import time
 
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
@@ -19,6 +20,7 @@ def get_selected_parents():
 def get_metafields(parent_object, since_id):
     # This call results in an HTTP request - the parent object never has a
     # cache of this data so we have to issue that request.
+    time.sleep(0.5)
     return parent_object.metafields(
         limit=Context.get_results_per_page(RESULTS_PER_PAGE),
         since_id=since_id)

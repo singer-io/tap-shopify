@@ -3,6 +3,7 @@ import shopify
 from singer.utils import strftime,strptime_to_utc
 from tap_shopify.streams.base import (Stream, shopify_error_handling)
 from tap_shopify.context import Context
+import time
 
 LOGGER = singer.get_logger()
 
@@ -14,6 +15,7 @@ class InventoryItems(Stream):
 
     @shopify_error_handling
     def get_inventory_items(self, inventory_items_ids):
+        time.sleep(0.5)
         return self.replication_object.find(
             ids=inventory_items_ids,
             limit=RESULTS_PER_PAGE)

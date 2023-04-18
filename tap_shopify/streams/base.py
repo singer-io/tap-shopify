@@ -2,6 +2,7 @@ import datetime
 import functools
 import math
 import sys
+import time
 
 import backoff
 import pyactiveresource
@@ -90,6 +91,7 @@ class Stream():
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
 
     def get_bookmark(self):
+        time.sleep(0.5)
         bookmark = (singer.get_bookmark(Context.state,
                                         # name is overridden by some substreams
                                         self.name,
