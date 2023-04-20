@@ -48,7 +48,7 @@ def retry_after_wait_gen(**kwargs):
     # it was proven to work in our spikes.
     # It's been observed to come through as lowercase, so fallback if not present
     sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
-    yield math.floor(float(sleep_time_str))
+    yield math.ceil(float(sleep_time_str))
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
