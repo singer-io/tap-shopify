@@ -61,6 +61,7 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
+                          jitter=backoff.random_jitter,
                           on_backoff=leaky_bucket_handler)
     @functools.wraps(fnc)
     def wrapper(*args, **kwargs):
