@@ -16,7 +16,7 @@ class Locations(Stream):
         yield from location_page
 
         while location_page.has_next_page():
-            location_page = location_page.next_page()
+            location_page = self.get_next_page(location_page)
             yield from location_page
 
     def sync(self):

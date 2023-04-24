@@ -125,6 +125,10 @@ class Stream():
     def call_api(self, query_params):
         return self.replication_object.find(**query_params)
 
+    @shopify_error_handling
+    def get_next_page(self, page):
+        return page.next_page()
+
     def get_objects(self):
         updated_at_min = self.get_bookmark()
 

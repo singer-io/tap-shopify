@@ -29,7 +29,7 @@ class EventsProducts(Stream):
         yield from page
 
         while page.has_next_page():
-            page = page.next_page()
+            page = self.get_next_page(page)
             yield from page
 
     def get_objects(self):
