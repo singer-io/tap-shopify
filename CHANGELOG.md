@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.2
+  * Add URLError (connection reset by peer) to retry logic [#165](https://github.com/singer-io/tap-shopify/pull/165)
+
 ## 1.7.1
   * Update bookmarking logic [#143](https://github.com/singer-io/tap-shopify/pull/143)
 

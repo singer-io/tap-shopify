@@ -3,6 +3,7 @@ import functools
 import math
 import sys
 import socket
+from urllib.error import URLError
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
@@ -127,7 +128,8 @@ def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
-                           simplejson.scanner.JSONDecodeError),
+                           simplejson.scanner.JSONDecodeError,
+                            URLError),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
