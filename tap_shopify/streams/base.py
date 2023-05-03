@@ -129,7 +129,7 @@ def shopify_error_handling(fnc):
                           (pyactiveresource.connection.ServerError,
                            pyactiveresource.formats.Error,
                            simplejson.scanner.JSONDecodeError,
-                            URLError),
+                           URLError),
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
