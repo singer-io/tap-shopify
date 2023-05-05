@@ -184,8 +184,8 @@ class Stream():
                                    'since_id')
 
     def get_updated_at_max(self):
-        return utils.strptime_with_tz(
-            Context.state.get('bookmarks', {}).get(self.name, {}).get('updated_at_max'))
+        updated_at_max = Context.state.get('bookmarks', {}).get(self.name, {}).get('updated_at_max')
+        return utils.strptime_with_tz(updated_at_max) if updated_at_max else None
 
     def update_bookmark(self, bookmark_value, bookmark_key=None):
         # NOTE: Bookmarking can never be updated to not get the most
