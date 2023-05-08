@@ -244,8 +244,8 @@ class Stream():
             # updated_at_max bookmarked in the interrupted sync.
             # This will make sure that records with lower id than since_id
             # which got updated later won't be missed
-            updated_at_max = last_sync_interrupted_at or updated_at_min + \
-                datetime.timedelta(days=date_window_size)
+            updated_at_max = (last_sync_interrupted_at
+                              or updated_at_min + datetime.timedelta(days=date_window_size))
             last_sync_interrupted_at = None
 
             if updated_at_max > stop_time:
