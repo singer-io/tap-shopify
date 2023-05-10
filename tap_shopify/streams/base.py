@@ -183,6 +183,10 @@ class Stream():
                                    self.name,
                                    'since_id')
 
+    def get_updated_at_max(self):
+        updated_at_max = Context.state.get('bookmarks', {}).get(self.name, {}).get('updated_at_max')
+        return utils.strptime_with_tz(updated_at_max) if updated_at_max else None
+
     def update_bookmark(self, bookmark_value, bookmark_key=None):
         # NOTE: Bookmarking can never be updated to not get the most
         # recent thing it saw the next time you run, because the querying
@@ -216,6 +220,7 @@ class Stream():
         }
 
     def get_objects(self):
+        last_sync_interrupted_at = self.get_updated_at_max()
         updated_at_min = self.get_bookmark()
         max_bookmark = updated_at_min
 
@@ -235,7 +240,14 @@ class Stream():
             # think it has something to do with how the API treats
             # microseconds on its date windows. Maybe it's possible to
             # drop data due to rounding errors or something like that?
-            updated_at_max = updated_at_min + datetime.timedelta(days=date_window_size)
+            # If last sync was interrupted, set updated_at_max to
+            # updated_at_max bookmarked in the interrupted sync.
+            # This will make sure that records with lower id than since_id
+            # which got updated later won't be missed
+            updated_at_max = (last_sync_interrupted_at
+                              or updated_at_min + datetime.timedelta(days=date_window_size))
+            last_sync_interrupted_at = None
+
             if updated_at_max > stop_time:
                 updated_at_max = stop_time
             while True:
@@ -266,7 +278,9 @@ class Stream():
                     # Save the updated_at_max as our bookmark as we've synced all rows up in our
                     # window and can move forward. Also remove the since_id because we want to
                     # restart at 1.
-                    Context.state.get('bookmarks', {}).get(self.name, {}).pop('since_id', None)
+                    stream_bookmarks = Context.state.get('bookmarks', {}).get(self.name, {})
+                    stream_bookmarks.pop('since_id', None)
+                    stream_bookmarks.pop('updated_at_max', None)
                     self.update_bookmark(utils.strftime(updated_at_max))
                     break
 
@@ -278,8 +292,9 @@ class Stream():
                         objects[-1].id, max([o.id for o in objects])))
                 since_id = objects[-1].id
 
-                # Put since_id into the state.
+                # Put since_id and updated_at_max into the state.
                 self.update_bookmark(since_id, bookmark_key='since_id')
+                self.update_bookmark(utils.strftime(updated_at_max), bookmark_key='updated_at_max')
 
             updated_at_min = updated_at_max
         bookmark = max(min(stop_time,
