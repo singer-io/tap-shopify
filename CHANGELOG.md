@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.4
+  * Add backoff for IncompleteRead [#144](https://github.com/singer-io/tap-shopify/pull/144)
+
 ## 1.7.3
   * Update interrupted sync bookmark strategy [#166](https://github.com/singer-io/tap-shopify/pull/166)
 
