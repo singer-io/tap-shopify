@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.5
+  * Dependabot update [#167](https://github.com/singer-io/tap-shopify/pull/167)
+
 ## 1.7.4
   * Add backoff for IncompleteRead [#144](https://github.com/singer-io/tap-shopify/pull/144)
 
