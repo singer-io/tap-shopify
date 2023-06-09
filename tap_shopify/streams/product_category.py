@@ -55,6 +55,10 @@ class ProductCategory(Stream):
         selected_parent.name = "products_categories"
         for parent_object in selected_parent.get_objects():
             product_category = self.call_api_for_product_categories(parent_object)
+            if product_category.get("errors"):
+                LOGGER.info(f"Error in fetching product category for product {parent_object.admin_graphql_api_id}")
+                LOGGER.info(product_category.get("errors"))
+                continue
             item = product_category["data"].get("product")
             if item.get('productCategory'):
                 item['category_id'] = item['productCategory']['productTaxonomyNode']['id']
