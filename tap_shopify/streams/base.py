@@ -125,6 +125,10 @@ def shopify_error_handling(fnc):
                           http.client.IncompleteRead,
                           max_tries=MAX_RETRIES,
                           factor=2)
+    @backoff.on_exception(backoff.expo, # ConnectionResetError raised
+                          ConnectionResetError,
+                          max_tries=MAX_RETRIES,
+                          factor=2)
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
                           (pyactiveresource.connection.Error, socket.timeout),
                           giveup=is_timeout_error,
