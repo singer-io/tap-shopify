@@ -9,12 +9,12 @@ from parameterized import parameterized
 class TestShopifyConnectionResetErrorHandling(unittest.TestCase):
 
     @parameterized.expand([
-       (URLError, URLError('<urlopen error [Errno 104] Connection reset by peer>'),'orders','call_api({})', 5),
-       (ConnectionResetError,  ConnectionResetError,'transactions','replication_object.find()', 5),
+       (URLError, URLError('<urlopen error [Errno 104] Connection reset by peer>'), 'orders', 'call_api({})', 5),
+       (ConnectionResetError, ConnectionResetError, 'transactions', 'replication_object.find()', 5),
     ])
     @mock.patch("time.sleep")
     @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
-    def test_check_access(self,error_type,  error, stream_name, func, expected_retries, mocked_find, mocked_sleep):
+    def test_check_access(self, error_type, error, stream_name, func, expected_retries, mocked_find, mocked_sleep):
         '''
         Test retry handling of URLError and ConnectionResetError
         '''
