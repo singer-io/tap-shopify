@@ -19,7 +19,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            make test
+            pylint tap_shopify -d missing-docstring,too-many-branches
       - run:
           name: 'JSON Validator'
           command: |
