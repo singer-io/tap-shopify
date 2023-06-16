@@ -5,7 +5,6 @@ import tap_shopify
 from tap_shopify.streams.transactions import Transactions
 from tap_shopify.streams.orders import Orders
 from tap_shopify.context import Context
-from parameterized import parameterized
 
 class TestShopifyConnectionResetErrorHandling(unittest.TestCase):
 
