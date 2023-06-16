@@ -38,29 +38,9 @@ class TestShopifyConnectionResetErrorHandling(unittest.TestCase):
         mocked_find.side_effect = ConnectionResetError
 
         # initialize class
-        locations = Transactions()
+        stream = Transactions()
 
         with self.assertRaises(ConnectionResetError):
-            locations.replication_object.find()
+            stream.replication_object.find()
 
         self.assertEqual(mocked_find.call_count, 5)
-
-    @parameterized.expand([
-       (URLError('<urlopen error [Errno 104] Connection reset by peer>'), Orders().call_api, 5),
-       (ConnectionResetError(''), Transactions().replication_object.find, 5),
-    ])
-    @mock.patch("time.sleep")
-    @mock.patch("pyactiveresource.activeresource.ActiveResource.find")
-    def test_check_access(self, error, func, expected_retries, mocked_find, mocked_sleep):
-        '''
-        Test retry handling of URLError and ConnectionResetError
-        '''
-
-        # mock 'find' and raise appropriate error
-        mocked_find.side_effect = error
-
-        with self.assertRaises(type(error)):
-           func({})
-
-        # verify we backoff expected number of times
-        self.assertEqual(mocked_find.call_count, expected_retries)
