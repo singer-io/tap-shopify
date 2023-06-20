@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.7.5
+  * Add backoff for ConnectionResetError [#169](https://github.com/singer-io/tap-shopify/pull/169)
 ## 1.7.4
   * Add backoff for IncompleteRead [#144](https://github.com/singer-io/tap-shopify/pull/144)
 
