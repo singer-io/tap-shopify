@@ -19,7 +19,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            make test
+            pylint tap_shopify -d missing-docstring,too-many-branches
       - run:
           name: 'JSON Validator'
           command: |
@@ -29,7 +29,7 @@ jobs:
           name: 'Unit Tests'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pip install nose coverage
+            pip install nose coverage parameterized
             nosetests --with-coverage --cover-erase --cover-package=tap_shopify --cover-html-dir=htmlcov tests/unittests
             coverage html
       - store_test_results:
