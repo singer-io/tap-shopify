@@ -2,12 +2,12 @@
 Setup expectations for test sub classes
 Run discovery for as a prerequisite for most tests
 """
-import os
-from datetime import datetime as dt
-from datetime import timezone as tz
 import dateutil.parser
+import os
 import pytz
+from datetime import datetime as dt
 from datetime import timedelta
+from datetime import timezone as tz
 
 from tap_tester import connections, menagerie, runner
 from tap_tester.base_case import BaseCase
@@ -363,3 +363,26 @@ class BaseTapTest(BaseCase):
 
             except ValueError:
                 return Exception("Datetime object is not of the format: {}".format(self.START_DATE_FORMAT))
+
+    @staticmethod
+    def parse_date(date_value):
+        """
+        Pass in string-formatted-datetime, parse the value
+        return it as an un-formatted datetime object.
+        """
+        date_formats = {
+            "%Y-%m-%dT%H:%M:%S.%fZ",
+            "%Y-%m-%dT%H:%M:%S%z",
+            "%Y-%m-%dT%H:%M:%SZ",
+            "%Y-%m-%dT%H:%M:%S.%f+00:00",
+            "%Y-%m-%dT%H:%M:%S+00:00",
+            "%Y-%m-%d"
+        }
+        for date_format in date_formats:
+            try:
+                date_stripped = dt.strptime(date_value, date_format)
+                return date_stripped
+            except ValueError:
+                pass
+
+        raise NotImplementedError(f"Tests do not account for dates of this format: {date_value}")
