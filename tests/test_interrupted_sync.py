@@ -28,22 +28,17 @@ class InterruptedSyncTest(BaseTapTest):
         super().__init__(*args, **kwargs)
         self.start_date = '2022-03-01T00:00:00Z'
 
-    # new global only for this test
-    global interrupt_test_streams
-    interrupt_test_streams = {'collects',
-                              'customers',
-                              'events',
-                              'metafields',
-                              'orders',
-                              'products',
-                              'transactions'}
+    def test_run(self):
 
-    def test_run_store_2(self):
-        with self.subTest(store="store_2"):
-            conn_id = self.create_connection(original_properties=False, original_credentials=False)
-            self.interrupted_sync_test(conn_id, interrupt_test_streams)
+        conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
-    def interrupted_sync_test(self, conn_id, testable_streams):
+        interrupt_test_streams = {'collects',
+                                  'customers',
+                                  'events',
+                                  'metafields',
+                                  'orders',
+                                  'products',
+                                  'transactions'}
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
@@ -82,33 +77,31 @@ class InterruptedSyncTest(BaseTapTest):
         # Update State between Syncs
         ################################
 
-        # new_state = {'bookmarks': {'currently_sync_stream': 'transactions'}}
-        new_state = {'bookmarks': {'currently_sync_stream': 'customers'}}
+        # hardcoding the updated state to ensure atleast 1 record in resuming (2nd) sync.
+        # values have been provided after reviewing the max bookmark value for each of the streams
+        new_state = {'bookmarks':
+                     {'currently_sync_stream': 'customers',
+                      'collects': {'updated_at': '2023-01-01T09:08:28.000000Z'},
+                      'customers': {'updated_at': '2023-03-28T18:53:28.000000Z'},
+                      'events': {'created_at': '2023-01-22T05:05:53.000000Z'},
+                      #'metafields': {'updated_at': '2023-01-07T21:18:05.000000Z'},
+                      #'orders': {'updated_at': '2023-01-20T05:09:01.000000Z'},
+                      #'products': {'updated_at': '2023-01-20T05:10:05.000000Z'},
+                      'transactions': {'created_at': '2022-06-26T00:06:38-04:00'}
+                      }}
+
         currently_syncing_stream = new_state['bookmarks']['currently_sync_stream']
         completed_streams = {'collects', 'customers', 'events', 'transactions'}
         completed_streams.remove(currently_syncing_stream)
         yet_to_be_synced_streams = {'metafields', 'orders', 'products'}
 
-        # hardcoding the updated state to ensure atleast 1 record in resuming (2nd) sync.
-        # values have been provided after reviewing the max bookmark value for each of the streams
-        simulated_states = {'collects': {'updated_at': '2023-01-01T09:08:28.000000Z'},
-                            'customers': {'updated_at': '2023-03-28T18:53:28.000000Z'},
-                            'events': {'created_at': '2023-01-22T05:05:53.000000Z'},
-                            #'metafields': {'updated_at': '2023-01-07T21:18:05.000000Z'},
-                            #'orders': {'updated_at': '2023-01-20T05:09:01.000000Z'},
-                            #'products': {'updated_at': '2023-01-20T05:10:05.000000Z'},
-                            'transactions': {'created_at': '2022-06-26T00:06:38-04:00'}
-                            }
-
-        for stream, updated_state in simulated_states.items():
-            new_state['bookmarks'][stream] = updated_state
         menagerie.set_state(conn_id, new_state)
+        middle_sync_state = menagerie.get_state(conn_id)
 
         ################################
         # Run Resuming (2nd) Sync
         ################################
 
-        middle_sync_state = menagerie.get_state(conn_id)
         resuming_sync_record_count = self.run_sync(conn_id)
         resuming_sync_records = runner.get_records_from_target_output()
         resuming_sync_state = menagerie.get_state(conn_id)
@@ -141,7 +134,7 @@ class InterruptedSyncTest(BaseTapTest):
             {currently_syncing_stream}, {'collects'})
         self.assertSetEqual(actual_remaining_streams, expected_remaining_streams)
 
-        for stream in testable_streams:
+        for stream in interrupt_test_streams:
             with self.subTest(stream=stream):
 
                 # expected values
@@ -188,11 +181,11 @@ class InterruptedSyncTest(BaseTapTest):
                 replication_key = next(iter(expected_replication_keys[stream]))
                 first_bookmark_value_utc = self.convert_state_to_utc(first_bookmark_value)
                 resuming_bookmark_value_utc = self.convert_state_to_utc(resuming_bookmark_value)
-                if stream in simulated_states.keys():
+                if stream in new_state['bookmarks'].keys():
                     simulated_bookmark = new_state['bookmarks'][stream]
                 else:
                     simulated_bookmark = None
-                if stream in simulated_states.keys():
+                if stream in new_state['bookmarks'].keys():
                     simulated_bookmark_value = list(simulated_bookmark.values())[0]
                 else:
                     simulated_bookmark_value = None
@@ -206,7 +199,7 @@ class InterruptedSyncTest(BaseTapTest):
                         self.parse_date(record.get(replication_key))
                         for record in resuming_sync_messages)
 
-                if stream in simulated_states.keys():
+                if stream in new_state['bookmarks'].keys():
                     expected_resuming_sync_start_time = self.parse_date(first_bookmark_value)
                 else:
                     # For not yet started streams there will be no bookmark and we should
@@ -231,7 +224,7 @@ class InterruptedSyncTest(BaseTapTest):
                 self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
 
                 # verify oldest record from resuming sync respects bookmark from previous sync
-                if resuming_sync_messages and stream in simulated_states.keys():
+                if resuming_sync_messages and stream in new_state['bookmarks'].keys():
                     self.assertEqual(actual_oldest_resuming_replication_date,
                                      self.parse_date(simulated_bookmark_value))
 
@@ -253,7 +246,7 @@ class InterruptedSyncTest(BaseTapTest):
                 for record in resuming_sync_messages:
                     replication_key_value = record.get(replication_key)
                     # this assertion is only for completed and interrupted streams
-                    if stream in simulated_states.keys():
+                    if stream in new_state['bookmarks'].keys():
                         # verify 2nd sync rep key value is greater or equal to 1st sync bookmarks
                         self.assertGreaterEqual(replication_key_value, simulated_bookmark_value,
                                                 msg=("Resuming sync records do not respect the"
@@ -265,10 +258,9 @@ class InterruptedSyncTest(BaseTapTest):
                                               " with a greater replication key value was synced")
                                          )
 
-                # verify that we get less data in the 2nd sync
-                # all records in the collects stream have the same replication key value, so this
-                # assertion does not apply to the collects stream
-                if stream in simulated_states.keys() and stream not in ('collects'):
+                # verify less data in 2nd sync. all records in the collects stream have the same
+                # replication key value, so this assertion does not apply to the collects stream
+                if stream in new_state['bookmarks'].keys() and stream not in ('collects'):
                     self.assertLess(resuming_sync_count, first_sync_count,
                                     msg="Resuming sync record count greater than expected")
 
