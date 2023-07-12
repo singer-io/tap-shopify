@@ -131,8 +131,10 @@ class InterruptedSyncTest(BaseTapTest):
         LOGGER.info(f"yet to be synced streams: {yet_to_be_synced_streams}")
 
         # tap level assertions
-        self.assertIsNone(first_sync_state.get('bookmarks').get('currently_sync_stream'))
-        self.assertIsNone(resuming_sync_state.get('bookmarks').get('currently_sync_stream'))
+        self.assertIsNone(first_sync_state.get(
+            'bookmarks', {'currently_sync_stream': True}).get('currently_sync_stream'))
+        self.assertIsNone(resuming_sync_state.get(
+            'bookmarks', {'currently_sync_stream': True}).get('currently_sync_stream'))
 
         # verify streams are shuffled so the resuming sync starts with currently_syncing_stream
         self.assertEqual(resuming_sync_order[0], currently_syncing_stream)
@@ -166,7 +168,7 @@ class InterruptedSyncTest(BaseTapTest):
                         record.get('data') for record
                         in first_sync_records.get(stream, {}).get('messages', [])
                         if record.get('action') == 'upsert'
-                        and record.get('data').get('owner_resource') == 'shop']
+                        and record.get('data', {}).get('owner_resource') == 'shop']
 
                 if stream != 'metafields':
                     resuming_sync_messages = [
@@ -178,7 +180,7 @@ class InterruptedSyncTest(BaseTapTest):
                         record.get('data') for record
                         in resuming_sync_records.get(stream, {}).get('messages', [])
                         if record.get('action') == 'upsert'
-                        and record.get('data').get('owner_resource') == 'shop']
+                        and record.get('data', {}).get('owner_resource') == 'shop']
 
                 first_bookmark_value = first_sync_state.get('bookmarks', {}).get(stream, {})
                 first_bookmark_value = list(first_bookmark_value.values())[0]
