@@ -1,6 +1,8 @@
 """
 Test tap successfully resumes after interrupted sync without missing any records
 """
+import random
+
 from datetime import datetime as dt
 
 from tap_tester import menagerie, connections, runner, LOGGER
@@ -24,6 +26,20 @@ class InterruptedSyncTest(BaseTapTest):
         # return True in case of no error
         return True
 
+    def group_streams(self, sync_order, currently_syncing):
+        if currently_syncing not in sync_order:
+            LOGGER.info(f"Currently syncing stream not found in sync order")
+            return None
+        index = len(sync_order)
+        for i, stream in enumerate(sync_order):
+            if stream == currently_syncing:
+                index = i
+                break
+        return {
+            "completed": sync_order[:index],
+            "yet_to_be_synced": sync_order[(index + 1):],
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2022-03-01T00:00:00Z'
@@ -32,20 +48,19 @@ class InterruptedSyncTest(BaseTapTest):
 
         conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
-        interrupt_test_streams = {'collects',
-                                  'customers',
-                                  'events',
-                                  'metafields',
-                                  'orders',
-                                  'products',
-                                  'transactions'}
+        expected_streams = {'customers',
+                            'events',
+                            'metafields',
+                            'orders',
+                            'products',
+                            'transactions'}
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
-                        catalog.get('tap_stream_id') in interrupt_test_streams]
+                        catalog.get('tap_stream_id') in expected_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
 
         #################################
@@ -60,7 +75,7 @@ class InterruptedSyncTest(BaseTapTest):
         LOGGER.info(f"First sync stream order: {first_sync_order}")
 
         # verify that the sync only sent records to the target for selected streams (catalogs)
-        self.assertEqual(set(first_sync_record_count.keys()), interrupt_test_streams)
+        self.assertEqual(set(first_sync_record_count.keys()), expected_streams)
 
         # BUG:TDL-17087 : State has additional values which are not streams
         # Need to remove additional values from bookmark value
@@ -79,24 +94,27 @@ class InterruptedSyncTest(BaseTapTest):
 
         # hardcoding the updated state to ensure atleast 1 record in resuming (2nd) sync.
         # values have been provided after reviewing the max bookmark value for each of the streams
-        new_state = {'bookmarks':
-                     {'currently_sync_stream': 'customers',
-                      'collects': {'updated_at': '2023-01-01T09:08:28.000000Z'},
+        currently_syncing_stream = random.choice(list(expected_streams))
+        LOGGER.info(f"Randomly selected currently syncing stream: {currently_syncing_stream}")
+
+        stream_groups = self.group_streams(first_sync_order, currently_syncing_stream)
+        completed_streams = stream_groups.get('completed')
+        yet_to_be_synced_streams = stream_groups.get('yet_to_be_synced')
+
+        base_state = {'bookmarks':
+                     {'currently_sync_stream': currently_syncing_stream,
                       'customers': {'updated_at': '2023-03-28T18:53:28.000000Z'},
                       'events': {'created_at': '2023-01-22T05:05:53.000000Z'},
-                      #'metafields': {'updated_at': '2023-01-07T21:18:05.000000Z'},
-                      #'orders': {'updated_at': '2023-01-20T05:09:01.000000Z'},
-                      #'products': {'updated_at': '2023-01-20T05:10:05.000000Z'},
+                      'metafields': {'updated_at': '2023-01-07T21:18:05.000000Z'},
+                      'orders': {'updated_at': '2023-01-22T05:07:44.000000Z'},
+                      'products': {'updated_at': '2023-01-22T05:05:56.000000Z'},
                       'transactions': {'created_at': '2022-06-26T00:06:38-04:00'}
                       }}
 
-        currently_syncing_stream = new_state['bookmarks']['currently_sync_stream']
-        completed_streams = {'collects', 'customers', 'events', 'transactions'}
-        completed_streams.remove(currently_syncing_stream)
-        yet_to_be_synced_streams = {'metafields', 'orders', 'products'}
+        new_state = {'bookmarks': {key: val for (key, val) in base_state['bookmarks'].items()
+            if key not in yet_to_be_synced_streams}}
 
         menagerie.set_state(conn_id, new_state)
-        middle_sync_state = menagerie.get_state(conn_id)
 
         ################################
         # Run Resuming (2nd) Sync
@@ -108,6 +126,9 @@ class InterruptedSyncTest(BaseTapTest):
         resuming_sync_order = runner.get_stream_sync_order_from_target()
 
         LOGGER.info(f"Resuming sync stream order: {resuming_sync_order}")
+        LOGGER.info(f"currently syncinging stream: {currently_syncing_stream}")
+        LOGGER.info(f"completed streams: {completed_streams}")
+        LOGGER.info(f"yet to be synced streams: {yet_to_be_synced_streams}")
 
         # tap level assertions
         self.assertIsNone(first_sync_state.get('bookmarks').get('currently_sync_stream'))
@@ -116,25 +137,11 @@ class InterruptedSyncTest(BaseTapTest):
         # verify streams are shuffled so the resuming sync starts with currently_syncing_stream
         self.assertEqual(resuming_sync_order[0], currently_syncing_stream)
 
-        # resuming sync does not prioritize yet to be sync'd streams for shopify TODO BUG?
-        actual_next_synced = set(resuming_sync_order[1:1 + len(yet_to_be_synced_streams)])
-        # self.assertSetEqual(actual_next_synced, yet_to_be_synced_streams)
+        expected_resuming_sync_order = [
+            currently_syncing_stream] + yet_to_be_synced_streams + completed_streams
+        self.assertEqual(expected_resuming_sync_order, resuming_sync_order)
 
-        # verify resuming sync finishes with completed streams, remove 'collects' stream if present
-        if 'collects' in resuming_sync_order:
-            actual_last_synced = set(
-                resuming_sync_order[-len(completed_streams):]).difference({'collects'})
-        else:
-            actual_last_synced = set(resuming_sync_order[-(len(completed_streams)-1):])
-
-        # shopify does not prioritize yet to be sync'd streams so group completed with yet to be
-        # sync'd streams for this second assertion.  TODO BUG?
-        actual_remaining_streams = actual_next_synced.union(actual_last_synced)
-        expected_remaining_streams = interrupt_test_streams.difference(
-            {currently_syncing_stream}, {'collects'})
-        self.assertSetEqual(actual_remaining_streams, expected_remaining_streams)
-
-        for stream in interrupt_test_streams:
+        for stream in expected_streams:
             with self.subTest(stream=stream):
 
                 # expected values
@@ -143,12 +150,12 @@ class InterruptedSyncTest(BaseTapTest):
                 # information required for assertions from sync 1 and 2 based on expected values
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 resuming_sync_count = resuming_sync_record_count.get(stream, 0)
-                """
-                The metafields fetches the fields from `products`, `customers`, `orders` and
-                `custom_collections` if the parent streams are selected along with the `shop`
-                fields.  These different streams have their own bookmark based on the parent.
-                Hence filtered out the main records i.e. the `shop` records from all the records.
-                """
+
+                # The metafields fetches the fields from `products`, `customers`, `orders` and
+                # `custom_collections` if the parent streams are selected along with the `shop`
+                # fields.  These different streams have their own bookmark based on the parent.
+                # Hence filtered out the main records i.e. the `shop` records from all the records.
+
                 if stream != 'metafields':
                     first_sync_messages = [
                         record.get('data') for record
@@ -183,30 +190,30 @@ class InterruptedSyncTest(BaseTapTest):
                 resuming_bookmark_value_utc = self.convert_state_to_utc(resuming_bookmark_value)
                 if stream in new_state['bookmarks'].keys():
                     simulated_bookmark = new_state['bookmarks'][stream]
-                else:
-                    simulated_bookmark = None
-                if stream in new_state['bookmarks'].keys():
                     simulated_bookmark_value = list(simulated_bookmark.values())[0]
-                else:
-                    simulated_bookmark_value = None
-
-                youngest_first_sync_date = max(
-                    self.parse_date(record.get(replication_key))
-                    for record in first_sync_messages)
-
-                if len(resuming_sync_messages) > 0:  # 'collects' stream may be empty
-                    actual_oldest_resuming_replication_date = min(
-                        self.parse_date(record.get(replication_key))
-                        for record in resuming_sync_messages)
-
-                if stream in new_state['bookmarks'].keys():
                     expected_resuming_sync_start_time = self.parse_date(first_bookmark_value)
                 else:
+                    simulated_bookmark = None
+                    simulated_bookmark_value = None
+
                     # For not yet started streams there will be no bookmark and we should
                     # sync all records the from the beginning of the original sync.
                     expected_resuming_sync_start_time = min(
                         self.parse_date(record.get(replication_key))
                         for record in first_sync_messages)
+
+
+                youngest_first_sync_date = max(
+                    self.parse_date(record.get(replication_key))
+                    for record in first_sync_messages)
+
+                # if metafields stream has no 'shop' messages resuming_sync_messages can be empty
+                if resuming_sync_messages:
+                    actual_oldest_resuming_replication_date = min(
+                        self.parse_date(record.get(replication_key))
+                        for record in resuming_sync_messages)
+                else:
+                    actual_oldest_resuming_replication_date = None
 
                 # verify the syncs sets a bookmark of the expected form
                 self.assertIsNotNone(first_bookmark_value)
@@ -221,12 +228,16 @@ class InterruptedSyncTest(BaseTapTest):
                 than the actual bookmark time for some streams.
                 TODO this is not the case for the transactions stream, they are equal.
                 """
-                self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
+                if stream == 'transactions':
+                    self.assertEqual(resuming_bookmark_value, first_bookmark_value)
+                else:
+                    self.assertGreater(resuming_bookmark_value, first_bookmark_value)
 
                 # verify oldest record from resuming sync respects bookmark from previous sync
-                if resuming_sync_messages and stream in new_state['bookmarks'].keys():
+                if stream in new_state['bookmarks'].keys() and resuming_sync_messages:
                     self.assertEqual(actual_oldest_resuming_replication_date,
-                                     self.parse_date(simulated_bookmark_value))
+                                     self.parse_date(simulated_bookmark_value),
+                                     msg="Oldest resuming sync record not respecting bookmark")
 
                     # all interrupted recs are in full recs, interrupted rec counts verified
                     first_sync_records_after_bookmark = [
@@ -267,7 +278,7 @@ class InterruptedSyncTest(BaseTapTest):
                 # verify yet to be sync'd streams have equal oldest record
                 if stream in yet_to_be_synced_streams:
                     oldest_first_sync_replication_date = min(
-                        self.parse_date(record[replication_key])
+                        self.parse_date(record.get(replication_key))
                         for record in first_sync_messages)
                     oldest_resuming_sync_replication_date = min(
                         self.parse_date(record.get(replication_key))
