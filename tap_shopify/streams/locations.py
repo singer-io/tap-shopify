@@ -20,21 +20,7 @@ class Locations(Stream):
             yield from location_page
 
     def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
-
         for location in self.get_locations_data():
-
-            location_dict = location.to_dict()
-            replication_value = utils.strptime_to_utc(location_dict[self.replication_key])
-
-            if replication_value >= bookmark:
-                yield location_dict
-
-            # update max bookmark if "replication_value" of current location is greater
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-
-        self.update_bookmark(utils.strftime(max_bookmark))
+            yield location.to_dict()
 
 Context.stream_objects['locations'] = Locations
