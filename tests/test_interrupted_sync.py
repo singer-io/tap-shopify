@@ -27,9 +27,8 @@ class InterruptedSyncTest(BaseTapTest):
         return True
 
     def group_streams(self, sync_order, currently_syncing):
-        if currently_syncing not in sync_order:
-            LOGGER.info(f"Currently syncing stream not found in sync order")
-            return None
+        self.assertIn(currently_syncing, sync_order,
+                      msg="Currently sycning stream not found in sync order")
         index = len(sync_order)
         for i, stream in enumerate(sync_order):
             if stream == currently_syncing:
@@ -72,10 +71,8 @@ class InterruptedSyncTest(BaseTapTest):
         first_sync_records = runner.get_records_from_target_output()
         first_sync_order = runner.get_stream_sync_order_from_target()
 
-        LOGGER.info(f"First sync stream order: {first_sync_order}")
-
         # verify that the sync only sent records to the target for selected streams (catalogs)
-        self.assertEqual(set(first_sync_record_count.keys()), expected_streams)
+        self.assertSetEqual(set(first_sync_record_count.keys()), expected_streams)
 
         # BUG:TDL-17087 : State has additional values which are not streams
         # Need to remove additional values from bookmark value
@@ -95,7 +92,7 @@ class InterruptedSyncTest(BaseTapTest):
         # hardcoding the updated state to ensure atleast 1 record in resuming (2nd) sync.
         # values have been provided after reviewing the max bookmark value for each of the streams
         currently_syncing_stream = random.choice(list(expected_streams))
-        LOGGER.info(f"Randomly selected currently syncing stream: {currently_syncing_stream}")
+        LOGGER.info("Randomly selected currently syncing stream: %s", currently_syncing_stream)
 
         stream_groups = self.group_streams(first_sync_order, currently_syncing_stream)
         completed_streams = stream_groups.get('completed')
@@ -111,8 +108,14 @@ class InterruptedSyncTest(BaseTapTest):
                       'transactions': {'created_at': '2022-06-26T00:06:38-04:00'}
                       }}
 
-        new_state = {'bookmarks': {key: val for (key, val) in base_state['bookmarks'].items()
-            if key not in yet_to_be_synced_streams}}
+        # remove yet to be synced streams from base state and then set new state
+        new_state = {
+            'bookmarks': {
+                key: val
+                for key, val in base_state['bookmarks'].items()
+                if key not in yet_to_be_synced_streams
+            }
+        }
 
         menagerie.set_state(conn_id, new_state)
 
@@ -125,28 +128,28 @@ class InterruptedSyncTest(BaseTapTest):
         resuming_sync_state = menagerie.get_state(conn_id)
         resuming_sync_order = runner.get_stream_sync_order_from_target()
 
-        LOGGER.info(f"Resuming sync stream order: {resuming_sync_order}")
-        LOGGER.info(f"currently syncinging stream: {currently_syncing_stream}")
-        LOGGER.info(f"completed streams: {completed_streams}")
-        LOGGER.info(f"yet to be synced streams: {yet_to_be_synced_streams}")
+        LOGGER.info("First sync stream order: %s", first_sync_order)
+        LOGGER.info("currently syncing stream: %s", currently_syncing_stream)
+        LOGGER.info("yet to be synced streams: %s", yet_to_be_synced_streams)
+        LOGGER.info("completed streams: %s", completed_streams)
+        LOGGER.info("Resuming sync stream order: %s", resuming_sync_order)
 
         # tap level assertions
-        self.assertIsNone(first_sync_state.get(
-            'bookmarks', {'currently_sync_stream': True}).get('currently_sync_stream'))
-        self.assertIsNone(resuming_sync_state.get(
-            'bookmarks', {'currently_sync_stream': True}).get('currently_sync_stream'))
+        self.assertIsNone(first_sync_state.get('bookmarks', {}).get('currently_sync_stream'))
+        self.assertIsNone(resuming_sync_state.get('bookmarks', {}).get('currently_sync_stream'))
 
         # verify streams are shuffled so the resuming sync starts with currently_syncing_stream
         self.assertEqual(resuming_sync_order[0], currently_syncing_stream)
 
-        expected_resuming_sync_order = [
-            currently_syncing_stream] + yet_to_be_synced_streams + completed_streams
-        self.assertEqual(expected_resuming_sync_order, resuming_sync_order)
+        expected_resuming_sync_order = (
+            [currently_syncing_stream] + yet_to_be_synced_streams + completed_streams
+        )
+        self.assertListEqual(expected_resuming_sync_order, resuming_sync_order)
 
         for stream in expected_streams:
             with self.subTest(stream=stream):
 
-                # expected values
+                # expected values (rep method = incremental for all shopify streams as of Jul-2023)
                 expected_replication_method = self.expected_replication_method()
                 expected_replication_keys = self.expected_replication_keys()
                 # information required for assertions from sync 1 and 2 based on expected values
@@ -192,18 +195,7 @@ class InterruptedSyncTest(BaseTapTest):
                 resuming_bookmark_value_utc = self.convert_state_to_utc(resuming_bookmark_value)
                 if stream in new_state['bookmarks'].keys():
                     simulated_bookmark = new_state['bookmarks'][stream]
-                    simulated_bookmark_value = list(simulated_bookmark.values())[0]
-                    expected_resuming_sync_start_time = self.parse_date(first_bookmark_value)
-                else:
-                    simulated_bookmark = None
-                    simulated_bookmark_value = None
-
-                    # For not yet started streams there will be no bookmark and we should
-                    # sync all records the from the beginning of the original sync.
-                    expected_resuming_sync_start_time = min(
-                        self.parse_date(record.get(replication_key))
-                        for record in first_sync_messages)
-
+                    simulated_bookmark_value = simulated_bookmark[replication_key]
 
                 youngest_first_sync_date = max(
                     self.parse_date(record.get(replication_key))
@@ -214,8 +206,6 @@ class InterruptedSyncTest(BaseTapTest):
                     actual_oldest_resuming_replication_date = min(
                         self.parse_date(record.get(replication_key))
                         for record in resuming_sync_messages)
-                else:
-                    actual_oldest_resuming_replication_date = None
 
                 # verify the syncs sets a bookmark of the expected form
                 self.assertIsNotNone(first_bookmark_value)
@@ -224,12 +214,10 @@ class InterruptedSyncTest(BaseTapTest):
                 self.assertTrue(self.is_expected_date_format(resuming_bookmark_value))
 
                 # verify the resuming bookmark is greater than 1st sync bookmark
-                """
-                This is the expected behaviour for shopify as they are using date windowing
-                TDL-17096 : Resuming bookmark value is getting assigned from execution time rather
-                than the actual bookmark time for some streams.
-                TODO this is not the case for the transactions stream, they are equal.
-                """
+                # This is the expected behaviour for shopify as they are using date windowing
+                # TDL-17096 : Resuming bookmark value is getting assigned from execution time
+                # rather than the actual bookmark time for some streams.
+                # TODO this is not the case for the transactions stream, they are equal.
                 if stream == 'transactions':
                     self.assertEqual(resuming_bookmark_value, first_bookmark_value)
                 else:
@@ -271,9 +259,8 @@ class InterruptedSyncTest(BaseTapTest):
                                               " with a greater replication key value was synced")
                                          )
 
-                # verify less data in 2nd sync. all records in the collects stream have the same
-                # replication key value, so this assertion does not apply to the collects stream
-                if stream in new_state['bookmarks'].keys() and stream not in ('collects'):
+                # verify less data in 2nd sync for streams that started or completed
+                if stream in new_state['bookmarks'].keys():
                     self.assertLess(resuming_sync_count, first_sync_count,
                                     msg="Resuming sync record count greater than expected")
 
@@ -288,8 +275,5 @@ class InterruptedSyncTest(BaseTapTest):
                     self.assertEqual(oldest_resuming_sync_replication_date,
                                      oldest_first_sync_replication_date)
 
-                # verify that we get atleast 1 record in the resuming sync
-                if stream not in ('collects'):
-                    self.assertGreater(resuming_sync_count, 0, msg="Resuming sync yielded 0 recs")
-                else:
-                    self.assertEqual(resuming_sync_count, 0, msg="Resuming sync was not empty")
+                # verify that we get at least 1 record in the resuming sync
+                self.assertGreater(resuming_sync_count, 0, msg="Resuming sync yielded 0 recs")
