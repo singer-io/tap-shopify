@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.6
+  * Add backoff for 404 error code [#159](https://github.com/singer-io/tap-shopify/pull/159)
+
 ## 1.7.5
   * Add backoff for ConnectionResetError [#169](https://github.com/singer-io/tap-shopify/pull/169)
 ## 1.7.4
