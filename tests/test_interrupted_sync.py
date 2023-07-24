@@ -15,17 +15,6 @@ class InterruptedSyncTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_int_sync_test"
 
-    # function for verifying the date format
-    def is_expected_date_format(self, date):
-        try:
-            # parse date
-            dt.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            # return False if date is in not expected format
-            return False
-        # return True in case of no error
-        return True
-
     def group_streams(self, sync_order, currently_syncing):
         self.assertIn(currently_syncing, sync_order,
                       msg="Currently sycning stream not found in sync order")
@@ -135,6 +124,8 @@ class InterruptedSyncTest(BaseTapTest):
         LOGGER.info("Resuming sync stream order: %s", resuming_sync_order)
 
         # tap level assertions
+        self.assertTrue(first_sync_state.get('bookmarks'))
+        self.assertTrue(resuming_sync_state.get('bookmarks'))
         self.assertIsNone(first_sync_state.get('bookmarks', {}).get('currently_sync_stream'))
         self.assertIsNone(resuming_sync_state.get('bookmarks', {}).get('currently_sync_stream'))
 
@@ -150,7 +141,6 @@ class InterruptedSyncTest(BaseTapTest):
             with self.subTest(stream=stream):
 
                 # expected values (rep method = incremental for all shopify streams as of Jul-2023)
-                expected_replication_method = self.expected_replication_method()
                 expected_replication_keys = self.expected_replication_keys()
                 # information required for assertions from sync 1 and 2 based on expected values
                 first_sync_count = first_sync_record_count.get(stream, 0)
@@ -166,6 +156,12 @@ class InterruptedSyncTest(BaseTapTest):
                         record.get('data') for record
                         in first_sync_records.get(stream, {}).get('messages', [])
                         if record.get('action') == 'upsert']
+
+                    resuming_sync_messages = [
+                        record.get('data') for record
+                        in resuming_sync_records.get(stream, {}).get('messages', [])
+                        if record.get('action') == 'upsert']
+
                 else:
                     first_sync_messages = [
                         record.get('data') for record
@@ -173,26 +169,19 @@ class InterruptedSyncTest(BaseTapTest):
                         if record.get('action') == 'upsert'
                         and record.get('data', {}).get('owner_resource') == 'shop']
 
-                if stream != 'metafields':
-                    resuming_sync_messages = [
-                        record.get('data') for record
-                        in resuming_sync_records.get(stream, {}).get('messages', [])
-                        if record.get('action') == 'upsert']
-                else:
                     resuming_sync_messages = [
                         record.get('data') for record
                         in resuming_sync_records.get(stream, {}).get('messages', [])
                         if record.get('action') == 'upsert'
                         and record.get('data', {}).get('owner_resource') == 'shop']
 
-                first_bookmark_value = first_sync_state.get('bookmarks', {}).get(stream, {})
-                first_bookmark_value = list(first_bookmark_value.values())[0]
-                resuming_bookmark_value = resuming_sync_state.get('bookmarks', {}).get(stream, {})
-                resuming_bookmark_value = list(resuming_bookmark_value.values())[0]
-
                 replication_key = next(iter(expected_replication_keys[stream]))
-                first_bookmark_value_utc = self.convert_state_to_utc(first_bookmark_value)
+                first_bookmark_stream = first_sync_state.get('bookmarks', {}).get(stream, {})
+                first_bookmark_value = first_bookmark_stream.get(replication_key)
+                resuming_bookmark_stream = resuming_sync_state.get('bookmarks', {}).get(stream, {})
+                resuming_bookmark_value = resuming_bookmark_stream.get(replication_key)
                 resuming_bookmark_value_utc = self.convert_state_to_utc(resuming_bookmark_value)
+
                 if stream in new_state['bookmarks'].keys():
                     simulated_bookmark = new_state['bookmarks'][stream]
                     simulated_bookmark_value = simulated_bookmark[replication_key]
@@ -200,12 +189,6 @@ class InterruptedSyncTest(BaseTapTest):
                 youngest_first_sync_date = max(
                     self.parse_date(record.get(replication_key))
                     for record in first_sync_messages)
-
-                # if metafields stream has no 'shop' messages resuming_sync_messages can be empty
-                if resuming_sync_messages:
-                    actual_oldest_resuming_replication_date = min(
-                        self.parse_date(record.get(replication_key))
-                        for record in resuming_sync_messages)
 
                 # verify the syncs sets a bookmark of the expected form
                 self.assertIsNotNone(first_bookmark_value)
@@ -222,6 +205,12 @@ class InterruptedSyncTest(BaseTapTest):
                     self.assertEqual(resuming_bookmark_value, first_bookmark_value)
                 else:
                     self.assertGreater(resuming_bookmark_value, first_bookmark_value)
+
+                # if metafields stream has no 'shop' messages resuming_sync_messages can be empty
+                if resuming_sync_messages:
+                    actual_oldest_resuming_replication_date = min(
+                        self.parse_date(record.get(replication_key))
+                        for record in resuming_sync_messages)
 
                 # verify oldest record from resuming sync respects bookmark from previous sync
                 if stream in new_state['bookmarks'].keys() and resuming_sync_messages:

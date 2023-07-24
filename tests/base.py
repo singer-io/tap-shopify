@@ -386,3 +386,14 @@ class BaseTapTest(BaseCase):
                 pass
 
         raise NotImplementedError(f"Tests do not account for dates of this format: {date_value}")
+
+    # function for verifying the date format
+    def is_expected_date_format(self, date):
+        try:
+            # parse date
+            dt.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except ValueError:
+            # return False if date is in not expected format
+            return False
+        # return True in case of no error
+        return True
