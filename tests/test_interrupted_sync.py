@@ -206,14 +206,13 @@ class InterruptedSyncTest(BaseTapTest):
                 else:
                     self.assertGreater(resuming_bookmark_value, first_bookmark_value)
 
-                # if metafields stream has no 'shop' messages resuming_sync_messages can be empty
-                if resuming_sync_messages:
+                # verify oldest record from resuming sync respects bookmark from previous sync
+                if stream in new_state['bookmarks'].keys() and resuming_sync_messages:
+                    # if metafields owner_resource != 'shop' resuming_sync_messages can be empty
                     actual_oldest_resuming_replication_date = min(
                         self.parse_date(record.get(replication_key))
                         for record in resuming_sync_messages)
 
-                # verify oldest record from resuming sync respects bookmark from previous sync
-                if stream in new_state['bookmarks'].keys() and resuming_sync_messages:
                     self.assertEqual(actual_oldest_resuming_replication_date,
                                      self.parse_date(simulated_bookmark_value),
                                      msg="Oldest resuming sync record not respecting bookmark")
