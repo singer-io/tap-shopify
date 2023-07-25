@@ -138,6 +138,11 @@ def shopify_error_handling(fnc):
                           giveup=is_not_status_code_fn(range(500, 599)),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
+    @backoff.on_exception(backoff.expo,
+                          pyactiveresource.connection.ResourceNotFound,
+                          giveup=is_not_status_code_fn([404]),
+                          on_backoff=retry_handler,
+                          max_tries=MAX_RETRIES)
     @backoff.on_exception(retry_after_wait_gen,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
