@@ -228,8 +228,7 @@ class InterruptedSyncTest(BaseTapTest):
                         if self.parse_date(record[replication_key]) <=
                         youngest_first_sync_date]
 
-                    self.assertEqual(first_sync_records_after_bookmark,
-                                     filtered_resuming_records,
+                    self.assertEqual(first_sync_records_after_bookmark, filtered_resuming_records,
                                      msg="Incorrect data in the resuming sync")
 
                 for record in resuming_sync_messages:
@@ -237,15 +236,14 @@ class InterruptedSyncTest(BaseTapTest):
                     # this assertion is only for completed and interrupted streams
                     if stream in new_state['bookmarks'].keys():
                         # verify 2nd sync rep key value is greater or equal to 1st sync bookmarks
+                        msg = "Resuming sync records do not respect the previous bookmark"
                         self.assertGreaterEqual(replication_key_value, simulated_bookmark_value,
-                                                msg=("Resuming sync records do not respect the"
-                                                     " previous bookmark")
-                                                )
+                                                msg=msg)
                     # verify the 2nd sync bookmark value is the max rep key value for given stream
+                    msg = ("Resuming sync bookmark was set incorrectly, a record with a greater"
+                           " replication key value was synced")
                     self.assertLessEqual(replication_key_value, resuming_bookmark_value_utc,
-                                         msg=("Resuming sync bookmark was set incorrectly, a record"
-                                              " with a greater replication key value was synced")
-                                         )
+                                         msg=msg)
 
                 # verify less data in 2nd sync for streams that started or completed
                 if stream in new_state['bookmarks'].keys():
