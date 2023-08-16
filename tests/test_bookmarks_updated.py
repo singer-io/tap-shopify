@@ -15,17 +15,6 @@ class BookmarkTest(BaseTapTest):
     def name():
         return "tap_tester_shopify_bookmark_test"
 
-    # function for verifying the date format
-    def is_expected_date_format(self, date):
-        try:
-            # parse date
-            dt.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            # return False if date is in not expected format
-            return False
-        # return True in case of no error
-        return True
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
