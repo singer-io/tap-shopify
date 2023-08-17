@@ -137,6 +137,12 @@ def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
 
+    # If there is a currently syncing stream bookmark, shuffle the
+    # stream order so it gets sync'd first
+    currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
+    if currently_sync_stream_name:
+        shuffle_streams(currently_sync_stream_name)
+
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
         if Context.is_selected(stream["tap_stream_id"]):
@@ -145,12 +151,6 @@ def sync():
                                 stream["key_properties"],
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
-
-    # If there is a currently syncing stream bookmark, shuffle the
-    # stream order so it gets sync'd first
-    currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
-    if currently_sync_stream_name:
-        shuffle_streams(currently_sync_stream_name)
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
