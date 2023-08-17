@@ -94,6 +94,7 @@ class AllFieldsTest(BaseTapTest):
                 if stream == 'orders':
                     # No field named 'order_adjustments', 'total_price_usd' present in the 'order' object
                     # Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
+                    # https://jira.talendforge.org/browse/TDL-15985
                     bad_schema_fields = {'order_adjustments', 'total_price_usd'}
                     expected_all_keys = expected_all_keys - bad_schema_fields
 
