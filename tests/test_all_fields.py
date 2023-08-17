@@ -88,14 +88,13 @@ class AllFieldsTest(BaseTapTest):
 
                 # verify all fields for a stream were replicated
                 self.assertGreater(len(expected_all_keys), len(expected_automatic_keys))
-                self.assertTrue(expected_automatic_keys.issubset(expected_all_keys), msg=f'{expected_automatic_keys-expected_all_keys} is not in "expected_all_keys"')
+                self.assertTrue(expected_automatic_keys.issubset(expected_all_keys),
+                                msg=f'{expected_automatic_keys-expected_all_keys} is not in "expected_all_keys"')
 
-                if stream == 'abandoned_checkouts':
-                    expected_all_keys.remove('billing_address')
-                elif stream == 'orders':
+                if stream == 'orders':
                     # No field named 'order_adjustments', 'total_price_usd' present in the 'order' object
-                    #   Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
-                    known_missing_fields = ['order_adjustments','total_price_usd']
-                    expected_all_keys= expected_all_keys-set( known_missing_fields)
+                    # Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
+                    bad_schema_fields = {'order_adjustments', 'total_price_usd'}
+                    expected_all_keys = expected_all_keys - bad_schema_fields
 
                 self.assertSetEqual(expected_all_keys, actual_all_keys)
