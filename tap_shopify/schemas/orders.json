@@ -6,12 +6,12 @@
           "string"
         ]
     },
-    "subtotal_price_set": {},
-    "total_discounts_set": {},
-    "total_line_items_price_set": {},
-    "total_price_set": {},
-    "total_shipping_price_set": {},
-    "total_tax_set": {},
+    "subtotal_price_set": { "type": ["object","array", "string"] },
+    "total_discounts_set": { "type": ["object", "array", "string"] },
+    "total_line_items_price_set": { "type": ["object", "array", "string"] },
+    "total_price_set": { "type": ["object", "array", "string"] },
+    "total_shipping_price_set": { "type": ["object", "array", "string"] },
+    "total_tax_set": { "type": ["object", "array", "string"] },
     "total_price": {
       "type": [
         "null",
