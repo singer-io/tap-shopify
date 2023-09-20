@@ -2,10 +2,19 @@ version: 2.1
 orbs:
   slack: circleci/slack@3.4.2
 
-jobs:
-  build:
+executors:
+  docker-executor:
     docker:
       - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:stitch-tap-tester
+
+jobs:
+  build:
+    executor: docker-executor
+    steps:
+      - run: echo "CI Done"
+
+  ensure_env:
+    executor: docker-executor
     steps:
       - checkout
       - run:
@@ -15,16 +24,39 @@ jobs:
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             pip install -U 'pip<19.2' 'setuptools<51.0.0'
             pip install .[dev]
+      - persist_to_workspace:
+          root: /usr/local/share/virtualenvs
+          paths:
+            - tap-ga4
+            - dev_env.sh
+  run_pylint:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /usr/local/share/virtualenvs
       - run:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             pylint tap_shopify -d missing-docstring,too-many-branches
+  json_validator:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /usr/local/share/virtualenvs
       - run:
           name: 'JSON Validator'
           command: |
             source /usr/local/share/virtualenvs/tap-tester/bin/activate
             stitch-validate-json tap_shopify/schemas/*.json
+  run_unit_tests:
+    executor: docker-executor
+    steps:   
+      - checkout
+      - attach_workspace:
+          at: /usr/local/share/virtualenvs
       - run:
           name: 'Unit Tests'
           command: |
@@ -36,9 +68,15 @@ jobs:
           path: test_output/report.xml
       - store_artifacts:
           path: htmlcov
+  run_integration_tests:
+    executor: docker-executor
+    parallelism: 5
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /usr/local/share/virtualenvs
       - run:
           name: 'Integration Tests'
-          parallelism: 5
           command: |
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
             source dev_env.sh
@@ -55,10 +93,42 @@ workflows:
   version: 2
   commit: &commit_jobs
     jobs:
+      - ensure_env:
+          context:
+            - circleci-user
+            - tier-1-tap-user
+      - run_pylint:
+          context:
+            - circleci-user
+            - tier-1-tap-user
+          requires:
+            - ensure_env
+      - json_validator:
+          context:
+            - circleci-user
+            - tier-1-tap-user
+          requires:
+            - ensure_env
+      - run_unit_tests:
+          context:
+            - circleci-user
+            - tier-1-tap-user
+          requires:
+            - ensure_env
+      - run_integration_tests:
+          context:
+            - circleci-user
+            - tier-1-tap-user
+          requires:
+            - ensure_env
       - build:
           context:
             - circleci-user
             - tier-1-tap-user
+          requires:
+            - run_pylint
+            - run_unit_tests
+            - run_integration_tests
   build_daily:
     <<: *commit_jobs
     triggers:
