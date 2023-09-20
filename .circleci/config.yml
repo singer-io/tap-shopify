@@ -38,6 +38,7 @@ jobs:
           path: htmlcov
       - run:
           name: 'Integration Tests'
+          parallelism: 5
           command: |
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
             source dev_env.sh
