@@ -1282,6 +1282,12 @@
           "boolean"
         ]
       },
+      "fulfillment_service": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
       "variant_inventory_management": {
         "type": [
           "null",
