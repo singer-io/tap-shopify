@@ -226,6 +226,12 @@
           ]
         }
       }
+    },
+    "payment_id": {
+      "type": [
+        "null",
+        "string"
+      ]
     }
   },
   "type": "object"
