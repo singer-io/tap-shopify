@@ -111,7 +111,31 @@
             "string"
           ]
         },
+        "credit_card_expiration_month": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "credit_card_expiration_year": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "credit_card_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
         "credit_card_number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "credit_card_wallet": {
           "type": [
             "null",
             "string"
