@@ -574,13 +574,6 @@
         "object"
       ]
     },
-    "total_price_usd": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "singer.decimal"
-    },
     "closed_at": {
       "type": [
         "null",
