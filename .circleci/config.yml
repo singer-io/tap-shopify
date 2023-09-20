@@ -27,7 +27,7 @@ jobs:
       - persist_to_workspace:
           root: /usr/local/share/virtualenvs
           paths:
-            - tap-ga4
+            - tap-shopify
             - dev_env.sh
   run_pylint:
     executor: docker-executor
