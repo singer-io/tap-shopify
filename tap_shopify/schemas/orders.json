@@ -58,12 +58,6 @@
     "line_items": {
       "$ref": "definitions.json#/line_items"
     },
-    "processing_method": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "order_number": {
       "type": [
         "null",
@@ -413,44 +407,6 @@
         "string"
       ],
       "format": "singer.decimal"
-    },
-    "payment_details": {
-      "properties": {
-        "avs_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_company": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "cvv_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_bin": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_number": {
-          "type": [
-            "null",
-            "string"
-          ]
-        }
-      },
-      "type": [
-        "null",
-        "object"
-      ]
     },
     "number": {
       "type": [
@@ -978,12 +934,6 @@
       "type": [
         "null",
         "integer"
-      ]
-    },
-    "gateway": {
-      "type": [
-        "null",
-        "string"
       ]
     },
     "cart_token": {
