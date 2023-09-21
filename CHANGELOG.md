@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.0
+  * Updates the Shopify SDK to 12.3.0
+  * Updates API version used to 2023_04
+  * Adds and removes fields per Shopify API changelog for versions 2022_10, 2023_01, 2023_04 [#178](https://github.com/singer-io/tap-shopify/pull/178)
+
 ## 1.7.6
   * Add backoff for 404 error code [#159](https://github.com/singer-io/tap-shopify/pull/159)
 
