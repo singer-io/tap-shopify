@@ -1223,94 +1223,58 @@
       ]
     },
     "merchant_of_record_app_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
+      "type": ["null", "integer"]
     },
     "current_total_additional_fees_set": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": [
+      "type": ["null", "object"],
+      "properties": {
         "presentment_money": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "properties": [
+          "type": ["null", "object"],
+          "properties": {
             "amount": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
             "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
-            },
-            "shop_money": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
+              "type": ["null", "string"]}
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
             "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
-            }
-          ]
+              "type": ["null", "string"]}
+          }
         }
-      ]
+      }
     },
     "original_total_additional_fees_set": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": [
+      "type": ["null", "object"],
+      "properties": {
         "presentment_money": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "properties": [
+          "type": ["null", "object"],
+          "properties": {
             "amount": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
             "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
-            },
-            "shop_money": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
-            "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
+              "type": ["null", "string"]
             }
-          ]
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
         }
-      ]
+      }
     }
   },
   "type": "object"

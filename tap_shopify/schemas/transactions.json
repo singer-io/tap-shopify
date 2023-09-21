@@ -234,46 +234,30 @@
       ]
     },
     "total_unsettled_set": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": [
+      "type": ["null", "object"],
+      "properties": {
         "presentment_money": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "properties": [
+          "type": ["null", "object"],
+          "properties": {
             "amount": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
             "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
-            },
-            "shop_money": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "format": "singer.decimal"
-            },
-            "currency": {
-              "type": [
-                "null",
-                "string"
-              ],
+              "type": ["null", "string"]
             }
-          ]
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
         }
-      ]
+      }
     }
   },
   "type": "object"
