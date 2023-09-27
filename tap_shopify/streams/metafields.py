@@ -38,6 +38,7 @@ class Metafields(Stream):
             # the bookmark key. This switches us over to the
             # `metafield_<parent_type>` bookmark. We track that separately
             # to make resetting individual streams easier.
+            selected_parent_name = selected_parent.name
             selected_parent.name = "metafield_{}".format(selected_parent.name)
             for parent_object in selected_parent.get_objects():
                 since_id = 1
@@ -57,6 +58,25 @@ class Metafields(Stream):
                         raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
                             metafields[-1].id, max([o.id for o in metafields])))
                     since_id += metafields[-1].id
+                if selected_parent_name == "products":
+                    for variant in parent_object.variants:
+                        since_id = 1
+                        while True:
+                            metafields = get_metafields(variant,
+                                                        since_id,
+                                                        shopify.Variant,
+                                                        self.request_timeout)
+                            for metafield in metafields:
+                                if metafield.id < since_id:
+                                    raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
+                                        metafield.id, since_id))
+                                yield metafield
+                            if len(metafields) < self.results_per_page:
+                                break
+                            if metafields[-1].id != max([o.id for o in metafields]):
+                                raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
+                                    metafields[-1].id, max([o.id for o in metafields])))
+                            since_id += metafields[-1].id
 
     def sync(self):
         # Shop metafields
