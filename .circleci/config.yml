@@ -53,7 +53,7 @@ jobs:
             stitch-validate-json tap_shopify/schemas/*.json
   run_unit_tests:
     executor: docker-executor
-    steps:   
+    steps:
       - checkout
       - attach_workspace:
           at: /usr/local/share/virtualenvs
