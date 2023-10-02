@@ -37,7 +37,8 @@ class BaseTapTest(BaseCase):
     @staticmethod
     def get_type():
         """the expected url route ending"""
-        return "platform.shopify-tba"
+        # return "platform.shopify-tba"  # moved to alpha Sep 28, 2023
+        return "platform.shopify"        # new connections after Sep 28, 2023
 
     def get_properties(self, original: bool = True):
         """Configuration properties required for the tap."""
