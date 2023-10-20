@@ -13,7 +13,7 @@ class BookmarkTest(BaseTapTest):
     """Test tap sets a bookmark and respects it for the next sync of a stream"""
     @staticmethod
     def name():
-        return "tap_tester_shopify_bookmark_test"
+        return "tap_tester_shopify_bookmark_update_test"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

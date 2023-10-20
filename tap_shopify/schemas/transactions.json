@@ -111,7 +111,31 @@
             "string"
           ]
         },
+        "credit_card_expiration_month": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "credit_card_expiration_year": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "credit_card_name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
         "credit_card_number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "credit_card_wallet": {
           "type": [
             "null",
             "string"
@@ -200,6 +224,38 @@
             "null",
             "string"
           ]
+        }
+      }
+    },
+    "payment_id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "total_unsettled_set": {
+      "type": ["null", "object"],
+      "properties": {
+        "presentment_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]
+            }
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
         }
       }
     }

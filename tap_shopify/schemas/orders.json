@@ -58,12 +58,6 @@
     "line_items": {
       "$ref": "definitions.json#/line_items"
     },
-    "processing_method": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "order_number": {
       "type": [
         "null",
@@ -414,44 +408,6 @@
       ],
       "format": "singer.decimal"
     },
-    "payment_details": {
-      "properties": {
-        "avs_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_company": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "cvv_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_bin": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_number": {
-          "type": [
-            "null",
-            "string"
-          ]
-        }
-      },
-      "type": [
-        "null",
-        "object"
-      ]
-    },
     "number": {
       "type": [
         "null",
@@ -573,13 +529,6 @@
         "null",
         "object"
       ]
-    },
-    "total_price_usd": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "singer.decimal"
     },
     "closed_at": {
       "type": [
@@ -987,12 +936,6 @@
         "integer"
       ]
     },
-    "gateway": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "cart_token": {
       "type": [
         "null",
@@ -1278,6 +1221,60 @@
         "null",
         "boolean"
       ]
+    },
+    "merchant_of_record_app_id": {
+      "type": ["null", "integer"]
+    },
+    "current_total_additional_fees_set": {
+      "type": ["null", "object"],
+      "properties": {
+        "presentment_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
+        }
+      }
+    },
+    "original_total_additional_fees_set": {
+      "type": ["null", "object"],
+      "properties": {
+        "presentment_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]
+            }
+          }
+        },
+        "shop_money": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": {
+              "type": ["null", "string"],
+              "format": "singer.decimal"},
+            "currency": {
+              "type": ["null", "string"]}
+          }
+        }
+      }
     }
   },
   "type": "object"
