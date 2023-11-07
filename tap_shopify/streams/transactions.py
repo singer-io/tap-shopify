@@ -89,8 +89,11 @@ class Transactions(Stream):
     def sync(self):
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
-            for field_name in ['token', 'version', 'ack']:
-                canonicalize(transaction_dict, field_name)
-            yield transaction_dict
+            if transaction_dict is not None and transaction_dict['receipt'] is not None:
+                for field_name in ['token', 'version', 'ack']:
+                    canonicalize(transaction_dict, field_name)
+                yield transaction_dict
+            else:
+                continue
 
 Context.stream_objects['transactions'] = Transactions
