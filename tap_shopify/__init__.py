@@ -172,9 +172,13 @@ def sync():
                 extraction_time = singer.utils.now()
                 record_schema = catalog_entry['schema']
                 record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform({**rec, **sdc_fields},
-                                            record_schema,
-                                            record_metadata)
+                try:
+                    rec = transformer.transform({**rec, **sdc_fields},
+                                                record_schema,
+                                                record_metadata)
+                except singer.transform.SchemaMismatch as e:
+                    LOGGER.error('Error transforming record: %s', rec)
+                    raise e
                 singer.write_record(stream_id,
                                     rec,
                                     time_extracted=extraction_time)
