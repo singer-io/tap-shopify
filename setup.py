@@ -19,7 +19,7 @@ setup(
             'pylint==2.7.4',
             'ipdb',
             'requests==2.20.0',
-            'nose2',
+            'nose',
         ]
     },
     entry_points="""
