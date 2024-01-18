@@ -39,7 +39,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pylint tap_shopify -d missing-docstring,too-many-branches
+            pylint tap_shopify -d missing-docstring,too-many-branches,consider-using-f-string,consider-using-generator,consider-using-dict-items,unnecessary-dunder-call,duplicate-code
   json_validator:
     executor: docker-executor
     steps:
@@ -61,9 +61,8 @@ jobs:
           name: 'Unit Tests'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pip install nose coverage parameterized
-            pip install nose2 coverage
-            nose2 -v -s tests/unittests
+            pip install nose2 parameterized nose2[coverage_plugin]>=0.6.5
+            nose2 --with-coverage -v -s tests/unittests
       - store_test_results:
           path: test_output/report.xml
       - store_artifacts:

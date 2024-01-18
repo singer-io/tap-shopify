@@ -1,7 +1,5 @@
 import datetime
 import functools
-import math
-import sys
 import socket
 from urllib.error import URLError
 import http
@@ -246,8 +244,7 @@ class Stream():
                               or updated_at_min + datetime.timedelta(days=date_window_size))
             last_sync_interrupted_at = None
 
-            if updated_at_max > stop_time:
-                updated_at_max = stop_time
+            updated_at_max = min(updated_at_max, stop_time)
             while True:
                 status_key = self.status_key or "status"
                 query_params = self.get_query_params(since_id,
