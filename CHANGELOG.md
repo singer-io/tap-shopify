@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.0
+  * Updates to run on python 3.11 [#186](https://github.com/singer-io/tap-shopify/pull/186)
+
 ## 1.8.0
   * Updates the Shopify SDK to 12.3.0
   * Updates API version used to 2023_04

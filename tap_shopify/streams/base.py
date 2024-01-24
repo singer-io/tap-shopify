@@ -1,7 +1,5 @@
 import datetime
 import functools
-import math
-import sys
 import socket
 from urllib.error import URLError
 import http
@@ -97,18 +95,6 @@ def retry_handler(details):
     LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
                 details['tries'], MAX_RETRIES)
 
-#pylint: disable=unused-argument
-def retry_after_wait_gen(**kwargs):
-    # This is called in an except block so we can retrieve the exception
-    # and check it.
-    exc_info = sys.exc_info()
-    resp = exc_info[1].response
-    # Retry-After is an undocumented header. But honoring
-    # it was proven to work in our spikes.
-    # It's been observed to come through as lowercase, so fallback if not present
-    sleep_time_str = resp.headers.get('Retry-After', resp.headers.get('retry-after'))
-    yield math.floor(float(sleep_time_str))
-
 # boolean function to check if the error is 'timeout' error or not
 def is_timeout_error(error_raised):
     """
@@ -143,7 +129,7 @@ def shopify_error_handling(fnc):
                           giveup=is_not_status_code_fn([404]),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
-    @backoff.on_exception(retry_after_wait_gen,
+    @backoff.on_exception(backoff.expo,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
                           on_backoff=leaky_bucket_handler,
@@ -258,8 +244,7 @@ class Stream():
                               or updated_at_min + datetime.timedelta(days=date_window_size))
             last_sync_interrupted_at = None
 
-            if updated_at_max > stop_time:
-                updated_at_max = stop_time
+            updated_at_max = min(updated_at_max, stop_time)
             while True:
                 status_key = self.status_key or "status"
                 query_params = self.get_query_params(since_id,

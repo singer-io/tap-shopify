@@ -47,7 +47,7 @@ def load_schemas():
     for filename in os.listdir(get_abs_path('schemas')):
         path = get_abs_path('schemas') + '/' + filename
         schema_name = filename.replace('.json', '')
-        with open(path) as file:
+        with open(path, encoding='UTF-8') as file:
             schemas[schema_name] = json.load(file)
 
     return schemas
@@ -74,7 +74,7 @@ def load_schema_references():
     shared_schema_path = get_abs_path('schemas/')
 
     refs = {}
-    with open(os.path.join(shared_schema_path, shared_schema_file)) as data_file:
+    with open(os.path.join(shared_schema_path, shared_schema_file), encoding='UTF-8') as data_file:
         refs[shared_schema_file] = json.load(data_file)
 
     return refs
