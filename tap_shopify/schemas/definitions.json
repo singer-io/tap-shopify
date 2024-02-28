@@ -81,12 +81,6 @@
           "string"
         ]
       },
-      "currency": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
       "email": {
         "type": [
           "null",
@@ -410,26 +404,6 @@
           "integer"
         ]
       },
-      "accepts_marketing": {
-        "type": [
-          "null",
-          "boolean"
-        ]
-      },
-      "accepts_marketing_updated_at": {
-        "anyOf": [
-          {
-            "type": "string" ,
-            "format": "date-time"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
       "created_at": {
         "type": [
           "null",
@@ -448,12 +422,6 @@
             "string"
           ]
         }
-      },
-      "marketing_opt_in_level": {
-        "type": [
-          "null",
-          "string"
-        ]
       },
       "email_marketing_consent": {
         "type": [
