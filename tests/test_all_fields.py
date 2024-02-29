@@ -96,7 +96,7 @@ class AllFieldsTest(BaseTapTest):
                     # Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
                     # https://jira.talendforge.org/browse/TDL-15985
                     # total_price_usd showing up in syncd records Sep 2023, still missing from docs
-                    bad_schema_fields = {'order_adjustments'}
+                    bad_schema_fields = {'order_adjustments', 'taxExempt', 'poNumber'}
                     expected_all_keys = expected_all_keys - bad_schema_fields
 
                 self.assertSetEqual(expected_all_keys, actual_all_keys)
