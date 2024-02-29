@@ -97,6 +97,9 @@ class AllFieldsTest(BaseTapTest):
                     # https://jira.talendforge.org/browse/TDL-15985
                     # total_price_usd showing up in syncd records Sep 2023, still missing from docs
                     bad_schema_fields = {'order_adjustments'}
-                    expected_all_keys = expected_all_keys - bad_schema_fields
+                    # missing data for 'taxExempt' and 'poNumber' in 'orders' stream
+                    # https://jira.talendforge.org/browse/TDL-25173
+                    missing_fields = {'taxExempt', 'poNumber'}
+                    expected_all_keys = expected_all_keys - bad_schema_fields - missing_fields
 
                 self.assertSetEqual(expected_all_keys, actual_all_keys)

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.0
+  * Updates the Shopify SDK to 12.3.0
+  * Updates API version used to 2024-01
+  * Incarporates schema changes [#187](https://github.com/singer-io/tap-shopify/pull/187)
+
 ## 1.9.0
   * Updates to run on python 3.11 [#186](https://github.com/singer-io/tap-shopify/pull/186)
 
