@@ -58,7 +58,6 @@
     "value": {
       "type": [
         "null",
-        "integer",
         "object",
         "string"
       ],
