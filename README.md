@@ -49,7 +49,10 @@ This tap:
 
    The `shop` is your Shopify shop which will be the value `test_shop` in the string `https://test_shop.myshopify.com`
 
-    The `request_timeout` is the timeout for the requests. Default: 300 seconds
+   The `request_timeout` is the timeout for the requests. Default: 300 seconds
+
+   The `end_date` specifies the date at which the tap will stop pulling data
+   (for those resources that support this). Default: current date & time.
 
 4. Run the Tap in Discovery Mode
 
