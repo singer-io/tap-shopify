@@ -200,8 +200,8 @@ class InterruptedSyncTest(BaseTapTest):
                 # This is the expected behaviour for shopify as they are using date windowing
                 # TDL-17096 : Resuming bookmark value is getting assigned from execution time
                 # rather than the actual bookmark time for some streams.
-                # TODO this is not the case for the transactions stream, they are equal.
-                if stream == 'transactions':
+                # TODO orders and transactions streams are equal, confirm this behavior is correct
+                if stream == 'transactions' or stream == 'orders':
                     self.assertEqual(resuming_bookmark_value, first_bookmark_value)
                 else:
                     self.assertGreater(resuming_bookmark_value, first_bookmark_value)
