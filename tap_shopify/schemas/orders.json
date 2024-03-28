@@ -110,12 +110,6 @@
               "array"
             ]
           },
-          "delivery_category": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "discounted_price": {
             "type": [
               "null",
