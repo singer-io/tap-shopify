@@ -204,7 +204,7 @@ class InterruptedSyncTest(BaseTapTest):
                 #   and greater than bookmark behavior, confirm if this is correct
                 if stream == 'transactions':
                     self.assertEqual(resuming_bookmark_value, first_bookmark_value)
-                if stream == 'orders':
+                elif stream == 'orders':
                     self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
                 else:
                     self.assertGreater(resuming_bookmark_value, first_bookmark_value)
