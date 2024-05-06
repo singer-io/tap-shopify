@@ -146,6 +146,12 @@
             "null",
             "string"
           ]
+        },
+        "payment_method_name": {
+          "type": [
+            "null",
+            "string"
+          ]
         }
       },
       "type": [
