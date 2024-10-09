@@ -26,7 +26,9 @@ logging.getLogger('backoff').setLevel(logging.CRITICAL)
 
 @shopify_error_handling
 def initialize_shopify_client():
-    api_key = Context.config.get('access_token', Context.config.get("api_key"))
+    api_key = Context.config.get('access_token') or Context.config.get('api_key')
+    if api_key is None:
+        raise ValueError("No 'access_token' or 'api_key' provided in the config file.")
     shop = Context.config['shop']
     version = Context.config.get('api_version', '2024-01')
     session = shopify.Session(shop, version, api_key)
