@@ -134,6 +134,8 @@ class Transactions(Stream):
         with HiddenPrints():
             response = gql_client.execute(self.gql_query, dict(query=query, cursor=cursor))
         result = json.loads(response)
+        if result.get("errors"):
+            raise Exception(result['errors'])
         return result
 
 
