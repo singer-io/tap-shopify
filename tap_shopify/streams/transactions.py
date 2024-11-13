@@ -174,6 +174,7 @@ class Transactions(Stream):
         query = f"updated_at:>'{updated_at}'"
 
         for page in self.get_transactions(query):
+            LOGGER.info(f"Got page: {page}")
             for order in page['data']['orders']['nodes']:
                 order_id = int(order['id'].split("/")[-1])
                 location_id = order.get("retailLocation", {}).get("id")
