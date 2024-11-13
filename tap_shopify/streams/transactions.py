@@ -131,11 +131,13 @@ class Transactions(Stream):
 
     @shopify_error_handling
     def call_api_for_transactions(self, gql_client, query, cursor=None):
+        LOGGER.info(f"Getting transactions query={query} cursor={cursor}")
         with HiddenPrints():
             response = gql_client.execute(self.gql_query, dict(query=query, cursor=cursor))
         result = json.loads(response)
         if result.get("errors"):
             raise Exception(result['errors'])
+        LOGGER.info("Returned transactions.")
         return result
 
 
