@@ -176,8 +176,11 @@ class Transactions(Stream):
         selected_parent.name = "transaction_orders"
         updated_at = selected_parent.get_bookmark().isoformat()
         query = f"updated_at:>'{updated_at}'"
+        transactions = 0
 
         for page in self.get_transactions(query):
+            LOGGER.info(f"Transactions: {transactions}")
+            LOGGER.info(page)
             for order in page['data']['orders']['nodes']:
                 order_id = int(order['id'].split("/")[-1])
                 location_id = order.get("retailLocation", {}).get("id")
@@ -212,6 +215,7 @@ class Transactions(Stream):
                             "avs_result_code": payment_details.get("avsResultCode"),
                         }
 
+                    transactions += 1
                     yield transaction
 
 
