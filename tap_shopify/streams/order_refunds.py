@@ -1,4 +1,5 @@
 import shopify
+import singer
 from singer.utils import strftime, strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
@@ -10,6 +11,7 @@ class OrderRefunds(Stream):
     name = 'order_refunds'
     replication_object = shopify.Refund
     replication_key = 'created_at'
+    parent_stream = None
 
     @shopify_error_handling
     def get_refunds(self, parent_object, since_id):
@@ -24,6 +26,7 @@ class OrderRefunds(Stream):
     def get_objects(self):
         selected_parent = Context.stream_objects['orders']()
         selected_parent.name = "refund_orders"
+        self.parent_stream = selected_parent
 
         # Page through all `orders`, bookmarking at `refund_orders`
         for parent_object in selected_parent.get_objects():
@@ -44,7 +47,6 @@ class OrderRefunds(Stream):
 
     def sync(self):
         bookmark = self.get_bookmark()
-        max_bookmark = bookmark
         for refund in self.get_objects():
             refund_dict = refund.to_dict()
             replication_value = strptime_to_utc(refund_dict[self.replication_key])
@@ -54,10 +56,9 @@ class OrderRefunds(Stream):
                         canonicalize(transaction_dict, field_name)
                 yield refund_dict
 
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
 
-        self.update_bookmark(strftime(max_bookmark))
+        max_bookmark = singer.get_bookmark(Context.state,self.parent_stream.name,self.parent_stream.replication_key)
+        self.update_bookmark(max_bookmark)
 
 
 Context.stream_objects['order_refunds'] = OrderRefunds

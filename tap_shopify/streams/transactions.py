@@ -17,6 +17,7 @@ class Transactions(Stream):
     name = 'transactions'
     replication_key = 'created_at'
     replication_object = shopify.Transaction
+    parent_stream = None
     # Added decorator over functions of shopify SDK
     replication_object.find = shopify_error_handling(replication_object.find)
     # Transactions have no updated_at property. Therefore we have
@@ -59,6 +60,7 @@ class Transactions(Stream):
         # Get transactions, bookmarking at `transaction_orders`
         selected_parent = Context.stream_objects['orders']()
         selected_parent.name = "transaction_orders"
+        self.parent_stream = selected_parent
 
         # Page through all `orders`, bookmarking at `transaction_orders`
         for parent_object in selected_parent.get_objects():
@@ -68,7 +70,6 @@ class Transactions(Stream):
 
     def sync(self):
         bookmark = self.get_bookmark()
-        max_bookmark = bookmark
         for transaction in self.get_objects():
             transaction_dict = transaction.to_dict()
             replication_value = strptime_to_utc(transaction_dict[self.replication_key])
@@ -77,9 +78,8 @@ class Transactions(Stream):
                     canonicalize(transaction_dict, field_name)
                 yield transaction_dict
 
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
 
-        self.update_bookmark(strftime(max_bookmark))
+        max_bookmark = singer.get_bookmark(Context.state,self.parent_stream.name,self.parent_stream.replication_key)
+        self.update_bookmark(max_bookmark)
 
 Context.stream_objects['transactions'] = Transactions
