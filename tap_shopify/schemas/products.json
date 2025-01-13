@@ -1,334 +1,107 @@
 {
+  "type": "object",
   "properties": {
-    "status": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "published_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "created_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "published_scope": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "vendor": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "updated_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "body_html": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "product_type": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "tags": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "options": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "properties": {
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "values": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": [
-                "null",
-                "string"
-              ]
+    "products": {
+      "type": ["null", "object"],
+      "properties": {
+        "availablePublicationsCount": {
+          "type": ["null", "object"],
+          "properties": {
+            "count": { "type": ["null", "integer"] },
+            "precision": { "type": ["null", "string"] }
+          }
+        },
+        "createdAt": { "type": ["null", "string"], "format": "date-time" },
+        "defaultCursor": { "type": ["null", "string"] },
+        "descriptionHtml": { "type": ["null", "string"] },
+        "description": { "type": ["null", "string"] },
+        "giftCardTemplateSuffix": { "type": ["null", "string"] },
+        "handle": { "type": ["null", "string"] },
+        "hasOnlyDefaultVariant": { "type": ["null", "boolean"] },
+        "hasOutOfStockVariants": { "type": ["null", "boolean"] },
+        "hasVariantsThatRequiresComponents": { "type": ["null", "boolean"] },
+        "id": { "type": ["null", "string"] },
+        "isGiftCard": { "type": ["null", "boolean"] },
+        "legacyResourceId": { "type": ["null", "string"] },
+        "media": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": { "type": ["null", "string"] },
+            "alt": { "type": ["null", "string"] },
+            "mediaContentType": { "type": ["null", "string"] },
+            "status": { "type": ["null", "string"] },
+            "createdAt": { "type": ["null", "string"], "format": "date-time" },
+            "fileStatus": { "type": ["null", "string"] },
+            "mimeType": { "type": ["null", "string"] },
+            "updatedAt": { "type": ["null", "string"], "format": "date-time" }
+          }
+        },
+        "title": { "type": ["null", "string"] },
+        "mediaCount": {
+          "type": ["null", "object"],
+          "properties": {
+            "count": { "type": ["null", "integer"] },
+            "precision": { "type": ["null", "string"] }
+          }
+        },
+        "onlineStorePreviewUrl": { "type": ["null", "string"], "format": "uri" },
+        "onlineStoreUrl": { "type": ["null", "string"], "format": "uri" },
+        "productType": { "type": ["null", "string"] },
+        "publishedAt": { "type": ["null", "string"], "format": "date-time" },
+        "publishedOnCurrentPublication": { "type": ["null", "boolean"] },
+        "requiresSellingPlan": { "type": ["null", "boolean"] },
+        "resourcePublicationOnCurrentPublication": {
+          "type": ["null", "object"],
+          "properties": {
+            "isPublished": { "type": ["null", "boolean"] },
+            "publishDate": { "type": ["null", "string"], "format": "date-time" }
+          }
+        },
+        "status": { "type": ["null", "string"] },
+        "tags": {
+          "type": ["null", "array"],
+          "items": { "type": ["null", "string"] }
+        },
+        "templateSuffix": { "type": ["null", "string"] },
+        "totalInventory": { "type": ["null", "integer"] },
+        "tracksInventory": { "type": ["null", "boolean"] },
+        "updatedAt": { "type": ["null", "string"], "format": "date-time" },
+        "vendor": { "type": ["null", "string"] },
+        "variants": {
+          "type": ["null", "array"],
+          "items": {
+            "type": ["null", "object"],
+            "properties": {
+              "availableForSale": { "type": ["null", "boolean"] },
+              "barcode": { "type": ["null", "string"] },
+              "compareAtPrice": { "type": ["null", "string"], "format": "decimal" },
+              "createdAt": { "type": ["null", "string"], "format": "date-time" },
+              "defaultCursor": { "type": ["null", "string"] },
+              "displayName": { "type": ["null", "string"] },
+              "id": { "type": ["null", "string"] },
+              "inventoryPolicy": { "type": ["null", "string"] },
+              "inventoryQuantity": { "type": ["null", "integer"] },
+              "legacyResourceId": { "type": ["null", "string"] },
+              "position": { "type": ["null", "integer"] },
+              "price": { "type": ["null", "string"], "format": "decimal" },
+              "requiresComponents": { "type": ["null", "boolean"] },
+              "sellableOnlineQuantity": { "type": ["null", "integer"] },
+              "sku": { "type": ["null", "string"] },
+              "taxCode": { "type": ["null", "string"] },
+              "taxable": { "type": ["null", "boolean"] },
+              "title": { "type": ["null", "string"] },
+              "updatedAt": { "type": ["null", "string"], "format": "date-time" }
             }
-          },
-          "id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "position": {
-            "type": [
-              "null",
-              "integer"
-            ]
           }
         },
-        "type": [
-          "null",
-          "object"
-        ]
-      }
-    },
-    "image": {
-      "$ref": "definitions.json#/image"
-    },
-    "handle": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "images": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "$ref": "definitions.json#/image"        
-      }
-    },
-    "template_suffix": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "title": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "variants": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "properties": {
-          "barcode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "tax_code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "created_at": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "weight_unit": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "position": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "price": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "singer.decimal"
-          },
-          "image_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "inventory_policy": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sku": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "inventory_item_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "fulfillment_service": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "weight": {
-            "type": [
-              "null",
-              "number"
-            ]
-          },
-          "inventory_management": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "taxable": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "admin_graphql_api_id": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "option1": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "compare_at_price": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "singer.decimal"
-          },
-          "updated_at": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "option2": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "old_inventory_quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "requires_shipping": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "inventory_quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "grams": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "option3": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
+        "resourcePublicationsCount": {
+          "type": ["null", "object"],
+          "properties": {
+            "count": { "type": ["null", "integer"] },
+            "precision": { "type": ["null", "string"] }
           }
-        },
-        "type": [
-          "null",
-          "object"
-        ]
+        }
       }
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "id": {
-      "type": [
-        "null",
-        "integer"
-      ]
     }
-  },
-  "type": "object"
+  }
 }
