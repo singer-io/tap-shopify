@@ -60,7 +60,7 @@ def shopify_graphql_error_handling(fnc):
 class GraphQLStream:
     name = None
     replication_method = 'INCREMENTAL'
-    replication_key = 'updatedAt'
+    replication_key = 'updated_at'
     key_properties = ['id']
     
     def __init__(self):

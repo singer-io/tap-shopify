@@ -1,8 +1,5 @@
 {
-  "type": "object",
-  "properties": {
-    "products": {
-      "type": ["null", "object"],
+      "type": "object",
       "properties": {
         "availablePublicationsCount": {
           "type": ["null", "object"],
@@ -103,5 +100,3 @@
         }
       }
     }
-  }
-}
