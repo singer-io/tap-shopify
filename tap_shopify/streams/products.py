@@ -1,3 +1,4 @@
+from singer import metadata
 from tap_shopify.streams.graphql_base import GraphQLStream
 from tap_shopify.context import Context
 
@@ -144,7 +145,9 @@ class Products(GraphQLStream):
 
     def get_selected_fields(self):
         """Get list of selected fields from catalog"""
-        mdata = Context.metadata.get(('properties', self.name), {})
+        for stream in Context.catalog['streams']:
+            if stream['stream'] == self.name:
+                mdata = metadata.to_map(stream['metadata'])
         selected_fields = []
         
         for field, mapping in self.FIELD_MAPPINGS.items():
