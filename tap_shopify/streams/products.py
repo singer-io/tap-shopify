@@ -22,62 +22,6 @@ class Products(GraphQLStream):
 
         return selected_fields, schema
 
-    # def build_field_string(self, schema, selected_fields):
-    #     """Recursively build the field string for GraphQL."""
-    #     field_strings = []
-
-    #     for field in selected_fields:
-    #         field_schema = schema['properties'].get(field)
-    #         if not field_schema:
-    #             continue
-
-    #         # Check if the field is an object with nested properties
-    #         if field_schema.get("type") == "object" and "properties" in field_schema:
-    #             nested_fields = list(field_schema["properties"].keys())
-    #             nested_field_string = self.build_field_string(field_schema, nested_fields)
-    #             if nested_field_string:
-    #                 field_strings.append(f"{field} {{\n{nested_field_string}\n}}")
-    #         elif field_schema.get("type") == "array" and "items" in field_schema:
-    #             # Handle array fields with nested objects
-    #             if field_schema["items"].get("type") == "object" and "properties" in field_schema["items"]:
-    #                 nested_fields = list(field_schema["items"]["properties"].keys())
-    #                 nested_field_string = self.build_field_string(field_schema["items"], nested_fields)
-    #                 if nested_field_string:
-    #                     field_strings.append(f"{field}(first: 2) {{\n  edges {{\n    node {{\n{nested_field_string}\n    }}\n  }}\n  pageInfo {{\n    endCursor\n    hasNextPage\n  }}\n}}")
-    #         else:
-    #             # Base field
-    #             field_strings.append(field)
-
-    #     return "\n".join(field_strings)
-
-    # def build_query(self):
-    #     """Build the complete GraphQL query."""
-    #     selected_fields, schema = self.get_selected_fields()
-
-    #     # Always include pagination info
-    #     pagination_info = """
-    #         pageInfo {
-    #             hasNextPage
-    #             endCursor
-    #         }
-    #     """
-
-    #     # Build field string dynamically
-    #     field_string = self.build_field_string(schema, selected_fields)
-
-    #     return f"""
-    #     query($first: Int!, $after: String) {{
-    #         products(first: $first, after: $after) {{
-    #             {pagination_info}
-    #             edges {{
-    #                 node {{
-    #                     {field_string}
-    #                 }}
-    #             }}
-    #         }}
-    #     }}
-    #     """
-
     def get_graphql_query(self):
         return """
         query GetProducts($first: Int!, $after: String, $query: String) {
