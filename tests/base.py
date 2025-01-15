@@ -44,7 +44,7 @@ class BaseTapTest(BaseCase):
         """Configuration properties required for the tap."""
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
-            'shop': 'stitchdatawearhouse',
+            'shop': 'stitch-test-store-data',
             'date_window_size': 30,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
             # 'results_per_page': '50'
@@ -57,7 +57,7 @@ class BaseTapTest(BaseCase):
         assert self.start_date > return_value["start_date"]
 
         return_value["start_date"] = self.start_date
-        return_value['shop'] = 'talenddatawearhouse'
+        return_value['shop'] = 'stitch-test-store-data'
         return return_value
 
     @staticmethod
@@ -101,7 +101,11 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "products": default,
+            "products": {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
             "inventory_items": {self.REPLICATION_KEYS: {"updated_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
