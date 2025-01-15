@@ -60,7 +60,7 @@ def shopify_graphql_error_handling(fnc):
 class GraphQLStream:
     name = None
     replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
+    replication_key = 'updatedAt'
     key_properties = ['id']
     
     def __init__(self):
@@ -121,7 +121,7 @@ class GraphQLStream:
             variables = {
                 'first': self.results_per_page,
                 'after': None,
-                'query': f"updated_at:>={updated_at_min.isoformat()} AND updated_at:<={updated_at_max.isoformat()}"
+                'query': f"updated_at:>={utils.strftime(updated_at_min,utils.DATETIME_PARSE)} AND updated_at:<={utils.strftime(updated_at_max,utils.DATETIME_PARSE)}"
             }
 
             has_next_page = True

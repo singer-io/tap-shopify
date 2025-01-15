@@ -4,209 +4,242 @@ from tap_shopify.context import Context
 
 class Products(GraphQLStream):
     name = 'products'
-    
-    # Field mapping from catalog to GraphQL fields
-    FIELD_MAPPINGS = {
-        'available_publications_count': {
-            'field': 'availablePublicationsCount',
-            'subfields': ['count', 'precision']
-        },
-        'created_at': 'createdAt',
-        'default_cursor': 'defaultCursor',
-        'description_html': 'descriptionHtml',
-        'description': 'description',
-        'gift_card_template_suffix': 'giftCardTemplateSuffix',
-        'handle': 'handle',
-        'has_only_default_variant': 'hasOnlyDefaultVariant',
-        'has_out_of_stock_variants': 'hasOutOfStockVariants',
-        'has_variants_that_requires_components': 'hasVariantsThatRequiresComponents',
-        'id': 'id',
-        'is_gift_card': 'isGiftCard',
-        'legacy_resource_id': 'legacyResourceId',
-        'media': {
-            'field': 'media',
-            'arguments': '(first: 2)',
-            'subfields': {
-                'id': 'id',
-                'alt': 'alt',
-                'media_content_type': 'mediaContentType',
-                'status': 'status',
-                'video': {
-                    'fragment': 'Video',
-                    'fields': [
-                        'createdAt',
-                        'duration',
-                        'filename',
-                        'fileStatus',
-                        'updatedAt'
-                    ]
-                },
-                'image': {
-                    'fragment': 'MediaImage',
-                    'fields': [
-                        'createdAt',
-                        'fileStatus',
-                        'mimeType',
-                        'updatedAt'
-                    ]
-                }
-            }
-        },
-        'title': 'title',
-        'media_count': {
-            'field': 'mediaCount',
-            'subfields': ['count', 'precision']
-        },
-        'online_store_preview_url': 'onlineStorePreviewUrl',
-        'online_store_url': 'onlineStoreUrl',
-        'product_type': 'productType',
-        'published_at': 'publishedAt',
-        'published_on_current_publication': 'publishedOnCurrentPublication',
-        'requires_selling_plan': 'requiresSellingPlan',
-        'resource_publication_on_current_publication': {
-            'field': 'resourcePublicationOnCurrentPublication',
-            'subfields': ['isPublished', 'publishDate']
-        },
-        'status': 'status',
-        'tags': 'tags',
-        'template_suffix': 'templateSuffix',
-        'total_inventory': 'totalInventory',
-        'tracks_inventory': 'tracksInventory',
-        'updated_at': 'updatedAt',
-        'vendor': 'vendor',
-        'variants': {
-            'field': 'variants',
-            'arguments': '(first: 150)',
-            'subfields': [
-                'availableForSale',
-                'barcode',
-                'compareAtPrice',
-                'createdAt',
-                'defaultCursor',
-                'displayName',
-                'id',
-                'inventoryPolicy',
-                'inventoryQuantity',
-                'legacyResourceId',
-                'position',
-                'price',
-                'requiresComponents',
-                'sellableOnlineQuantity',
-                'sku',
-                'taxCode',
-                'taxable',
-                'title',
-                'updatedAt'
-            ]
-        },
-        'resource_publications_count': {
-            'field': 'resourcePublicationsCount',
-            'subfields': ['count', 'precision']
-        }
-    }
-
-    def build_field_selection(self, field_mapping, selected_fields=None):
-        """Recursively build GraphQL field selection"""
-        if isinstance(field_mapping, str):
-            return field_mapping
-
-        if isinstance(field_mapping, dict):
-            field = field_mapping['field']
-            parts = [field]
-            
-            # Add arguments if present
-            if 'arguments' in field_mapping:
-                parts.append(field_mapping['arguments'])
-
-            # Handle subfields
-            if 'subfields' in field_mapping:
-                subfields = field_mapping['subfields']
-                
-                if isinstance(subfields, list):
-                    subfield_str = ' '.join(subfields)
-                elif isinstance(subfields, dict):
-                    sub_parts = []
-                    for key, value in subfields.items():
-                        if isinstance(value, dict) and 'fragment' in value:
-                            # Handle fragments (like Video and MediaImage)
-                            fragment_fields = ' '.join(value['fields'])
-                            sub_parts.append(f'... on {value["fragment"]} {{ {fragment_fields} }}')
-                        else:
-                            sub_parts.append(self.build_field_selection(value))
-                    subfield_str = ' '.join(sub_parts)
-                else:
-                    subfield_str = ' '.join(subfields)
-
-                parts.append(f'{{ {subfield_str} }}')
-                
-            return ' '.join(parts)
-
-        return ''
 
     def get_selected_fields(self):
-        """Get list of selected fields from catalog"""
+        """Get list of selected fields from catalog."""
+        mdata = None
+        schema = {}
         for stream in Context.catalog['streams']:
             if stream['stream'] == self.name:
                 mdata = metadata.to_map(stream['metadata'])
+                schema = stream['schema']
         selected_fields = []
-        
-        for field, mapping in self.FIELD_MAPPINGS.items():
-            if mdata.get(('properties', field, 'selected'), True):  # Default to True if not specified
-                selected_fields.append(field)
-                
-        return selected_fields
 
-    def build_query(self, selected_fields):
-        """Build the complete GraphQL query"""
-        field_selections = []
-        
-        for field in selected_fields:
-            mapping = self.FIELD_MAPPINGS.get(field)
-            if mapping:
-                field_selection = self.build_field_selection(mapping)
-                if field_selection:
-                    field_selections.append(field_selection)
+        if 'properties' in schema.keys():
+            for field in schema['properties'].keys():
+                if mdata.get(('properties', field, 'selected'), True):  # Default to True if not specified
+                    selected_fields.append(field)
 
-        # Always include pagination info and necessary fields
-        required_fields = """
-            pageInfo {
-                hasNextPage
-                endCursor
-            }
-        """
-        
-        fields_str = '\n'.join(field_selections)
-        
-        return f"""
-        query($first: Int!, $after: String) {{
-            products(first: $first, after: $after) {{
-                {required_fields}
-                edges {{
-                    node {{
-                        {fields_str}
-                    }}
-                }}
-            }}
-        }}
-        """
+        return selected_fields, schema
+
+    # def build_field_string(self, schema, selected_fields):
+    #     """Recursively build the field string for GraphQL."""
+    #     field_strings = []
+
+    #     for field in selected_fields:
+    #         field_schema = schema['properties'].get(field)
+    #         if not field_schema:
+    #             continue
+
+    #         # Check if the field is an object with nested properties
+    #         if field_schema.get("type") == "object" and "properties" in field_schema:
+    #             nested_fields = list(field_schema["properties"].keys())
+    #             nested_field_string = self.build_field_string(field_schema, nested_fields)
+    #             if nested_field_string:
+    #                 field_strings.append(f"{field} {{\n{nested_field_string}\n}}")
+    #         elif field_schema.get("type") == "array" and "items" in field_schema:
+    #             # Handle array fields with nested objects
+    #             if field_schema["items"].get("type") == "object" and "properties" in field_schema["items"]:
+    #                 nested_fields = list(field_schema["items"]["properties"].keys())
+    #                 nested_field_string = self.build_field_string(field_schema["items"], nested_fields)
+    #                 if nested_field_string:
+    #                     field_strings.append(f"{field}(first: 2) {{\n  edges {{\n    node {{\n{nested_field_string}\n    }}\n  }}\n  pageInfo {{\n    endCursor\n    hasNextPage\n  }}\n}}")
+    #         else:
+    #             # Base field
+    #             field_strings.append(field)
+
+    #     return "\n".join(field_strings)
+
+    # def build_query(self):
+    #     """Build the complete GraphQL query."""
+    #     selected_fields, schema = self.get_selected_fields()
+
+    #     # Always include pagination info
+    #     pagination_info = """
+    #         pageInfo {
+    #             hasNextPage
+    #             endCursor
+    #         }
+    #     """
+
+    #     # Build field string dynamically
+    #     field_string = self.build_field_string(schema, selected_fields)
+
+    #     return f"""
+    #     query($first: Int!, $after: String) {{
+    #         products(first: $first, after: $after) {{
+    #             {pagination_info}
+    #             edges {{
+    #                 node {{
+    #                     {field_string}
+    #                 }}
+    #             }}
+    #         }}
+    #     }}
+    #     """
 
     def get_graphql_query(self):
-        """Generate the GraphQL query based on selected fields"""
-        selected_fields = self.get_selected_fields()
-        return self.build_query(selected_fields)
+        return """
+        query GetProducts($first: Int!, $after: String, $query: String) {
+            products(first: $first, after: $after, query: $query) {
+                edges {
+                    node {
+                        availablePublicationsCount {
+                            count
+                            precision
+                        }
+                        createdAt
+                        descriptionHtml
+                        description
+                        giftCardTemplateSuffix
+                        handle
+                        hasOnlyDefaultVariant
+                        hasOutOfStockVariants
+                        hasVariantsThatRequiresComponents
+                        id
+                        isGiftCard
+                        legacyResourceId
+                        media(first: 2) {
+                            edges {
+                                node {
+                                    id
+                                    alt
+                                    mediaContentType
+                                    status
+                                    ... on Video {
+                                        id
+                                        alt
+                                        createdAt
+                                        duration
+                                        filename
+                                        fileStatus
+                                        mediaContentType
+                                        status
+                                        updatedAt
+                                    }
+                                    ... on MediaImage {
+                                        id
+                                        alt
+                                        createdAt
+                                        fileStatus
+                                        mediaContentType
+                                        mimeType
+                                        status
+                                        updatedAt
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                endCursor
+                                hasNextPage
+                            }
+                        }
+                        title
+                        mediaCount {
+                            count
+                            precision
+                        }
+                        onlineStorePreviewUrl
+                        onlineStoreUrl
+                        productType
+                        publishedAt
+                        requiresSellingPlan
+                        resourcePublicationOnCurrentPublication {
+                            isPublished
+                            publishDate
+                        }
+                        status
+                        tags
+                        templateSuffix
+                        totalInventory
+                        tracksInventory
+                        updatedAt
+                        vendor
+                        variants(first: 250) {
+                            edges {
+                                node {
+                                    availableForSale
+                                    barcode
+                                    compareAtPrice
+                                    createdAt
+                                    defaultCursor
+                                    displayName
+                                    id
+                                    inventoryPolicy
+                                    inventoryQuantity
+                                    legacyResourceId
+                                    position
+                                    price
+                                    requiresComponents
+                                    sellableOnlineQuantity
+                                    sku
+                                    taxCode
+                                    taxable
+                                    title
+                                    updatedAt
+                                }
+                            }
+                        }
+                        resourcePublicationsCount {
+                            count
+                            precision
+                        }
+                        options(first: 200) {
+                            id
+                            name
+                            position
+                            values
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+        """
 
     def get_connection_from_data(self, data):
         return data['products']
 
+    def transform_media(self, node):
+        """
+        Transform media structure from edges/node format to a flat array.
+    
+        Args:
+            node (dict): The input JSON data
+            
+        Returns:
+            dict: Transformed data with flattened media array
+        """
+        if "media" in node and "edges" in node["media"]:
+            # Flatten the edges into a list of nodes
+            node["media"] = [edge["node"] for edge in node["media"]["edges"]]
+
+    def transform_variants(self, node):
+        """
+        Transform variant structure from edges/node format to a flat array.
+    
+        Args:
+            node (dict): The input JSON data
+            
+        Returns:
+            dict: Transformed data with flattened variants array
+        """
+        if "variants" in node and "edges" in node["variants"]:
+            # Flatten the edges into a list of nodes
+            node["variants"] = [edge["node"] for edge in node["variants"]["edges"]]
+
     def process_node(self, node):
-        """Process the node based on selected fields"""
-        selected_fields = self.get_selected_fields()
-        processed = {}
+        """Process the node based on selected fields."""
+        selected_fields, _ = self.get_selected_fields()
+        if "media" in selected_fields:
+            self.transform_media(node)
+        if "variants" in selected_fields:
+            self.transform_variants(node)
         
-        for field in selected_fields:
-            if field in node:
-                processed[field] = node[field]
-                
-        return processed
+        return node
+
 
 Context.stream_objects['products'] = Products
