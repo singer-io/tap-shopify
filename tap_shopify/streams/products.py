@@ -20,7 +20,7 @@ LOGGER = singer.get_logger()
 class Products(Stream):
     name = 'products'
     data_key = 'products'
-    replication_key = "updatedAt"
+    replication_key = "updated_at"
 
     @shopify_error_handling
     def call_api(self, query_params):

@@ -21,7 +21,7 @@ RESULTS_PER_PAGE = 250
 class InventoryItems(Stream):
     name = 'inventory_items'
     data_key = "inventoryItems"
-    replication_key = "updatedAt"
+    replication_key = "updated_at"
 
     @shopify_error_handling
     def call_api(self, query_params):
