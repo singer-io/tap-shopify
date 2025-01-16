@@ -19,6 +19,7 @@ LOGGER = singer.get_logger()
 
 class Products(Stream):
     name = 'products'
+    data_key = 'products'
     replication_key = "updatedAt"
 
     @shopify_error_handling
@@ -29,7 +30,7 @@ class Products(Stream):
         response = json.loads(response)
         if "errors" in response.keys():
             raise Error("Unable to Query Data")
-        data = response.get("data", {}).get(self.name, {})
+        data = response.get("data", {}).get(self.data_key, {})
         return data
 
 
@@ -37,6 +38,7 @@ class Products(Stream):
         """
         performs compatibility transformations
         """
+        obj["admin_graphql_api_id"] = obj["id"]
         obj["id"] = int(obj["id"].replace("gid://shopify/Product/", ""))
         opts = []
         for item in obj["options"]:
