@@ -1,4 +1,6 @@
-
+"""
+Stores all the GraphQl Queries for shopify api
+"""
 
 def get_products_query():
     """
@@ -37,4 +39,41 @@ def get_products_query():
                 }
             }
         }
-"""
+        """
+
+
+def get_inventory_items_query():
+    return """
+            query GetinventoryItems($first: Int!, $after: String, $query: String) {
+                inventoryItems(first: $first, after: $after, query: $query) {
+                    edges {
+                        node {
+                            id
+                            createdAt
+                            sku
+                            updatedAt
+                            requiresShipping
+                            countryCodeOfOrigin
+                            provinceCodeOfOrigin
+                            harmonizedSystemCode
+                            tracked
+                            countryHarmonizedSystemCodes(first: 250) {
+                                edges {
+                                    node {
+                                        harmonizedSystemCode
+                                        countryCode
+                                    }
+                                }
+                            }
+                            unitCost {
+                                amount
+                            }
+                        }
+                    }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
+                }
+            }
+        """
