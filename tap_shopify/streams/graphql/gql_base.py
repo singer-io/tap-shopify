@@ -32,12 +32,13 @@ class ShopifyGqlStream(Stream):
     def transform_object(self, obj):
         raise NotImplementedError("Function Not Implemented")
 
-    def get_query_params(self, repl_key_min, repl_key_max, cursor=None):
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor, **kwargs):
         """
-        Returns Query and pagination params for filtering 
+        Returns Query and pagination params for filtering
         """
         params = {
-            "query": f"{self.replication_key}:>'{repl_key_min}' {self.replication_key}:<'{repl_key_max}'",
+            "query": f"{self.replication_key}:>'{updated_at_min}' {self.replication_key}:<'{updated_at_max}'",
             "first": self.results_per_page,
         }
         if cursor:
@@ -69,7 +70,7 @@ class ShopifyGqlStream(Stream):
 
             while has_next_page:
                 query_params = self.get_query_params(updated_at_min, updated_at_max, cursor)
-                
+
                 with metrics.http_request_timer(self.name):
                     data = self.call_api(query_params)
 

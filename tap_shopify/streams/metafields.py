@@ -7,7 +7,7 @@ from singer import utils, metrics
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql.gql_queries import (
-    get_parent_ids, 
+    get_parent_ids,
     get_metadata_query,
     get_metadata_query_customers,
     get_metadata_query_product,
@@ -38,24 +38,19 @@ class Metafields(ShopifyGqlStream):
 
     parent_resource_metadata_alias = {
         "customers":"customer",
-        "products":"product", 
+        "products":"product",
         "collections": "collection"
     }
-
+    # pylint: disable=W0221
     def get_query(self, data_key):
         return get_metadata_query(self, data_key)
 
-
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
-        # LOGGER.info("Fetching %s", query_params)
-        # LOGGER.info("Fetching %s", query)
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
-        # LOGGER.info("Response %s", response)
         if "errors" in response.keys():
             raise ShopifyGraphQLError(response['errors'])
-        
         data = response.get("data", {}).get(data_key, {})
         return data
 
@@ -108,7 +103,6 @@ class Metafields(ShopifyGqlStream):
                 query = get_metadata_query_order()
             else:
                 raise ShopifyGraphQLError("Invalid Resource Type")
-            
             has_next_page, cursor = True, None
             query_params = {
                 "first": self.results_per_page,
@@ -125,7 +119,6 @@ class Metafields(ShopifyGqlStream):
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     yield obj
-                
                 page_info =  data.get("pageInfo")
                 cursor,has_next_page = page_info.get("endCursor"),page_info.get("hasNextPage")
 
@@ -134,13 +127,14 @@ class Metafields(ShopifyGqlStream):
         obj["id"] = int(obj["id"].replace("gid://shopify/Metafield/", ""))
         obj["value_type"] = obj[ "type"]
         return obj
-            
+
 
     def sync(self):
         # Shop metafields
         for metafield in self.get_objects():
             metafield = self.transform_object(metafield)
             metafield_type = metafield.get("type")
+            print(metafield_type)
             # create "value_type" field in the record
             metafield["value_type"] = metafield_type
             if metafield_type and metafield_type in ["json", "weight", "volume", \
