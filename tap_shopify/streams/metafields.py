@@ -134,7 +134,6 @@ class Metafields(ShopifyGqlStream):
         for metafield in self.get_objects():
             metafield = self.transform_object(metafield)
             metafield_type = metafield.get("type")
-            print(metafield_type)
             # create "value_type" field in the record
             metafield["value_type"] = metafield_type
             if metafield_type and metafield_type in ["json", "weight", "volume", \
