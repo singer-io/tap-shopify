@@ -6,14 +6,14 @@
         "string"
       ]
     },
-    "published_at": {
+    "publishedAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
@@ -26,7 +26,7 @@
         "string"
       ]
     },
-    "updated_at": {
+    "updatedAt": {
       "type": [
         "null",
         "string"
@@ -39,7 +39,7 @@
         "string"
       ]
     },
-    "product_type": {
+    "productType": {
       "type": [
         "null",
         "string"
@@ -64,12 +64,6 @@
               "string"
             ]
           },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
           "values": {
             "type": [
               "null",
@@ -85,7 +79,7 @@
           "id": {
             "type": [
               "null",
-              "integer"
+              "string"
             ]
           },
           "position": {
@@ -107,7 +101,7 @@
         "string"
       ]
     },
-    "template_suffix": {
+    "templateSuffix": {
       "type": [
         "null",
         "string"
@@ -122,7 +116,131 @@
     "id": {
       "type": [
         "null",
+        "string"
+      ]
+    },
+    "giftCardTemplateSuffix": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "hasOnlyDefaultVariant": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "hasOutOfStockVariants": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "hasVariantsThatRequiresComponents": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "isGiftCard": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "compareAtPriceRange": {
+      "maxVariantCompareAtPrice": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "amount": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "currencyCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "minVariantCompareAtPrice": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "amount": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "currencyCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "category":{
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "featuredMedia": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "requiresSellingPlan": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "totalInventory": {
+      "type": [
+        "null",
         "integer"
+      ]
+    },
+    "tracksInventory": {
+      "type": [
+        "null",
+        "boolean"
       ]
     }
   },

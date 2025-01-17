@@ -8,14 +8,16 @@ def get_products_query(*args, **kwargs):
     """
     return """
         query GetProducts($first: Int!, $after: String, $query: String) {
-            products(first: $first, after: $after, query: $query)
-            {
+            products(first: $first, after: $after, query: $query) {
                 edges {
                     node {
                         id
                         title
                         descriptionHtml
                         vendor
+                        category {
+                            id
+                        }
                         tags
                         handle
                         publishedAt
@@ -30,17 +32,69 @@ def get_products_query(*args, **kwargs):
                             position
                             values
                         }
+                        giftCardTemplateSuffix
+                        hasOnlyDefaultVariant
+                        hasOutOfStockVariants
+                        hasVariantsThatRequiresComponents
+                        isGiftCard
+                        description
+                        compareAtPriceRange {
+                            maxVariantCompareAtPrice {
+                                amount
+                                currencyCode
+                            }
+                            minVariantCompareAtPrice {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        featuredMedia {
+                            id
+                        }
+                        requiresSellingPlan
+                        totalInventory
+                        tracksInventory
                     }
                 }
                 pageInfo {
                     hasNextPage
                     endCursor
-
                 }
             }
         }
         """
 
+def get_product_variant_query(*args, **kwargs):
+    return """
+        query GetProductVariants($first: Int!, $after: String, $query: String) {
+            productVariants(first: $first, after: $after, query: $query) {
+                nodes {
+                    updatedAt
+                    id
+                    price
+                    displayName
+                    createdAt
+                    barcode
+                    compareAtPrice
+                    availableForSale
+                    inventoryPolicy
+                    inventoryQuantity
+                    legacyResourceId
+                    position
+                    requiresComponents
+                    sku
+                    taxCode
+                    taxable
+                    title
+                    sellableOnlineQuantity
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
+                }
+            }
+        }
+        """
 
 def get_inventory_items_query(*args, **kwargs):
     return """

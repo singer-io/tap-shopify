@@ -6,7 +6,7 @@ import shopify
 from singer import utils, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql.gql_queries import (
+from tap_shopify.streams.graphql import (
     get_parent_ids,
     get_metadata_query,
     get_metadata_query_customers,
@@ -32,11 +32,11 @@ class Metafields(ShopifyGqlStream):
 
     selected_parent = None
 
-    parent_resource_alias = {
+    parent_alias = {
         "custom_collections":"collections"
     }
 
-    parent_resource_metadata_alias = {
+    resource_alias = {
         "customers":"customer",
         "products":"product",
         "collections": "collection"
@@ -62,11 +62,9 @@ class Metafields(ShopifyGqlStream):
 
     def get_parents(self):
 
-        # TODO: Change this
-        # for selected_parent in self.get_selected_parents():
-        for selected_parent in ['orders', 'customers', 'products', 'custom_collections']:
-            self.selected_parent = self.parent_resource_alias.get(selected_parent, selected_parent)
-            LOGGER.info("Fetching id's for %s", self.selected_parent)
+        for parent in self.get_selected_parents():
+            parent = self.parent_alias.get(parent, parent)
+            LOGGER.info("Fetching id's for %s", parent)
 
             updated_at_min = self.get_bookmark()
             stop_time = utils.now().replace(microsecond=0)
@@ -78,18 +76,20 @@ class Metafields(ShopifyGqlStream):
 
                 while has_next_page:
                     query_params = self.get_query_params(updated_at_min, updated_at_max, cursor)
+                    query = get_parent_ids(self, parent)
+
                     with metrics.http_request_timer(self.name):
-                        query = get_parent_ids(self, self.selected_parent)
-                        data = self.call_api(query_params, query, self.selected_parent)
+                        data = self.call_api(query_params, query, parent)
+
                     for edge in data.get("edges"):
                         obj = edge.get("node")
-                        parent_single_alais = self.parent_resource_metadata_alias.get(self.selected_parent, self.selected_parent)
-                        yield (obj, parent_single_alais)
+                        resource_alias = self.resource_alias.get(parent, parent)
+                        yield (obj, resource_alias)
 
                     page_info =  data.get("pageInfo")
                     cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
                 updated_at_min = updated_at_max
-        self.selected_parent = None
+        parent = None
 
     def get_objects(self):
         for parent_obj, resource_type in self.get_parents():
@@ -125,19 +125,20 @@ class Metafields(ShopifyGqlStream):
 
     def transform_object(self, obj):
         obj["id"] = int(obj["id"].replace("gid://shopify/Metafield/", ""))
-        obj["value_type"] = obj[ "type"]
+        obj["value_type"] = obj["type"] or None
+        if val_type in ["json", "weight", "volume", "dimension", "rating"]:
+            value = metafield.get("value")
+
+
         return obj
 
 
     def sync(self):
-        # Shop metafields
+
         for metafield in self.get_objects():
             metafield = self.transform_object(metafield)
-            metafield_type = metafield.get("type")
-            # create "value_type" field in the record
-            metafield["value_type"] = metafield_type
-            if metafield_type and metafield_type in ["json", "weight", "volume", \
-                "dimension", "rating"]:
+            val_type = metafield["value_type"]
+            if val_type in ["json", "weight", "volume", "dimension", "rating"]:
                 value = metafield.get("value")
                 try:
                     metafield["value"] = json.loads(value) if value is not None else value

@@ -1,7 +1,7 @@
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql.gql_queries import get_inventory_items_query
-from tap_shopify.streams.graphql.gql_base import ShopifyGqlStream
+from tap_shopify.streams.graphql import get_inventory_items_query
+from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 
