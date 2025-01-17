@@ -96,6 +96,7 @@ class Metafields(ShopifyGqlStream):
         parent = None
 
     def get_objects(self):
+
         for parent_obj, resource_type in self.get_parents():
             if resource_type == "customer":
                  query = get_metadata_query_customers()
@@ -116,40 +117,30 @@ class Metafields(ShopifyGqlStream):
                 query_params["pk_id"] = parent_obj["id"]
                 if cursor:
                     query_params["cursor"] = cursor
-
                 with metrics.http_request_timer(self.name):
                     response = self.call_api(query_params, query, resource_type)
                 data = (response.get("metafields") or {})
                 for edge in data.get("edges"):
                     obj = edge.get("node")
+                    obj = self.transform_object(obj)
                     yield obj
                 page_info =  data.get("pageInfo")
                 cursor,has_next_page = page_info.get("endCursor"),page_info.get("hasNextPage")
 
-
     def transform_object(self, obj):
         obj["id"] = int(obj["id"].replace("gid://shopify/Metafield/", ""))
         obj["value_type"] = obj["type"] or None
-        if val_type in ["json", "weight", "volume", "dimension", "rating"]:
-            value = metafield.get("value")
-
-
+        if obj["value_type"] in ["json", "weight", "volume", "dimension", "rating"]:
+            value = obj.get("value")
+            try:
+                obj["value"] = json.loads(value) if value is not None else value
+            except json.decoder.JSONDecodeError:
+                LOGGER.info("Failed to decode JSON value for obj %s", obj.get('id'))
+                obj["value"] = value
         return obj
 
-
     def sync(self):
-
         for metafield in self.get_objects():
-            metafield = self.transform_object(metafield)
-            val_type = metafield["value_type"]
-            if val_type in ["json", "weight", "volume", "dimension", "rating"]:
-                value = metafield.get("value")
-                try:
-                    metafield["value"] = json.loads(value) if value is not None else value
-                except json.decoder.JSONDecodeError:
-                    LOGGER.info("Failed to decode JSON value for metafield %s", metafield.get('id'))
-                    metafield["value"] = value
-
             yield metafield
 
 Context.stream_objects['metafields'] = Metafields
