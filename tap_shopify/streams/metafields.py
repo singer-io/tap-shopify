@@ -1,6 +1,6 @@
+from datetime import timedelta
 import json
 import singer
-import datetime
 import shopify
 
 from singer import utils, metrics
@@ -71,11 +71,13 @@ class Metafields(ShopifyGqlStream):
             date_window_size = 30
 
             while updated_at_min < stop_time:
-                updated_at_max = min(updated_at_min + datetime.timedelta(days=date_window_size),stop_time)
+                updated_at_max = min(\
+                    updated_at_min + timedelta(days=date_window_size) , stop_time)
                 has_next_page, cursor = True, None
 
                 while has_next_page:
-                    query_params = self.get_query_params(updated_at_min, updated_at_max, cursor)
+                    query_params = self.get_query_params(\
+                        updated_at_min, updated_at_max, cursor)
                     query = get_parent_ids(self, parent)
 
                     with metrics.http_request_timer(self.name):
@@ -87,7 +89,9 @@ class Metafields(ShopifyGqlStream):
                         yield (obj, resource_alias)
 
                     page_info =  data.get("pageInfo")
-                    cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+                    cursor = page_info.get("endCursor")
+                    has_next_page = page_info.get("hasNextPage")
+
                 updated_at_min = updated_at_max
         parent = None
 
