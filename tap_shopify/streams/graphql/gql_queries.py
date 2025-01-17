@@ -148,7 +148,6 @@ def get_parent_ids(resource):
         }
     }
     """
-
     qry = qry.replace("RESOURCE", resource)
     return qry
 

@@ -1,6 +1,6 @@
-import shopify
 import json
 import datetime
+import shopify
 
 from singer import(
     metrics,
@@ -20,7 +20,6 @@ LOGGER = get_logger()
 
 class ShopifyGraphQLError(Exception):
     """Custom exception for GraphQL errors"""
-    pass
 
 class ShopifyGqlStream(Stream):
 
@@ -33,12 +32,13 @@ class ShopifyGqlStream(Stream):
         raise NotImplementedError("Function Not Implemented")
 
     # pylint: disable=W0221
-    def get_query_params(self, updated_at_min, updated_at_max, cursor, **kwargs):
+    def get_query_params(self, updated_at_min, updated_at_max, cursor,):
         """
         Returns Query and pagination params for filtering
         """
         params = {
-            "query": f"{self.replication_key}:>'{updated_at_min}' {self.replication_key}:<'{updated_at_max}'",
+            "query": f"{self.replication_key}:>'{updated_at_min}'\
+                  {self.replication_key}:<'{updated_at_max}'",
             "first": self.results_per_page,
         }
         if cursor:
@@ -65,7 +65,8 @@ class ShopifyGqlStream(Stream):
 
         while updated_at_min < stop_time:
 
-            updated_at_max = min(updated_at_min + datetime.timedelta(days=date_window_size),stop_time)
+            updated_at_max = min(updated_at_min + \
+                                 datetime.timedelta(days=date_window_size),stop_time)
             has_next_page, cursor = True, None
 
             while has_next_page:

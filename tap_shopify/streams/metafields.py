@@ -99,7 +99,7 @@ class Metafields(ShopifyGqlStream):
 
         for parent_obj, resource_type in self.get_parents():
             if resource_type == "customer":
-                 query = get_metafield_query_customers()
+                query = get_metafield_query_customers()
             elif resource_type == "product":
                 query = get_metafield_query_product()
             elif resource_type == "collection":
