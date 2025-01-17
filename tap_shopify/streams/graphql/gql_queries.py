@@ -2,7 +2,7 @@
 Stores all the GraphQl Queries for shopify api
 """
 
-def get_products_query(*args, **kwargs):
+def get_products_query():
     """
     product stream get query
     """
@@ -64,7 +64,7 @@ def get_products_query(*args, **kwargs):
         }
         """
 
-def get_product_variant_query(*args, **kwargs):
+def get_product_variant_query():
     return """
         query GetProductVariants($first: Int!, $after: String, $query: String) {
             productVariants(first: $first, after: $after, query: $query) {
@@ -96,7 +96,7 @@ def get_product_variant_query(*args, **kwargs):
         }
         """
 
-def get_inventory_items_query(*args, **kwargs):
+def get_inventory_items_query():
     return """
             query GetinventoryItems($first: Int!, $after: String, $query: String) {
                 inventoryItems(first: $first, after: $after, query: $query) {
@@ -132,9 +132,8 @@ def get_inventory_items_query(*args, **kwargs):
             }
         """
 
-def get_parent_ids(cls, resource):
-    
-    qry = """ 
+def get_parent_ids(resource):
+    qry = """
     query getParentEntities( $first: Int!, $after: String $query: String) {
         RESOURCE(first: $first after: $after query: $query) {
             edges {
@@ -149,10 +148,11 @@ def get_parent_ids(cls, resource):
         }
     }
     """
+
     qry = qry.replace("RESOURCE", resource)
     return qry
 
-def get_metadata_query(cls, resource, *args, **kwargs):
+def get_metafield_query():
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             RESOURCE(id: $pk_id) {
@@ -268,7 +268,7 @@ def get_metadata_query(cls, resource, *args, **kwargs):
     qry = qry.replace("RESOURCE", resource)
     return qry
 
-def get_metadata_query_customers():
+def get_metafield_query_customers():
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             customer(id: $pk_id) {
@@ -371,7 +371,7 @@ def get_metadata_query_customers():
     """
     return qry
 
-def get_metadata_query_product():
+def get_metafield_query_product():
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             product(id: $pk_id) {
@@ -475,7 +475,7 @@ def get_metadata_query_product():
     """
     return qry
 
-def get_metadata_query_collection():
+def get_metafield_query_collection():
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             collection(id: $pk_id) {
@@ -579,7 +579,7 @@ def get_metadata_query_collection():
     """
     return qry
 
-def get_metadata_query_order():
+def get_metafield_query_order():
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             order(id: $pk_id) {

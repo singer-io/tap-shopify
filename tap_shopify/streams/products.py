@@ -9,7 +9,9 @@ class Products(ShopifyGqlStream):
     name = 'products'
     data_key = "products"
     replication_key = "updatedAt"
-    get_query = get_products_query
+
+    def get_query(self):
+        return get_products_query()
 
     def transform_object(self, obj):
         return obj

@@ -10,7 +10,8 @@ class InventoryItems(ShopifyGqlStream):
     data_key = "inventoryItems"
     replication_key = "updated_at"
 
-    get_query = get_inventory_items_query
+    def get_query(self):
+        return get_inventory_items_query()
 
     def transform_object(self, obj):
         """

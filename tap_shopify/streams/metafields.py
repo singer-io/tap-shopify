@@ -8,11 +8,11 @@ from singer import utils, metrics
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
     get_parent_ids,
-    get_metadata_query,
-    get_metadata_query_customers,
-    get_metadata_query_product,
-    get_metadata_query_collection,
-    get_metadata_query_order,
+    get_metafield_query,
+    get_metafield_query_customers,
+    get_metafield_query_product,
+    get_metafield_query_collection,
+    get_metafield_query_order,
 
 
 )
@@ -43,7 +43,7 @@ class Metafields(ShopifyGqlStream):
     }
     # pylint: disable=W0221
     def get_query(self, data_key):
-        return get_metadata_query(self, data_key)
+        return get_metafield_query(data_key)
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
@@ -78,7 +78,7 @@ class Metafields(ShopifyGqlStream):
                 while has_next_page:
                     query_params = self.get_query_params(\
                         updated_at_min, updated_at_max, cursor)
-                    query = get_parent_ids(self, parent)
+                    query = get_parent_ids(parent)
 
                     with metrics.http_request_timer(self.name):
                         data = self.call_api(query_params, query, parent)
@@ -99,13 +99,13 @@ class Metafields(ShopifyGqlStream):
 
         for parent_obj, resource_type in self.get_parents():
             if resource_type == "customer":
-                 query = get_metadata_query_customers()
+                 query = get_metafield_query_customers()
             elif resource_type == "product":
-                query = get_metadata_query_product()
+                query = get_metafield_query_product()
             elif resource_type == "collection":
-                query = get_metadata_query_collection()
+                query = get_metafield_query_collection()
             elif resource_type == "order":
-                query = get_metadata_query_order()
+                query = get_metafield_query_order()
             else:
                 raise ShopifyGraphQLError("Invalid Resource Type")
             has_next_page, cursor = True, None
