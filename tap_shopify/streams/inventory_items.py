@@ -26,6 +26,8 @@ class InventoryItems(ShopifyGqlStream):
         obj["requires_shipping"] = obj.get("requiresShipping",)
         obj["country_code_of_origin"] = obj.get("countryCodeOfOrigin")
         obj["province_code_of_origin"] = obj.get("provinceCodeOfOrigin")
+
+        # TODO: Test this
         country_harmonized_system_codes = []
         for edge in obj["countryHarmonizedSystemCodes"]["edges"]:
             item = edge.get("node") or {}

@@ -12,7 +12,6 @@ from tap_shopify.streams.base import (
     Stream,
     shopify_error_handling,
     DATE_WINDOW_SIZE,
-    Error
     )
 
 from tap_shopify.context import Context
@@ -33,7 +32,7 @@ class ShopifyGqlStream(Stream):
     def transform_object(self, obj):
         raise NotImplementedError("Function Not Implemented")
 
-    def get_query_params(self, repl_key_min, repl_key_max, cursor, *args, **kwargs):
+    def get_query_params(self, repl_key_min, repl_key_max, cursor=None):
         """
         Returns Query and pagination params for filtering 
         """

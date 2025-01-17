@@ -1,73 +1,148 @@
 import json
-import shopify
 import singer
+import datetime
+import shopify
+
+from singer import utils, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.base import (Stream,
-                                      shopify_error_handling,
-                                      RESULTS_PER_PAGE,
-                                      OutOfOrderIdsError)
+from tap_shopify.streams.graphql.gql_queries import (
+    get_parent_ids, 
+    get_metadata_query,
+    get_metadata_query_customers,
+    get_metadata_query_product,
+    get_metadata_query_collection,
+    get_metadata_query_order,
+
+
+)
+from tap_shopify.streams.graphql.gql_base import (
+    ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError
+    )
+
 
 LOGGER = singer.get_logger()
 
-def get_selected_parents():
-    for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
-        if Context.is_selected(parent_stream):
-            yield Context.stream_objects[parent_stream]()
 
-@shopify_error_handling
-def get_metafields(parent_object, since_id, parent_replication_object, timeout):
-    # set timeout
-    parent_replication_object.set_timeout(timeout)
-    # This call results in an HTTP request - the parent object never has a
-    # cache of this data so we have to issue that request.
-    return parent_object.metafields(
-        limit=Context.get_results_per_page(RESULTS_PER_PAGE),
-        since_id=since_id)
 
-class Metafields(Stream):
+class Metafields(ShopifyGqlStream):
     name = 'metafields'
-    replication_object = shopify.Metafield
+    data_key = "metafields"
+    replication_key = "updated_at"
+
+    selected_parent = None
+
+    parent_resource_alias = {
+        "custom_collections":"collections"
+    }
+
+    parent_resource_metadata_alias = {
+        "customers":"customer",
+        "products":"product", 
+        "collections": "collection"
+    }
+
+    def get_query(self, data_key):
+        return get_metadata_query(self, data_key)
+
+
+    @shopify_error_handling
+    def call_api(self, query_params, query, data_key):
+        # LOGGER.info("Fetching %s", query_params)
+        # LOGGER.info("Fetching %s", query)
+        response = shopify.GraphQL().execute(query=query, variables=query_params)
+        response = json.loads(response)
+        # LOGGER.info("Response %s", response)
+        if "errors" in response.keys():
+            raise ShopifyGraphQLError(response['errors'])
+        
+        data = response.get("data", {}).get(data_key, {})
+        return data
+
+
+    def get_selected_parents(self):
+        for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
+            if Context.is_selected(parent_stream):
+                yield Context.stream_objects[parent_stream]()
+
+    def get_parents(self):
+
+        # TODO: Change this
+        # for selected_parent in self.get_selected_parents():
+        for selected_parent in ['orders', 'customers', 'products', 'custom_collections']:
+            self.selected_parent = self.parent_resource_alias.get(selected_parent, selected_parent)
+            LOGGER.info("Fetching id's for %s", self.selected_parent)
+
+            updated_at_min = self.get_bookmark()
+            stop_time = utils.now().replace(microsecond=0)
+            date_window_size = 30
+
+            while updated_at_min < stop_time:
+                updated_at_max = min(updated_at_min + datetime.timedelta(days=date_window_size),stop_time)
+                has_next_page, cursor = True, None
+
+                while has_next_page:
+                    query_params = self.get_query_params(updated_at_min, updated_at_max, cursor)
+                    with metrics.http_request_timer(self.name):
+                        query = get_parent_ids(self, self.selected_parent)
+                        data = self.call_api(query_params, query, self.selected_parent)
+                    for edge in data.get("edges"):
+                        obj = edge.get("node")
+                        parent_single_alais = self.parent_resource_metadata_alias.get(self.selected_parent, self.selected_parent)
+                        yield (obj, parent_single_alais)
+
+                    page_info =  data.get("pageInfo")
+                    cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+                updated_at_min = updated_at_max
+        self.selected_parent = None
 
     def get_objects(self):
-        # Get top-level shop metafields
-        yield from super().get_objects()
-        # Get parent objects, bookmarking at `metafield_<object_name>`
-        for selected_parent in get_selected_parents():
-            # The name member controls many things, but most importantly
-            # the bookmark key. This switches us over to the
-            # `metafield_<parent_type>` bookmark. We track that separately
-            # to make resetting individual streams easier.
-            selected_parent.name = "metafield_{}".format(selected_parent.name)
-            for parent_object in selected_parent.get_objects():
-                since_id = 1
-                while True:
-                    metafields = get_metafields(parent_object,
-                                                since_id,
-                                                selected_parent.replication_object,
-                                                self.request_timeout)
-                    for metafield in metafields:
-                        if metafield.id < since_id:
-                            raise OutOfOrderIdsError("metafield.id < since_id: {} < {}".format(
-                                metafield.id, since_id))
-                        yield metafield
-                    if len(metafields) < self.results_per_page:
-                        break
-                    if metafields[-1].id != max([o.id for o in metafields]):
-                        raise OutOfOrderIdsError("{} is not the max id in metafields ({})".format(
-                            metafields[-1].id, max([o.id for o in metafields])))
-                    since_id += metafields[-1].id
+        for parent_obj, resource_type in self.get_parents():
+            if resource_type == "customer":
+                 query = get_metadata_query_customers()
+            elif resource_type == "product":
+                query = get_metadata_query_product()
+            elif resource_type == "collection":
+                query = get_metadata_query_collection()
+            elif resource_type == "order":
+                query = get_metadata_query_order()
+            else:
+                raise ShopifyGraphQLError("Invalid Resource Type")
+            
+            has_next_page, cursor = True, None
+            query_params = {
+                "first": self.results_per_page,
+            }
+
+            while has_next_page:
+                query_params["pk_id"] = parent_obj["id"]
+                if cursor:
+                    query_params["cursor"] = cursor
+
+                with metrics.http_request_timer(self.name):
+                    response = self.call_api(query_params, query, resource_type)
+                data = (response.get("metafields") or {})
+                for edge in data.get("edges"):
+                    obj = edge.get("node")
+                    yield obj
+                
+                page_info =  data.get("pageInfo")
+                cursor,has_next_page = page_info.get("endCursor"),page_info.get("hasNextPage")
+
+
+    def transform_object(self, obj):
+        obj["id"] = int(obj["id"].replace("gid://shopify/Metafield/", ""))
+        obj["value_type"] = obj[ "type"]
+        return obj
+            
 
     def sync(self):
         # Shop metafields
         for metafield in self.get_objects():
-            metafield = metafield.to_dict()
+            metafield = self.transform_object(metafield)
             metafield_type = metafield.get("type")
             # create "value_type" field in the record
             metafield["value_type"] = metafield_type
-            # the json_string value in "value_type" field will be
-            # mapped to following "type" value in the new version
-            # Reference: https://shopify.dev/apps/metafields/types
             if metafield_type and metafield_type in ["json", "weight", "volume", \
                 "dimension", "rating"]:
                 value = metafield.get("value")
