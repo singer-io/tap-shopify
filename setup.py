@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
+from setuptools import find_packages
 
 setup(
     name="tap-shopify",
@@ -26,7 +27,7 @@ setup(
     [console_scripts]
     tap-shopify=tap_shopify:main
     """,
-    packages=["tap_shopify"],
+    packages=find_packages(),
     package_data = {
         "schemas": ["tap_shopify/schemas/*.json"]
     },

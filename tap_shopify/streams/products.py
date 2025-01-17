@@ -11,5 +11,7 @@ class Products(ShopifyGqlStream):
     replication_key = "updatedAt"
     get_query = get_products_query
 
+    def transform_object(self, obj):
+        return obj
 
 Context.stream_objects['products'] = Products
