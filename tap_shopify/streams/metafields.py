@@ -8,7 +8,6 @@ from singer import utils, metrics
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
     get_parent_ids,
-    get_metafield_query,
     get_metafield_query_customers,
     get_metafield_query_product,
     get_metafield_query_collection,
