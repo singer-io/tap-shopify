@@ -41,8 +41,8 @@ class Metafields(ShopifyGqlStream):
         "collections": "collection"
     }
     # pylint: disable=W0221
-    def get_query(self, data_key):
-        return get_metafield_query(data_key)
+    def get_query(self):
+        return None
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
