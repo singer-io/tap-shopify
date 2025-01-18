@@ -4,7 +4,7 @@
     "id": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "sku": {
@@ -13,46 +13,54 @@
         "string"
       ]
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "updated_at": {
+    "updatedAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "requires_shipping": {
+    "requiresShipping": {
       "type": [
         "null",
         "boolean"
       ]
     },
-    "cost": {
+    "unitCost": {
       "type": [
         "null",
-        "string"
+        "object"
       ],
-      "format": "singer.decimal"
+      "properties": {
+          "amount": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "singer.decimal"
+          }
+        }
     },
-    "country_code_of_origin": {
+    "countryCodeOfOrigin": {
       "type": [
         "null",
         "string"
       ]
     },
-    "province_code_of_origin": {
+    "provinceCodeOfOrigin": {
       "type": [
         "null",
         "string"
       ]
     },
-    "harmonized_system_code": {
+    "harmonizedSystemCode": {
       "type": [
         "null",
         "integer"
@@ -62,38 +70,6 @@
       "type": [
         "null",
         "boolean"
-      ]
-    },
-    "country_harmonized_system_codes": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "type": [
-          "null",
-          "object"
-        ],
-        "properties": {
-          "harmonized_system_code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "country_code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      }
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
       ]
     }
   }

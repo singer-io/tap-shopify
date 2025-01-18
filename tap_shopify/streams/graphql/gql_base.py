@@ -90,7 +90,7 @@ class ShopifyGqlStream(Stream):
 
     def sync(self):
         """
-        TODO: Update DocString
+        Default Impl for Sync Method
         """
         for obj in self.get_objects():
             yield obj

@@ -111,14 +111,6 @@ def get_inventory_items_query():
                             provinceCodeOfOrigin
                             harmonizedSystemCode
                             tracked
-                            countryHarmonizedSystemCodes(first: 250) {
-                                edges {
-                                    node {
-                                        harmonizedSystemCode
-                                        countryCode
-                                    }
-                                }
-                            }
                             unitCost {
                                 amount
                             }
