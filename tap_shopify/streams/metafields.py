@@ -114,6 +114,7 @@ class Metafields(ShopifyGqlStream):
                 with metrics.http_request_timer(self.name):
                     response = self.call_api(query_params, query, resource_type)
                 data = (response.get("metafields") or {})
+                LOGGER.info("got Data %s", data)
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     obj = self.transform_object(obj)
