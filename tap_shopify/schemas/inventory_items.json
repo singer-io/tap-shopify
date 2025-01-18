@@ -42,7 +42,7 @@
           "amount": {
             "type": [
               "null",
-              "integer"
+             "string"
             ],
             "format": "singer.decimal"
           }
@@ -63,7 +63,7 @@
     "harmonizedSystemCode": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "tracked": {
