@@ -12,7 +12,6 @@ from tap_shopify.streams.order_refunds import OrderRefunds
 from tap_shopify.streams.transactions import Transactions
 from tap_shopify.streams.abandoned_checkouts import AbandonedCheckouts
 from tap_shopify.streams.metafields import Metafields
-from tap_shopify.streams.metafields import get_metafields
 import unittest
 
 class TestTimeoutValue(unittest.TestCase):
@@ -332,24 +331,6 @@ class TestTimeoutBackoff(unittest.TestCase):
         self.assertEquals(mocked_find.call_count, 5)
 
     @mock.patch("time.sleep")
-    @mock.patch("shopify.Order.metafields")
-    def test_Metafields_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
-        """
-            Test case to verify that we backoff for 5 times when 'pyactiveresource.connection.Error' error occurs
-        """
-        # mock 'find' and raise timeout error
-        mocked_find.side_effect = pyactiveresource.connection.Error('urlopen error _ssl.c:1074: The handshake operation timed out')
-
-        try:
-            # function call
-            get_metafields(shopify.Order, 1, shopify.Order, 100)
-        except pyactiveresource.connection.Error:
-            pass
-
-        # verify we backoff 5 times
-        self.assertEquals(mocked_find.call_count, 5)
-
-    @mock.patch("time.sleep")
     @mock.patch("shopify.Refund.find")
     def test_OrderRefunds_pyactiveresource_error_timeout_backoff(self, mocked_find, mocked_sleep):
         """
@@ -489,24 +470,6 @@ class TestTimeoutBackoff(unittest.TestCase):
         try:
             # function call
             locations.replication_object.find()
-        except socket.timeout:
-            pass
-
-        # verify we backoff 5 times
-        self.assertEquals(mocked_find.call_count, 5)
-
-    @mock.patch("time.sleep")
-    @mock.patch("shopify.Order.metafields")
-    def test_Metafields_socket_timeout_backoff(self, mocked_find, mocked_sleep):
-        """
-            Test case to verify that we backoff for 5 times when 'socket.timeout' error occurs
-        """
-        # mock 'find' and raise timeout error
-        mocked_find.side_effect = socket.timeout("The read operation timed out")
-
-        try:
-            # function call
-            get_metafields(shopify.Order, 1, shopify.Order, 100)
         except socket.timeout:
             pass
 
