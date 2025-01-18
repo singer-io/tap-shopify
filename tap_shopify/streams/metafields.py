@@ -53,15 +53,10 @@ class Metafields(ShopifyGqlStream):
         data = response.get("data", {}).get(data_key, {})
         return data
 
-
-    def get_selected_parents(self):
-        for parent_stream in ['orders', 'customers', 'products', 'custom_collections']:
-            if Context.is_selected(parent_stream):
-                yield Context.stream_objects[parent_stream]()
-
     def get_parents(self):
-
-        for parent in self.get_selected_parents():
+        for parent in ['orders', 'customers', 'products', 'custom_collections']:
+            if not Context.is_selected(parent):
+                continue
             parent = self.parent_alias.get(parent, parent)
             LOGGER.info("Fetching id's for %s", parent)
 
