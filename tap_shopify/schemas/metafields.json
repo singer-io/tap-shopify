@@ -42,7 +42,7 @@
     "id": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "namespace": {

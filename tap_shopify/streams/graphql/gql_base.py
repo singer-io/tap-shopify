@@ -36,9 +36,9 @@ class ShopifyGqlStream(Stream):
         """
         Returns Query and pagination params for filtering
         """
+        rkey = self.replication_key
         params = {
-            "query": f"{self.replication_key}:>'{updated_at_min}'\
-                  {self.replication_key}:<'{updated_at_max}'",
+            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
             "first": self.results_per_page,
         }
         if cursor:

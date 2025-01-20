@@ -25,7 +25,7 @@ LOGGER = singer.get_logger()
 class Metafields(ShopifyGqlStream):
     name = 'metafields'
     data_key = "metafields"
-    replication_key = "updatedAt"
+    replication_key = "updated_at"
 
     selected_parent = None
 
@@ -67,6 +67,8 @@ class Metafields(ShopifyGqlStream):
             parent = self.parent_alias.get(parent, parent)
             LOGGER.info("Fetching id's for %s", parent)
 
+            # To force get all parents from the start date using a blank replication key
+            self.name = 'metafield_parents'
             updated_at_min = self.get_bookmark()
             stop_time = utils.now().replace(microsecond=0)
             date_window_size = 30
@@ -126,8 +128,8 @@ class Metafields(ShopifyGqlStream):
                 cursor,has_next_page = page_info.get("endCursor"),page_info.get("hasNextPage")
 
     def transform_object(self, obj):
-        obj["id"] = int(obj["id"].replace("gid://shopify/Metafield/", ""))
         obj["value_type"] = obj["type"] or None
+        obj["updated_at"] = obj["updatedAt"]
         if obj["value_type"] in ["json", "weight", "volume", "dimension", "rating"]:
             value = obj.get("value")
             try:
@@ -138,7 +140,15 @@ class Metafields(ShopifyGqlStream):
         return obj
 
     def sync(self):
-        for metafield in self.get_objects():
-            yield metafield
+        updated_at_min = self.get_bookmark()
+        max_bookmark = updated_at_min
+        for obj in self.get_objects():
+            replication_value = utils.strptime_to_utc(obj[self.replication_key])
+            if replication_value >= max_bookmark:
+                max_bookmark = replication_value
+                yield obj
+
+        self.name = 'metafields'
+        self.update_bookmark(utils.strftime(max_bookmark))
 
 Context.stream_objects['metafields'] = Metafields
