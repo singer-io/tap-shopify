@@ -13,7 +13,7 @@ class AllFieldsTest(BaseTapTest):
         """Configuration properties required for the tap."""
         return_value = {
             'start_date': '2021-04-01T00:00:00Z',
-            'shop': 'talenddatawearhouse',
+            'shop': 'stitch-test-store-data',
             'date_window_size': 30
         }
 
