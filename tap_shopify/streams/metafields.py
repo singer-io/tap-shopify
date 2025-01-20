@@ -25,7 +25,7 @@ LOGGER = singer.get_logger()
 class Metafields(ShopifyGqlStream):
     name = 'metafields'
     data_key = "metafields"
-    replication_key = "updated_at"
+    replication_key = "updatedAt"
 
     selected_parent = None
 
@@ -44,6 +44,20 @@ class Metafields(ShopifyGqlStream):
     # pylint: disable=W0221
     def get_query(self):
         return None
+
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor,):
+        """
+        Returns Query and pagination params for filtering
+        """
+        rkey = "updated_at"
+        params = {
+            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
+            "first": self.results_per_page,
+        }
+        if cursor:
+            params["after"] = cursor
+        return params
 
     def get_resource_type_query(self, resource):
         return {
@@ -141,6 +155,8 @@ class Metafields(ShopifyGqlStream):
 
     def sync(self):
         updated_at_min = self.get_bookmark()
+        stop_time = utils.now().replace(microsecond=0)
+
         max_bookmark = updated_at_min
         for obj in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
@@ -149,6 +165,7 @@ class Metafields(ShopifyGqlStream):
                 yield obj
 
         self.name = 'metafields'
+        max_bookmark = min(max_bookmark, stop_time)
         self.update_bookmark(utils.strftime(max_bookmark))
 
 Context.stream_objects['metafields'] = Metafields
