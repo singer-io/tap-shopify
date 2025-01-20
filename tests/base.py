@@ -57,7 +57,7 @@ class BaseTapTest(BaseCase):
         assert self.start_date > return_value["start_date"]
 
         return_value["start_date"] = self.start_date
-        return_value['shop'] = 'stitch-test-store-data'
+        return_value['shop'] = 'talenddatawearhouse'
         return return_value
 
     @staticmethod
