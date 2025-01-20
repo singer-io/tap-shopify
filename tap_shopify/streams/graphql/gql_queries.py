@@ -487,9 +487,6 @@ def get_metafield_query_order():
                                 ... on PaymentCustomization {
                                     id
                                 }
-                                ... on Page {
-                                    id
-                                }
                                 ... on Order {
                                     id
                                     email
@@ -508,22 +505,10 @@ def get_metafield_query_order():
                                 ... on Image {
                                     id
                                 }
-                                ... on GiftCardDebitTransaction {
-                                    id
-                                }
-                                ... on GiftCardCreditTransaction {
-                                    id
-                                }
                                 ... on FulfillmentConstraintRule {
                                     id
                                 }
                                 ... on AppInstallation {
-                                    id
-                                }
-                                ... on Article {
-                                    id
-                                }
-                                ... on Blog {
                                     id
                                 }
                                 ... on CartTransform {
@@ -561,6 +546,10 @@ def get_metafield_query_order():
                                 }
                             }
                         }
+                    }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
                     }
                 }
             }

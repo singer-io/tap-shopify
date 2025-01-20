@@ -35,10 +35,13 @@ class Metafields(ShopifyGqlStream):
         "custom_collections":"collections"
     }
 
+    # required to access correct key from graphql response
+    # maps object list to single object access key
     resource_alias = {
         "customers":"customer",
         "products":"product",
-        "collections": "collection"
+        "collections": "collection",
+        "orders": "order"
     }
     # pylint: disable=W0221
     def get_query(self):
@@ -114,7 +117,6 @@ class Metafields(ShopifyGqlStream):
                 with metrics.http_request_timer(self.name):
                     response = self.call_api(query_params, query, resource_type)
                 data = (response.get("metafields") or {})
-                LOGGER.info("got Data %s", data)
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     obj = self.transform_object(obj)
