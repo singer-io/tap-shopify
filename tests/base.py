@@ -44,7 +44,7 @@ class BaseTapTest(BaseCase):
         """Configuration properties required for the tap."""
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
-            'shop': 'stitch-test-store-data',
+            'shop': 'stitchdatawearhouse',
             'date_window_size': 30,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
             # 'results_per_page': '50'
