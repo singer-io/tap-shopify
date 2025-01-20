@@ -28,7 +28,7 @@ class StartDateTest(BaseTapTest):
     def get_properties(self, original: bool = True):
         return_value = {
             'start_date': '2021-04-01T00:00:00Z',
-            'shop': 'stitch-test-store-data',
+            'shop': 'talenddatawearhouse',
             'date_window_size': 30,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
             'results_per_page': '50'
