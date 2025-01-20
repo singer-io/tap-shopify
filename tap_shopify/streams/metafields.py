@@ -12,8 +12,6 @@ from tap_shopify.streams.graphql import (
     get_metafield_query_product,
     get_metafield_query_collection,
     get_metafield_query_order,
-
-
 )
 from tap_shopify.streams.graphql.gql_base import (
     ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError
@@ -46,6 +44,14 @@ class Metafields(ShopifyGqlStream):
     # pylint: disable=W0221
     def get_query(self):
         return None
+
+    def get_resource_type_query(self, resource):
+        return {
+            "customer": get_metafield_query_customers,
+            "product": get_metafield_query_product,
+            "collection": get_metafield_query_collection,
+            "order": get_metafield_query_order
+            }.get(resource)
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
@@ -95,16 +101,13 @@ class Metafields(ShopifyGqlStream):
     def get_objects(self):
 
         for parent_obj, resource_type in self.get_parents():
-            if resource_type == "customer":
-                query = get_metafield_query_customers()
-            elif resource_type == "product":
-                query = get_metafield_query_product()
-            elif resource_type == "collection":
-                query = get_metafield_query_collection()
-            elif resource_type == "order":
-                query = get_metafield_query_order()
+            qury_fnc = self.get_resource_type_query(resource_type)
+
+            if qury_fnc:
+                query = qury_fnc()
             else:
                 raise ShopifyGraphQLError("Invalid Resource Type")
+
             has_next_page, cursor = True, None
             query_params = {
                 "first": self.results_per_page,
