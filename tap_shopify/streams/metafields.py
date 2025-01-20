@@ -27,7 +27,7 @@ LOGGER = singer.get_logger()
 class Metafields(ShopifyGqlStream):
     name = 'metafields'
     data_key = "metafields"
-    replication_key = "updated_at"
+    replication_key = "updatedAt"
 
     selected_parent = None
 
