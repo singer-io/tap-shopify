@@ -83,6 +83,7 @@ class BaseTapTest(BaseCase):
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
 
         meta = default.copy()
+        meta[self.REPLICATION_KEYS] =  {"updatedAt"}
         meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
 
         return {
