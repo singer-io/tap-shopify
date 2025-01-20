@@ -33,12 +33,6 @@
       ],
       "format": "date-time"
     },
-    "body_html": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
     "productType": {
       "type": [
         "null",
@@ -150,6 +144,12 @@
       ]
     },
     "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "descriptionHtml" : {
       "type": [
         "null",
         "string"
