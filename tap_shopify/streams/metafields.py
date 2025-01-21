@@ -154,18 +154,18 @@ class Metafields(ShopifyGqlStream):
         return obj
 
     def sync(self):
-        updated_at_min = self.get_bookmark()
-        stop_time = utils.now().replace(microsecond=0)
+        last_bookmark = self.get_bookmark()
+        start_time = utils.now().replace(microsecond=0)
+        max_bookmark = last_bookmark
 
-        max_bookmark = updated_at_min
         for obj in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
-            if replication_value >= max_bookmark:
-                max_bookmark = replication_value
+            if replication_value >= last_bookmark:
+                max_bookmark = max(replication_value, max_bookmark)
                 yield obj
 
         self.name = 'metafields'
-        max_bookmark = min(max_bookmark, stop_time)
+        max_bookmark = min(max_bookmark, start_time)
         self.update_bookmark(utils.strftime(max_bookmark))
 
 Context.stream_objects['metafields'] = Metafields

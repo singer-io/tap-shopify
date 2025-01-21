@@ -18,9 +18,9 @@ class Products(ShopifyGqlStream):
         """
         Returns Query and pagination params for filtering
         """
-        rkey = "updated_at"
+        filter_key = "updated_at"
         params = {
-            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
+            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
             "first": self.results_per_page,
         }
         if cursor:
