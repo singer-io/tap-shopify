@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import timedelta
 import shopify
 
 from singer import(
@@ -32,9 +32,17 @@ class ShopifyGqlStream(Stream):
         raise NotImplementedError("Function Not Implemented")
 
     # pylint: disable=W0221
-    def get_query_params(self, updated_at_min, updated_at_max, cursor,):
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns Query and pagination params for filtering
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
         """
         rkey = self.replication_key
         params = {
@@ -47,30 +55,39 @@ class ShopifyGqlStream(Stream):
 
     @shopify_error_handling
     def call_api(self, query_params):
-        query = self.get_query()
-        LOGGER.info("Fetching %s %s", self.name, query_params)
-        response = shopify.GraphQL().execute(query=query, variables=query_params)
-        response = json.loads(response)
-        if "errors" in response.keys():
-            raise ShopifyGraphQLError(response['errors'])
-        data = response.get("data", {}).get(self.data_key, {})
-        return data
+        try:
+            query = self.get_query()
+            LOGGER.info("Fetching %s %s", self.name, query_params)
+            response = shopify.GraphQL().execute(query=query, variables=query_params)
+            response = json.loads(response)
+            if "errors" in response.keys():
+                raise ShopifyGraphQLError(response['errors'])
+            data = response.get("data", {}).get(self.data_key, {})
+            return data
+        except ShopifyGraphQLError as gql_error:
+            LOGGER.error("GraphQL Error %s", gql_error)
+            raise ShopifyGraphQLError("An error occurred with the GraphQL API.") from gql_error
+        except Exception as e:
+            LOGGER.error("Unexpected error occurred.",)
+            raise e
 
     def get_objects(self):
+        """
+        perform's pagination and bookmarking
+        """
 
-        updated_at_min = self.get_bookmark()
-        max_bookmark = updated_at_min
-        stop_time = utils.now().replace(microsecond=0)
+        last_updated_at = self.get_bookmark()
+        current_bookmark = last_updated_at
+        sync_start = utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
-        while updated_at_min < stop_time:
-
-            updated_at_max = min(updated_at_min + \
-                                 datetime.timedelta(days=date_window_size),stop_time)
+        while last_updated_at < sync_start:
+            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            query_end = min(sync_start, date_window_end)
             has_next_page, cursor = True, None
 
             while has_next_page:
-                query_params = self.get_query_params(updated_at_min, updated_at_max, cursor)
+                query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
                     data = self.call_api(query_params)
@@ -78,15 +95,15 @@ class ShopifyGqlStream(Stream):
                 for edge in data.get("edges"):
                     obj = self.transform_object(edge.get("node"))
                     replication_value = utils.strptime_to_utc(obj[self.replication_key])
-                    if replication_value > max_bookmark:
-                        max_bookmark = replication_value
+                    if replication_value > current_bookmark:
+                        current_bookmark = replication_value
                     yield obj
 
                 page_info =  data.get("pageInfo")
                 cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
-            updated_at_min = updated_at_max
-            self.update_bookmark(utils.strftime(max_bookmark))
+            last_updated_at = query_end
+            self.update_bookmark(utils.strftime(current_bookmark))
 
     def sync(self):
         """
