@@ -29,6 +29,14 @@ class Products(ShopifyGqlStream):
 
 
     def transform_object(self, obj):
+        media = obj.get("media")
+        media_list  = []
+        if media and "edges" in media:
+            for edge in media.get("edges"):
+                node = edge.get("node")
+                if node:
+                    media_list.append(node)
+        obj["media"] = media_list
         return obj
 
 Context.stream_objects['products'] = Products

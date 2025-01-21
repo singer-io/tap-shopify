@@ -56,6 +56,64 @@ def get_products_query():
                         requiresSellingPlan
                         totalInventory
                         tracksInventory
+                        media(first: 250) {
+                            edges {
+                                node {
+                                    id
+                                    alt
+                                    status
+                                    mediaContentType
+                                    mediaWarnings {
+                                        code
+                                        message
+                                    }
+                                    mediaErrors {
+                                        code
+                                        details
+                                        message
+                                    }
+                                    ... on ExternalVideo {
+                                        id
+                                        embedUrl
+                                    }
+                                    ... on MediaImage {
+                                        id
+                                        updatedAt
+                                        createdAt
+                                        mimeType
+                                        image {
+                                            url
+                                            width
+                                            height
+                                            id
+                                        }
+                                    }
+                                    ... on Model3d {
+                                        id
+                                        filename
+                                        sources {
+                                            url
+                                            format
+                                            mimeType
+                                            filesize
+                                        }
+                                    }
+                                    ... on Video {
+                                        id
+                                        updatedAt
+                                        createdAt
+                                        filename
+                                        sources {
+                                            url
+                                            format
+                                            mimeType
+                                            fileSize
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 pageInfo {
