@@ -222,6 +222,18 @@
             "null",
             "string"
           ]
+        },
+        "mediaContentType": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "status": {
+          "type": [
+            "null",
+            "string"
+          ]
         }
       }
     },

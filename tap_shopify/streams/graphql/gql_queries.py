@@ -50,6 +50,8 @@ def get_products_query():
                         }
                         featuredMedia {
                             id
+                            mediaContentType
+                            status
                         }
                         requiresSellingPlan
                         totalInventory
