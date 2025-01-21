@@ -13,10 +13,15 @@ class TestShopifyGqlStream(unittest.TestCase):
         self.stream = ShopifyGqlStream()
         self.stream.data_key = "products"
         # Mock the Context.config to include start_date
+        self.original_config = Context.config
         Context.config = {
-            "start_date": "2024-01-01T00:00:00Z",
+            "start_date": "2025-01-01T00:00:00Z",
             "date_window_size": 30
         }
+
+    def tearDown(self):
+        # Reset Context.config to its original state
+        Context.config = self.original_config
 
     @patch('shopify.GraphQL')
     @patch.object(ShopifyGqlStream, 'get_query', return_value='mocked_query')
@@ -86,8 +91,8 @@ class TestShopifyGqlStream(unittest.TestCase):
     @patch('shopify.GraphQL')
     @patch.object(ShopifyGqlStream, 'get_query', return_value='mocked_query')
     @patch.object(ShopifyGqlStream, 'transform_object', side_effect=lambda x: x)
-    # @patch('tap_shopify.streams.graphql.gql_base.utils.now', return_value=datetime(2025, 1, 1, 0, 0, tzinfo=tzlocal()))
-    def test_get_objects(self, mock_transform_object, mock_get_query, mock_graphql):
+    @patch('tap_shopify.streams.graphql.gql_base.utils.now', return_value=datetime(2025, 2, 1, 0, 0, tzinfo=tzlocal()))
+    def test_get_objects(self, mock_now, mock_transform_object, mock_get_query, mock_graphql):
         """Test get_objects with pagination and bookmarking."""
         # Mock the response from Shopify GraphQL API
         mock_response_page_1 = {
@@ -116,7 +121,7 @@ class TestShopifyGqlStream(unittest.TestCase):
 
         objects = list(self.stream.get_objects())
 
-        self.assertEqual(len(objects), 26)
+        self.assertEqual(len(objects), 4)
         self.assertEqual(objects[0], {"id": "mocked_id_1", "updated_at": "2025-01-01T00:00:00Z"})
         self.assertEqual(objects[1], {"id": "mocked_id_2", "updated_at": "2025-01-01T00:00:00Z"})
 
