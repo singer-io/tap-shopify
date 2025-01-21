@@ -183,6 +183,14 @@ def get_inventory_items_query():
                             unitCost {
                                 amount
                             }
+                            countryHarmonizedSystemCodes(first: 175) {
+                                edges {
+                                    node {
+                                        countryCode
+                                        harmonizedSystemCode
+                                    }
+                                }
+                            }
                         }
                     }
                     pageInfo {

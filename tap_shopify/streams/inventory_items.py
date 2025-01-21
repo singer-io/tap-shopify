@@ -28,6 +28,14 @@ class InventoryItems(ShopifyGqlStream):
         return params
 
     def transform_object(self, obj):
+        hsc = obj.get("countryHarmonizedSystemCodes")
+        hsc_list  = []
+        if hsc and "edges" in hsc:
+            for edge in hsc.get("edges"):
+                node = edge.get("node")
+                if node:
+                    hsc_list.append(node)
+        obj["countryHarmonizedSystemCodes"] = hsc_list
         return obj
 
 Context.stream_objects['inventory_items'] = InventoryItems
