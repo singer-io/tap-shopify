@@ -14,7 +14,7 @@ class InventoryItems(ShopifyGqlStream):
         return get_inventory_items_query()
 
     # pylint: disable=W0221
-    def get_query_params(self, updated_at_min, updated_at_max, cursor,):
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
         Returns Query and pagination params for filtering
         """

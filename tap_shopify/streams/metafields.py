@@ -3,7 +3,7 @@ import json
 import singer
 import shopify
 
-from singer import utils, metrics
+from singer import utils
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
@@ -47,7 +47,7 @@ class Metafields(ShopifyGqlStream):
         return None
 
     # pylint: disable=W0221
-    def get_query_params(self, updated_at_min, updated_at_max, cursor,):
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
         Returns Query and pagination params for filtering
         """
@@ -101,8 +101,7 @@ class Metafields(ShopifyGqlStream):
                     data = self.call_api(query_params, query, parent)
 
                     for edge in data.get("edges"):
-                        obj = edge.get("node")
-                        yield (obj, resource_alias)
+                        yield (edge.get("node"), resource_alias)
 
                     page_info =  data.get("pageInfo")
                     cursor = page_info.get("endCursor")
@@ -129,10 +128,11 @@ class Metafields(ShopifyGqlStream):
                     query_params["after"] = cursor
                 response = self.call_api(query_params, query, resource_type)
                 data = (response.get("metafields") or {})
+
                 for edge in data.get("edges"):
-                    obj = edge.get("node")
-                    obj = self.transform_object(obj)
+                    obj = self.transform_object(edge.get("node"))
                     yield (obj, resource_type)
+
                 page_info =  data.get("pageInfo")
                 cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
@@ -162,10 +162,12 @@ class Metafields(ShopifyGqlStream):
                 current_bookmarks[resource_type] = bookmark
 
             if replication_value >= last_bookmarks[resource_type]:
-                current_bookmarks[resource_type] = max(replication_value, current_bookmarks[resource_type])
+                current_bookmarks[resource_type] = max(replication_value, \
+                                                       current_bookmarks[resource_type])
                 yield obj
 
         for resource, bookmark_val in current_bookmarks.items():
-            self.update_bookmark(utils.strftime(min(start_time, bookmark_val)), f"{self.name}_{resource}")
+            bookmark_val = min(start_time, bookmark_val)
+            self.update_bookmark(utils.strftime(bookmark_val), f"{self.name}_{resource}")
 
 Context.stream_objects['metafields'] = Metafields
