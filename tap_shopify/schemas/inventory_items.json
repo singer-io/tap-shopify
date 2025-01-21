@@ -39,14 +39,14 @@
         "object"
       ],
       "properties": {
-          "amount": {
-            "type": [
-              "null",
-             "string"
-            ],
-            "format": "singer.decimal"
-          }
+        "amount": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "singer.decimal"
         }
+      }
     },
     "countryCodeOfOrigin": {
       "type": [
@@ -71,6 +71,32 @@
         "null",
         "boolean"
       ]
+    },
+    "countryHarmonizedSystemCodes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "countryCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "harmonizedSystemCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
     }
   }
 }
