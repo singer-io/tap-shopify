@@ -14,7 +14,8 @@ from tap_shopify.streams.graphql import (
     get_metafield_query_order,
 )
 from tap_shopify.streams.graphql.gql_base import (
-    ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError
+    ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError,
+    DATE_WINDOW_SIZE,
     )
 
 
@@ -69,7 +70,7 @@ class Metafields(ShopifyGqlStream):
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
-        LOGGER.info("Fetching %s", query_params)
+        LOGGER.info("Fetching %s %s", self.name,  query_params)
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
         if "errors" in response.keys():
@@ -80,37 +81,35 @@ class Metafields(ShopifyGqlStream):
     def get_parents(self):
         for parent in ['orders', 'customers', 'products', 'custom_collections']:
             parent = self.parent_alias.get(parent, parent)
+            resource_alias = self.resource_alias.get(parent, parent)
             LOGGER.info("Fetching id's for %s", parent)
 
-            # To force get all parents from the start date using a blank replication key
-            self.name = 'metafield_parents'
-            updated_at_min = self.get_bookmark()
-            stop_time = utils.now().replace(microsecond=0)
-            date_window_size = 30
+            last_updated_at = self.get_bookmark_by_name(f'{self.name}_{resource_alias}')
+            date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+            sync_start = utils.now().replace(microsecond=0)
 
-            while updated_at_min < stop_time:
-                updated_at_max = min(\
-                    updated_at_min + timedelta(days=date_window_size) , stop_time)
+            while last_updated_at < sync_start:
+
+                date_window_end = last_updated_at + timedelta(days=date_window_size)
+                query_end = min(sync_start, date_window_end)
                 has_next_page, cursor = True, None
 
                 while has_next_page:
                     query_params = self.get_query_params(\
-                        updated_at_min, updated_at_max, cursor)
+                        last_updated_at, query_end, cursor)
                     query = get_parent_ids(parent)
 
                     data = self.call_api(query_params, query, parent)
 
                     for edge in data.get("edges"):
                         obj = edge.get("node")
-                        resource_alias = self.resource_alias.get(parent, parent)
                         yield (obj, resource_alias)
 
                     page_info =  data.get("pageInfo")
                     cursor = page_info.get("endCursor")
                     has_next_page = page_info.get("hasNextPage")
 
-                updated_at_min = updated_at_max
-        parent = None
+                last_updated_at = query_end
 
     def get_objects(self):
 
@@ -136,7 +135,7 @@ class Metafields(ShopifyGqlStream):
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     obj = self.transform_object(obj)
-                    yield obj
+                    yield obj, resource_type
                 page_info =  data.get("pageInfo")
                 cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
@@ -153,18 +152,23 @@ class Metafields(ShopifyGqlStream):
         return obj
 
     def sync(self):
-        last_bookmark = self.get_bookmark()
         start_time = utils.now().replace(microsecond=0)
-        max_bookmark = last_bookmark
+        current_bookmarks = {}
+        last_bookmarks = {}
 
-        for obj in self.get_objects():
+        for obj, resource_type in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
-            if replication_value >= last_bookmark:
-                max_bookmark = max(replication_value, max_bookmark)
+
+            if resource_type not in current_bookmarks or resource_type not in last_bookmarks:
+                bookmark = self.get_bookmark_by_name(f"metafields_{resource_type}")
+                last_bookmarks[resource_type] = bookmark
+                current_bookmarks[resource_type] = bookmark
+
+            if replication_value >= last_bookmarks[resource_type]:
+                current_bookmarks[resource_type] = max(replication_value, current_bookmarks[resource_type])
                 yield obj
 
-        self.name = 'metafields'
-        max_bookmark = min(max_bookmark, start_time)
-        self.update_bookmark(utils.strftime(max_bookmark))
+        for resource, bookmark_val in current_bookmarks.items():
+            self.update_bookmark(utils.strftime(min(start_time, bookmark_val)), f"{self.name}_{resource}")
 
 Context.stream_objects['metafields'] = Metafields
