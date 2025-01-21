@@ -69,6 +69,7 @@ class Metafields(ShopifyGqlStream):
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
+        LOGGER.info("Fetching %s", query_params)
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
         if "errors" in response.keys():
@@ -97,8 +98,7 @@ class Metafields(ShopifyGqlStream):
                         updated_at_min, updated_at_max, cursor)
                     query = get_parent_ids(parent)
 
-                    with metrics.http_request_timer(self.name):
-                        data = self.call_api(query_params, query, parent)
+                    data = self.call_api(query_params, query, parent)
 
                     for edge in data.get("edges"):
                         obj = edge.get("node")
@@ -130,16 +130,15 @@ class Metafields(ShopifyGqlStream):
             while has_next_page:
                 query_params["pk_id"] = parent_obj["id"]
                 if cursor:
-                    query_params["cursor"] = cursor
-                with metrics.http_request_timer(self.name):
-                    response = self.call_api(query_params, query, resource_type)
+                    query_params["after"] = cursor
+                response = self.call_api(query_params, query, resource_type)
                 data = (response.get("metafields") or {})
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     obj = self.transform_object(obj)
                     yield obj
                 page_info =  data.get("pageInfo")
-                cursor,has_next_page = page_info.get("endCursor"),page_info.get("hasNextPage")
+                cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
     def transform_object(self, obj):
         obj["value_type"] = obj["type"] or None
