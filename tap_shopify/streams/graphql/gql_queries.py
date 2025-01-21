@@ -68,30 +68,39 @@ def get_product_variant_query():
     return """
         query GetProductVariants($first: Int!, $after: String, $query: String) {
             productVariants(first: $first, after: $after, query: $query) {
-                nodes {
-                    updatedAt
-                    id
-                    price
-                    displayName
-                    createdAt
-                    barcode
-                    compareAtPrice
-                    availableForSale
-                    inventoryPolicy
-                    inventoryQuantity
-                    legacyResourceId
-                    position
-                    requiresComponents
-                    sku
-                    taxCode
-                    taxable
-                    title
-                    sellableOnlineQuantity
-                }
-                pageInfo {
-                    hasNextPage
-                    endCursor
-                }
+                edges {
+                    node {
+                        id
+                        createdAt
+                        barcode
+                        availableForSale
+                        compareAtPrice
+                        displayName
+                        image {
+                            altText
+                            height
+                            id
+                            url
+                            width
+                        }
+                        inventoryPolicy
+                        inventoryQuantity
+                        position
+                        price
+                        requiresComponents
+                        sellableOnlineQuantity
+                        sku
+                        taxCode
+                        taxable
+                        title
+                        updatedAt
+                        product { id }
+                    }
+                    }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
             }
         }
         """

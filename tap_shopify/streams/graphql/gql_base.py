@@ -48,7 +48,7 @@ class ShopifyGqlStream(Stream):
     @shopify_error_handling
     def call_api(self, query_params):
         query = self.get_query()
-        LOGGER.info("Fetching %s", query_params)
+        LOGGER.info("Fetching %s %s", self.name, query_params)
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
         if "errors" in response.keys():
