@@ -201,7 +201,7 @@ def get_inventory_items_query():
             }
         """
 
-def get_parent_ids(resource):
+def get_parent_ids_query(resource):
     qry = """
     query getParentEntities( $first: Int!, $after: String $query: String) {
         RESOURCE(first: $first after: $after query: $query) {

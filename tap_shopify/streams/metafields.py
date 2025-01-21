@@ -7,7 +7,7 @@ from singer import utils, metrics
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
-    get_parent_ids,
+    get_parent_ids_query,
     get_metafield_query_customers,
     get_metafield_query_product,
     get_metafield_query_collection,
@@ -95,9 +95,8 @@ class Metafields(ShopifyGqlStream):
                 has_next_page, cursor = True, None
 
                 while has_next_page:
-                    query_params = self.get_query_params(\
-                        last_updated_at, query_end, cursor)
-                    query = get_parent_ids(parent)
+                    query_params = self.get_query_params(last_updated_at, query_end, cursor)
+                    query = get_parent_ids_query(parent)
 
                     data = self.call_api(query_params, query, parent)
 
@@ -122,9 +121,7 @@ class Metafields(ShopifyGqlStream):
                 raise ShopifyGraphQLError("Invalid Resource Type")
 
             has_next_page, cursor = True, None
-            query_params = {
-                "first": self.results_per_page,
-            }
+            query_params = {"first": self.results_per_page}
 
             while has_next_page:
                 query_params["pk_id"] = parent_obj["id"]
@@ -135,7 +132,7 @@ class Metafields(ShopifyGqlStream):
                 for edge in data.get("edges"):
                     obj = edge.get("node")
                     obj = self.transform_object(obj)
-                    yield obj, resource_type
+                    yield (obj, resource_type)
                 page_info =  data.get("pageInfo")
                 cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 

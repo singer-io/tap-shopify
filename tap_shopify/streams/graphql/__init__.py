@@ -9,7 +9,7 @@ from .gql_queries import (
     get_metafield_query_collection,
     get_metafield_query_order,
     get_metafield_query_customers,
-    get_parent_ids,
+    get_parent_ids_query,
     get_product_variant_query,
     get_metafield_query_product,
     get_products_query)
