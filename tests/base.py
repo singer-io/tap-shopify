@@ -84,7 +84,7 @@ class BaseTapTest(BaseCase):
 
         meta = default.copy()
         meta[self.REPLICATION_KEYS] =  {"updatedAt"}
-        meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
+        meta.update({self.FOREIGN_KEYS: {"owner", "ownerType"}})
 
         return {
             "abandoned_checkouts": {
