@@ -85,7 +85,7 @@ class BookmarkTest(BaseTapTest):
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
                                if value == self.INCREMENTAL and key in testable_streams}
-        incremental_streams = incremental_streams - {'metafields'}
+        incremental_streams = incremental_streams - {'metafields'} # Created a separate test for metafields
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
