@@ -237,77 +237,7 @@ def get_metafield_query_customers():
                             description
                             updatedAt
                             owner {
-                                ... on Validation {
-                                    id
-                                }
-                                ... on Shop {
-                                    id
-                                    email
-                                }
-                                ... on ProductVariant {
-                                    id
-                                }
-                                ... on Product {
-                                    id
-                                }
-                                ... on PaymentCustomization {
-                                    id
-                                }
-                                ... on Order {
-                                    id
-                                    email
-                                }
-                                ... on MediaImage {
-                                    id
-                                }
-                                ... on Market {
-                                    id
-                                    name
-                                }
-                                ... on Location {
-                                    id
-                                    name
-                                }
-                                ... on Image {
-                                    id
-                                }
-                                ... on FulfillmentConstraintRule {
-                                    id
-                                }
-                                ... on AppInstallation {
-                                    id
-                                }
-                                ... on CartTransform {
-                                    id
-                                }
-                                ... on DraftOrder {
-                                    id
-                                }
-                                ... on DiscountNode {
-                                    id
-                                }
-                                ... on DiscountCodeNode {
-                                    id
-                                }
-                                ... on DiscountAutomaticNode {
-                                    id
-                                }
-                                ... on DeliveryCustomization {
-                                    id
-                                }
-                                ... on CustomerSegmentMember {
-                                    id
-                                }
                                 ... on Customer {
-                                    id
-                                }
-                                ... on CompanyLocation {
-                                    id
-                                }
-                                ... on Company {
-                                    id
-                                }
-                                ... on Collection {
                                     id
                                 }
                             }
@@ -340,78 +270,7 @@ def get_metafield_query_product():
                             description
                             updatedAt
                             owner {
-                                ... on Validation {
-                                    id
-                                }
-                                ... on Shop {
-                                    id
-                                    email
-                                }
-                                ... on ProductVariant {
-                                    id
-                                }
                                 ... on Product {
-                                    id
-                                }
-                                ... on PaymentCustomization {
-                                    id
-                                }
-
-                                ... on Order {
-                                    id
-                                    email
-                                }
-                                ... on MediaImage {
-                                    id
-                                }
-                                ... on Market {
-                                    id
-                                    name
-                                }
-                                ... on Location {
-                                    id
-                                    name
-                                }
-                                ... on Image {
-                                    id
-                                }
-                                ... on FulfillmentConstraintRule {
-                                    id
-                                }
-                                ... on AppInstallation {
-                                    id
-                                }
-                                ... on CartTransform {
-                                    id
-                                }
-                                ... on DraftOrder {
-                                    id
-                                }
-                                ... on DiscountNode {
-                                    id
-                                }
-                                ... on DiscountCodeNode {
-                                    id
-                                }
-                                ... on DiscountAutomaticNode {
-                                    id
-                                }
-                                ... on DeliveryCustomization {
-                                    id
-                                }
-                                ... on CustomerSegmentMember {
-                                    id
-                                }
-                                ... on Customer {
-                                    id
-                                }
-                                ... on CompanyLocation {
-                                    id
-                                }
-                                ... on Company {
-                                    id
-                                }
-                                ... on Collection {
                                     id
                                 }
                             }
@@ -444,77 +303,6 @@ def get_metafield_query_collection():
                             description
                             updatedAt
                             owner {
-                                ... on Validation {
-                                    id
-                                }
-                                ... on Shop {
-                                    id
-                                    email
-                                }
-                                ... on ProductVariant {
-                                    id
-                                }
-                                ... on Product {
-                                    id
-                                }
-                                ... on PaymentCustomization {
-                                    id
-                                }
-
-                                ... on Order {
-                                    id
-                                    email
-                                }
-                                ... on MediaImage {
-                                    id
-                                }
-                                ... on Market {
-                                    id
-                                    name
-                                }
-                                ... on Location {
-                                    id
-                                    name
-                                }
-                                ... on Image {
-                                    id
-                                }
-                                ... on FulfillmentConstraintRule {
-                                    id
-                                }
-                                ... on AppInstallation {
-                                    id
-                                }
-                                ... on CartTransform {
-                                    id
-                                }
-                                ... on DraftOrder {
-                                    id
-                                }
-                                ... on DiscountNode {
-                                    id
-                                }
-                                ... on DiscountCodeNode {
-                                    id
-                                }
-                                ... on DiscountAutomaticNode {
-                                    id
-                                }
-                                ... on DeliveryCustomization {
-                                    id
-                                }
-                                ... on CustomerSegmentMember {
-                                    id
-                                }
-                                ... on Customer {
-                                    id
-                                }
-                                ... on CompanyLocation {
-                                    id
-                                }
-                                ... on Company {
-                                    id
-                                }
                                 ... on Collection {
                                     id
                                 }
@@ -548,77 +336,41 @@ def get_metafield_query_order():
                             description
                             updatedAt
                             owner {
-                                ... on Validation {
-                                    id
-                                }
-                                ... on Shop {
-                                    id
-                                    email
-                                }
-                                ... on ProductVariant {
-                                    id
-                                }
-                                ... on Product {
-                                    id
-                                }
-                                ... on PaymentCustomization {
-                                    id
-                                }
                                 ... on Order {
                                     id
-                                    email
                                 }
-                                ... on MediaImage {
-                                    id
-                                }
-                                ... on Market {
-                                    id
-                                    name
-                                }
-                                ... on Location {
-                                    id
-                                    name
-                                }
-                                ... on Image {
-                                    id
-                                }
-                                ... on FulfillmentConstraintRule {
-                                    id
-                                }
-                                ... on AppInstallation {
-                                    id
-                                }
-                                ... on CartTransform {
-                                    id
-                                }
-                                ... on DraftOrder {
-                                    id
-                                }
-                                ... on DiscountNode {
-                                    id
-                                }
-                                ... on DiscountCodeNode {
-                                    id
-                                }
-                                ... on DiscountAutomaticNode {
-                                    id
-                                }
-                                ... on DeliveryCustomization {
-                                    id
-                                }
-                                ... on CustomerSegmentMember {
-                                    id
-                                }
-                                ... on Customer {
-                                    id
-                                }
-                                ... on CompanyLocation {
-                                    id
-                                }
-                                ... on Company {
-                                    id
-                                }
-                                ... on Collection {
+                            }
+                        }
+                    }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
+                }
+            }
+        }
+    """
+    return qry
+
+
+def get_metafield_query_shop():
+    qry = """
+        query GetMetafields($first: Int!, $after: String) {
+            shop{
+                metafields(first: $first after: $after ){
+                    edges {
+                        node {
+                            id
+                            ownerType
+                            value
+                            type
+                            key
+                            createdAt
+                            namespace
+                            description
+                            updatedAt
+                            owner {
+                                ... on Shop {
                                     id
                                 }
                             }

@@ -12,6 +12,7 @@ from tap_shopify.streams.graphql import (
     get_metafield_query_product,
     get_metafield_query_collection,
     get_metafield_query_order,
+    get_metafield_query_shop,
 )
 from tap_shopify.streams.graphql.gql_base import (
     ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError,
@@ -65,7 +66,8 @@ class Metafields(ShopifyGqlStream):
             "customer": get_metafield_query_customers,
             "product": get_metafield_query_product,
             "collection": get_metafield_query_collection,
-            "order": get_metafield_query_order
+            "order": get_metafield_query_order,
+            "shop":get_metafield_query_shop
             }.get(resource)
 
     @shopify_error_handling
@@ -79,14 +81,18 @@ class Metafields(ShopifyGqlStream):
         return data
 
     def get_parents(self):
+        sync_start = utils.now().replace(microsecond=0)
         for parent in ['orders', 'customers', 'products', 'custom_collections']:
             parent = self.parent_alias.get(parent, parent)
             resource_alias = self.resource_alias.get(parent, parent)
-            LOGGER.info("Fetching id's for %s", parent)
+            LOGGER.info("Fetching id's for %s %s", parent, resource_alias)
+
+            if parent == "shop":
+                yield None, resource_alias
+                continue
 
             last_updated_at = self.get_bookmark_by_name(f'{self.name}_{resource_alias}')
             date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-            sync_start = utils.now().replace(microsecond=0)
 
             while last_updated_at < sync_start:
 
@@ -97,8 +103,8 @@ class Metafields(ShopifyGqlStream):
                 while has_next_page:
                     query_params = self.get_query_params(last_updated_at, query_end, cursor)
                     query = get_parent_ids_query(parent)
-
                     data = self.call_api(query_params, query, parent)
+                    LOGGER.info("%s : %s", parent, len(data.get("edges")))
 
                     for edge in data.get("edges"):
                         yield (edge.get("node"), resource_alias)
@@ -121,9 +127,10 @@ class Metafields(ShopifyGqlStream):
 
             has_next_page, cursor = True, None
             query_params = {"first": self.results_per_page}
+            if resource_type != "shop":
+                query_params["pk_id"] = parent_obj["id"]
 
             while has_next_page:
-                query_params["pk_id"] = parent_obj["id"]
                 if cursor:
                     query_params["after"] = cursor
                 response = self.call_api(query_params, query, resource_type)
@@ -157,7 +164,7 @@ class Metafields(ShopifyGqlStream):
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
             if resource_type not in current_bookmarks or resource_type not in last_bookmarks:
-                bookmark = self.get_bookmark_by_name(f"metafields_{resource_type}")
+                bookmark = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
                 last_bookmarks[resource_type] = bookmark
                 current_bookmarks[resource_type] = bookmark
 
@@ -166,8 +173,8 @@ class Metafields(ShopifyGqlStream):
                                                        current_bookmarks[resource_type])
                 yield obj
 
-        for resource, bookmark_val in current_bookmarks.items():
+        for res, bookmark_val in current_bookmarks.items():
             bookmark_val = min(start_time, bookmark_val)
-            self.update_bookmark(utils.strftime(bookmark_val), f"{self.name}_{resource}")
+            self.update_bookmark(utils.strftime(bookmark_val), f"{self.name}_{res}")
 
 Context.stream_objects['metafields'] = Metafields
