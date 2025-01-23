@@ -1,9 +1,8 @@
 from datetime import timedelta
 import json
-import singer
 import shopify
 
-from singer import utils
+from singer import utils, get_logger
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
@@ -15,12 +14,14 @@ from tap_shopify.streams.graphql import (
     get_metafield_query_shop,
 )
 from tap_shopify.streams.graphql.gql_base import (
-    ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError,
+    ShopifyGqlStream,
+    ShopifyGraphQLError,
     DATE_WINDOW_SIZE,
+    shopify_error_handling,
     )
 
 
-LOGGER = singer.get_logger()
+LOGGER = get_logger()
 
 
 
@@ -35,22 +36,23 @@ class Metafields(ShopifyGqlStream):
         "custom_collections":"collections"
     }
 
-    # required to access correct key from graphql response
-    # maps object list to single object access key
+
+    # maps object list identifier to single object access identifier
+    # eg customers -> customer
     resource_alias = {
         "customers":"customer",
         "products":"product",
         "collections": "collection",
         "orders": "order"
     }
-    # pylint: disable=W0221
+
     def get_query(self):
         return None
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns Query and pagination params for filtering
+        Returns query and params for filtering, pagination
         """
         rkey = "updated_at"
         params = {
