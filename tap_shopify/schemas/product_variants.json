@@ -28,10 +28,11 @@
         },
         "compareAtPrice": {
             "type": [
-                "null",
-                "number"
-            ]
-        },
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
         "displayName": {
             "type": [
                 "null",
@@ -97,10 +98,11 @@
         },
         "price": {
             "type": [
-                "null",
-                "number"
-            ]
-        },
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
         "requiresComponents": {
             "type": [
                 "null",

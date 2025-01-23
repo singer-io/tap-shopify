@@ -35,8 +35,9 @@ class Metafields(ShopifyGqlStream):
         "custom_collections":"collections"
     }
 
-    # required to access correct key from graphql response
-    # maps object list to single object access key
+
+    # maps object list identifier to single object access identifier
+    # eg customers -> customer
     resource_alias = {
         "customers":"customer",
         "products":"product",

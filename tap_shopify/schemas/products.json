@@ -165,8 +165,9 @@
           "amount": {
             "type": [
               "null",
-              "string"
-            ]
+             "string"
+            ],
+            "format": "singer.decimal"
           },
           "currencyCode": {
             "type": [
@@ -185,8 +186,9 @@
           "amount": {
             "type": [
               "null",
-              "string"
-            ]
+             "string"
+            ],
+            "format": "singer.decimal"
           },
           "currencyCode": {
             "type": [
