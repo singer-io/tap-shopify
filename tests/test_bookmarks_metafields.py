@@ -58,6 +58,12 @@ class BookmarkMetafieldsTest(BaseTapTest):
 
 
     def fetch_max_min(self, owner_type, stream_bookmark_key, messages, max_bookmarks, min_bookmarks):
+        """
+        Updates the maximum and minimum bookmark values for a given owner type based on a list of messages.
+
+        Returns:
+            tuple: Updated dictionaries for maximum and minimum bookmark values.
+        """
         bk_values = [message.get(stream_bookmark_key) for message in messages]
         max_bookmarks[owner_type] = None
         min_bookmarks[owner_type] = None
@@ -80,7 +86,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
 
     def test_run(self):
         """
-        Verify that for each stream you can do a sync which records bookmarks.
+        Verify that metafields stream you can do a sync which records bookmarks.
         That the bookmark is the maximum value sent to the target for the replication key.
         That a second sync respects the bookmark
             All data of the second sync is > the bookmark from the first sync
@@ -92,7 +98,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
         Verify that only data for incremental streams is sent to the target
 
         PREREQUISITE
-        For EACH stream that is incrementally replicated there are multiple rows of data with
+        For metafields stream that is incrementally replicated there are multiple rows of data with
             different values for the replication key
         """
         conn_id = self.create_connection(original_credentials=True)
