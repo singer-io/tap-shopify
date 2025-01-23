@@ -12,4 +12,5 @@ from .gql_queries import (
     get_parent_ids_query,
     get_product_variant_query,
     get_metafield_query_product,
+    get_metafield_query_shop,
     get_products_query)
