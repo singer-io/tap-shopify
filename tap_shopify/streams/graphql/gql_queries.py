@@ -212,7 +212,7 @@ def get_parent_ids_query(resource):
             }
             pageInfo {
                 endCursor
-                startCursor
+                hasNextPage
             }
         }
     }
