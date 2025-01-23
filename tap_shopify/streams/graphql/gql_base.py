@@ -1,5 +1,5 @@
-import json
 from datetime import timedelta
+import json
 import shopify
 
 from singer import(
@@ -7,14 +7,13 @@ from singer import(
     get_logger,
     utils
 )
-
+from tap_shopify.context import Context
 from tap_shopify.streams.base import (
     Stream,
     shopify_error_handling,
     DATE_WINDOW_SIZE,
     )
 
-from tap_shopify.context import Context
 
 LOGGER = get_logger()
 

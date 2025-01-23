@@ -1,9 +1,8 @@
 from datetime import timedelta
 import json
-import singer
 import shopify
 
-from singer import utils
+from singer import utils, get_logger
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
@@ -15,12 +14,14 @@ from tap_shopify.streams.graphql import (
     get_metafield_query_shop,
 )
 from tap_shopify.streams.graphql.gql_base import (
-    ShopifyGqlStream, shopify_error_handling, ShopifyGraphQLError,
+    ShopifyGqlStream,
+    ShopifyGraphQLError,
     DATE_WINDOW_SIZE,
+    shopify_error_handling,
     )
 
 
-LOGGER = singer.get_logger()
+LOGGER = get_logger()
 
 
 
