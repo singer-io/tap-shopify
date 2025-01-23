@@ -1,7 +1,7 @@
 """
 Test tap sets a bookmark and respects it for the next sync of a stream
 """
-from datetime import datetime as dt
+from datetime import datetime as dt, timezone
 
 from dateutil.parser import parse
 
@@ -28,6 +28,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
         """
         max_bookmarks = {}
         min_bookmarks = {}
+        metafields_shop = []
         metafields_order = []
         metafields_product = []
         metafields_customer = []
@@ -35,7 +36,9 @@ class BookmarkMetafieldsTest(BaseTapTest):
         for stream, batch in sync_records.items():
             for message in batch.get('messages'):
                 if message['action'] == 'upsert':
-                    if message.get('data').get('ownerType') == "ORDER":
+                    if message.get('data').get('ownerType') == "SHOP":
+                        metafields_shop.append(message.get('data'))
+                    elif message.get('data').get('ownerType') == "ORDER":
                         metafields_order.append(message.get('data'))
                     elif message.get('data').get('ownerType') == "PRODUCT":
                         metafields_product.append(message.get('data'))
@@ -48,8 +51,8 @@ class BookmarkMetafieldsTest(BaseTapTest):
         assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
         stream_bookmark_key = stream_bookmark_key.pop()
 
-        for owner_type, messages in [("metafields_order", metafields_order), ("metafields_product", metafields_product), ("metafields_customer", metafields_customer), ("metafields_collection", metafields_collection)]:
-            max_bookmarks, min_bookmarks = self.fetch_max_min(owner_type, stream_bookmark_key, messages, max_bookmarks, min_bookmarks)
+        for metafields_owner, messages in [("metafields_shop", metafields_shop), ("metafields_order", metafields_order), ("metafields_product", metafields_product), ("metafields_customer", metafields_customer), ("metafields_collection", metafields_collection)]:
+            max_bookmarks, min_bookmarks = self.fetch_max_min(metafields_owner, stream_bookmark_key, messages, max_bookmarks, min_bookmarks)
         
         max_bookmarks["metafields"] = max_bookmarks
         min_bookmarks["metafields"] = min_bookmarks
@@ -155,7 +158,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                     stream_bookmark_key) == 1  # There shouldn't be a compound replication key
                 stream_bookmark_key = stream_bookmark_key.pop()
 
-                for metafield_key in {"metafields_order", "metafields_product", "metafields_customer", "metafields_collection"}:
+                for metafield_key in {"metafields_shop", "metafields_order", "metafields_product", "metafields_customer", "metafields_collection"}:
 
                     state_value = first_sync_state.get("bookmarks", {}).get(
                         stream, {None: None}).get(metafield_key)
@@ -170,20 +173,20 @@ class BookmarkMetafieldsTest(BaseTapTest):
                             if isinstance(state_value, str):
                                 state_value = self.local_to_utc(parse(state_value))
                             if isinstance(state_value, int):
-                                state_value = self.local_to_utc(dt.utcfromtimestamp(state_value))
+                                state_value = self.local_to_utc(dt.fromtimestamp(state_value, tz=timezone.utc))
 
                         if target_value:
                             if isinstance(target_value, str):
                                 target_value = self.local_to_utc(parse(target_value))
                             if isinstance(target_value, int):
-                                target_value = self.local_to_utc(dt.utcfromtimestamp(target_value))
+                                target_value = self.local_to_utc(dt.fromtimestamp(target_value, tz=timezone.utc))
 
                         if target_min_value:
                             if isinstance(target_min_value, str):
                                 target_min_value = self.local_to_utc(parse(target_min_value))
                             if isinstance(target_min_value, int):
                                 target_min_value = self.local_to_utc(
-                                    dt.utcfromtimestamp(target_min_value))
+                                    dt.fromtimestamp(target_min_value, tz=timezone.utc))
 
                     except (OverflowError, ValueError, TypeError):
                         LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")
@@ -204,7 +207,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                             if isinstance(target_value, str):
                                 target_value = self.local_to_utc(parse(target_value))
                             if isinstance(target_value, int):
-                                target_value = self.local_to_utc(dt.utcfromtimestamp(target_value))
+                                target_value = self.local_to_utc(dt.fromtimestamp(target_value, tz=timezone.utc))
 
                     except (OverflowError, ValueError, TypeError):
                         LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")
