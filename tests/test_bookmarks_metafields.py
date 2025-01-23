@@ -28,30 +28,27 @@ class BookmarkMetafieldsTest(BaseTapTest):
         """
         max_bookmarks = {}
         min_bookmarks = {}
-        metafields_shop = []
-        metafields_order = []
-        metafields_product = []
-        metafields_customer = []
-        metafields_collection = []
+        metafields_dict = {}
         for stream, batch in sync_records.items():
             for message in batch.get('messages'):
                 if message['action'] == 'upsert':
-                    if message.get('data').get('ownerType') == "SHOP":
-                        metafields_shop.append(message.get('data'))
-                    elif message.get('data').get('ownerType') == "ORDER":
-                        metafields_order.append(message.get('data'))
-                    elif message.get('data').get('ownerType') == "PRODUCT":
-                        metafields_product.append(message.get('data'))
-                    elif message.get('data').get('ownerType') == "CUSTOMER":
-                        metafields_customer.append(message.get('data'))
-                    elif message.get('data').get('ownerType') == "COLLECTION":
-                        metafields_collection.append(message.get('data'))
-            
+                    data = message.get('data')
+                    if data.get('ownerType') == "SHOP":
+                        metafields_dict.setdefault("metafields_shop", []).append(data)
+                    elif data.get('ownerType') == "ORDER":
+                        metafields_dict.setdefault("metafields_order", []).append(data)
+                    elif data.get('ownerType') == "PRODUCT":
+                        metafields_dict.setdefault("metafields_product", []).append(data)
+                    elif data.get('ownerType') == "CUSTOMER":
+                        metafields_dict.setdefault("metafields_customer", []).append(data)
+                    elif data.get('ownerType') == "COLLECTION":
+                        metafields_dict.setdefault("metafields_collection", []).append(data)
+    
         stream_bookmark_key = self.expected_replication_keys().get(stream, set())
         assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
         stream_bookmark_key = stream_bookmark_key.pop()
 
-        for metafields_owner, messages in [("metafields_shop", metafields_shop), ("metafields_order", metafields_order), ("metafields_product", metafields_product), ("metafields_customer", metafields_customer), ("metafields_collection", metafields_collection)]:
+        for metafields_owner, messages in metafields_dict.items():
             max_bookmarks, min_bookmarks = self.fetch_max_min(metafields_owner, stream_bookmark_key, messages, max_bookmarks, min_bookmarks)
         
         max_bookmarks["metafields"] = max_bookmarks
@@ -129,24 +126,13 @@ class BookmarkMetafieldsTest(BaseTapTest):
 
         first_max_bookmarks, first_min_bookmarks = self.min_max_bookmarks_by_stream(first_sync_records)
         #first_sync_bookmarks = menagerie.get_state(conn_id)
-        
-        #######################
-        # Update State between Syncs
-        #######################
-
-        # new_state = {'bookmarks': dict()}
-        # simulated_states = self.calculated_states_by_stream(first_sync_bookmarks)
-
-        # for stream, updated_state in simulated_states.items():
-        #     new_state['bookmarks'][stream] = updated_state
-        # menagerie.set_state(conn_id, new_state)
 
         _ , second_min_bookmarks = self.min_max_bookmarks_by_stream(second_sync_records)
 
         for stream in incremental_stream:
             with self.subTest(stream=stream):
 
-                # verify that you get less data the 2nd time around
+                # Verify that you get less data the 2nd time around
                 self.assertGreater(
                     first_sync_record_count.get(stream, 0),
                     second_sync_record_count.get(stream, 0),
@@ -189,7 +175,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                                     dt.fromtimestamp(target_min_value, tz=timezone.utc))
 
                     except (OverflowError, ValueError, TypeError):
-                        LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")
+                        LOGGER.warn("Bookmarks cannot be converted to dates, comparing values directly")
 
                     # verify that there is data with different bookmark values - setup necessary
                     self.assertGreaterEqual(target_value, target_min_value,
@@ -212,7 +198,6 @@ class BookmarkMetafieldsTest(BaseTapTest):
                     except (OverflowError, ValueError, TypeError):
                         LOGGER.warn("bookmarks cannot be converted to dates, comparing values directly")
 
-                    # TODO: Loop over and verify all records from 2nd sync >= 1st bookmark
                     for message in second_sync_records.get(stream).get('messages'):
                         if message['action'] == 'upsert':
                             if message.get('data').get('ownerType') == metafield_key:

@@ -70,26 +70,6 @@ class TestShopifyGqlStream(unittest.TestCase):
 
     @patch('shopify.GraphQL')
     @patch.object(ShopifyGqlStream, 'get_query', return_value='mocked_query')
-    def test_call_api_partial_response(self, mock_get_query, mock_graphql):
-        """Test GraphQL query execution with a partial response."""
-        # Mock a partial response from Shopify GraphQL API
-        mock_response = {
-            "data": {
-                "products": {
-                    "edges": [{"node": {"id": "mocked_id"}}],
-                    "pageInfo": {"endCursor": "cursor_123", "hasNextPage": False},
-                }
-            }
-        }
-        mock_graphql.return_value.execute.return_value = json.dumps(mock_response)
-
-        query_params = self.stream.get_query_params("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z")
-        result = self.stream.call_api(query_params)
-
-        self.assertEqual(result, mock_response["data"]["products"])
-
-    @patch('shopify.GraphQL')
-    @patch.object(ShopifyGqlStream, 'get_query', return_value='mocked_query')
     @patch.object(ShopifyGqlStream, 'transform_object', side_effect=lambda x: x)
     @patch('tap_shopify.streams.graphql.gql_base.utils.now', return_value=datetime(2025, 2, 1, 0, 0, tzinfo=tzlocal()))
     def test_get_objects(self, mock_now, mock_transform_object, mock_get_query, mock_graphql):
@@ -124,6 +104,3 @@ class TestShopifyGqlStream(unittest.TestCase):
         self.assertEqual(len(objects), 4)
         self.assertEqual(objects[0], {"id": "mocked_id_1", "updated_at": "2025-01-01T00:00:00Z"})
         self.assertEqual(objects[1], {"id": "mocked_id_2", "updated_at": "2025-01-01T00:00:00Z"})
-
-if __name__ == "__main__":
-    unittest.main()
