@@ -4,7 +4,7 @@ Stores all the GraphQl Queries for shopify api
 
 def get_products_query():
     """
-    product stream get query
+    Returns GraphQL query to get all products
     """
     return """
         query GetProducts($first: Int!, $after: String, $query: String) {
@@ -125,6 +125,9 @@ def get_products_query():
         """
 
 def get_product_variant_query():
+    """
+    Returns GraphQL query to get all product variants
+    """
     return """
         query GetProductVariants($first: Int!, $after: String, $query: String) {
             productVariants(first: $first, after: $after, query: $query) {
@@ -166,6 +169,9 @@ def get_product_variant_query():
         """
 
 def get_inventory_items_query():
+    """
+    Returns GraphQL query to get all inventory items
+    """
     return """
             query GetinventoryItems($first: Int!, $after: String, $query: String) {
                 inventoryItems(first: $first, after: $after, query: $query) {
@@ -202,6 +208,11 @@ def get_inventory_items_query():
         """
 
 def get_parent_ids_query(resource):
+    """
+    Returns GraphQL query to get id for all metaftield
+    supported parent streams.
+    """
+
     qry = """
     query getParentEntities( $first: Int!, $after: String $query: String) {
         RESOURCE(first: $first after: $after query: $query) {
@@ -221,6 +232,9 @@ def get_parent_ids_query(resource):
     return qry
 
 def get_metafield_query_customers():
+    """
+    Returns GraphQL query to get customer metafields
+    """
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             customer(id: $pk_id) {
@@ -254,6 +268,9 @@ def get_metafield_query_customers():
     return qry
 
 def get_metafield_query_product():
+    """
+    Returns GraphQL query to get product metafields
+    """
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             product(id: $pk_id) {
@@ -287,6 +304,9 @@ def get_metafield_query_product():
     return qry
 
 def get_metafield_query_collection():
+    """
+    Returns GraphQL query to get collection metafields
+    """
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             collection(id: $pk_id) {
@@ -320,6 +340,9 @@ def get_metafield_query_collection():
     return qry
 
 def get_metafield_query_order():
+    """
+    Returns GraphQL query to get order metafields
+    """
     qry = """
         query GetMetafields($pk_id: ID! $first: Int!, $after: String) {
             order(id: $pk_id) {
@@ -352,8 +375,10 @@ def get_metafield_query_order():
     """
     return qry
 
-
 def get_metafield_query_shop():
+    """
+    Returns GraphQL query to get shop metafields
+    """
     qry = """
         query GetMetafields($first: Int!, $after: String) {
             shop{

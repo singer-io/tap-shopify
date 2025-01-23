@@ -16,7 +16,7 @@ class ProductVariants(ShopifyGqlStream):
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns Query and pagination params for filtering
+        Returns query and params for filtering, pagination
         """
         filter_key = "updated_at"
         params = {

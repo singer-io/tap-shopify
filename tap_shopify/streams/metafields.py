@@ -43,14 +43,14 @@ class Metafields(ShopifyGqlStream):
         "collections": "collection",
         "orders": "order"
     }
-    # pylint: disable=W0221
+
     def get_query(self):
         return None
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns Query and pagination params for filtering
+        Returns query and params for filtering, pagination
         """
         rkey = "updated_at"
         params = {

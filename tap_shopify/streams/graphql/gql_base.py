@@ -26,10 +26,16 @@ class ShopifyGqlStream(Stream):
     data_key = None
 
     def get_query(self):
+        """
+        Provides GraphQL query
+        """
         raise NotImplementedError("Function Not Implemented")
 
     def transform_object(self, obj):
-        raise NotImplementedError("Function Not Implemented")
+        """
+        Modify this to perform custom transformation on each object
+        """
+        return obj
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
@@ -55,6 +61,11 @@ class ShopifyGqlStream(Stream):
 
     @shopify_error_handling
     def call_api(self, query_params):
+        """
+        - Modifies the default call api implementation to support GraphQL
+        - Returns response Object dict
+        """
+
         try:
             query = self.get_query()
             LOGGER.info("Fetching %s %s", self.name, query_params)
@@ -73,7 +84,11 @@ class ShopifyGqlStream(Stream):
 
     def get_objects(self):
         """
-        perform's pagination and bookmarking
+        Returns:
+            - Yields list of objects for the stream
+        Performs
+            - Pagination & Filtering of stream
+            - Transformation and bookmarking
         """
 
         last_updated_at = self.get_bookmark()
@@ -107,7 +122,7 @@ class ShopifyGqlStream(Stream):
 
     def sync(self):
         """
-        Default Impl for Sync Method
+        Default implementation for sync method
         """
         for obj in self.get_objects():
             yield obj
