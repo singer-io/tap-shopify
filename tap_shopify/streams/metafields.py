@@ -82,7 +82,7 @@ class Metafields(ShopifyGqlStream):
 
     def get_parents(self):
         sync_start = utils.now().replace(microsecond=0)
-        for parent in ['orders', 'customers', 'products', 'custom_collections']:
+        for parent in ['shop','orders', 'customers', 'products', 'custom_collections']:
             parent = self.parent_alias.get(parent, parent)
             resource_alias = self.resource_alias.get(parent, parent)
             LOGGER.info("Fetching id's for %s %s", parent, resource_alias)
