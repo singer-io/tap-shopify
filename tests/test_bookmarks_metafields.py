@@ -131,7 +131,6 @@ class BookmarkMetafieldsTest(BaseTapTest):
         second_sync_records = runner.get_records_from_target_output()
 
         first_max_bookmarks, first_min_bookmarks = self.min_max_bookmarks_by_stream(first_sync_records)
-        #first_sync_bookmarks = menagerie.get_state(conn_id)
 
         _ , second_min_bookmarks = self.min_max_bookmarks_by_stream(second_sync_records)
 
@@ -144,7 +143,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                     second_sync_record_count.get(stream, 0),
                     msg="second sync didn't have less records, bookmark usage not verified")
 
-                # get bookmark values from state and target data
+                # Get bookmark values from state and target data
                 stream_bookmark_key = self.expected_replication_keys().get(stream, set())
                 assert len(
                     stream_bookmark_key) == 1  # There shouldn't be a compound replication key
@@ -160,7 +159,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                         stream, {None: None}).get(metafield_key)
 
                     try:
-                        # attempt to parse the bookmark as a date
+                        # Attempt to parse the bookmark as a date
                         if state_value:
                             if isinstance(state_value, str):
                                 state_value = self.local_to_utc(parse(state_value))
@@ -183,15 +182,15 @@ class BookmarkMetafieldsTest(BaseTapTest):
                     except (OverflowError, ValueError, TypeError):
                         LOGGER.warn("Bookmarks cannot be converted to dates, comparing values directly")
 
-                    # verify that there is data with different bookmark values - setup necessary
+                    # Verify that there is data with different bookmark values - setup necessary
                     self.assertGreaterEqual(target_value, target_min_value,
                                             msg="Data isn't set up to be able to test bookmarks")
 
-                    # verify state agrees with target data after 1st sync
+                    # Verify state agrees with target data after 1st sync
                     self.assertGreaterEqual(state_value, target_value,
                                     msg="The bookmark value isn't correct based on target data")
 
-                    # verify all data from 2nd sync >= 1st bookmark
+                    # Verify all data from 2nd sync >= 1st bookmark
                     target_value = second_min_bookmarks.get(
                         stream, {None: None}).get(metafield_key)
                     try:
