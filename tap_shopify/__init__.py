@@ -18,6 +18,8 @@ from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+DISABLED_STREAMS = ["products", "inventory_items"]
+
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 
@@ -146,6 +148,8 @@ def sync():
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
         if Context.is_selected(stream["tap_stream_id"]):
+            if stream["tap_stream_id"] in DISABLED_STREAMS:
+                continue
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
                                 stream["key_properties"],
@@ -155,6 +159,8 @@ def sync():
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
+        if stream_id in DISABLED_STREAMS:
+                continue
         stream = Context.stream_objects[stream_id]()
 
         if not Context.is_selected(stream_id):
