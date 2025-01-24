@@ -17,6 +17,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2025-01-01T00:00:00Z'
+        self.metafields_dict = {}
 
     def min_max_bookmarks_by_stream(self, sync_records):
         """
@@ -28,21 +29,20 @@ class BookmarkMetafieldsTest(BaseTapTest):
         """
         max_bookmarks = {}
         min_bookmarks = {}
-        metafields_dict = {}
         for stream, batch in sync_records.items():
             for message in batch.get('messages'):
                 if message['action'] == 'upsert':
                     data = message.get('data')
                     if data.get('ownerType') == "SHOP":
-                        metafields_dict.setdefault("metafields_shop", []).append(data)
+                        self.metafields_dict.setdefault("metafields_shop", []).append(data)
                     elif data.get('ownerType') == "ORDER":
-                        metafields_dict.setdefault("metafields_order", []).append(data)
+                        self.metafields_dict.setdefault("metafields_order", []).append(data)
                     elif data.get('ownerType') == "PRODUCT":
-                        metafields_dict.setdefault("metafields_product", []).append(data)
+                        self.metafields_dict.setdefault("metafields_product", []).append(data)
                     elif data.get('ownerType') == "CUSTOMER":
-                        metafields_dict.setdefault("metafields_customer", []).append(data)
+                        self.metafields_dict.setdefault("metafields_customer", []).append(data)
                     elif data.get('ownerType') == "COLLECTION":
-                        metafields_dict.setdefault("metafields_collection", []).append(data)
+                        self.metafields_dict.setdefault("metafields_collection", []).append(data)
     
         stream_bookmark_key = self.expected_replication_keys().get(stream, set())
         assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
@@ -149,7 +149,7 @@ class BookmarkMetafieldsTest(BaseTapTest):
                     stream_bookmark_key) == 1  # There shouldn't be a compound replication key
                 stream_bookmark_key = stream_bookmark_key.pop()
 
-                for metafield_key in {"metafields_shop", "metafields_order", "metafields_product", "metafields_customer", "metafields_collection"}:
+                for metafield_key in self.metafields_dict.keys():
 
                     state_value = first_sync_state.get("bookmarks", {}).get(
                         stream, {None: None}).get(metafield_key)
