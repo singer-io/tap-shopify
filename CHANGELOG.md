@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+  * Deprecated REST Admin API for products
+  * GraphQL Support added for deprecated streams
+  * New Stream `Product Variants` added
+  * More Details here: [#193](https://github.com/singer-io/tap-shopify/pull/193)
+
 ## 1.10.0
   * Updates the Shopify SDK to 12.3.0
   * Updates API version used to 2024-01
