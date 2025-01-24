@@ -43,14 +43,14 @@ class BookmarkMetafieldsTest(BaseTapTest):
                         self.metafields_dict.setdefault("metafields_customer", []).append(data)
                     elif data.get('ownerType') == "COLLECTION":
                         self.metafields_dict.setdefault("metafields_collection", []).append(data)
-    
+
         stream_bookmark_key = self.expected_replication_keys().get(stream, set())
         assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
         stream_bookmark_key = stream_bookmark_key.pop()
 
-        for metafields_owner, messages in metafields_dict.items():
+        for metafields_owner, messages in self.metafields_dict.items():
             max_bookmarks, min_bookmarks = self.fetch_max_min(metafields_owner, stream_bookmark_key, messages, max_bookmarks, min_bookmarks)
-        
+
         max_bookmarks["metafields"] = max_bookmarks
         min_bookmarks["metafields"] = min_bookmarks
 
