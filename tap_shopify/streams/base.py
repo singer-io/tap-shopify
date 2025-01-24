@@ -174,8 +174,8 @@ class Stream():
         return utils.strptime_with_tz(bookmark)
 
     def get_bookmark_by_name(self, bookmark_key):
+        # name is overridden by some substreams
         bookmark = (singer.get_bookmark(Context.state,
-                                        # name is overridden by some substreams
                                         self.name,
                                         bookmark_key)
                     or Context.config["start_date"])
