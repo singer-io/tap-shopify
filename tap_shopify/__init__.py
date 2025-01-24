@@ -160,7 +160,8 @@ def sync():
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
         if stream_id in DISABLED_STREAMS:
-                continue
+            LOGGER.critical('Deprecated stream: %s, please upgrade to latest version', stream_id)
+            continue
         stream = Context.stream_objects[stream_id]()
 
         if not Context.is_selected(stream_id):
