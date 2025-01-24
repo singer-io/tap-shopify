@@ -1,0 +1,164 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "createdAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "barcode": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "availableForSale": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "compareAtPrice": {
+            "type": [
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
+        "displayName": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "image": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "altText": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "height": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                },
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "url": {
+                    "type": [
+                        "null",
+                        "string"
+                    ],
+                    "format": "uri"
+                },
+                "width": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                }
+            }
+        },
+        "inventoryPolicy": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "inventoryQuantity": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "position": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "price": {
+            "type": [
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
+        "requiresComponents": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "sellableOnlineQuantity": {
+            "type": [
+                "null",
+                "integer"
+            ]
+        },
+        "sku": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "taxCode": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "taxable": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "title": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "updatedAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "product": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@
     "id": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "sku": {
@@ -13,49 +13,57 @@
         "string"
       ]
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "updated_at": {
+    "updatedAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "requires_shipping": {
+    "requiresShipping": {
       "type": [
         "null",
         "boolean"
       ]
     },
-    "cost": {
+    "unitCost": {
       "type": [
         "null",
-        "string"
+        "object"
       ],
-      "format": "singer.decimal"
+      "properties": {
+        "amount": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "singer.decimal"
+        }
+      }
     },
-    "country_code_of_origin": {
+    "countryCodeOfOrigin": {
       "type": [
         "null",
         "string"
       ]
     },
-    "province_code_of_origin": {
+    "provinceCodeOfOrigin": {
       "type": [
         "null",
         "string"
       ]
     },
-    "harmonized_system_code": {
+    "harmonizedSystemCode": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "tracked": {
@@ -64,7 +72,7 @@
         "boolean"
       ]
     },
-    "country_harmonized_system_codes": {
+    "countryHarmonizedSystemCodes": {
       "type": [
         "null",
         "array"
@@ -75,13 +83,13 @@
           "object"
         ],
         "properties": {
-          "harmonized_system_code": {
+          "countryCode": {
             "type": [
               "null",
               "string"
             ]
           },
-          "country_code": {
+          "harmonizedSystemCode": {
             "type": [
               "null",
               "string"
@@ -89,12 +97,6 @@
           }
         }
       }
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
     }
   }
 }

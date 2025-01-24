@@ -6,25 +6,19 @@
         "string"
       ]
     },
-    "published_at": {
+    "publishedAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
-    },
-    "published_scope": {
-      "type": [
-        "null",
-        "string"
-      ]
     },
     "vendor": {
       "type": [
@@ -32,20 +26,14 @@
         "string"
       ]
     },
-    "updated_at": {
+    "updatedAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "body_html": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "product_type": {
+    "productType": {
       "type": [
         "null",
         "string"
@@ -70,12 +58,6 @@
               "string"
             ]
           },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
           "values": {
             "type": [
               "null",
@@ -91,7 +73,7 @@
           "id": {
             "type": [
               "null",
-              "integer"
+              "string"
             ]
           },
           "position": {
@@ -107,25 +89,13 @@
         ]
       }
     },
-    "image": {
-      "$ref": "definitions.json#/image"
-    },
     "handle": {
       "type": [
         "null",
         "string"
       ]
     },
-    "images": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "$ref": "definitions.json#/image"        
-      }
-    },
-    "template_suffix": {
+    "templateSuffix": {
       "type": [
         "null",
         "string"
@@ -137,197 +107,339 @@
         "string"
       ]
     },
-    "variants": {
-      "type": [
-        "null",
-        "array"
-      ],
-      "items": {
-        "properties": {
-          "barcode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "tax_code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "created_at": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "weight_unit": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "position": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "price": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "singer.decimal"
-          },
-          "image_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "inventory_policy": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sku": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "inventory_item_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "fulfillment_service": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "weight": {
-            "type": [
-              "null",
-              "number"
-            ]
-          },
-          "inventory_management": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "taxable": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "admin_graphql_api_id": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "option1": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "compare_at_price": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "singer.decimal"
-          },
-          "updated_at": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "option2": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "old_inventory_quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "requires_shipping": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "inventory_quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "grams": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          },
-          "option3": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "product_id": {
-            "type": [
-              "null",
-              "integer"
-            ]
-          }
-        },
-        "type": [
-          "null",
-          "object"
-        ]
-      }
-    },
-    "admin_graphql_api_id": {
+    "id": {
       "type": [
         "null",
         "string"
       ]
     },
-    "id": {
+    "giftCardTemplateSuffix": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "hasOnlyDefaultVariant": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "hasOutOfStockVariants": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "hasVariantsThatRequiresComponents": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "isGiftCard": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "descriptionHtml": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "compareAtPriceRange": {
+      "maxVariantCompareAtPrice": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "amount": {
+            "type": [
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
+          "currencyCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "minVariantCompareAtPrice": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "amount": {
+            "type": [
+              "null",
+             "string"
+            ],
+            "format": "singer.decimal"
+          },
+          "currencyCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "category": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "featuredMedia": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "mediaContentType": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "status": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "requiresSellingPlan": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "totalInventory": {
       "type": [
         "null",
         "integer"
       ]
+    },
+    "tracksInventory": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "media": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alt": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mediaContentType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "embedUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mimeType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "filename": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "image": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "url": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "width": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "height": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
+          "sources": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "url": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "format": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "mimeType": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "fileSize": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            }
+          },
+          "mediaWarnings": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "message": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            }
+          },
+          "mediaErrors": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "details": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "message": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "type": "object"

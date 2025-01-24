@@ -1,18 +1,20 @@
 {
   "properties": {
-    "owner_id": {
+    "owner": {
       "type": [
         "null",
-        "integer"
-      ]
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "owner_resource": {
+    "ownerType": {
       "type": [
         "null",
         "string"
@@ -30,7 +32,7 @@
         "string"
       ]
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
@@ -40,7 +42,7 @@
     "id": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
     "namespace": {
@@ -64,7 +66,7 @@
       ],
       "properties": {}
     },
-    "updated_at": {
+    "updatedAt": {
       "type": [
         "null",
         "string"
