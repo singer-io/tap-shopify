@@ -13,7 +13,7 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError
+from tap_shopify.exceptions import ShopifyError, SHopifyDeprecationError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 import tap_shopify.streams # Load stream objects into Context
 
@@ -30,13 +30,13 @@ def raise_warning():
 
     if SELECTED_DEPRECATED_STREAMS:
         if today_utc > cutoff_date:
-            raise Exception(
+            raise SHopifyDeprecationError(
                 f"The {SELECTED_DEPRECATED_STREAMS} streams are no longer supported after 31st January 2025. "
                 "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for these streams."
             )
         else:
             days_left = (cutoff_date - today_utc).days
-            raise Exception(
+            raise SHopifyDeprecationError(
                 f"WARNING: The {SELECTED_DEPRECATED_STREAMS} streams are deprecated and will no longer be supported "
                 f"after 31st January 2025, ({days_left} days left). Please upgrade to the latest version of tap-shopify, "
                 "which supports GraphQL endpoints for these streams."
@@ -248,6 +248,8 @@ def main():
             msg = body.get('errors')
         finally:
             raise ShopifyError(exc, msg) from exc
+    except SHopifyDeprecationError as exc:
+        raise SHopifyDeprecationError(exc) from None
     except Exception as exc:
         raise ShopifyError(exc) from exc
 
