@@ -30,8 +30,8 @@ def execute_gql(self, query, variables=None, operation_name=None):
     req = urllib.request.Request(self.endpoint, json.dumps(data).encode("utf-8"), headers)
 
     try:
-        response = urllib.request.urlopen(req)
-        return response.read().decode("utf-8")
+        with urllib.request.urlopen(req) as response:
+            return response.read().decode("utf-8")
     except urllib.error.HTTPError as e:
         raise e
 
