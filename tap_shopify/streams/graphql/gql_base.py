@@ -24,8 +24,8 @@ class ShopifyGraphQLError(Exception):
 
 def execute_gql(self, query, variables=None, operation_name=None):
     """
-    This method overrides the original `execute` method from ShopifyAPI v12.6.0 to remove the print statement.
-    Ensure to review the original implementation before making any changes or upgrading the SDK version, 
+    This overrides the `execute` method from ShopifyAPI(v12.6.0) to remove the print statement.
+    Ensure to check the original impl before making any changes or upgrading the SDK version,
     as this modification may affect future updates
     """
     default_headers = {"Accept": "application/json", "Content-Type": "application/json"}
