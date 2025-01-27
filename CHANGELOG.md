@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.0
+  * Deprecate the streams for the older version. [#196](https://github.com/singer-io/tap-shopify/pull/196)
+  * Deprecated streams - products, inventory_items, metafields (product)
+
 ## 1.10.0
   * Updates the Shopify SDK to 12.3.0
   * Updates API version used to 2024-01
