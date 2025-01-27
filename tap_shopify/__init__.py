@@ -30,18 +30,18 @@ TODAY_UTC = utils.now()
 def raise_warning():
 
     if "products" in SELECTED_DEPRECATED_STREAMS and IS_METAFIELDS_SELECTED:
-        SELECTED_DEPRECATED_STREAMS.append("product metafields")
+        SELECTED_DEPRECATED_STREAMS.append("metafields (product related)")
 
     if SELECTED_DEPRECATED_STREAMS:
         if TODAY_UTC > CUTOFF_DATE:
             raise ShopifyDeprecationError(
-                f"The {SELECTED_DEPRECATED_STREAMS} are no longer supported after 31st January 2025. "
+                f"The {SELECTED_DEPRECATED_STREAMS} stream(s) are no longer supported after 31st January 2025. "
                 "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for these streams."
             )
         else:
             days_left = (CUTOFF_DATE - TODAY_UTC).days
             raise ShopifyDeprecationError(
-                f"WARNING: The {SELECTED_DEPRECATED_STREAMS} are deprecated and will no longer be supported "
+                f"WARNING: The {SELECTED_DEPRECATED_STREAMS} stream(s) are deprecated and will no longer be supported "
                 f"after 31st January 2025, ({days_left} days left). Please upgrade to the latest version of tap-shopify, "
                 "which supports GraphQL endpoints for these streams."
             )
