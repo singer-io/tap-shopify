@@ -74,7 +74,6 @@ class Metafields(ShopifyGqlStream):
 
     @shopify_error_handling
     def call_api(self, query_params, query, data_key):
-        LOGGER.info("Fetching %s %s", self.name,  query_params)
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
         if "errors" in response.keys():
@@ -106,8 +105,6 @@ class Metafields(ShopifyGqlStream):
                     query_params = self.get_query_params(last_updated_at, query_end, cursor)
                     query = get_parent_ids_query(parent)
                     data = self.call_api(query_params, query, parent)
-                    LOGGER.info("%s : %s", parent, len(data.get("edges")))
-
                     for edge in data.get("edges"):
                         yield (edge.get("node"), resource_alias)
 
