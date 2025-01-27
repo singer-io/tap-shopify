@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+  * Fixed Error Handling for GraphQL Client[#193](https://github.com/singer-io/tap-shopify/pull/195)
+
 ## 2.0.0
   * Deprecated REST Admin API for products
   * GraphQL Support added for deprecated streams
