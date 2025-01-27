@@ -1,6 +1,7 @@
 import json
 import shopify
 import singer
+from singer import utils
 from datetime import datetime, timezone
 
 from tap_shopify.context import Context
@@ -10,8 +11,8 @@ from tap_shopify.streams.base import (Stream,
                                       OutOfOrderIdsError)
 
 LOGGER = singer.get_logger()
-CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
-TODAY_UTC = datetime.now(timezone.utc).date()
+CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc)
+TODAY_UTC = utils.now()
 PARENT_STREAMS = ['orders', 'customers', 'products', 'custom_collections']
 
 def get_selected_parents():

@@ -24,8 +24,8 @@ SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 DEPRECATED_STREAMS = ["products", "inventory_items"]
 IS_METAFIELDS_SELECTED = False
 SELECTED_DEPRECATED_STREAMS = []
-CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
-TODAY_UTC = datetime.now(timezone.utc).date()
+CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc)
+TODAY_UTC = utils.now()
 
 def raise_warning():
 
