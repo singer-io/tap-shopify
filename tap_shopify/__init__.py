@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-import datetime
+from datetime import datetime, timezone
 import json
 import time
 import math
@@ -18,10 +18,29 @@ from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
-DISABLED_STREAMS = ["products", "inventory_items"]
 
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
+DEPRECATED_STREAMS = ["products", "inventory_items", "metafields"]
+SELECTED_DEPRECATED_STREAMS = []
+
+def raise_warning():
+    cutoff_date = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
+    today_utc = datetime.now(timezone.utc).date()
+
+    if SELECTED_DEPRECATED_STREAMS:
+        if today_utc > cutoff_date:
+            raise Exception(
+                f"The {SELECTED_DEPRECATED_STREAMS} streams are no longer supported after 31st January 2025. "
+                "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for these streams."
+            )
+        else:
+            days_left = (cutoff_date - today_utc).days
+            raise Exception(
+                f"WARNING: The {SELECTED_DEPRECATED_STREAMS} streams are deprecated and will no longer be supported "
+                f"after 31st January 2025, ({days_left} days left). Please upgrade to the latest version of tap-shopify, "
+                "which supports GraphQL endpoints for these streams."
+            )
 
 @shopify_error_handling
 def initialize_shopify_client():
@@ -148,20 +167,17 @@ def sync():
     # Emit all schemas first so we have them for child streams
     for stream in Context.catalog["streams"]:
         if Context.is_selected(stream["tap_stream_id"]):
-            if stream["tap_stream_id"] in DISABLED_STREAMS:
-                continue
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
                                 stream["key_properties"],
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
+            if stream["tap_stream_id"] in DEPRECATED_STREAMS:
+                SELECTED_DEPRECATED_STREAMS.append(stream["tap_stream_id"])
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
         stream_id = catalog_entry['tap_stream_id']
-        if stream_id in DISABLED_STREAMS:
-            LOGGER.critical('Deprecated stream: %s, please upgrade to latest version', stream_id)
-            continue
         stream = Context.stream_objects[stream_id]()
 
         if not Context.is_selected(stream_id):
@@ -218,6 +234,7 @@ def main():
                 Context.catalog = discover()
 
             sync()
+        raise_warning()
     except pyactiveresource.connection.ResourceNotFound as exc:
         raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
     except pyactiveresource.connection.UnauthorizedAccess as exc:
