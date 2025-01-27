@@ -24,9 +24,9 @@ class ShopifyGraphQLError(Exception):
 
 def execute_gql(self, query, variables=None, operation_name=None):
     """
-    This Method has been modified to remove the print statement
-    in the orignal implementation of the execute method in ShopifyAPI v12.6.0
-    Check the o.g implementation before changing or upgrading the sdk version
+    This method has been modified to remove the print statement,
+    in the original implementation of the execute method in ShopifyAPI v12.6.0.
+    Check the original implementation before changing or upgrading the sdk version
     """
     default_headers = {"Accept": "application/json", "Content-Type": "application/json"}
     headers = self.merge_headers(default_headers, self.headers)

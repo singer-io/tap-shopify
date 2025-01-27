@@ -12,8 +12,7 @@ setup(
     python_requires='>=3.5.2',
     py_modules=["tap_shopify"],
     install_requires=[
-        # Important!
-        # do check the monkey patched method in graphql client while upgrading this dependancy
+        # Important: review the monkey-patched method in the GraphQL client when upgrading this dependency.
         "ShopifyAPI==12.6.0",
         "singer-python==6.0.0",
     ],
