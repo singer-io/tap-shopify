@@ -13,7 +13,7 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError, SHopifyDeprecationError
+from tap_shopify.exceptions import ShopifyError, ShopifyDeprecationError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 import tap_shopify.streams # Load stream objects into Context
 
@@ -23,20 +23,20 @@ LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 DEPRECATED_STREAMS = ["products", "inventory_items", "metafields"]
 SELECTED_DEPRECATED_STREAMS = []
+CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
+TODAY_UTC = datetime.now(timezone.utc).date()
 
 def raise_warning():
-    cutoff_date = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
-    today_utc = datetime.now(timezone.utc).date()
 
     if SELECTED_DEPRECATED_STREAMS:
-        if today_utc > cutoff_date:
-            raise SHopifyDeprecationError(
+        if TODAY_UTC > CUTOFF_DATE:
+            raise ShopifyDeprecationError(
                 f"The {SELECTED_DEPRECATED_STREAMS} streams are no longer supported after 31st January 2025. "
                 "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for these streams."
             )
         else:
-            days_left = (cutoff_date - today_utc).days
-            raise SHopifyDeprecationError(
+            days_left = (CUTOFF_DATE - TODAY_UTC).days
+            raise ShopifyDeprecationError(
                 f"WARNING: The {SELECTED_DEPRECATED_STREAMS} streams are deprecated and will no longer be supported "
                 f"after 31st January 2025, ({days_left} days left). Please upgrade to the latest version of tap-shopify, "
                 "which supports GraphQL endpoints for these streams."
@@ -172,8 +172,6 @@ def sync():
                                 stream["key_properties"],
                                 bookmark_properties=stream["replication_key"])
             Context.counts[stream["tap_stream_id"]] = 0
-            if stream["tap_stream_id"] in DEPRECATED_STREAMS:
-                SELECTED_DEPRECATED_STREAMS.append(stream["tap_stream_id"])
 
     # Loop over streams in catalog
     for catalog_entry in Context.catalog['streams']:
@@ -184,6 +182,14 @@ def sync():
             LOGGER.info('Skipping stream: %s', stream_id)
             continue
 
+        if stream_id in DEPRECATED_STREAMS:
+            SELECTED_DEPRECATED_STREAMS.append(stream_id)
+            if TODAY_UTC > CUTOFF_DATE:
+                LOGGER.critical(
+                    f"The {stream_id} stream is no longer supported. "
+                    "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for this stream."
+                )
+                continue
         LOGGER.info('Syncing stream: %s', stream_id)
 
         if not Context.state.get('bookmarks'):
@@ -248,8 +254,8 @@ def main():
             msg = body.get('errors')
         finally:
             raise ShopifyError(exc, msg) from exc
-    except SHopifyDeprecationError as exc:
-        raise SHopifyDeprecationError(exc) from None
+    except ShopifyDeprecationError as exc:
+        raise ShopifyDeprecationError(exc) from None
     except Exception as exc:
         raise ShopifyError(exc) from exc
 
