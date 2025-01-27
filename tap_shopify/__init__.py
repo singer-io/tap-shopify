@@ -21,23 +21,27 @@ REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
-DEPRECATED_STREAMS = ["products", "inventory_items", "metafields"]
+DEPRECATED_STREAMS = ["products", "inventory_items"]
+IS_METAFIELDS_SELECTED = False
 SELECTED_DEPRECATED_STREAMS = []
 CUTOFF_DATE = datetime(2025, 1, 31, tzinfo=timezone.utc).date()
 TODAY_UTC = datetime.now(timezone.utc).date()
 
 def raise_warning():
 
+    if "products" in SELECTED_DEPRECATED_STREAMS and IS_METAFIELDS_SELECTED:
+        SELECTED_DEPRECATED_STREAMS.append("product metafields")
+
     if SELECTED_DEPRECATED_STREAMS:
         if TODAY_UTC > CUTOFF_DATE:
             raise ShopifyDeprecationError(
-                f"The {SELECTED_DEPRECATED_STREAMS} streams are no longer supported after 31st January 2025. "
+                f"The {SELECTED_DEPRECATED_STREAMS} are no longer supported after 31st January 2025. "
                 "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for these streams."
             )
         else:
             days_left = (CUTOFF_DATE - TODAY_UTC).days
             raise ShopifyDeprecationError(
-                f"WARNING: The {SELECTED_DEPRECATED_STREAMS} streams are deprecated and will no longer be supported "
+                f"WARNING: The {SELECTED_DEPRECATED_STREAMS} are deprecated and will no longer be supported "
                 f"after 31st January 2025, ({days_left} days left). Please upgrade to the latest version of tap-shopify, "
                 "which supports GraphQL endpoints for these streams."
             )
@@ -190,6 +194,9 @@ def sync():
                     "Please upgrade to the latest version of tap-shopify, which supports GraphQL endpoints for this stream."
                 )
                 continue
+        if stream_id == 'metafields':
+            global IS_METAFIELDS_SELECTED
+            IS_METAFIELDS_SELECTED = True
         LOGGER.info('Syncing stream: %s', stream_id)
 
         if not Context.state.get('bookmarks'):
