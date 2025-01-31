@@ -15,7 +15,7 @@ from tap_shopify.streams.graphql import (
 )
 from tap_shopify.streams.graphql.gql_base import (
     ShopifyGqlStream,
-    ShopifyGraphQLError,
+    ShopifyAPIError,
     DATE_WINDOW_SIZE,
     shopify_error_handling,
     )
@@ -77,7 +77,7 @@ class Metafields(ShopifyGqlStream):
         response = shopify.GraphQL().execute(query=query, variables=query_params)
         response = json.loads(response)
         if "errors" in response.keys():
-            raise ShopifyGraphQLError(response['errors'])
+            raise ShopifyAPIError(response['errors'])
         data = response.get("data", {}).get(data_key, {})
         return data
 

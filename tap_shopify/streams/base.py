@@ -111,6 +111,10 @@ def shopify_error_handling(fnc):
                           (http.client.IncompleteRead, ConnectionResetError),
                           max_tries=MAX_RETRIES,
                           factor=2)
+    @backoff.on_exception(backoff.expo,
+                          ShopifyAPIError,
+                          max_tries=MAX_RETRIES,
+                          factor=2)
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
                           (pyactiveresource.connection.Error, socket.timeout),
                           giveup=is_timeout_error,
@@ -145,6 +149,9 @@ class Error(Exception):
 
 class OutOfOrderIdsError(Error):
     """Raised if our expectation of ordering by ID is violated"""
+
+class ShopifyAPIError(Error):
+    """Raised if api returns any failure"""
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
