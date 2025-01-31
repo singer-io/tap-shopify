@@ -108,7 +108,7 @@ def is_timeout_error(error_raised):
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
-                          (http.client.IncompleteRead, ConnectionResetError),
+                          (http.client.IncompleteRead, ConnectionResetError, ShopifyAPIError),
                           max_tries=MAX_RETRIES,
                           factor=2)
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
@@ -145,6 +145,9 @@ class Error(Exception):
 
 class OutOfOrderIdsError(Error):
     """Raised if our expectation of ordering by ID is violated"""
+
+class ShopifyAPIError(Error):
+    """Raised for any unexpected api error without a valid status code"""
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by
