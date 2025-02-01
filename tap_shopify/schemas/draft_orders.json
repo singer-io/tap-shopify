@@ -1,0 +1,212 @@
+{
+  "properties": {
+    "id": {
+      "type": ["null", "integer"]
+    },
+    "order_id": {
+      "type": ["null", "integer"]
+    },
+    "name": {
+      "type": ["null", "string"]
+    },
+    "customer": {
+      "$ref": "definitions.json#/customer"
+    },
+    "shipping_address": {
+      "properties": {
+        "phone": {
+          "type": ["null", "string"]
+        },
+        "country": {
+          "type": ["null", "string"]
+        },
+        "name": {
+          "type": ["null", "string"]
+        },
+        "address1": {
+          "type": ["null", "string"]
+        },
+        "longitude": {
+          "type": ["null", "number"]
+        },
+        "address2": {
+          "type": ["null", "string"]
+        },
+        "last_name": {
+          "type": ["null", "string"]
+        },
+        "first_name": {
+          "type": ["null", "string"]
+        },
+        "province": {
+          "type": ["null", "string"]
+        },
+        "city": {
+          "type": ["null", "string"]
+        },
+        "company": {
+          "type": ["null", "string"]
+        },
+        "latitude": {
+          "type": ["null", "number"]
+        },
+        "country_code": {
+          "type": ["null", "string"]
+        },
+        "province_code": {
+          "type": ["null", "string"]
+        },
+        "zip": {
+          "type": ["null", "string"]
+        }
+      },
+      "type": ["null", "object"]
+    },
+    "billing_address": {
+      "properties": {
+        "phone": {
+          "type": ["null", "string"]
+        },
+        "country": {
+          "type": ["null", "string"]
+        },
+        "name": {
+          "type": ["null", "string"]
+        },
+        "address1": {
+          "type": ["null", "string"]
+        },
+        "longitude": {
+          "type": ["null", "number"]
+        },
+        "address2": {
+          "type": ["null", "string"]
+        },
+        "last_name": {
+          "type": ["null", "string"]
+        },
+        "first_name": {
+          "type": ["null", "string"]
+        },
+        "province": {
+          "type": ["null", "string"]
+        },
+        "city": {
+          "type": ["null", "string"]
+        },
+        "company": {
+          "type": ["null", "string"]
+        },
+        "latitude": {
+          "type": ["null", "number"]
+        },
+        "country_code": {
+          "type": ["null", "string"]
+        },
+        "province_code": {
+          "type": ["null", "string"]
+        },
+        "zip": {
+          "type": ["null", "string"]
+        }
+      },
+      "type": ["null", "object"]
+    },
+    "note": {
+      "type": ["null", "string"]
+    },
+    "note_attributes": {
+      "items": {
+        "properties": {
+          "name": {
+            "type": ["null", "string"]
+          },
+          "value": {
+            "type": ["null", "string"]
+          }
+        },
+        "type": ["null", "object"]
+      },
+      "type": ["null", "array"]
+    },
+    "email": {
+      "type": ["null", "string"]
+    },
+    "currency": {
+      "type": ["null", "string"]
+    },
+    "invoice_sent_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "invoice_url": {
+      "type": ["null", "string"]
+    },
+    "line_items": {
+      "$ref": "definitions.json#/draft_line_items"
+    },
+    "shipping_line": {
+      "properties": {
+        "title": {
+          "type": ["null", "string"]
+        },
+        "custom": {
+          "type": ["null", "boolean"]
+        },
+        "handle": {
+          "type": ["null", "string"]
+        },
+        "price": {
+          "type": ["null", "number"]
+        }
+      },
+      "type": ["null", "object"]
+    },
+    "source_name": {
+      "type": ["null", "string"]
+    },
+    "tags": {
+      "type": ["null", "string"]
+    },
+    "tax_exempt": {
+      "type": ["null", "boolean"]
+    },
+    "tax_lines": {
+      "$ref": "definitions.json#/tax_lines"
+    },
+    "applied_discount": {
+      "$ref": "definitions.json#/applied_discount"
+    },
+    "taxes_included": {
+      "type": ["null", "boolean"]
+    },
+    "total_price": {
+      "type": ["null", "string"],
+      "format": "singer.decimal"
+    },
+    "subtotal_price": {
+      "type": ["null", "string"],
+      "format": "singer.decimal"
+    },
+    "total_tax": {
+      "type": ["null", "string"],
+      "format": "singer.decimal"
+    },
+    "completed_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "status": {
+      "type": ["null", "string"]
+    }
+  },
+  "type": "object"
+}
