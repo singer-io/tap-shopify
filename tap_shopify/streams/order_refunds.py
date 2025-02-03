@@ -1,6 +1,6 @@
 import shopify
 import singer
-from singer.utils import strftime, strptime_to_utc
+from singer.utils import strptime_to_utc
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling,
@@ -56,8 +56,9 @@ class OrderRefunds(Stream):
                         canonicalize(transaction_dict, field_name)
                 yield refund_dict
 
-
-        max_bookmark = singer.get_bookmark(Context.state,self.parent_stream.name,self.parent_stream.replication_key)
+        max_bookmark = singer.get_bookmark(
+            Context.state, self.parent_stream.name, self.parent_stream.replication_key
+        )
         self.update_bookmark(max_bookmark)
 
 
