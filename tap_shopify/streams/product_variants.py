@@ -1,17 +1,17 @@
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import get_products_query
+from tap_shopify.streams.graphql import get_product_variant_query
 from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 
-class Products(ShopifyGqlStream):
-    name = 'products'
-    data_key = "products"
+class ProductVariants(ShopifyGqlStream):
+    name = 'product_variants'
+    data_key = "productVariants"
     replication_key = "updatedAt"
 
     def get_query(self):
-        return get_products_query()
+        return get_product_variant_query()
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
@@ -29,14 +29,6 @@ class Products(ShopifyGqlStream):
 
 
     def transform_object(self, obj):
-        media = obj.get("media")
-        media_list  = []
-        if media and "edges" in media:
-            for edge in media.get("edges"):
-                node = edge.get("node")
-                if node:
-                    media_list.append(node)
-        obj["media"] = media_list
         return obj
 
-Context.stream_objects['products'] = Products
+Context.stream_objects['product_variants'] = ProductVariants

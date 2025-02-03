@@ -83,7 +83,8 @@ class BaseTapTest(BaseCase):
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
 
         meta = default.copy()
-        meta.update({self.FOREIGN_KEYS: {"owner_id", "owner_resource"}})
+        meta[self.REPLICATION_KEYS] =  {"updatedAt"}
+        meta.update({self.FOREIGN_KEYS: {"owner", "ownerType"}})
 
         return {
             "abandoned_checkouts": {
@@ -101,8 +102,17 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "products": default,
-            "inventory_items": {self.REPLICATION_KEYS: {"updated_at"},
+            "products":  {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "product_variants": {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "inventory_items": {self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 250},
