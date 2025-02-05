@@ -57,8 +57,7 @@ class OrderRefunds(Stream):
                 yield refund_dict
 
         max_bookmark = singer.get_bookmark(
-            Context.state, self.parent_stream.name, self.parent_stream.replication_key
-        )
+            Context.state, self.parent_stream.name, self.parent_stream.replication_key)
         self.update_bookmark(max_bookmark)
 
 
