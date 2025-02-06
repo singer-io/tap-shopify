@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.12.0
+  * Update bookmark logic for transactions and order_refunds stream [#198](https://github.com/singer-io/tap-shopify/pull/198)
+
 ## 1.11.0
   * Deprecate the streams for the older version. [#196](https://github.com/singer-io/tap-shopify/pull/196)
   * Deprecated streams - products, inventory_items, metafields (product)
