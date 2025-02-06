@@ -89,12 +89,12 @@ class InterruptedSyncTest(BaseTapTest):
 
         base_state = {'bookmarks':
                      {'currently_sync_stream': currently_syncing_stream,
-                      'customers': {'updated_at': '2023-03-28T18:53:28.000000Z'},
-                      'events': {'created_at': '2023-01-22T05:05:53.000000Z'},
-                      'metafields': {'updated_at': '2023-01-07T21:18:05.000000Z'},
-                      'orders': {'updated_at': '2023-01-22T05:07:44.000000Z'},
-                      'products': {'updated_at': '2023-01-22T05:05:56.000000Z'},
-                      'transactions': {'created_at': '2022-06-26T00:06:38-04:00'}
+                      'customers': first_sync_state.get('bookmarks').get('customers'),
+                      'events': first_sync_state.get('bookmarks').get('events'),
+                      'metafields': first_sync_state.get('bookmarks').get('metafields'),
+                      'orders': first_sync_state.get('bookmarks').get('orders'),
+                      'products': first_sync_state.get('bookmarks').get('products'),
+                      'transactions': first_sync_state.get('bookmarks').get('transactions')
                       }}
 
         # remove yet to be synced streams from base state and then set new state
