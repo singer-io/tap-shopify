@@ -87,17 +87,13 @@ class InterruptedSyncTest(BaseTapTest):
         completed_streams = stream_groups.get('completed')
         yet_to_be_synced_streams = stream_groups.get('yet_to_be_synced')
 
-        base_state = {
-            "bookmarks": {
-                "currently_sync_stream": currently_syncing_stream,
-                "customers": first_sync_state.get("bookmarks").get("customers"),
-                "events": first_sync_state.get("bookmarks").get("events"),
-                "metafields": first_sync_state.get("bookmarks").get("metafields"),
-                "orders": first_sync_state.get("bookmarks").get("orders"),
-                "products": first_sync_state.get("bookmarks").get("products"),
-                "transactions": first_sync_state.get("bookmarks").get("transactions"),
-            }
-        }
+        base_state = {"bookmarks": {"currently_sync_stream": currently_syncing_stream,
+                                    "customers": first_sync_state.get("bookmarks").get("customers"),
+                                    "events": first_sync_state.get("bookmarks").get("events"),
+                                    "metafields": first_sync_state.get("bookmarks").get("metafields"),
+                                    "orders": first_sync_state.get("bookmarks").get("orders"),
+                                    "products": first_sync_state.get("bookmarks").get("products"),
+                                    "transactions": first_sync_state.get("bookmarks").get("transactions"),}}
 
         # remove yet to be synced streams from base state and then set new state
         new_state = {
