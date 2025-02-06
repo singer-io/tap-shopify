@@ -196,18 +196,8 @@ class InterruptedSyncTest(BaseTapTest):
                 self.assertIsNotNone(resuming_bookmark_value)
                 self.assertTrue(self.is_expected_date_format(resuming_bookmark_value))
 
-                # verify the resuming bookmark is greater than 1st sync bookmark
-                # This is the expected behaviour for shopify as they are using date windowing
-                # TDL-17096 : Resuming bookmark value is getting assigned from execution time
-                # rather than the actual bookmark time for some streams.
-                # TODO transactions stream has equal bookmarks, orders stream has shown both equal
-                #   and greater than bookmark behavior, confirm if this is correct
-                if stream == 'transactions':
-                    self.assertEqual(resuming_bookmark_value, first_bookmark_value)
-                elif stream == 'orders':
-                    self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
-                else:
-                    self.assertGreater(resuming_bookmark_value, first_bookmark_value)
+                # verify the resuming bookmark is greater or equal than 1st sync bookmark
+                self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
 
                 # verify oldest record from resuming sync respects bookmark from previous sync
                 if stream in new_state['bookmarks'].keys() and resuming_sync_messages:

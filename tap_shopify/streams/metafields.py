@@ -1,8 +1,8 @@
 import json
+from datetime import datetime, timezone
 import shopify
 import singer
 from singer import utils
-from datetime import datetime, timezone
 
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
