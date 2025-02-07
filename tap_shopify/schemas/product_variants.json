@@ -159,6 +159,79 @@
                     ]
                 }
             }
+        },
+        "inventoryItem": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "inventoryLevel": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "location": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "fulfillmentService": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "handle": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "measurement": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "weight": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "unit": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ],
+                                    "format": "singer.decimal"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
