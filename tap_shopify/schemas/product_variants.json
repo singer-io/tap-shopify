@@ -173,60 +173,42 @@
                     ]
                 },
                 "inventoryLevel": {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "properties": {
-                        "location": {
+                    "location": {
+                        "fulfillmentService": {
                             "type": [
                                 "null",
                                 "object"
                             ],
                             "properties": {
-                                "fulfillmentService": {
+                                "handle": {
                                     "type": [
                                         "null",
-                                        "object"
-                                    ],
-                                    "properties": {
-                                        "handle": {
-                                            "type": [
-                                                "null",
-                                                "string"
-                                            ]
-                                        }
-                                    }
+                                        "string"
+                                    ]
                                 }
                             }
                         }
                     }
                 },
                 "measurement": {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "properties": {
-                        "weight": {
-                            "type": [
-                                "null",
-                                "object"
-                            ],
-                            "properties": {
-                                "unit": {
-                                    "type": [
-                                        "null",
-                                        "string"
-                                    ]
-                                },
-                                "value": {
-                                    "type": [
-                                        "null",
-                                        "string"
-                                    ],
-                                    "format": "singer.decimal"
-                                }
+                    "weight": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "unit": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "value": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ],
+                                "format": "singer.decimal"
                             }
                         }
                     }
