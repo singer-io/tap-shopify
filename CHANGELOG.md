@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2
+  * Update bookmark logic for transactions and order_refunds stream [#197](https://github.com/singer-io/tap-shopify/pull/197)
+
 ## 2.0.1
   * Fixed error handling for GraphQL client [#195](https://github.com/singer-io/tap-shopify/pull/195)
 
