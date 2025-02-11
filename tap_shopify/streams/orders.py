@@ -44,7 +44,7 @@ class Orders(Stream):
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
-        orders(first: 250, query: $query, after: $cursor, sort_key: UPDATED_AT) {
+        orders(first: 250, query: $query, after: $cursor, sortKey: UPDATED_AT) {
             nodes {
                 id
                 updatedAt
