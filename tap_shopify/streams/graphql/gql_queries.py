@@ -219,6 +219,39 @@ def get_parent_ids_query(resource):
             edges {
                 node {
                     id
+                    metafields(first: $first) {
+                        edges {
+                            node {
+                                id
+                                ownerType
+                                value
+                                type
+                                key
+                                createdAt
+                                namespace
+                                description
+                                updatedAt
+                                owner {
+                                    ... on Customer {
+                                        id
+                                    }
+                                    ... on Product {
+                                        id
+                                    }
+                                    ... on Order {
+                                        id
+                                    }
+                                    ... on Collection {
+                                        id
+                                    }
+                                }
+                            }
+                        }
+                        pageInfo {
+                            hasNextPage
+                            endCursor
+                        }
+                    }
                 }
             }
             pageInfo {

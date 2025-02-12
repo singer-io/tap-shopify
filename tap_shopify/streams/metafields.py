@@ -69,7 +69,7 @@ class Metafields(ShopifyGqlStream):
             "product": get_metafield_query_product,
             "collection": get_metafield_query_collection,
             "order": get_metafield_query_order,
-            "shop":get_metafield_query_shop
+            "shop": get_metafield_query_shop
             }.get(resource)
 
     @shopify_error_handling
@@ -128,6 +128,13 @@ class Metafields(ShopifyGqlStream):
             query_params = {"first": self.results_per_page}
             if resource_type != "shop":
                 query_params["pk_id"] = parent_obj["id"]
+                # added logic to loop through first fetch of metafields
+                metafields_data = parent_obj.get("metafields")
+                page_info =  metafields_data.get("pageInfo")
+                cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+                for edge in metafields_data.get("edges"):
+                    obj = self.transform_object(edge.get("node"))
+                    yield (obj, resource_type)
 
             while has_next_page:
                 if cursor:
