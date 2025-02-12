@@ -43,8 +43,7 @@ class Metafields(ShopifyGqlStream):
         "orders": "order"
     }
 
-    @staticmethod
-    def get_query():
+    def get_query(self):
         return None
 
     # pylint: disable=arguments-differ
