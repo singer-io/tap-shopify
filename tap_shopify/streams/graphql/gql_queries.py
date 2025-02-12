@@ -241,14 +241,14 @@ def get_metafields_query(resource):
                             edges {
                                 node {
                                     id
-                                    updatedAt
                                     ownerType
-                                    namespace
-                                    key
                                     value
                                     type
-                                    description
+                                    key
                                     createdAt
+                                    namespace
+                                    description
+                                    updatedAt
                                     owner {
                                         ... on Shop {
                                             id
@@ -274,7 +274,6 @@ def get_metafields_query(resource):
                     edges {
                         node {
                             id
-                            updatedAt
                             ownerType
                             value
                             type
@@ -282,6 +281,7 @@ def get_metafields_query(resource):
                             createdAt
                             namespace
                             description
+                            updatedAt
                             owner {
                                 ... on Customer {
                                 id

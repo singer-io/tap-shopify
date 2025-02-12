@@ -23,8 +23,6 @@ from tap_shopify.streams.graphql.gql_base import (
 
 LOGGER = get_logger()
 
-
-
 class Metafields(ShopifyGqlStream):
     name = 'metafields'
     data_key = "metafields"
@@ -192,7 +190,7 @@ class Metafields(ShopifyGqlStream):
                     replication_value,
                     current_bookmarks[resource_type]
                 )
-            if replication_value > current_bookmark_value:
+            if replication_value >= current_bookmark_value:
                 yield obj
 
         # Update bookmarks
