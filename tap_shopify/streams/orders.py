@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 
 import singer
 import shopify
@@ -346,10 +347,15 @@ class Orders(Stream):
         # get bookmark
         updated_at = self.get_bookmark().strftime('%Y-%m-%dT%H:%M:%S')
         query = f"updated_at:>'{updated_at}'"
+        orders = 0
+        start = time.time()
 
         for page in self.get_orders(query):
             for order in page['data']['orders']['nodes']:
                 # TODO: need to map back to Shopify REST formatting
+                orders += 1
+                now = time.time()
+                LOGGER.info(f"Got {orders} in {now - start} sec.")
 
                 # unwrap nodes
                 order = unwrap_nodes(order)
