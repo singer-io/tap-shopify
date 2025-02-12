@@ -9,6 +9,7 @@ import shopify
 from tap_shopify.context import Context
 from tap_shopify.streams.base import (Stream,
                                       shopify_error_handling)
+from singer.utils import strftime, strptime_to_utc
 
 LOGGER = singer.get_logger()
 
@@ -42,6 +43,7 @@ def unwrap_nodes(obj):
 class Orders(Stream):
     name = 'orders'
     replication_object = shopify.Order
+    replication_key = 'updatedAt'
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
@@ -360,7 +362,8 @@ class Orders(Stream):
                 # TODO: need to map back to Shopify REST formatting
                 orders += 1
                 now = time.time()
-                LOGGER.info(f"Got {orders} in {now - start} sec.")
+                if orders % 1000 == 0:
+                    LOGGER.info(f"Got {orders} in {now - start} sec.")
 
                 # unwrap nodes
                 order = unwrap_nodes(order)
@@ -373,7 +376,21 @@ class Orders(Stream):
         This is the default implementation. Get's all of self's objects
         and calls to_dict on them with no further processing.
         """
+        bookmark = self.get_bookmark()
+        max_bookmark = bookmark
+        orders = 0
+
         for obj in self.get_objects():
             yield obj
+            orders += 1
+            replication_value = strptime_to_utc(obj[self.replication_key])
+
+            if replication_value > max_bookmark:
+                max_bookmark = replication_value
+            if orders % 1000 == 0:
+                LOGGER.info(f"Most recent order = {max_bookmark}")
+                self.update_bookmark(strftime(max_bookmark))
+
+        self.update_bookmark(strftime(max_bookmark))
 
 Context.stream_objects['orders'] = Orders
