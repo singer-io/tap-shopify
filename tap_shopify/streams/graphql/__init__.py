@@ -5,6 +5,7 @@ tap shopify graphql module
 from .gql_base import ShopifyGqlStream, ShopifyGraphQLError
 
 from .gql_queries import (
+    get_metafields_query,
     get_inventory_items_query,
     get_metafield_query_collection,
     get_metafield_query_order,

@@ -241,11 +241,11 @@ def get_metafields_query(resource):
                             edges {
                                 node {
                                     id
+                                    updatedAt
+                                    ownerType
                                     namespace
                                     key
                                     value
-                                    updatedAt
-                                    ownerType
                                     type
                                     description
                                     createdAt
@@ -273,33 +273,32 @@ def get_metafields_query(resource):
                     metafields(first: $first) {
                     edges {
                         node {
-                        id
-                        namespace
-                        key
-                        value
-                        updatedAt
-                        ownerType
-                        jsonValue
-                        type
-                        description
-                        createdAt
-                        owner {
-                            ... on Customer {
                             id
+                            updatedAt
+                            ownerType
+                            value
+                            type
+                            key
+                            createdAt
+                            namespace
+                            description
+                            owner {
+                                ... on Customer {
+                                id
+                                }
+                                ... on Product {
+                                id
+                                }
+                                ... on Order {
+                                id
+                                }
+                                ... on Collection {
+                                id
+                                }
+                                ... on Shop {
+                                id
+                                }
                             }
-                            ... on Product {
-                            id
-                            }
-                            ... on Order {
-                            id
-                            }
-                            ... on Collection {
-                            id
-                            }
-                            ... on Shop {
-                            id
-                            }
-                        }
                         }
                     }
                     pageInfo {

@@ -40,6 +40,7 @@ class Metafields(ShopifyGqlStream):
     # maps object list identifier to single object access identifier
     # eg customers -> customer
     resource_alias = {
+        "shop": "shop",
         "customers":"customer",
         "products":"product",
         "collections": "collection",
@@ -182,7 +183,7 @@ class Metafields(ShopifyGqlStream):
         for obj in self.get_objects():
             resource_type = obj["ownerType"].lower()
             replication_value = utils.strptime_to_utc(obj["updated_at"])
-
+            current_bookmark_value = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
             if resource_type not in current_bookmarks:
                 current_bookmarks[resource_type] = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
 
@@ -191,6 +192,7 @@ class Metafields(ShopifyGqlStream):
                     replication_value,
                     current_bookmarks[resource_type]
                 )
+            if replication_value > current_bookmark_value:
                 yield obj
 
         # Update bookmarks
