@@ -234,36 +234,7 @@ def get_parent_ids_query(resource):
 def get_metafields_query(resource):
     """Returns the GraphQL query for fetching metafields"""
     if resource == 'shop':
-        return """
-            query getShopMetafields($first: Int!) {
-                shop {
-                    metafields(first: $first) {
-                        edges {
-                            node {
-                                id
-                                ownerType
-                                value
-                                type
-                                key
-                                createdAt
-                                namespace
-                                description
-                                updatedAt
-                                owner {
-                                    ... on Shop {
-                                        id
-                                    }
-                                }
-                            }
-                        }
-                        pageInfo {
-                            hasNextPage
-                            endCursor
-                        }
-                    }
-                }
-            }
-            """
+        return get_metafield_query_shop()
 
     qry = """
         query getMetafields( $first: Int!, $after: String $query: String) {
