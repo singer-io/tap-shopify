@@ -232,63 +232,93 @@ def get_parent_ids_query(resource):
     return qry
 
 def get_metafields_query(resource):
-    """
-    Returns GraphQL query to get metafields
-    """
-    qry = """
-        query getMetafields( $first: Int!, $after: String $query: String) {
-        RESOURCE(first: $first after: $after query: $query) {
-            edges {
-            node {
-                metafields(first: $first) {
+        """Returns the GraphQL query for fetching metafields"""
+        if resource == 'shop':
+            return """
+                query getShopMetafields($first: Int!) {
+                    shop {
+                        metafields(first: $first) {
+                            edges {
+                                node {
+                                    id
+                                    namespace
+                                    key
+                                    value
+                                    updatedAt
+                                    ownerType
+                                    type
+                                    description
+                                    createdAt
+                                    owner {
+                                        ... on Shop {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                hasNextPage
+                                endCursor
+                            }
+                        }
+                    }
+                }
+                """
+
+        qry = """
+            query getMetafields( $first: Int!, $after: String $query: String) {
+            RESOURCE(first: $first after: $after query: $query) {
                 edges {
-                    node {
-                    id
-                    namespace
-                    key
-                    value
-                    updatedAt
-                    ownerType
-                    jsonValue
-                    type
-                    description
-                    createdAt
-                    owner {
-                        ... on Order {
+                node {
+                    metafields(first: $first) {
+                    edges {
+                        node {
                         id
+                        namespace
+                        key
+                        value
+                        updatedAt
+                        ownerType
+                        jsonValue
+                        type
+                        description
+                        createdAt
+                        owner {
+                            ... on Customer {
+                            id
+                            }
+                            ... on Product {
+                            id
+                            }
+                            ... on Order {
+                            id
+                            }
+                            ... on Collection {
+                            id
+                            }
+                            ... on Shop {
+                            id
+                            }
                         }
-                        ... on Product {
-                        id
-                        }
-                        ... on Collection {
-                        id
-                        }
-                        ... on Customer {
-                        id
-                        }
-                        ... on Shop {
-                        id
                         }
                     }
+                    pageInfo {
+                        hasNextPage
+                        endCursor
                     }
+                    }
+                }
                 }
                 pageInfo {
-                    hasNextPage
-                    endCursor
+                endCursor
+                hasNextPage
                 }
-                }
             }
             }
-            pageInfo {
-            endCursor
-            hasNextPage
-            }
-        }
-        }
-    """
-    
-    qry = qry.replace("RESOURCE", resource)
-    return qry
+        """
+
+        qry = qry.replace("RESOURCE", resource)
+        return qry
 
 def get_metafield_query_customers():
     """
