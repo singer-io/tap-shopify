@@ -47,7 +47,7 @@ class Orders(Stream):
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
-        orders(first: 50, query: $query, after: $cursor, sortKey: UPDATED_AT) {
+        orders(first: 100, query: $query, after: $cursor, sortKey: UPDATED_AT) {
             nodes {
                 id
                 updatedAt
@@ -338,33 +338,33 @@ class Orders(Stream):
             raise Exception(result['errors'])
         return result
 
-    def get_orders(self, query):
+    def get_orders(self):
         gql_client = shopify.GraphQL()
+        updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S')
+        query = f"updated_at:>'{updated_at}'"
+
         page = self.call_api_for_orders(gql_client, query)
         yield page
 
         # paginate
         page_info = page['data']['orders']['pageInfo']
+        cursor = page_info.get('endCursor')
+
         while page_info['hasNextPage']:
-            page = self.call_api_for_orders(gql_client, query, cursor=page_info['endCursor'])
+            page = self.call_api_for_orders(gql_client, query, cursor=cursor)
             page_info = page['data']['orders']['pageInfo']
+            cursor = page_info.get('endCursor')
             yield page
-        
+
+            # Every 10,000 orders we will reset the cursor
+            if self.orders % 10_000 == 0:
+                updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S')
+                query = f"updated_at:>'{updated_at}'"
+                cursor = None
+
     def get_objects(self):
-        # get bookmark
-        updated_at = self.get_bookmark().strftime('%Y-%m-%dT%H:%M:%S')
-        query = f"updated_at:>'{updated_at}'"
-        orders = 0
-        start = time.time()
-
-        for page in self.get_orders(query):
+        for page in self.get_orders():
             for order in page['data']['orders']['nodes']:
-                # TODO: need to map back to Shopify REST formatting
-                orders += 1
-                now = time.time()
-                if orders % 1000 == 0:
-                    LOGGER.info(f"Got {orders} in {now - start} sec.")
-
                 # unwrap nodes
                 order = unwrap_nodes(order)
 
@@ -376,21 +376,34 @@ class Orders(Stream):
         This is the default implementation. Get's all of self's objects
         and calls to_dict on them with no further processing.
         """
+        # get bookmark
         bookmark = self.get_bookmark()
-        max_bookmark = bookmark
-        orders = 0
+        self.max_bookmark = bookmark
+
+        # performance monitoring
+        self.orders = 0
+        start = time.time()
 
         for obj in self.get_objects():
             yield obj
-            orders += 1
+
+            self.orders += 1
+
+            # handle rep key logic
             replication_value = strptime_to_utc(obj[self.replication_key])
 
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-            if orders % 1000 == 0:
-                LOGGER.info(f"Most recent order = {max_bookmark}")
-                self.update_bookmark(strftime(max_bookmark))
+            if replication_value > self.max_bookmark:
+                self.max_bookmark = replication_value
 
-        self.update_bookmark(strftime(max_bookmark))
+            # debug performance logs
+            if self.orders % 1000 == 0:
+                LOGGER.info(f"Most recent order = {self.max_bookmark}")
+                self.update_bookmark(strftime(self.max_bookmark))
+
+                now = time.time()
+                LOGGER.info(f"Got {self.orders} in {now - start} sec.")
+
+
+        self.update_bookmark(strftime(self.max_bookmark))
 
 Context.stream_objects['orders'] = Orders
