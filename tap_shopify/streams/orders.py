@@ -45,7 +45,7 @@ class Orders(Stream):
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
-        orders(first: 250, query: $query, after: $cursor, sortKey: UPDATED_AT) {
+        orders(first: 100, query: $query, after: $cursor, sortKey: UPDATED_AT) {
             nodes {
                 id
                 updatedAt
@@ -196,13 +196,13 @@ class Orders(Stream):
                     rate
                     title
                 }
-                refunds(first: 250) {
+                refunds(first: 50) {
                     createdAt
                     id
                     legacyResourceId
                     note
                     updatedAt
-                    refundLineItems(first: 250) {
+                    refundLineItems(first: 50) {
                         nodes {
                             price
                             quantity
@@ -240,7 +240,7 @@ class Orders(Stream):
                         }
                     }
                 }
-                discountApplications(first: 250) {
+                discountApplications(first: 50) {
                     nodes {
                         allocationMethod
                         index
@@ -268,7 +268,7 @@ class Orders(Stream):
                     totalQuantity
                     updatedAt
                 }
-                shippingLines(first: 250) {
+                shippingLines(first: 50) {
                     nodes {
                         carrierIdentifier
                         code
@@ -282,7 +282,7 @@ class Orders(Stream):
                         title
                     }
                 }
-                lineItems(first: 250) {
+                lineItems(first: 50) {
                     nodes {
                         canRestock
                         currentQuantity
