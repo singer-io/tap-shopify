@@ -325,7 +325,9 @@ class Orders(Stream):
     @shopify_error_handling
     def call_api_for_orders(self, gql_client, query, cursor=None):
         with HiddenPrints():
-            response = gql_client.execute(self.gql_query, dict(query=query, cursor=cursor))
+            params = dict(query=query, cursor=cursor)
+            LOGGER.info(f"Making request = {self.gql_query}, {params}")
+            response = gql_client.execute(self.gql_query, params)
         result = json.loads(response)
         if result.get("errors"):
             raise Exception(result['errors'])
