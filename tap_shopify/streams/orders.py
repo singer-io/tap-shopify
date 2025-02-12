@@ -329,6 +329,8 @@ class Orders(Stream):
             LOGGER.info(f"Making request = {self.gql_query}, {params}")
             response = gql_client.execute(self.gql_query, params)
         result = json.loads(response)
+        LOGGER.info(result)
+
         if result.get("errors"):
             raise Exception(result['errors'])
         return result
