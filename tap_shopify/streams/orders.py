@@ -45,7 +45,7 @@ class Orders(Stream):
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
-        orders(first: 100, query: $query, after: $cursor, sortKey: UPDATED_AT) {
+        orders(first: 50, query: $query, after: $cursor, sortKey: UPDATED_AT) {
             nodes {
                 id
                 updatedAt
@@ -331,6 +331,8 @@ class Orders(Stream):
 
         if result.get("errors"):
             LOGGER.error(result)
+            LOGGER.error(self.gql_query)
+            LOGGER.error(params)
             raise Exception(result['errors'])
         return result
 
