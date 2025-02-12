@@ -295,9 +295,6 @@ def get_metafields_query(resource):
                             ... on Collection {
                             id
                             }
-                            ... on Shop {
-                            id
-                            }
                         }
                     }
                 }
