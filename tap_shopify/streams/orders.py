@@ -344,7 +344,7 @@ class Orders(Stream):
         
     def get_objects(self):
         # get bookmark
-        updated_at = self.get_bookmark().isoformat()
+        updated_at = self.get_bookmark().strftime('%Y-%m-%dT%H:%M:%S')
         query = f"updated_at:>'{updated_at}'"
 
         for page in self.get_orders(query):
