@@ -47,7 +47,7 @@ class Orders(Stream):
 
     gql_query = """
     query Orders($query: String, $cursor: String) {
-        orders(first: 25, query: $query, after: $cursor, sortKey: UPDATED_AT) {
+        orders(first: 10, query: $query, after: $cursor, sortKey: UPDATED_AT) {
             nodes {
                 id
                 updatedAt
@@ -198,13 +198,13 @@ class Orders(Stream):
                     rate
                     title
                 }
-                refunds(first: 50) {
+                refunds(first: 25) {
                     createdAt
                     id
                     legacyResourceId
                     note
                     updatedAt
-                    refundLineItems(first: 50) {
+                    refundLineItems(first: 25) {
                         nodes {
                             price
                             quantity
@@ -242,7 +242,7 @@ class Orders(Stream):
                         }
                     }
                 }
-                discountApplications(first: 50) {
+                discountApplications(first: 25) {
                     nodes {
                         allocationMethod
                         index
@@ -270,7 +270,7 @@ class Orders(Stream):
                     totalQuantity
                     updatedAt
                 }
-                shippingLines(first: 50) {
+                shippingLines(first: 25) {
                     nodes {
                         carrierIdentifier
                         code
@@ -284,7 +284,7 @@ class Orders(Stream):
                         title
                     }
                 }
-                lineItems(first: 50) {
+                lineItems(first: 25) {
                     nodes {
                         canRestock
                         currentQuantity
@@ -356,8 +356,8 @@ class Orders(Stream):
             cursor = page_info.get('endCursor')
             yield page
 
-            # Every 10,000 orders we will reset the cursor
-            if self.orders % 10_000 == 0:
+            # Every 1,000 orders we will reset the cursor
+            if self.orders % 1_000 == 0:
                 updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S')
                 query = f"updated_at:>'{updated_at}'"
                 cursor = None
