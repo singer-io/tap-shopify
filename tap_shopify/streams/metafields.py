@@ -29,10 +29,6 @@ class Metafields(ShopifyGqlStream):
 
     selected_parent = None
 
-    parent_alias = {
-        "custom_collections": "collections"
-    }
-
     # maps object list identifier to single object access identifier
     # eg customers -> customer
     resource_alias = {
