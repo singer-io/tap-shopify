@@ -53,8 +53,7 @@ class ShopifyGqlStream(Stream):
         """
         raise NotImplementedError("Function Not Implemented")
 
-    @staticmethod
-    def transform_object(obj):
+    def transform_object(self, obj):
         """
         Modify this to perform custom transformation on each object
         """
@@ -101,9 +100,9 @@ class ShopifyGqlStream(Stream):
         except ShopifyAPIError as gql_error:
             LOGGER.error("GraphQL Error %s", gql_error)
             raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
-        except Exception as exception:
+        except Exception as exc:
             LOGGER.error("Unexpected error occurred.",)
-            raise exception
+            raise exc
 
     def get_objects(self):
         """

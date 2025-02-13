@@ -60,8 +60,7 @@ class Metafields(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-    @staticmethod
-    def get_resource_type_query(resource):
+    def get_resource_type_query(self, resource):
         return {
             "customer": get_metafield_query_customers,
             "product": get_metafield_query_product,
@@ -72,12 +71,19 @@ class Metafields(ShopifyGqlStream):
 
     @shopify_error_handling
     def call_api(self, query_params, query):
-        response = shopify.GraphQL().execute(query=query, variables=query_params)
-        response = json.loads(response)
-        if "errors" in response.keys():
-            raise ShopifyAPIError(response['errors'])
-        data = response.get("data", {})
-        return data
+        try:
+            response = shopify.GraphQL().execute(query=query, variables=query_params)
+            response = json.loads(response)
+            if "errors" in response.keys():
+                raise ShopifyAPIError(response['errors'])
+            data = response.get("data", {})
+            return data
+        except ShopifyAPIError as gql_error:
+            LOGGER.error("GraphQL Error %s", gql_error)
+            raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
+        except Exception as exception:
+            LOGGER.error("Unexpected error occurred.",)
+            raise exception
 
     def transform_object(self, obj):
         obj["value_type"] = obj["type"] or None
