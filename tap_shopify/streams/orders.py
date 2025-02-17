@@ -340,7 +340,7 @@ class Orders(Stream):
 
     def get_orders(self):
         gql_client = shopify.GraphQL()
-        updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S')
+        updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%SZ')
         query = f"updated_at:>='{updated_at}'"
 
         page = self.call_api_for_orders(gql_client, query)
@@ -357,8 +357,8 @@ class Orders(Stream):
             yield page
 
             # Every 1,000 orders we will reset the cursor
-            if self.orders % 1_000 == 0 and updated_at != self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S'):
-                updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%S')
+            if self.orders % 1_000 == 0 and updated_at != self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%SZ'):
+                updated_at = self.max_bookmark.strftime('%Y-%m-%dT%H:%M:%SZ')
                 query = f"updated_at:>='{updated_at}'"
                 cursor = None
 
