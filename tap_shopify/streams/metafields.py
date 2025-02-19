@@ -22,6 +22,7 @@ from tap_shopify.streams.graphql.gql_base import (
 
 LOGGER = get_logger()
 
+
 class Metafields(ShopifyGqlStream):
     name = 'metafields'
     data_key = "metafields"
