@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0
+  * Optimize Shopify Metafields Sync Performance [#200](https://github.com/singer-io/tap-shopify/pull/200)
+  * Include the new field (= inventoryItem) in the product variants schema.
+  * Add retry for the interruptible sync error from the server side.
+
 ## 2.0.2
   * Update bookmark logic for transactions and order_refunds stream [#197](https://github.com/singer-io/tap-shopify/pull/197)
 
