@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime
 from dateutil.tz import tzlocal
 from itertools import cycle
-from tap_shopify.streams.graphql.gql_base import ShopifyGqlStream, ShopifyGraphQLError
+from tap_shopify.streams.graphql.gql_base import ShopifyGqlStream, ShopifyAPIError
 from tap_shopify.context import Context
 
 class TestShopifyGqlStream(unittest.TestCase):
@@ -48,11 +48,11 @@ class TestShopifyGqlStream(unittest.TestCase):
     def test_call_api_error(self, mock_get_query, mock_graphql):
         """Test GraphQL query execution with an error."""
         # Mock an error response from Shopify GraphQL API
-        mock_graphql.return_value.execute.side_effect = ShopifyGraphQLError("GraphQL error")
+        mock_graphql.return_value.execute.side_effect = ShopifyAPIError("GraphQL error")
 
         query_params = self.stream.get_query_params("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z")
 
-        with self.assertRaises(ShopifyGraphQLError):
+        with self.assertRaises(ShopifyAPIError):
             self.stream.call_api(query_params)
 
     @patch('shopify.GraphQL')

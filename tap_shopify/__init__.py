@@ -166,6 +166,7 @@ def sync():
         if not Context.state.get('bookmarks'):
             Context.state['bookmarks'] = {}
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
+        singer.write_state(Context.state)
 
         # some fields have epoch-time as date, hence transform into UTC date
         with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:

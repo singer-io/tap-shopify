@@ -6,7 +6,7 @@ from singer import utils, get_logger
 
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import (
-    get_parent_ids_query,
+    get_metafields_query,
     get_metafield_query_customers,
     get_metafield_query_product,
     get_metafield_query_collection,
@@ -15,14 +15,12 @@ from tap_shopify.streams.graphql import (
 )
 from tap_shopify.streams.graphql.gql_base import (
     ShopifyGqlStream,
-    ShopifyGraphQLError,
+    ShopifyAPIError,
     DATE_WINDOW_SIZE,
     shopify_error_handling,
-    )
-
+)
 
 LOGGER = get_logger()
-
 
 
 class Metafields(ShopifyGqlStream):
@@ -32,16 +30,12 @@ class Metafields(ShopifyGqlStream):
 
     selected_parent = None
 
-    parent_alias = {
-        "custom_collections":"collections"
-    }
-
-
     # maps object list identifier to single object access identifier
     # eg customers -> customer
     resource_alias = {
-        "customers":"customer",
-        "products":"product",
+        "shop": "shop",
+        "customers": "customer",
+        "products": "product",
         "collections": "collection",
         "orders": "order"
     }
@@ -49,7 +43,7 @@ class Metafields(ShopifyGqlStream):
     def get_query(self):
         return None
 
-    # pylint: disable=W0221
+    # pylint: disable=arguments-differ
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
         Returns query and params for filtering, pagination
@@ -69,78 +63,24 @@ class Metafields(ShopifyGqlStream):
             "product": get_metafield_query_product,
             "collection": get_metafield_query_collection,
             "order": get_metafield_query_order,
-            "shop":get_metafield_query_shop
-            }.get(resource)
+            "shop": get_metafield_query_shop
+        }.get(resource)
 
     @shopify_error_handling
-    def call_api(self, query_params, query, data_key):
-        response = shopify.GraphQL().execute(query=query, variables=query_params)
-        response = json.loads(response)
-        if "errors" in response.keys():
-            raise ShopifyGraphQLError(response['errors'])
-        data = response.get("data", {}).get(data_key, {})
-        return data
-
-    def get_parents(self):
-        sync_start = utils.now().replace(microsecond=0)
-        for parent in ['shop','orders', 'customers', 'products', 'custom_collections']:
-            parent = self.parent_alias.get(parent, parent)
-            resource_alias = self.resource_alias.get(parent, parent)
-            LOGGER.info("Fetching id's for %s %s", parent, resource_alias)
-
-            if parent == "shop":
-                yield None, resource_alias
-                continue
-
-            last_updated_at = self.get_bookmark_by_name(f'{self.name}_{resource_alias}')
-            date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
-
-            while last_updated_at < sync_start:
-
-                date_window_end = last_updated_at + timedelta(days=date_window_size)
-                query_end = min(sync_start, date_window_end)
-                has_next_page, cursor = True, None
-
-                while has_next_page:
-                    query_params = self.get_query_params(last_updated_at, query_end, cursor)
-                    query = get_parent_ids_query(parent)
-                    data = self.call_api(query_params, query, parent)
-                    for edge in data.get("edges"):
-                        yield (edge.get("node"), resource_alias)
-
-                    page_info =  data.get("pageInfo")
-                    cursor = page_info.get("endCursor")
-                    has_next_page = page_info.get("hasNextPage")
-
-                last_updated_at = query_end
-
-    def get_objects(self):
-
-        for parent_obj, resource_type in self.get_parents():
-            qury_fnc = self.get_resource_type_query(resource_type)
-
-            if qury_fnc:
-                query = qury_fnc()
-            else:
-                raise ShopifyGraphQLError("Invalid Resource Type")
-
-            has_next_page, cursor = True, None
-            query_params = {"first": self.results_per_page}
-            if resource_type != "shop":
-                query_params["pk_id"] = parent_obj["id"]
-
-            while has_next_page:
-                if cursor:
-                    query_params["after"] = cursor
-                response = self.call_api(query_params, query, resource_type)
-                data = (response.get("metafields") or {})
-
-                for edge in data.get("edges"):
-                    obj = self.transform_object(edge.get("node"))
-                    yield (obj, resource_type)
-
-                page_info =  data.get("pageInfo")
-                cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+    def call_api(self, query_params, query):
+        try:
+            response = shopify.GraphQL().execute(query=query, variables=query_params)
+            response = json.loads(response)
+            if "errors" in response.keys():
+                raise ShopifyAPIError(response['errors'])
+            data = response.get("data", {})
+            return data
+        except ShopifyAPIError as gql_error:
+            LOGGER.error("GraphQL Error %s", gql_error)
+            raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
+        except Exception as exception:
+            LOGGER.error("Unexpected error occurred.",)
+            raise exception
 
     def transform_object(self, obj):
         obj["value_type"] = obj["type"] or None
@@ -154,24 +94,104 @@ class Metafields(ShopifyGqlStream):
                 obj["value"] = value
         return obj
 
+    def get_next_page_metafields(self, metafields, query_params, gql_resource):
+        owner_id = metafields.get("edges", [])[0]["node"]["owner"]["id"]
+        query = self.get_resource_type_query(gql_resource)()
+        has_next_page = True
+        cursor = metafields.get("pageInfo", {}).get("endCursor")
+        while has_next_page:
+            query_params["after"] = cursor
+            query_params["pk_id"] = owner_id
+            data = self.call_api(query_params, query).get(gql_resource, {})
+            metafields = data.get("metafields", {})
+            for edge in metafields.get("edges", []):
+                yield edge
+            page_info = metafields.get("pageInfo", {})
+            cursor = page_info.get("endCursor")
+            has_next_page = page_info.get("hasNextPage", False)
+
+    # pylint: disable=too-many-locals, too-many-nested-blocks
+    def get_objects(self):
+        """Main iterator to yield metafield objects"""
+        sync_start = utils.now().replace(microsecond=0)
+
+        for resource_type, gql_resource in self.resource_alias.items():
+            LOGGER.info("Syncing metafields for %s", resource_type)
+
+            # Handle shop metafields separately
+            if resource_type == 'shop':
+                query = get_metafields_query(gql_resource)
+                has_next_page = True
+                cursor = None
+
+                while has_next_page:
+                    params = {"first": self.results_per_page}
+                    if cursor:
+                        params["after"] = cursor
+
+                    data = self.call_api(params, query)
+                    metafields = data.get("shop", {}).get("metafields", {})
+
+                    for edge in metafields.get("edges", []):
+                        yield self.transform_object(edge["node"])
+
+                    page_info = metafields.get("pageInfo", {})
+                    cursor = page_info.get("endCursor")
+                    has_next_page = page_info.get("hasNextPage", False)
+                continue
+
+            # Handle other resources
+            last_updated_at = self.get_bookmark_by_name(f'{self.name}_{resource_type}')
+            date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+
+            while last_updated_at < sync_start:
+                date_window_end = last_updated_at + timedelta(days=date_window_size)
+                query_end = min(sync_start, date_window_end)
+
+                has_next_page = True
+                cursor = None
+
+                while has_next_page:
+                    query_params = self.get_query_params(last_updated_at, query_end, cursor)
+                    query = get_metafields_query(resource_type)
+                    data = self.call_api(query_params, query)
+
+                    resource_data = data.get(resource_type, {})
+                    for data_edge in resource_data.get("edges", []):
+                        metafields = data_edge["node"].get("metafields", {})
+                        for edge in metafields.get("edges", []):
+                            yield self.transform_object(edge["node"])
+                        meta_page_info = metafields.get("pageInfo", {})
+                        meta_has_next_page = meta_page_info.get("hasNextPage", False)
+                        if meta_has_next_page:
+                            for edge in self.get_next_page_metafields(
+                                metafields, query_params, gql_resource
+                            ):
+                                yield self.transform_object(edge["node"])
+
+                    page_info = resource_data.get("pageInfo", {})
+                    cursor = page_info.get("endCursor")
+                    has_next_page = page_info.get("hasNextPage", False)
+
+                last_updated_at = query_end
+
     def sync(self):
+        """Sync metafields and update bookmarks"""
         start_time = utils.now().replace(microsecond=0)
         current_bookmarks = {}
-        last_bookmarks = {}
 
-        for obj, resource_type in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
+        for obj in self.get_objects():
+            resource_type = obj["ownerType"].lower()
+            replication_value = utils.strptime_to_utc(obj["updated_at"])
+            current_bookmark_value = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
 
-            if resource_type not in current_bookmarks or resource_type not in last_bookmarks:
-                bookmark = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
-                last_bookmarks[resource_type] = bookmark
-                current_bookmarks[resource_type] = bookmark
+            if replication_value >= current_bookmarks.get(resource_type, current_bookmark_value):
+                current_bookmarks[resource_type] = replication_value
 
-            if replication_value >= last_bookmarks[resource_type]:
-                current_bookmarks[resource_type] = max(replication_value, \
-                                                       current_bookmarks[resource_type])
+            if replication_value >= current_bookmark_value:
                 yield obj
 
+        # Update bookmarks
         for res, bookmark_val in current_bookmarks.items():
             bookmark_val = min(start_time, bookmark_val)
             self.update_bookmark(utils.strftime(bookmark_val), f"{self.name}_{res}")

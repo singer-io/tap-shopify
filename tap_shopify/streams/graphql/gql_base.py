@@ -12,13 +12,14 @@ from tap_shopify.context import Context
 from tap_shopify.streams.base import (
     Stream,
     shopify_error_handling,
+    ShopifyAPIError,
     DATE_WINDOW_SIZE,
     )
 
 
 LOGGER = get_logger()
 
-class ShopifyGraphQLError(Exception):
+class ShopifyGraphQLError(ShopifyAPIError):
     """Custom exception for GraphQL errors"""
 
 
@@ -37,8 +38,8 @@ def execute_gql(self, query, variables=None, operation_name=None):
     try:
         with urllib.request.urlopen(req) as response:
             return response.read().decode("utf-8")
-    except urllib.error.HTTPError as e:
-        raise e
+    except urllib.error.HTTPError as http_error:
+        raise http_error
 
 shopify.GraphQL.execute  = execute_gql
 
@@ -93,15 +94,15 @@ class ShopifyGqlStream(Stream):
             response = shopify.GraphQL().execute(query=query, variables=query_params)
             response = json.loads(response)
             if "errors" in response.keys():
-                raise ShopifyGraphQLError(response['errors'])
+                raise ShopifyAPIError(response['errors'])
             data = response.get("data", {}).get(self.data_key, {})
             return data
-        except ShopifyGraphQLError as gql_error:
+        except ShopifyAPIError as gql_error:
             LOGGER.error("GraphQL Error %s", gql_error)
-            raise ShopifyGraphQLError("An error occurred with the GraphQL API.") from gql_error
-        except Exception as e:
+            raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
+        except Exception as exc:
             LOGGER.error("Unexpected error occurred.",)
-            raise e
+            raise exc
 
     def get_objects(self):
         """

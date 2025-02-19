@@ -158,6 +158,7 @@ def get_product_variant_query():
                         title
                         updatedAt
                         product { id }
+                        inventoryItem { id }
                     }
                     }
                     pageInfo {
@@ -228,6 +229,62 @@ def get_parent_ids_query(resource):
         }
     }
     """
+    qry = qry.replace("RESOURCE", resource)
+    return qry
+
+def get_metafields_query(resource):
+    """Returns the GraphQL query for fetching metafields"""
+    if resource == 'shop':
+        return get_metafield_query_shop()
+
+    qry = """
+        query getMetafields( $first: Int!, $after: String $query: String) {
+        RESOURCE(first: $first after: $after query: $query) {
+            edges {
+            node {
+                metafields(first: $first) {
+                edges {
+                    node {
+                        id
+                        ownerType
+                        value
+                        type
+                        key
+                        createdAt
+                        namespace
+                        description
+                        updatedAt
+                        owner {
+                            ... on Customer {
+                            id
+                            }
+                            ... on Product {
+                            id
+                            }
+                            ... on Order {
+                            id
+                            }
+                            ... on Collection {
+                            id
+                            }
+                        }
+                    }
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
+                }
+                }
+            }
+            }
+            pageInfo {
+            endCursor
+            hasNextPage
+            }
+        }
+        }
+    """
+
     qry = qry.replace("RESOURCE", resource)
     return qry
 
