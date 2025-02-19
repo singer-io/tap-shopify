@@ -184,8 +184,7 @@ class Metafields(ShopifyGqlStream):
             replication_value = utils.strptime_to_utc(obj["updated_at"])
             current_bookmark_value = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
             if resource_type not in current_bookmarks:
-                current_bookmarks[resource_type] = \
-                    self.get_bookmark_by_name(f"{self.name}_{resource_type}")
+                current_bookmarks[resource_type] = current_bookmark_value
 
             if replication_value >= current_bookmarks[resource_type]:
                 current_bookmarks[resource_type] = max(
