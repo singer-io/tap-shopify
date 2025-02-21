@@ -232,7 +232,7 @@ class Stream():
         updated_at_min = self.get_bookmark()
         max_bookmark = updated_at_min
 
-        stop_time = singer.utils.now().replace(microsecond=0)
+        stop_time = Context.config.get("end_date", singer.utils.now()).replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Page through till the end of the resultset
