@@ -467,3 +467,356 @@ def get_metafield_query_shop():
         }
     """
     return qry
+
+def get_abandoned_checkouts_query():
+    qry = """query abandonedcheckouts {
+                abandonedCheckouts(first: 10) {
+                    edges {
+                    node {
+                        note
+                        completedAt
+                        billingAddress {
+                        phone
+                        country
+                        firstName
+                        name
+                        latitude
+                        zip
+                        lastName
+                        province
+                        address2
+                        address1
+                        countryCodeV2
+                        city
+                        company
+                        provinceCode
+                        longitude
+                        coordinatesValidated
+                        formattedArea
+                        id
+                        timeZone
+                        validationResultSummary
+                        }
+                        discountCodes
+                        createdAt
+                        updatedAt
+                        taxLines {
+                        priceSet {
+                            presentmentMoney {
+                            amount
+                            currencyCode
+                            }
+                            shopMoney {
+                            amount
+                            currencyCode
+                            }
+                        }
+                        title
+                        rate
+                        source
+                        channelLiable
+                        }
+                        totalLineItemsPriceSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        id
+                        name
+                        totalTaxSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        lineItems(first: 10, after: "") {
+                        edges {
+                            node {
+                            id
+                            quantity
+                            sku
+                            title
+                            variantTitle
+                            variant {
+                                title
+                                id
+                            }
+                            }
+                        }
+                        }
+                        shippingAddress {
+                        phone
+                        country
+                        firstName
+                        name
+                        latitude
+                        zip
+                        lastName
+                        province
+                        address2
+                        address1
+                        countryCodeV2
+                        city
+                        company
+                        provinceCode
+                        longitude
+                        coordinatesValidated
+                        formattedArea
+                        id
+                        timeZone
+                        validationResultSummary
+                        }
+                        abandonedCheckoutUrl
+                        totalDiscountSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        taxesIncluded
+                        totalDutiesSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        totalPriceSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                    }
+                    }
+                    pageInfo {
+                    hasNextPage
+                    endCursor
+                    }
+                }
+                }"""
+
+def get_collects_query():
+    qry = """
+        query MyQuery {
+            collections(first: 10) {
+                edges {
+                node {
+                    id
+                    title
+                    handle
+                    description
+                    updatedAt
+                    productsCount {
+                    count
+                    }
+                    sortOrder
+                }
+                }
+            }
+            }
+            """
+    return qry
+
+def get_custom_collections_query():
+    qry = """
+            query MyQuery {
+            collections(first: 10, query: "collection_type:custom") {
+                edges {
+                node {
+                    id
+                    title
+                    handle
+                    description
+                    updatedAt
+                    productsCount {
+                    count
+                    }
+                    sortOrder
+                }
+                }
+            }
+            }"""
+
+def get_customers_query():
+    qry = """
+            query Customers {
+            customers(first: 10) {
+                edges {
+                node {
+                    email
+                    multipassIdentifier
+                    defaultAddress {
+                    city
+                    address1
+                    zip
+                    id
+                    province
+                    phone
+                    country
+                    firstName
+                    lastName
+                    countryCodeV2
+                    name
+                    provinceCode
+                    address2
+                    company
+                    timeZone
+                    validationResultSummary
+                    latitude
+                    longitude
+                    coordinatesValidated
+                    formattedArea
+                    }
+                    numberOfOrders
+                    state
+                    verifiedEmail
+                    firstName
+                    updatedAt
+                    note
+                    phone
+                    addresses(first: 10) {
+                    city
+                    address1
+                    zip
+                    id
+                    province
+                    phone
+                    country
+                    firstName
+                    lastName
+                    countryCodeV2
+                    name
+                    provinceCode
+                    address2
+                    company
+                    timeZone
+                    validationResultSummary
+                    latitude
+                    longitude
+                    coordinatesValidated
+                    formattedArea
+                    }
+                    lastName
+                    tags
+                    taxExempt
+                    id
+                    createdAt
+                    taxExemptions
+                    emailMarketingConsent {
+                    consentUpdatedAt
+                    marketingOptInLevel
+                    marketingState
+                    }
+                    smsMarketingConsent {
+                    consentCollectedFrom
+                    consentUpdatedAt
+                    marketingOptInLevel
+                    marketingState
+                    }
+                    orders(first: 10) {
+                    edges {
+                        node {
+                        id
+                        }
+                    }
+                    }
+                    validEmailAddress
+                    productSubscriberStatus
+                    amountSpent {
+                    amount
+                    currencyCode
+                    }
+                    dataSaleOptOut
+                    displayName
+                    locale
+                    lifetimeDuration
+                }
+                }
+            }
+            }"""
+    return qry
+
+def get_events_qry():
+    qry = """
+            query events {
+            events(first: 10) {
+                edges {
+                node {
+                    id
+                    createdAt
+                    action
+                    appTitle
+                    attributeToApp
+                    attributeToUser
+                    criticalAlert
+                    message
+                    ... on BasicEvent {
+                    id
+                    subjectId
+                    subjectType
+                    }
+                    ... on CommentEvent {
+                    id
+                    }
+                }
+                }
+            }
+            }"""
+    return qry
+
+def get_inventory_levels_qry():
+    qry = """query MyQuery {
+                locations {
+                    edges {
+                    node {
+                        inventoryLevels(first: 10) {
+                        edges {
+                            node {
+                            canDeactivate
+                            createdAt
+                            deactivationAlert
+                            id
+                            item {
+                                id
+                            }
+                            location {
+                                id
+                            }
+                            updatedAt
+                            }
+                        }
+                        pageInfo {
+                            hasNextPage
+                            endCursor
+                        }
+                        }
+                    }
+                    }
+                    pageInfo {
+                    endCursor
+                    hasNextPage
+                    }
+                }
+                }"""
+    return qry
