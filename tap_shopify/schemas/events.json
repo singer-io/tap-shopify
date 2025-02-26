@@ -4,26 +4,44 @@
     "id": {
       "type": [
         "null",
-        "integer"
+        "string"
       ]
     },
-    "created_at": {
+    "createdAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "body": {
+    "action": {
       "type": [
         "null",
         "string"
       ]
     },
-    "path": {
+    "appTitle": {
       "type": [
         "null",
         "string"
+      ]
+    },
+    "attributeToApp": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "attributeToUser": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "criticalAlert": {
+      "type": [
+        "null",
+        "boolean"
       ]
     },
     "message": {
@@ -32,51 +50,131 @@
         "string"
       ]
     },
-     "subject_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "subject_type": {
+    "subjectId": {
       "type": [
         "null",
         "string"
       ]
     },
-    "verb": {
+    "subjectType": {
       "type": [
         "null",
         "string"
       ]
     },
-    "author": {
+    "additionalContent": {
       "type": [
         "null",
         "string"
       ]
     },
-    "description": {
+    "additionalData": {
       "type": [
         "null",
         "string"
       ]
     },
     "arguments": {
-      "anyOf": [
-        {
-          "type": [
-            "null",
-            "array"
-          ],
-          "items": {}
-        },
-        {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "hasAdditionalContent": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "secondaryMessage": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "attachments": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "fileExtension": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "size": {
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "author": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
           "type": [
             "null",
             "string"
           ]
         }
+      }
+    },
+    "canDelete": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "canEdit": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "edited": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "rawMessage": {
+      "type": [
+        "null",
+        "string"
       ]
     }
   }
