@@ -616,7 +616,7 @@ def get_abandoned_checkouts_query():
                 }
                 }"""
 
-def get_collects_query():
+def get_collections_query():
     qry = """
         query MyQuery {
             collections(first: 10) {
