@@ -54,32 +54,32 @@ class Orders(Stream):
                 presentmentCurrencyCode
                 subtotalPriceSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 totalDiscountsSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 totalPriceSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 totalShippingPriceSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 totalTaxSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 test
@@ -188,8 +188,8 @@ class Orders(Stream):
                 totalWeight
                 totalTipReceivedSet {
                     shopMoney {
-                        amount
-                        currencyCode
+                    amount
+                    currencyCode
                     }
                 }
                 taxLines {
@@ -205,87 +205,14 @@ class Orders(Stream):
                     note
                     updatedAt
                     refundLineItems(first: 25) {
-                        nodes {
-                            price
-                            quantity
-                            restockType
-                            restocked
-                            subtotal
-                            totalTax
-                            lineItem {
-                                canRestock
-                                currentQuantity
-                                discountedTotal
-                                discountedUnitPrice
-                                fulfillableQuantity
-                                fulfillmentStatus
-                                id
-                                merchantEditable
-                                name
-                                nonFulfillableQuantity
-                                originalTotal
-                                originalUnitPrice
-                                quantity
-                                refundableQuantity
-                                requiresShipping
-                                restockable
-                                sku
-                                taxable
-                                title
-                                totalDiscount
-                                unfulfilledDiscountedTotal
-                                unfulfilledOriginalTotal
-                                unfulfilledQuantity
-                                variantTitle
-                                vendor
-                            }
-                        }
-                    }
-                }
-                discountApplications(first: 25) {
                     nodes {
-                        allocationMethod
-                        index
-                        targetSelection
-                        targetType
-                        value {
-                            ... on MoneyV2 {
-                                amount
-                                currencyCode
-                            }
-                        }
-                    }
-                }
-                fulfillments {
-                    createdAt
-                    deliveredAt
-                    displayStatus
-                    estimatedDeliveryAt
-                    id
-                    inTransitAt
-                    legacyResourceId
-                    name
-                    requiresShipping
-                    status
-                    totalQuantity
-                    updatedAt
-                }
-                shippingLines(first: 25) {
-                    nodes {
-                        carrierIdentifier
-                        code
-                        custom
-                        deliveryCategory
-                        id
-                        phone
                         price
-                        shippingRateHandle
-                        source
-                        title
-                    }
-                }
-                lineItems(first: 25) {
-                    nodes {
+                        quantity
+                        restockType
+                        restocked
+                        subtotal
+                        totalTax
+                        lineItem {
                         canRestock
                         currentQuantity
                         discountedTotal
@@ -311,6 +238,79 @@ class Orders(Stream):
                         unfulfilledQuantity
                         variantTitle
                         vendor
+                        }
+                    }
+                    }
+                }
+                discountApplications(first: 25) {
+                    nodes {
+                    allocationMethod
+                    index
+                    targetSelection
+                    targetType
+                    value {
+                        ... on MoneyV2 {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    }
+                }
+                fulfillments {
+                    createdAt
+                    deliveredAt
+                    displayStatus
+                    estimatedDeliveryAt
+                    id
+                    inTransitAt
+                    legacyResourceId
+                    name
+                    requiresShipping
+                    status
+                    totalQuantity
+                    updatedAt
+                }
+                shippingLines(first: 25) {
+                    nodes {
+                    carrierIdentifier
+                    code
+                    custom
+                    deliveryCategory
+                    id
+                    phone
+                    price
+                    shippingRateHandle
+                    source
+                    title
+                    }
+                }
+                lineItems(first: 25) {
+                    nodes {
+                    canRestock
+                    currentQuantity
+                    discountedTotal
+                    discountedUnitPrice
+                    fulfillableQuantity
+                    fulfillmentStatus
+                    id
+                    merchantEditable
+                    name
+                    nonFulfillableQuantity
+                    originalTotal
+                    originalUnitPrice
+                    quantity
+                    refundableQuantity
+                    requiresShipping
+                    restockable
+                    sku
+                    taxable
+                    title
+                    totalDiscount
+                    unfulfilledDiscountedTotal
+                    unfulfilledOriginalTotal
+                    unfulfilledQuantity
+                    variantTitle
+                    vendor
                     }
                 }
                 customerJourneySummary {
@@ -318,96 +318,97 @@ class Orders(Stream):
                     daysToConversion
                     ready
                     firstVisit {
+                    id
+                    landingPage
+                    landingPageHtml
+                    occurredAt
+                    referralCode
+                    referralInfoHtml
+                    referrerUrl
+                    source
+                    sourceDescription
+                    sourceType
+                    marketingEvent {
+                        channel
+                        channelHandle
+                        description
+                        endedAt
                         id
-                        landingPage
-                        landingPageHtml
-                        occurredAt
-                        referralCode
-                        referralInfoHtml
-                        referrerUrl
+                        legacyResourceId
+                        manageUrl
+                        marketingChannelType
+                        previewUrl
+                        remoteId
+                        scheduledToEndAt
+                        sourceAndMedium
+                        startedAt
+                        targetTypeDisplayText
+                        type
+                        utmCampaign
+                        utmMedium
+                        utmSource
+                        app {
+                        handle
+                        title
+                        }
+                    }
+                    utmParameters {
+                        campaign
+                        content
+                        medium
                         source
-                        sourceDescription
-                        sourceType
-                        marketingEvent {
-                            channel
-                            channelHandle
-                            description
-                            endedAt
-                            id
-                            legacyResourceId
-                            manageUrl
-                            marketingChannelType
-                            previewUrl
-                            remoteId
-                            scheduledToEndAt
-                            sourceAndMedium
-                            startedAt
-                            targetTypeDisplayText
-                            type
-                            utmCampaign
-                            utmMedium
-                            utmSource
-                            app {
-                                handle
-                                title
-                            }
-                        }
-                        utmParameters {
-                            campaign
-                            content
-                            medium
-                            source
-                            term
-                        }
+                        term
+                    }
                     }
                     lastVisit {
+                    id
+                    landingPage
+                    landingPageHtml
+                    occurredAt
+                    referralCode
+                    referralInfoHtml
+                    referrerUrl
+                    source
+                    sourceDescription
+                    sourceType
+                    marketingEvent {
+                        channel
+                        channelHandle
+                        description
+                        endedAt
                         id
-                        landingPage
-                        landingPageHtml
-                        occurredAt
-                        referralCode
-                        referralInfoHtml
-                        referrerUrl
+                        legacyResourceId
+                        manageUrl
+                        marketingChannelType
+                        previewUrl
+                        remoteId
+                        scheduledToEndAt
+                        sourceAndMedium
+                        startedAt
+                        targetTypeDisplayText
+                        type
+                        utmCampaign
+                        utmMedium
+                        utmSource
+                        app {
+                        handle
+                        title
+                        }
+                    }
+                    utmParameters {
+                        campaign
+                        content
+                        medium
                         source
-                        sourceDescription
-                        sourceType
-                        marketingEvent {
-                            channel
-                            channelHandle
-                            description
-                            endedAt
-                            id
-                            legacyResourceId
-                            manageUrl
-                            marketingChannelType
-                            previewUrl
-                            remoteId
-                            scheduledToEndAt
-                            sourceAndMedium
-                            startedAt
-                            targetTypeDisplayText
-                            type
-                            utmCampaign
-                            utmMedium
-                            utmSource
-                            app {
-                                handle
-                                title
-                            }
-                        }
-                        utmParameters {
-                            campaign
-                            content
-                            medium
-                            source
-                            term
-                        }
+                        term
+                    }
                     }
                     momentsCount {
-                        count
-                        precision
+                    count
+                    precision
                     }
                 }
+            }
             pageInfo {
                 endCursor
                 hasNextPage
