@@ -75,7 +75,7 @@
       "type": ["null", "array"], 
       "items": {} 
     },
-    "customerJourneySummary": { "type": ["null", "object"] },
+    "customerJourneySummary": { "type": ["null", "object"] }
   },
   "type": "object"
 }
