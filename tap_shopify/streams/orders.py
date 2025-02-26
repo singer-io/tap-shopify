@@ -313,7 +313,101 @@ class Orders(Stream):
                         vendor
                     }
                 }
-            }
+                customerJourneySummary {
+                    customerOrderIndex
+                    daysToConversion
+                    ready
+                    firstVisit {
+                        id
+                        landingPage
+                        landingPageHtml
+                        occurredAt
+                        referralCode
+                        referralInfoHtml
+                        referrerUrl
+                        source
+                        sourceDescription
+                        sourceType
+                        marketingEvent {
+                            channel
+                            channelHandle
+                            description
+                            endedAt
+                            id
+                            legacyResourceId
+                            manageUrl
+                            marketingChannelType
+                            previewUrl
+                            remoteId
+                            scheduledToEndAt
+                            sourceAndMedium
+                            startedAt
+                            targetTypeDisplayText
+                            type
+                            utmCampaign
+                            utmMedium
+                            utmSource
+                            app {
+                                handle
+                                title
+                            }
+                        }
+                        utmParameters {
+                            campaign
+                            content
+                            medium
+                            source
+                            term
+                        }
+                    }
+                    lastVisit {
+                        id
+                        landingPage
+                        landingPageHtml
+                        occurredAt
+                        referralCode
+                        referralInfoHtml
+                        referrerUrl
+                        source
+                        sourceDescription
+                        sourceType
+                        marketingEvent {
+                            channel
+                            channelHandle
+                            description
+                            endedAt
+                            id
+                            legacyResourceId
+                            manageUrl
+                            marketingChannelType
+                            previewUrl
+                            remoteId
+                            scheduledToEndAt
+                            sourceAndMedium
+                            startedAt
+                            targetTypeDisplayText
+                            type
+                            utmCampaign
+                            utmMedium
+                            utmSource
+                            app {
+                                handle
+                                title
+                            }
+                        }
+                        utmParameters {
+                            campaign
+                            content
+                            medium
+                            source
+                            term
+                        }
+                    }
+                    momentsCount {
+                        count
+                        precision
+                    }
+                }
             pageInfo {
                 endCursor
                 hasNextPage

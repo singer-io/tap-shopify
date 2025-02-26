@@ -74,7 +74,8 @@
     "lineItems": { 
       "type": ["null", "array"], 
       "items": {} 
-    }
+    },
+    "customerJourneySummary": { "type": ["null", "object"] },
   },
   "type": "object"
 }
