@@ -1591,113 +1591,113 @@ def get_orders_query():
             }"""
     return qry
 
-# def get_transactions_query():
-#     qry = """
-#         query transactions {
-#             orders(first: 10) {
-#                 edges {
-#                 node {
-#                     transactions(first: 10) {
-#                     accountNumber
-#                     amountRoundingSet {
-#                         presentmentMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                         shopMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                     }
-#                     amountSet {
-#                         presentmentMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                         shopMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                     }
-#                     authorizationCode
-#                     authorizationExpiresAt
-#                     createdAt
-#                     errorCode
-#                     fees {
-#                         amount {
-#                         amount
-#                         currencyCode
-#                         }
-#                         flatFee {
-#                         amount
-#                         currencyCode
-#                         }
-#                         flatFeeName
-#                         id
-#                         rate
-#                         rateName
-#                         taxAmount {
-#                         amount
-#                         currencyCode
-#                         }
-#                         type
-#                     }
-#                     formattedGateway
-#                     gateway
-#                     id
-#                     kind
-#                     manualPaymentGateway
-#                     maximumRefundableV2 {
-#                         amount
-#                         currencyCode
-#                     }
-#                     multiCapturable
-#                     parentTransaction {
-#                         accountNumber
-#                         createdAt
-#                         id
-#                         status
-#                         paymentId
-#                         processedAt
-#                         amountSet {
-#                         presentmentMoney {
-#                             amount
-#                             currencyCode
-#                         }
-#                         shopMoney {
-#                             amount
-#                             currencyCode
-#                         }
-#                         }
-#                     }
-#                     paymentId
-#                     processedAt
-#                     receiptJson
-#                     settlementCurrency
-#                     settlementCurrencyRate
-#                     shopifyPaymentsSet {
-#                         extendedAuthorizationSet {
-#                         extendedAuthorizationExpiresAt
-#                         standardAuthorizationExpiresAt
-#                         }
-#                         refundSet {
-#                         acquirerReferenceNumber
-#                         }
-#                     }
-#                     status
-#                     test
-#                     totalUnsettledSet {
-#                         presentmentMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                         shopMoney {
-#                         amount
-#                         currencyCode
-#                         }
-#                     }
-#                     }
-#                 }
-#                 }
-#             }
-#             }"""
+def get_transactions_query():
+    qry = """
+        query transactions {
+            orders(first: 10) {
+                edges {
+                node {
+                    transactions(first: 10) {
+                    accountNumber
+                    amountRoundingSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    amountSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    authorizationCode
+                    authorizationExpiresAt
+                    createdAt
+                    errorCode
+                    fees {
+                        amount {
+                        amount
+                        currencyCode
+                        }
+                        flatFee {
+                        amount
+                        currencyCode
+                        }
+                        flatFeeName
+                        id
+                        rate
+                        rateName
+                        taxAmount {
+                        amount
+                        currencyCode
+                        }
+                        type
+                    }
+                    formattedGateway
+                    gateway
+                    id
+                    kind
+                    manualPaymentGateway
+                    maximumRefundableV2 {
+                        amount
+                        currencyCode
+                    }
+                    multiCapturable
+                    parentTransaction {
+                        accountNumber
+                        createdAt
+                        id
+                        status
+                        paymentId
+                        processedAt
+                        amountSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                    }
+                    paymentId
+                    processedAt
+                    receiptJson
+                    settlementCurrency
+                    settlementCurrencyRate
+                    shopifyPaymentsSet {
+                        extendedAuthorizationSet {
+                        extendedAuthorizationExpiresAt
+                        standardAuthorizationExpiresAt
+                        }
+                        refundSet {
+                        acquirerReferenceNumber
+                        }
+                    }
+                    status
+                    test
+                    totalUnsettledSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    }
+                }
+                }
+            }
+            }"""
