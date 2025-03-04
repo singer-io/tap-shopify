@@ -1,21 +1,28 @@
-import shopify
-
-from tap_shopify.streams.base import Stream
 from tap_shopify.context import Context
+from tap_shopify.streams.graphql import ShopifyGqlStream, get_events_query
 
 
-class Events(Stream):
+
+class Events(ShopifyGqlStream):
     name = 'events'
-    replication_object = shopify.Event
-    replication_key = "created_at"
+    data_key = "events"
+    replication_key = "createdAt"
 
-    def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):
-        return {
-            "since_id": since_id,
-            "created_at_min": updated_at_min,
-            "created_at_max": updated_at_max,
-            "limit": self.results_per_page,
-            status_key: "any"
+    def get_query(self):
+        return get_events_query()
+
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Returns query and params for filtering, pagination
+        """
+        filter_key = "created_at"
+        params = {
+            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
+            "first": self.results_per_page,
         }
+        if cursor:
+            params["after"] = cursor
+        return params
 
 Context.stream_objects['events'] = Events
