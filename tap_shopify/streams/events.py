@@ -8,9 +8,6 @@ class Events(ShopifyGqlStream):
     data_key = "events"
     replication_key = "createdAt"
 
-    def get_query(self):
-        return get_events_query()
-
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
@@ -24,5 +21,70 @@ class Events(ShopifyGqlStream):
         if cursor:
             params["after"] = cursor
         return params
+
+    def get_query(self):
+        qry = """
+            query GetEvents($first: Int!, $after: String, $query: String) {
+                events(first: $first, after: $after, query: $query, sortKey: CREATED_AT) {
+                    edges {
+                    node {
+                        id
+                        createdAt
+                        action
+                        appTitle
+                        attributeToApp
+                        attributeToUser
+                        criticalAlert
+                        message
+                        ... on BasicEvent {
+                        id
+                        subjectId
+                        subjectType
+                        action
+                        additionalContent
+                        additionalData
+                        appTitle
+                        arguments
+                        attributeToApp
+                        attributeToUser
+                        createdAt
+                        criticalAlert
+                        hasAdditionalContent
+                        message
+                        secondaryMessage
+                        }
+                        ... on CommentEvent {
+                        id
+                        action
+                        appTitle
+                        attachments {
+                            fileExtension
+                            id
+                            name
+                            size
+                            url
+                        }
+                        attributeToApp
+                        attributeToUser
+                        author {
+                            id
+                        }
+                        canDelete
+                        canEdit
+                        createdAt
+                        criticalAlert
+                        edited
+                        message
+                        rawMessage
+                        }
+                    }
+                    }
+                    pageInfo {
+                    endCursor
+                    hasNextPage
+                    }
+                }
+            }"""
+        return qry
 
 Context.stream_objects['events'] = Events

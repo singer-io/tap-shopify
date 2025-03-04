@@ -8,9 +8,6 @@ class Locations(ShopifyGqlStream):
     data_key = "locations"
     replication_key = "createdAt"
 
-    def get_query(self):
-        return get_locations_query()
-
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
@@ -24,5 +21,53 @@ class Locations(ShopifyGqlStream):
         if cursor:
             params["after"] = cursor
         return params
+
+    def get_query(self):
+        qry = """query GetLocations($first: Int!, $after: String, $query: String) {
+                locations(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+                    edges {
+                    node {
+                        address {
+                        countryCode
+                        address1
+                        city
+                        address2
+                        provinceCode
+                        zip
+                        province
+                        phone
+                        country
+                        formatted
+                        latitude
+                        longitude
+                        }
+                        name
+                        id
+                        updatedAt
+                        createdAt
+                        isActive
+                        addressVerified
+                        deactivatable
+                        deactivatedAt
+                        deletable
+                        fulfillsOnlineOrders
+                        hasActiveInventory
+                        hasUnfulfilledOrders
+                        isFulfillmentService
+                        legacyResourceId
+                        localPickupSettingsV2 {
+                        instructions
+                        pickupTime
+                        }
+                        shipsInventory
+                    }
+                    }
+                    pageInfo {
+                    endCursor
+                    hasNextPage
+                    }
+                }
+                }"""
+        return qry
 
 Context.stream_objects['locations'] = Locations
