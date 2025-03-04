@@ -1,7 +1,6 @@
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import get_products_query
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.graphql import ShopifyGqlStream, get_products_query
 
 
 
