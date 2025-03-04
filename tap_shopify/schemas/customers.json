@@ -117,15 +117,17 @@
         },
         "latitude": {
           "type": [
-            "number",
-            "null"
-          ]
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
         },
         "longitude": {
           "type": [
-            "number",
-            "null"
-          ]
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
         },
         "coordinatesValidated": {
           "type": [
@@ -418,39 +420,6 @@
         }
       }
     },
-    "orders": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": {
-        "edges": {
-          "type": "array",
-          "items": {
-            "type": [
-              "null",
-              "object"
-            ],
-            "properties": {
-              "node": {
-                "type": [
-                  "null",
-                  "object"
-                ],
-                "properties": {
-                  "id": {
-                    "type": [
-                      "null",
-                      "string"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "validEmailAddress": {
       "type": [
         "null",
@@ -471,9 +440,10 @@
       "properties": {
         "amount": {
           "type": [
-            "null",
-            "string"
-          ]
+                "null",
+                "string"
+              ],
+            "format": "singer.decimal"
         },
         "currencyCode": {
           "type": [
