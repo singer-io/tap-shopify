@@ -171,6 +171,35 @@
                         "null",
                         "string"
                     ]
+                },
+                "measurement": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "weight": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "unit": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ],
+                                    "format": "singer.decimal"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
