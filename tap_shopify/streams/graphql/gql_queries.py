@@ -158,13 +158,21 @@ def get_product_variant_query():
                         title
                         updatedAt
                         product { id }
-                        inventoryItem { id }
+                        inventoryItem { 
+                            id 
+                            measurement {
+                                weight {
+                                    unit
+                                    value
+                                }
+                            }
+                        }
                     }
-                    }
-                    pageInfo {
-                        hasNextPage
-                        endCursor
-                    }
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
+                }
             }
         }
         """
