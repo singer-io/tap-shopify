@@ -1,5 +1,4 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import get_customers_query
 from tap_shopify.streams.graphql import ShopifyGqlStream
 
 

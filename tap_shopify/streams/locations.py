@@ -1,5 +1,5 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream, get_locations_query
+from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 

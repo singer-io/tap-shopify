@@ -82,20 +82,21 @@ class ShopifyGqlStream(Stream):
         return params
 
     @shopify_error_handling
-    def call_api(self, query_params):
+    def call_api(self, query_params, query=None, data_key=None):
         """
         - Modifies the default call api implementation to support GraphQL
         - Returns response Object dict
         """
 
         try:
-            query = self.get_query()
+            query = query or self.get_query()
+            data_key = data_key or self.data_key
             LOGGER.info("Fetching %s %s", self.name, query_params)
             response = shopify.GraphQL().execute(query=query, variables=query_params)
             response = json.loads(response)
             if "errors" in response.keys():
                 raise ShopifyAPIError(response['errors'])
-            data = response.get("data", {}).get(self.data_key, {})
+            data = response.get("data", {}).get(data_key, {})
             return data
         except ShopifyAPIError as gql_error:
             LOGGER.error("GraphQL Error %s", gql_error)

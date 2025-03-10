@@ -1,5 +1,5 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream, get_events_query
+from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 

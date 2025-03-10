@@ -15,10 +15,6 @@ from .gql_queries import (
     get_metafield_query_product,
     get_metafield_query_shop,
     get_products_query,
-    get_customers_query,
-    get_events_query,
     get_inventory_levels_query,
-    get_locations_query,
     get_order_refunds_query,
-    get_orders_query,
     get_transactions_query)
