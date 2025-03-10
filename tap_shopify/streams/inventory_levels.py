@@ -1,12 +1,8 @@
 from singer import(
     metrics,
-    get_logger,
     utils
 )
-from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
-                                      DATE_WINDOW_SIZE,
-                                      shopify_error_handling)
+from tap_shopify.streams.base import DATE_WINDOW_SIZE
 from tap_shopify.context import Context
 
 from datetime import timedelta
@@ -33,31 +29,33 @@ class InventoryLevels(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-    def get_next_page_child(self, edge):
-        parent_id = edge.get("node").get("id")
+    def get_next_page_child(self, parent_id, cursor):
+        """Gets all child objects efficiently with pagination"""
         query = self.get_child_query(parent_id)
         has_next_page = True
-        child_query_params = {}
-        cursor = edge.get("node", {}).get(self.child_data_key, {}).get("pageInfo", {}).get("endCursor")
         while has_next_page:
-            child_query_params["after"] = cursor
-            child_query_params["parent_id"] = parent_id
-            child_query_params["first"] = self.results_per_page
+            child_query_params = {
+                "after": cursor,
+                "parent_id": parent_id,
+                "first": self.results_per_page
+            }
             data = self.call_api(child_query_params, query, "location")
             child_data = data.get(self.child_data_key, {})
-            for edge in child_data.get("edges", []):
-                yield edge
-            page_info = data.get("pageInfo", {})
+
+            # Yield all edges in current page
+            yield from child_data.get("edges", [])
+
+            page_info = child_data.get("pageInfo", {})
             cursor = page_info.get("endCursor")
             has_next_page = page_info.get("hasNextPage", False)
 
     # pylint: disable=too-many-locals, too-many-nested-blocks
     def get_objects(self):
         last_updated_at = self.get_bookmark()
-        current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
+        # Process each date window
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=date_window_size)
             query_end = min(sync_start, date_window_end)
@@ -68,23 +66,31 @@ class InventoryLevels(ShopifyGqlStream):
                 with metrics.http_request_timer(self.name):
                     data = self.call_api(query_params)
 
+                # Process parent objects
                 for edge in data.get("edges", []):
-                    child_objects = edge.get("node").get(self.child_data_key).get("edges", [])
-                    for child_obj in child_objects:
+                    node = edge.get("node", {})
+
+                    # First handle the already fetched child objects
+                    child_edges = node.get(self.child_data_key).get("edges", [])
+                    for child_obj in child_edges:
                         obj = self.transform_object(child_obj.get("node"))
-                        replication_value = utils.strptime_to_utc(obj[self.replication_key])
-                        if replication_value > current_bookmark:
-                            current_bookmark = replication_value
                         yield obj
-                    child_page_info = edge.get("node", {}).get(self.child_data_key, {}).get("pageInfo", {})
-                    child_has_next_page = child_page_info.get("hasNextPage", False)
-                    if child_has_next_page:
-                        for child_obj in self.get_next_page_child(edge):
-                            yield self.transform_object(child_obj.get("node"))
+
+                    # Check if we need to get more child pages
+                    child_page_info = node.get(self.child_data_key, {}).get("pageInfo", {})
+                    if child_page_info.get("hasNextPage", False):
+                        parent_id = node.get("id")
+                        child_cursor = child_page_info.get("endCursor")
+
+                        # Get remaining child pages
+                        for child_obj in self.get_next_page_child(parent_id, child_cursor):
+                            transformed_obj = self.transform_object(child_obj.get("node"))
+                            yield transformed_obj
 
                 page_info =  data.get("pageInfo", {})
                 cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
+            # Move to next date window
             last_updated_at = query_end
 
     def sync(self):
@@ -106,10 +112,10 @@ class InventoryLevels(ShopifyGqlStream):
 
     def get_query(self):
         qry = """query GetInventoryLevels($first: Int!, $after: String, $query: String) {
-                locations(first: $first, after: $after, sortKey: ID) {
+                locations(first: $first, after: $after, sortKey: ID, includeInactive: true, includeLegacy: true) {
                     edges {
                     node {
-                        inventoryLevels(first: 10, query: $query) {
+                        inventoryLevels(first: $first, query: $query) {
                         edges {
                             node {
                             canDeactivate
