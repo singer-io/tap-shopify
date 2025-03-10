@@ -1,21 +1,66 @@
 {
   "type": "object",
   "properties": {
-    "id": { "type": ["null", "string"] },
-    "canDeactivate": { "type": ["null", "boolean"] },
-    "createdAt": { "type": ["null", "string"], "format": "date-time" },
-    "updatedAt": { "type": ["null", "string"], "format": "date-time" },
-    "deactivationAlert": { "type": ["null", "string"] },
+    "id": {
+      "type": ["null", "string"]
+    },
+    "canDeactivate": {
+      "type": ["null", "boolean"]
+    },
+    "createdAt": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "deactivationAlert": {
+      "type": ["null", "string"]
+    },
     "item": {
       "type": ["null", "object"],
       "properties": {
-        "id": { "type": ["null", "string"] }
+        "id": {
+          "type": ["null", "string"]
+        },
+        "variant": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": {
+              "type": ["null", "string"]
+            }
+          }
+        }
       }
     },
     "location": {
       "type": ["null", "object"],
       "properties": {
-        "id": { "type": ["null", "string"] }
+        "id": {
+          "type": ["null", "string"]
+        }
+      }
+    },
+    "quantities": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "string"]
+          },
+          "name": {
+            "type": ["null", "string"]
+          },
+          "quantity": {
+            "type": ["null", "integer"]
+          },
+          "updatedAt": {
+            "type": ["null", "string"],
+            "format": "date-time"
+          }
+        }
       }
     }
   }
