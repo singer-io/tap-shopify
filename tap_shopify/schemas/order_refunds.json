@@ -187,7 +187,10 @@
                   ],
                   "properties": {
                     "channelLiable": {
-                      "type": ["null", "boolean"]
+                      "type": [
+                        "null",
+                        "boolean"
+                      ]
                     },
                     "priceSet": {
                       "type": [
@@ -291,7 +294,10 @@
             ]
           },
           "quantity": {
-            "type": "integer"
+            "type": [
+              "null",
+              "integer"
+            ]
           },
           "priceSet": {
             "type": [
@@ -350,7 +356,10 @@
             ]
           },
           "restocked": {
-            "type": ["null", "boolean"]
+            "type": [
+              "null",
+              "boolean"
+            ]
           },
           "subtotalSet": {
             "type": [

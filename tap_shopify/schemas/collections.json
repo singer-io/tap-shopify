@@ -1,5 +1,4 @@
 {
-  "type": "object",
   "properties": {
     "id": {
       "type": [
@@ -19,7 +18,7 @@
         "string"
       ]
     },
-    "description": {
+    "type": {
       "type": [
         "null",
         "string"
@@ -43,6 +42,12 @@
             "null",
             "integer"
           ]
+        },
+        "precision": {
+          "type": [
+            "null",
+            "string"
+          ]
         }
       }
     },
@@ -51,6 +56,106 @@
         "null",
         "string"
       ]
+    },
+    "ruleSet": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "appliedDisjunctively": {
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
+        "rules": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "column": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "relation": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "seo": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "title": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "feedback": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "summary": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "products": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
     }
   }
 }
