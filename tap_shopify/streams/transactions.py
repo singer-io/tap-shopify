@@ -1,13 +1,10 @@
-from singer import(
-    metrics,
-    utils
-)
-from tap_shopify.streams.base import DATE_WINDOW_SIZE
-from tap_shopify.context import Context
 
 from datetime import timedelta
+from singer import metrics, utils
 from tap_shopify.context import Context
+from tap_shopify.streams.base import DATE_WINDOW_SIZE
 from tap_shopify.streams.graphql import ShopifyGqlStream
+
 
 class Transactions(ShopifyGqlStream):
     name = 'transactions'
@@ -15,7 +12,6 @@ class Transactions(ShopifyGqlStream):
     child_data_key = "transactions"
     replication_key = "createdAt"
 
-    # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
         Returns query and params for filtering, pagination
@@ -29,28 +25,10 @@ class Transactions(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-    def get_next_page_child(self, parent_id, cursor):
-        """Gets all child objects efficiently with pagination"""
-        query = self.get_child_query(parent_id)
-        has_next_page = True
-        while has_next_page:
-            child_query_params = {
-                "after": cursor,
-                "parent_id": parent_id,
-                "first": self.results_per_page
-            }
-            data = self.call_api(child_query_params, query, "location")
-            child_data = data.get(self.child_data_key, {})
-
-            # Yield all edges in current page
-            yield from child_data.get("edges", [])
-
-            page_info = child_data.get("pageInfo", {})
-            cursor = page_info.get("endCursor")
-            has_next_page = page_info.get("hasNextPage", False)
-
-    # pylint: disable=too-many-locals, too-many-nested-blocks
     def get_objects(self):
+        """
+        Fetch transaction objects within date windows, yielding each transaction individually
+        """
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
         date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
@@ -59,59 +37,57 @@ class Transactions(ShopifyGqlStream):
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=date_window_size)
             query_end = min(sync_start, date_window_end)
-            has_next_page, cursor = True, None
+            cursor = None
 
-            while has_next_page:
+            while True:
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
+
                 with metrics.http_request_timer(self.name):
                     data = self.call_api(query_params)
-                    print(data)
 
-                # Process parent objects
-                for edge in data.get("edges", []):
+                # Process parent objects and their transactions
+                edges = data.get("edges", [])
+                for edge in edges:
                     node = edge.get("node", {})
+                    child_edges = node.get(self.child_data_key, [])
 
-                    # First handle the already fetched child objects
-                    child_edges = node.get(self.child_data_key).get("edges", [])
-                    for child_obj in child_edges:
-                        obj = self.transform_object(child_obj.get("node"))
-                        yield obj
+                    # Yield each transformed transaction
+                    yield from (self.transform_object(child_obj) for child_obj in child_edges)
 
-                    # Check if we need to get more child pages
-                    child_page_info = node.get(self.child_data_key, {}).get("pageInfo", {})
-                    if child_page_info.get("hasNextPage", False):
-                        parent_id = node.get("id")
-                        child_cursor = child_page_info.get("endCursor")
-
-                        # Get remaining child pages
-                        for child_obj in self.get_next_page_child(parent_id, child_cursor):
-                            transformed_obj = self.transform_object(child_obj.get("node"))
-                            yield transformed_obj
-
-                page_info =  data.get("pageInfo", {})
-                cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+                # Handle pagination
+                page_info = data.get("pageInfo", {})
+                cursor = page_info.get("endCursor")
+                if not page_info.get("hasNextPage", False):
+                    break
 
             # Move to next date window
             last_updated_at = query_end
 
     def sync(self):
-        """Sync metafields and update bookmarks"""
+        """Sync transactions and update bookmarks"""
         start_time = utils.now().replace(microsecond=0)
         max_bookmark_value = current_bookmark_value = self.get_bookmark()
 
         for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj["updatedAt"])
+            replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
+            # Track max bookmark value seen
             if replication_value > max_bookmark_value:
                 max_bookmark_value = replication_value
 
+            # Only yield records that are new or updated since the last sync
             if replication_value >= current_bookmark_value:
                 yield obj
 
+        # Update bookmark to the latest value, but not beyond sync start time
         max_bookmark_value = min(start_time, max_bookmark_value)
         self.update_bookmark(utils.strftime(max_bookmark_value))
 
-    def get_transactions_query():
+    def get_query(self):
+        """
+        Returns query for fetching transactions.
+        Note - Shopify has a limit of 100 transactions per order.
+        """
         qry = """
             query GetTransactions($first: Int!, $after: String, $query: String) {
             orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
@@ -143,25 +119,6 @@ class Transactions(ShopifyGqlStream):
                     authorizationExpiresAt
                     createdAt
                     errorCode
-                    fees {
-                        amount {
-                        amount
-                        currencyCode
-                        }
-                        flatFee {
-                        amount
-                        currencyCode
-                        }
-                        flatFeeName
-                        id
-                        rate
-                        rateName
-                        taxAmount {
-                        amount
-                        currencyCode
-                        }
-                        type
-                    }
                     formattedGateway
                     gateway
                     id
@@ -229,8 +186,5 @@ class Transactions(ShopifyGqlStream):
             }
             }"""
         return qry
-
-    def get_child_query(self, parent_id):
-        pass
 
 Context.stream_objects['transactions'] = Transactions

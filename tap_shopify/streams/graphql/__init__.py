@@ -14,7 +14,4 @@ from .gql_queries import (
     get_product_variant_query,
     get_metafield_query_product,
     get_metafield_query_shop,
-    get_products_query,
-    get_inventory_levels_query,
-    get_order_refunds_query,
-    get_transactions_query)
+    get_products_query)
