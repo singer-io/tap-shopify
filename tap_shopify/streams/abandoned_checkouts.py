@@ -1,9 +1,186 @@
-import shopify
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream
+from tap_shopify.streams.graphql import ShopifyGqlStream
 
-class AbandonedCheckouts(Stream):
+
+
+class AbandonedCheckouts(ShopifyGqlStream):
     name = 'abandoned_checkouts'
-    replication_object = shopify.Checkout
+    data_key = "abandoned_checkouts"
+    replication_key = "updatedAt"
+
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Returns query and params for filtering, pagination
+        """
+        filter_key = "updated_at"
+        params = {
+            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
+            "first": self.results_per_page,
+        }
+        if cursor:
+            params["after"] = cursor
+        return params
+
+
+    def transform_object(self, obj):
+        media = obj.get("media")
+        media_list  = []
+        if media and "edges" in media:
+            for edge in media.get("edges"):
+                node = edge.get("node")
+                if node:
+                    media_list.append(node)
+        obj["media"] = media_list
+        return obj
+    
+    def get_query(self):
+        qry = """query abandonedcheckouts {
+                abandonedCheckouts(first: 10) {
+                    edges {
+                    node {
+                        note
+                        completedAt
+                        billingAddress {
+                        phone
+                        country
+                        firstName
+                        name
+                        latitude
+                        zip
+                        lastName
+                        province
+                        address2
+                        address1
+                        countryCodeV2
+                        city
+                        company
+                        provinceCode
+                        longitude
+                        coordinatesValidated
+                        formattedArea
+                        id
+                        timeZone
+                        validationResultSummary
+                        }
+                        discountCodes
+                        createdAt
+                        updatedAt
+                        taxLines {
+                        priceSet {
+                            presentmentMoney {
+                            amount
+                            currencyCode
+                            }
+                            shopMoney {
+                            amount
+                            currencyCode
+                            }
+                        }
+                        title
+                        rate
+                        source
+                        channelLiable
+                        }
+                        totalLineItemsPriceSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        id
+                        name
+                        totalTaxSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        lineItems(first: 10, after: "") {
+                        edges {
+                            node {
+                            id
+                            quantity
+                            sku
+                            title
+                            variantTitle
+                            variant {
+                                title
+                                id
+                            }
+                            }
+                        }
+                        }
+                        shippingAddress {
+                        phone
+                        country
+                        firstName
+                        name
+                        latitude
+                        zip
+                        lastName
+                        province
+                        address2
+                        address1
+                        countryCodeV2
+                        city
+                        company
+                        provinceCode
+                        longitude
+                        coordinatesValidated
+                        formattedArea
+                        id
+                        timeZone
+                        validationResultSummary
+                        }
+                        abandonedCheckoutUrl
+                        totalDiscountSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        taxesIncluded
+                        totalDutiesSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        totalPriceSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                    }
+                    }
+                    pageInfo {
+                    hasNextPage
+                    endCursor
+                    }
+                }
+                }"""
+        return qry
 
 Context.stream_objects['abandoned_checkouts'] = AbandonedCheckouts
