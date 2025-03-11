@@ -24,61 +24,55 @@ class Collections(ShopifyGqlStream):
 
 
     def transform_object(self, obj):
-        media = obj.get("media")
-        media_list  = []
-        if media and "edges" in media:
-            for edge in media.get("edges"):
-                node = edge.get("node")
-                if node:
-                    media_list.append(node)
-        obj["media"] = media_list
+        obj["collections_type"] = "SMART" if obj.get("ruleSet") else "MANUAL"
+        # TODO Process Products
+        # obj["products"] = 
         return obj
 
     def get_query(self):
         qry = """query Collections($first: Int!, $after: String, $query: String) {
             collections(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
-                node {
-                    id
-                    title
-                    handle
-                    updatedAt
-                    productsCount {
-                    count
-                    precision
-                    }
-                    sortOrder
-                    ruleSet {
-                    appliedDisjunctively
-                    rules {
-                        column
-                        condition
-                        relation
-                    }
-                    }
-                    seo {
-                    description
-                    title
-                    }
-                    feedback {
-                    summary
-                    }
-                    products(first: 250, sortKey: ID) {
-                    edges {
-                        node {
+                    node {
                         id
                         title
+                        handle
+                        updatedAt
+                        productsCount {
+                            count
+                            precision
+                        }
+                        sortOrder
+                        ruleSet {
+                            appliedDisjunctively
+                            rules {
+                                column
+                                condition
+                                relation
+                            }
+                        }
+                        seo {
+                            description
+                            title
+                        }
+                        feedback {
+                            summary
+                        }
+                        products(first: 250, sortKey: ID) {
+                            edges {
+                                node {
+                                    id
+                                }
+                            }
+                            pageInfo {
+                                endCursor
+                                hasNextPage
+                            }
                         }
                     }
-                    pageInfo {
-                        endCursor
-                        hasNextPage
-                    }
-                    }
-                }
                 }
             }
-            }"""
+        }"""
         return qry
 
 Context.stream_objects['collections'] = Collections
