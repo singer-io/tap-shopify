@@ -1,265 +1,169 @@
 {
+  "type": "object",
   "properties": {
-    "error_code": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "device_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "user_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "parent_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "test": {
-      "type": [
-        "null",
-        "boolean"
-      ]
-    },
-    "kind": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "order_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "amount": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "singer.decimal"
-    },
-    "authorization": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "currency": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "source_name": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "message": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "created_at": {
-      "type": [
-        "null",
-        "string"
-      ],
-      "format": "date-time"
-    },
-    "status": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "payment_details": {
+    "accountNumber": { "type": ["null", "string"] },
+    "amountRoundingSet": {
+      "type": ["null", "object"],
       "properties": {
-        "cvv_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
+        "presentmentMoney": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
+          }
         },
-        "credit_card_bin": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_company": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_expiration_month": {
-          "type": [
-            "null",
-            "integer"
-          ]
-        },
-        "credit_card_expiration_year": {
-          "type": [
-            "null",
-            "integer"
-          ]
-        },
-        "credit_card_name": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_number": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_wallet": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "avs_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        }
-      },
-      "type": [
-        "null",
-        "object"
-      ]
-    },
-    "gateway": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "admin_graphql_api_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "receipt": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": {
-        "fee_amount": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "singer.decimal"
-        },
-        "gross_amount": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "singer.decimal"
-        },
-        "tax_amount": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "singer.decimal"
-        }
-      },
-      "patternProperties": {".+": {}}
-    },
-    "location_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "processed_at": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "payments_refund_attributes": {
-      "type": [
-        "null",
-        "object"
-      ],
-      "properties": {
-        "status": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "acquirer_reference_number": {
-          "type": [
-            "null",
-            "string"
-          ]
+        "shopMoney": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
+          }
         }
       }
     },
-    "payment_id": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "total_unsettled_set": {
+    "amountSet": {
       "type": ["null", "object"],
       "properties": {
-        "presentment_money": {
+        "presentmentMoney": {
           "type": ["null", "object"],
           "properties": {
-            "amount": {
-              "type": ["null", "string"],
-              "format": "singer.decimal"},
-            "currency": {
-              "type": ["null", "string"]
-            }
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
           }
         },
-        "shop_money": {
+        "shopMoney": {
           "type": ["null", "object"],
           "properties": {
-            "amount": {
-              "type": ["null", "string"],
-              "format": "singer.decimal"},
-            "currency": {
-              "type": ["null", "string"]}
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
+          }
+        }
+      }
+    },
+    "authorizationCode": { "type": ["null", "string"] },
+    "authorizationExpiresAt": { "type": ["null", "string"], "format": "date-time" },
+    "createdAt": { "type": ["null", "string"], "format": "date-time" },
+    "errorCode": { "type": ["null", "string"] },
+    "fees": {
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "amount": {
+            "type": ["null", "object"],
+            "properties": {
+              "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+              "currencyCode": { "type": ["null", "string"] }
+            }
+          },
+          "flatFee": {
+            "type": ["null", "object"],
+            "properties": {
+              "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+              "currencyCode": { "type": ["null", "string"] }
+            }
+          },
+          "flatFeeName": { "type": ["null", "string"] },
+          "id": { "type": ["null", "string"] },
+          "rate": { "type": ["null", "string"], "format": "singer.decimal"  },
+          "rateName": { "type": ["null", "string"] },
+          "taxAmount": {
+            "type": ["null", "object"],
+            "properties": {
+              "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+              "currencyCode": { "type": ["null", "string"] }
+            }
+          },
+          "type": { "type": ["null", "string"] }
+        }
+      }
+    },
+    "formattedGateway": { "type": ["null", "string"] },
+    "gateway": { "type": ["null", "string"] },
+    "id": { "type": ["null", "string"] },
+    "kind": { "type": ["null", "string"] },
+    "manualPaymentGateway": { "type": ["null", "boolean"] },
+    "maximumRefundableV2": { "type": ["null", "object"] },
+    "multiCapturable": { "type": ["null", "boolean"] },
+    "order": {
+      "type": ["null", "object"],
+      "properties": {
+        "id": { "type": ["null", "string"] }
+      }
+    },
+    "parentTransaction": {
+      "type": ["null", "object"],
+      "properties": {
+        "accountNumber": { "type": ["null", "string"] },
+        "createdAt": { "type": ["null", "string"], "format": "date-time" },
+        "id": { "type": ["null", "string"] },
+        "status": { "type": ["null", "string"] },
+        "paymentId": { "type": ["null", "string"] },
+        "processedAt": { "type": ["null", "string"], "format": "date-time" },
+        "amountSet": {
+          "type": ["null", "object"],
+          "properties": {
+            "presentmentMoney": {
+              "type": ["null", "object"],
+              "properties": {
+                "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+                "currencyCode": { "type": ["null", "string"] }
+              }
+            },
+            "shopMoney": {
+              "type": ["null", "object"],
+              "properties": {
+                "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+                "currencyCode": { "type": ["null", "string"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "paymentId": { "type": ["null", "string"] },
+    "processedAt": { "type": ["null", "string"], "format": "date-time" },
+    "receiptJson": { "type": ["null", "string"] },
+    "settlementCurrency": { "type": ["null", "string"] },
+    "settlementCurrencyRate": { "type": ["null", "string"], "format": "singer.decimal" },
+    "shopifyPaymentsSet": {
+      "type": ["null", "object"],
+      "properties": {
+        "extendedAuthorizationSet": {
+          "type": ["null", "object"],
+          "properties": {
+            "extendedAuthorizationExpiresAt": { "type": ["null", "string"], "format": "date-time" },
+            "standardAuthorizationExpiresAt": { "type": ["null", "string"], "format": "date-time" }
+          }
+        },
+        "refundSet": {
+          "type": ["null", "object"],
+          "properties": {
+            "acquirerReferenceNumber": { "type": ["null", "string"] }
+          }
+        }
+      }
+    },
+    "status": { "type": ["null", "string"] },
+    "test": { "type": ["null", "boolean"] },
+    "totalUnsettledSet": {
+      "type": ["null", "object"],
+      "properties": {
+        "presentmentMoney": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
+          }
+        },
+        "shopMoney": {
+          "type": ["null", "object"],
+          "properties": {
+            "amount": { "type": ["null", "string"], "format": "singer.decimal" },
+            "currencyCode": { "type": ["null", "string"] }
           }
         }
       }
     }
-  },
-  "type": "object"
+  }
 }

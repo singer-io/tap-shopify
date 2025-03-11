@@ -22,7 +22,7 @@
     },
     "note": {
       "type": [
-        "null",
+        ""null"",
         "string"
       ]
     },
@@ -40,13 +40,249 @@
         }
       }
     },
+    "duties": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "amountSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "originalDuty": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "countryCodeOfOrigin": {
+                "type": [
+                  ""null"",
+                  "string"
+                ]
+              },
+              "harmonizedSystemCode": {
+                "type": [
+                  ""null"",
+                  "string"
+                ]
+              },
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "price": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "presentmentMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "amount": {
+                        "type": [
+                          "null",
+                          "string"
+                        ],
+                        "format": "singer.decimal"
+                      },
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  },
+                  "shopMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "amount": {
+                        "type": [
+                          "null",
+                          "string"
+                        ],
+                        "format": "singer.decimal"
+                      },
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "taxLines": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "properties": {
+                    "channelLiable": {
+                      "type": ["null", "boolean"]
+                    },
+                    "priceSet": {
+                      "type": [
+                        "null",
+                        "object"
+                      ],
+                      "properties": {
+                        "presentmentMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "string"
+                              ],
+                              "format": "singer.decimal"
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        },
+                        "shopMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "string"
+                              ],
+                              "format": "singer.decimal"
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "rate": {
+                      "type": [
+                        "null",
+                        "string"
+                      ],
+                      "format": "singer.decimal"
+                    },
+                    "ratePercentage": {
+                      "type": [
+                        "null",
+                        "string"
+                      ],
+                      "format": "singer.decimal"
+                    },
+                    "source": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "refundLineItems": {
       "type": [
         "null",
         "array"
       ],
       "items": {
-        "type": "object",
+        "type": [
+          "null",
+          "object"
+        ],
         "properties": {
           "id": {
             "type": [
@@ -55,10 +291,7 @@
             ]
           },
           "quantity": {
-            "type": [
-              "null",
-              "integer"
-            ]
+            "type": "integer"
           },
           "priceSet": {
             "type": [
@@ -117,10 +350,7 @@
             ]
           },
           "restocked": {
-            "type": [
-              "null",
-              "boolean"
-            ]
+            "type": ["null", "boolean"]
           },
           "subtotalSet": {
             "type": [
@@ -224,6 +454,13 @@
           }
         }
       }
+    },
+    "updatedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
     }
   }
 }
