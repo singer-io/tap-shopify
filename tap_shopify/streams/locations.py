@@ -24,7 +24,7 @@ class Locations(ShopifyGqlStream):
 
     def get_query(self):
         qry = """query GetLocations($first: Int!, $after: String, $query: String) {
-                locations(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+                locations(first: $first, after: $after, query: $query, sortKey: ID) {
                     edges {
                     node {
                         address {
