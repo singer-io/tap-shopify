@@ -218,15 +218,32 @@ def main():
         raise ShopifyError(exc, 'Invalid access token - Re-authorize the connection') \
             from exc
     except pyactiveresource.connection.ConnectionError as exc:
+        # Try to get x-request-id if available
+        x_request_id = get_request_id_from_exception(exc)
         msg = ''
         try:
             body_json = exc.response.body.decode()
             body = json.loads(body_json)
             msg = body.get('errors')
         finally:
-            raise ShopifyError(exc, msg) from exc
+            error_msg = f'{msg} X-Request-ID: {x_request_id}'
+            raise ShopifyError(exc, error_msg) from exc
     except Exception as exc:
-        raise ShopifyError(exc) from exc
+        x_request_id = get_request_id_from_exception(exc)
+        error_msg = f'An error occurred. X-Request-ID: {x_request_id}'
+        raise ShopifyError(exc, error_msg) from exc
+
+def get_request_id_from_exception(exc):
+    """Extract x-request-id from exception if available"""
+    try:
+        # Try to get x-request-id from the exception response if it exists
+        if hasattr(exc, 'response') and hasattr(exc.response, 'headers'):
+            return exc.response.headers.get('x-request-id', 'unknown')
+
+        # If not in the exception, try getting it from the Shopify connection
+        return shopify.ShopifyResource.connection.response.headers.get('x-request-id', 'unknown')
+    except (AttributeError, KeyError):
+        return 'unknown'
 
 if __name__ == "__main__":
     main()
