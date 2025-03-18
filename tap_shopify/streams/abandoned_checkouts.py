@@ -2,9 +2,8 @@ from tap_shopify.context import Context
 from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
-
 class AbandonedCheckouts(ShopifyGqlStream):
-    name = 'abandoned_checkouts'
+    name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
 
@@ -29,41 +28,21 @@ class AbandonedCheckouts(ShopifyGqlStream):
             if (node := item.get("node")):
                 sub_entities.append(node)
 
-        # Commented below code as query filter is not working for abandoned checkouts based on the ID
-        # Handle pagination
-        # page_info = data[entity_name].get("pageInfo", {})
-        # while page_info.get("hasNextPage"):
-        #     params = {
-        #         "first": self.results_per_page,
-        #         "query": f"id:{data['id'].split('/')[-1]}",
-        #         "childafter": page_info.get("endCursor")
-        #     }
-
-        #     # Fetch the next page of data
-        #     response = self.call_api(params)
-        #     edge = response.get("edges", [{}])[0]  # Directly access the first (only) edge
-        #     data = edge.get("node", {}).get(entity_name, {})
-        #     for item in data[entity_name]["edges"]:
-        #         if (node := item.get("node")):
-        #             sub_entities.append(node)
-
-        #     # Update pagination info for the next iteration
-        #     page_info = data.get("pageInfo", {})
-
         return sub_entities
 
     def transform_object(self, obj):
-        obj["lineItems"] = self.process_sub_entities(obj, entity_name = "lineItems")
+        obj["lineItems"] = self.process_sub_entities(obj, entity_name="lineItems")
         return obj
 
     def get_query(self):
-        qry = """query abandonedcheckouts($first: Int!, $after: String, $query: String, $childafter: String) {
-                    abandonedCheckouts(first: $first, after: $after, query: $query) {
-                        edges {
-                        node {
-                            note
-                            completedAt
-                            billingAddress {
+        qry = """
+        query abandonedcheckouts($first: Int!, $after: String, $query: String) {
+            abandonedCheckouts(first: $first, after: $after, query: $query) {
+                edges {
+                    node {
+                        note
+                        completedAt
+                        billingAddress {
                             phone
                             country
                             firstName
@@ -84,19 +63,19 @@ class AbandonedCheckouts(ShopifyGqlStream):
                             id
                             timeZone
                             validationResultSummary
-                            }
-                            discountCodes
-                            createdAt
-                            updatedAt
-                            taxLines {
+                        }
+                        discountCodes
+                        createdAt
+                        updatedAt
+                        taxLines {
                             priceSet {
                                 presentmentMoney {
-                                amount
-                                currencyCode
+                                    amount
+                                    currencyCode
                                 }
                                 shopMoney {
-                                amount
-                                currencyCode
+                                    amount
+                                    currencyCode
                                 }
                             }
                             title
@@ -104,8 +83,8 @@ class AbandonedCheckouts(ShopifyGqlStream):
                             source
                             channelLiable
                             ratePercentage
-                            }
-                            totalLineItemsPriceSet {
+                        }
+                        totalLineItemsPriceSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -114,10 +93,10 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                            id
-                            name
-                            totalTaxSet {
+                        }
+                        id
+                        name
+                        totalTaxSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -126,8 +105,8 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                            shippingAddress {
+                        }
+                        shippingAddress {
                             phone
                             country
                             firstName
@@ -148,9 +127,9 @@ class AbandonedCheckouts(ShopifyGqlStream):
                             id
                             timeZone
                             validationResultSummary
-                            }
-                            abandonedCheckoutUrl
-                            totalDiscountSet {
+                        }
+                        abandonedCheckoutUrl
+                        totalDiscountSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -159,9 +138,9 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                            taxesIncluded
-                            totalDutiesSet {
+                        }
+                        taxesIncluded
+                        totalDutiesSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -170,8 +149,8 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                            totalPriceSet {
+                        }
+                        totalPriceSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -180,90 +159,90 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                            lineItems(first: $first, after: $childafter) {
+                        }
+                        lineItems(first: 250) {
                             edges {
                                 node {
-                                id
-                                quantity
-                                sku
-                                title
-                                variantTitle
-                                variant {
-                                    title
-                                    id
-                                }
-                                discountedTotalPriceSet {
-                                    presentmentMoney {
-                                    amount
-                                    currencyCode
-                                    }
-                                    shopMoney {
-                                    amount
-                                    currencyCode
-                                    }
-                                }
-                                components {
                                     id
                                     quantity
+                                    sku
                                     title
                                     variantTitle
-                                }
-                                customAttributes {
-                                    key
-                                    value
-                                }
-                                product {
-                                    id
-                                }
-                                discountedUnitPriceSet {
-                                    presentmentMoney {
-                                    amount
-                                    currencyCode
+                                    variant {
+                                        title
+                                        id
                                     }
-                                    shopMoney {
-                                    amount
-                                    currencyCode
+                                    discountedTotalPriceSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
                                     }
-                                }
-                                discountedUnitPriceWithCodeDiscount {
-                                    presentmentMoney {
-                                    amount
-                                    currencyCode
+                                    components {
+                                        id
+                                        quantity
+                                        title
+                                        variantTitle
                                     }
-                                    shopMoney {
-                                    amount
-                                    currencyCode
+                                    customAttributes {
+                                        key
+                                        value
                                     }
-                                }
-                                originalTotalPriceSet {
-                                    presentmentMoney {
-                                    amount
-                                    currencyCode
+                                    product {
+                                        id
                                     }
-                                    shopMoney {
-                                    amount
-                                    currencyCode
+                                    discountedUnitPriceSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
                                     }
-                                }
-                                originalUnitPriceSet {
-                                    presentmentMoney {
-                                    amount
-                                    currencyCode
+                                    discountedUnitPriceWithCodeDiscount {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
                                     }
-                                    shopMoney {
-                                    amount
-                                    currencyCode
+                                    originalTotalPriceSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
                                     }
-                                }
+                                    originalUnitPriceSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
                                 }
                             }
                             pageInfo {
                                 endCursor
                                 hasNextPage
                             }
-                            }
-                            subtotalPriceSet {
+                        }
+                        subtotalPriceSet {
                             presentmentMoney {
                                 amount
                                 currencyCode
@@ -272,15 +251,17 @@ class AbandonedCheckouts(ShopifyGqlStream):
                                 amount
                                 currencyCode
                             }
-                            }
-                        }
-                        }
-                        pageInfo {
-                        hasNextPage
-                        endCursor
                         }
                     }
-                    }"""
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
+                }
+            }
+        }
+        """
         return qry
 
-Context.stream_objects['abandoned_checkouts'] = AbandonedCheckouts
+
+Context.stream_objects["abandoned_checkouts"] = AbandonedCheckouts
