@@ -1,5 +1,4 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import get_inventory_items_query
 from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
@@ -8,9 +7,6 @@ class InventoryItems(ShopifyGqlStream):
     name = 'inventory_items'
     data_key = "inventoryItems"
     replication_key = "updatedAt"
-
-    def get_query(self):
-        return get_inventory_items_query()
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
@@ -36,5 +32,44 @@ class InventoryItems(ShopifyGqlStream):
                     hsc_list.append(node)
         obj["countryHarmonizedSystemCodes"] = hsc_list
         return obj
+    
+    def get_query(self):
+        """
+        Returns GraphQL query to get all inventory items
+        """
+        return """
+                query GetinventoryItems($first: Int!, $after: String, $query: String) {
+                    inventoryItems(first: $first, after: $after, query: $query) {
+                        edges {
+                            node {
+                                id
+                                createdAt
+                                sku
+                                updatedAt
+                                requiresShipping
+                                countryCodeOfOrigin
+                                provinceCodeOfOrigin
+                                harmonizedSystemCode
+                                tracked
+                                unitCost {
+                                    amount
+                                }
+                                countryHarmonizedSystemCodes(first: 175) {
+                                    edges {
+                                        node {
+                                            countryCode
+                                            harmonizedSystemCode
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        pageInfo {
+                            hasNextPage
+                            endCursor
+                        }
+                    }
+                }
+            """
 
 Context.stream_objects['inventory_items'] = InventoryItems
