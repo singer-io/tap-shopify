@@ -5,7 +5,7 @@ from tap_shopify.streams.graphql import ShopifyGqlStream
 
 class AbandonedCheckouts(ShopifyGqlStream):
     name = 'abandoned_checkouts'
-    data_key = "abandoned_checkouts"
+    data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
 
     # pylint: disable=W0221
@@ -22,165 +22,265 @@ class AbandonedCheckouts(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
+    def process_sub_entities(self, data, entity_name):
+        sub_entities = []
+
+        for item in data[entity_name]["edges"]:
+            if (node := item.get("node")):
+                sub_entities.append(node)
+
+        # Commented below code as query filter is not working for abandoned checkouts based on the ID
+        # Handle pagination
+        # page_info = data[entity_name].get("pageInfo", {})
+        # while page_info.get("hasNextPage"):
+        #     params = {
+        #         "first": self.results_per_page,
+        #         "query": f"id:{data['id'].split('/')[-1]}",
+        #         "childafter": page_info.get("endCursor")
+        #     }
+
+        #     # Fetch the next page of data
+        #     response = self.call_api(params)
+        #     edge = response.get("edges", [{}])[0]  # Directly access the first (only) edge
+        #     data = edge.get("node", {}).get(entity_name, {})
+        #     for item in data[entity_name]["edges"]:
+        #         if (node := item.get("node")):
+        #             sub_entities.append(node)
+
+        #     # Update pagination info for the next iteration
+        #     page_info = data.get("pageInfo", {})
+
+        return sub_entities
 
     def transform_object(self, obj):
-        media = obj.get("media")
-        media_list  = []
-        if media and "edges" in media:
-            for edge in media.get("edges"):
-                node = edge.get("node")
-                if node:
-                    media_list.append(node)
-        obj["media"] = media_list
+        obj["lineItems"] = self.process_sub_entities(obj, entity_name = "lineItems")
         return obj
-    
+
     def get_query(self):
-        qry = """query abandonedcheckouts {
-                abandonedCheckouts(first: 10) {
-                    edges {
-                    node {
-                        note
-                        completedAt
-                        billingAddress {
-                        phone
-                        country
-                        firstName
-                        name
-                        latitude
-                        zip
-                        lastName
-                        province
-                        address2
-                        address1
-                        countryCodeV2
-                        city
-                        company
-                        provinceCode
-                        longitude
-                        coordinatesValidated
-                        formattedArea
-                        id
-                        timeZone
-                        validationResultSummary
-                        }
-                        discountCodes
-                        createdAt
-                        updatedAt
-                        taxLines {
-                        priceSet {
+        qry = """query abandonedcheckouts($first: Int!, $after: String, $query: String, $childafter: String) {
+                    abandonedCheckouts(first: $first, after: $after, query: $query) {
+                        edges {
+                        node {
+                            note
+                            completedAt
+                            billingAddress {
+                            phone
+                            country
+                            firstName
+                            name
+                            latitude
+                            zip
+                            lastName
+                            province
+                            address2
+                            address1
+                            countryCodeV2
+                            city
+                            company
+                            provinceCode
+                            longitude
+                            coordinatesValidated
+                            formattedArea
+                            id
+                            timeZone
+                            validationResultSummary
+                            }
+                            discountCodes
+                            createdAt
+                            updatedAt
+                            taxLines {
+                            priceSet {
+                                presentmentMoney {
+                                amount
+                                currencyCode
+                                }
+                                shopMoney {
+                                amount
+                                currencyCode
+                                }
+                            }
+                            title
+                            rate
+                            source
+                            channelLiable
+                            ratePercentage
+                            }
+                            totalLineItemsPriceSet {
                             presentmentMoney {
-                            amount
-                            currencyCode
+                                amount
+                                currencyCode
                             }
                             shopMoney {
-                            amount
-                            currencyCode
+                                amount
+                                currencyCode
                             }
-                        }
-                        title
-                        rate
-                        source
-                        channelLiable
-                        }
-                        totalLineItemsPriceSet {
-                        presentmentMoney {
-                            amount
-                            currencyCode
-                        }
-                        shopMoney {
-                            amount
-                            currencyCode
-                        }
-                        }
-                        id
-                        name
-                        totalTaxSet {
-                        presentmentMoney {
-                            amount
-                            currencyCode
-                        }
-                        shopMoney {
-                            amount
-                            currencyCode
-                        }
-                        }
-                        lineItems(first: 10, after: "") {
-                        edges {
-                            node {
+                            }
                             id
-                            quantity
-                            sku
-                            title
-                            variantTitle
-                            variant {
-                                title
+                            name
+                            totalTaxSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            shippingAddress {
+                            phone
+                            country
+                            firstName
+                            name
+                            latitude
+                            zip
+                            lastName
+                            province
+                            address2
+                            address1
+                            countryCodeV2
+                            city
+                            company
+                            provinceCode
+                            longitude
+                            coordinatesValidated
+                            formattedArea
+                            id
+                            timeZone
+                            validationResultSummary
+                            }
+                            abandonedCheckoutUrl
+                            totalDiscountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            taxesIncluded
+                            totalDutiesSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            totalPriceSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            lineItems(first: $first, after: $childafter) {
+                            edges {
+                                node {
                                 id
+                                quantity
+                                sku
+                                title
+                                variantTitle
+                                variant {
+                                    title
+                                    id
+                                }
+                                discountedTotalPriceSet {
+                                    presentmentMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                    shopMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                }
+                                components {
+                                    id
+                                    quantity
+                                    title
+                                    variantTitle
+                                }
+                                customAttributes {
+                                    key
+                                    value
+                                }
+                                product {
+                                    id
+                                }
+                                discountedUnitPriceSet {
+                                    presentmentMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                    shopMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                }
+                                discountedUnitPriceWithCodeDiscount {
+                                    presentmentMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                    shopMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                }
+                                originalTotalPriceSet {
+                                    presentmentMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                    shopMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                }
+                                originalUnitPriceSet {
+                                    presentmentMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                    shopMoney {
+                                    amount
+                                    currencyCode
+                                    }
+                                }
+                                }
+                            }
+                            pageInfo {
+                                endCursor
+                                hasNextPage
+                            }
+                            }
+                            subtotalPriceSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
                             }
                             }
                         }
                         }
-                        shippingAddress {
-                        phone
-                        country
-                        firstName
-                        name
-                        latitude
-                        zip
-                        lastName
-                        province
-                        address2
-                        address1
-                        countryCodeV2
-                        city
-                        company
-                        provinceCode
-                        longitude
-                        coordinatesValidated
-                        formattedArea
-                        id
-                        timeZone
-                        validationResultSummary
-                        }
-                        abandonedCheckoutUrl
-                        totalDiscountSet {
-                        presentmentMoney {
-                            amount
-                            currencyCode
-                        }
-                        shopMoney {
-                            amount
-                            currencyCode
-                        }
-                        }
-                        taxesIncluded
-                        totalDutiesSet {
-                        presentmentMoney {
-                            amount
-                            currencyCode
-                        }
-                        shopMoney {
-                            amount
-                            currencyCode
-                        }
-                        }
-                        totalPriceSet {
-                        presentmentMoney {
-                            amount
-                            currencyCode
-                        }
-                        shopMoney {
-                            amount
-                            currencyCode
-                        }
+                        pageInfo {
+                        hasNextPage
+                        endCursor
                         }
                     }
-                    }
-                    pageInfo {
-                    hasNextPage
-                    endCursor
-                    }
-                }
-                }"""
+                    }"""
         return qry
 
 Context.stream_objects['abandoned_checkouts'] = AbandonedCheckouts
