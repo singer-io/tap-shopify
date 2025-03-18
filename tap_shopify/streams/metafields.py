@@ -1,47 +1,22 @@
 from datetime import timedelta
 import json
-import shopify
 
-from singer import utils, get_logger
+from singer import utils, get_logger, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import (
-    get_metafields_query,
-    get_metafield_query_customers,
-    get_metafield_query_product,
-    get_metafield_query_collection,
-    get_metafield_query_order,
-    get_metafield_query_shop,
-)
 from tap_shopify.streams.graphql.gql_base import (
     ShopifyGqlStream,
-    ShopifyAPIError,
     DATE_WINDOW_SIZE,
-    shopify_error_handling,
 )
 
 LOGGER = get_logger()
 
 
 class Metafields(ShopifyGqlStream):
-    name = 'metafields'
-    data_key = "metafields"
+    name = None
+    data_key = None
+    child_data_key = "metafields"
     replication_key = "updatedAt"
-
-    selected_parent = None
-
-    # maps object list identifier to single object access identifier
-    # eg customers -> customer
-    resource_alias = {
-        "shop": "shop",
-        "customers": "customer",
-        "products": "product",
-        "collections": "collection",
-        "orders": "order"
-    }
-
-    def get_query(self):
-        return None
 
     # pylint: disable=arguments-differ
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
@@ -57,31 +32,6 @@ class Metafields(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-    def get_resource_type_query(self, resource):
-        return {
-            "customer": get_metafield_query_customers,
-            "product": get_metafield_query_product,
-            "collection": get_metafield_query_collection,
-            "order": get_metafield_query_order,
-            "shop": get_metafield_query_shop
-        }.get(resource)
-
-    @shopify_error_handling
-    def call_api(self, query_params, query):
-        try:
-            response = shopify.GraphQL().execute(query=query, variables=query_params)
-            response = json.loads(response)
-            if "errors" in response.keys():
-                raise ShopifyAPIError(response['errors'])
-            data = response.get("data", {})
-            return data
-        except ShopifyAPIError as gql_error:
-            LOGGER.error("GraphQL Error %s", gql_error)
-            raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
-        except Exception as exception:
-            LOGGER.error("Unexpected error occurred.",)
-            raise exception
-
     def transform_object(self, obj):
         obj["value_type"] = obj["type"] or None
         obj["updated_at"] = obj["updatedAt"]
@@ -94,106 +44,103 @@ class Metafields(ShopifyGqlStream):
                 obj["value"] = value
         return obj
 
-    def get_next_page_metafields(self, metafields, query_params, gql_resource):
-        owner_id = metafields.get("edges", [])[0]["node"]["owner"]["id"]
-        query = self.get_resource_type_query(gql_resource)()
-        has_next_page = True
-        cursor = metafields.get("pageInfo", {}).get("endCursor")
-        while has_next_page:
-            query_params["after"] = cursor
-            query_params["pk_id"] = owner_id
-            data = self.call_api(query_params, query).get(gql_resource, {})
-            metafields = data.get("metafields", {})
-            for edge in metafields.get("edges", []):
+    def fetch_paginated_child_data(self, initial_child_data, parent_id):
+        """
+        Fetches all pages of child data by handling pagination.
+        """
+        # Extract the numeric ID from the full path
+        numeric_id = parent_id.split('/')[-1]
+        page_info = initial_child_data.get("pageInfo", {})
+
+        # Continue fetching pages while there are more
+        while page_info.get("hasNextPage"):
+            # Configure the query parameters for the next page
+            query_params = {
+                "first": self.results_per_page,
+                "query": f"id:{numeric_id}",
+                "childafter": page_info.get("endCursor")
+            }
+
+            # Fetch the next page
+            response = self.call_api(query_params)
+
+            # Handle empty or invalid responses
+            response_edges = response.get("edges", [])
+            if not response_edges:
+                break
+
+            # Extract child data from the first edge (typically the only one)
+            first_edge = response_edges[0]
+            child_data = first_edge.get("node", {}).get(self.child_data_key, {})
+
+            # Yield each edge from the current page
+            for edge in child_data.get("edges", []):
                 yield edge
-            page_info = metafields.get("pageInfo", {})
-            cursor = page_info.get("endCursor")
-            has_next_page = page_info.get("hasNextPage", False)
+
+            # Update pagination info for the next iteration
+            page_info = child_data.get("pageInfo", {})
 
     # pylint: disable=too-many-locals, too-many-nested-blocks
     def get_objects(self):
         """Main iterator to yield metafield objects"""
         sync_start = utils.now().replace(microsecond=0)
+        last_updated_at = self.get_bookmark()
+        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
-        for resource_type, gql_resource in self.resource_alias.items():
-            LOGGER.info("Syncing metafields for %s", resource_type)
+        while last_updated_at < sync_start:
+            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            query_end = min(sync_start, date_window_end)
 
-            # Handle shop metafields separately
-            if resource_type == 'shop':
-                query = get_metafields_query(gql_resource)
-                has_next_page = True
-                cursor = None
+            has_next_page = True
+            cursor = None
 
-                while has_next_page:
-                    params = {"first": self.results_per_page}
-                    if cursor:
-                        params["after"] = cursor
+            while has_next_page:
+                query_params = self.get_query_params(last_updated_at, query_end, cursor)
+                with metrics.http_request_timer(self.name):
+                    data = self.call_api(query_params)
 
-                    data = self.call_api(params, query)
-                    metafields = data.get("shop", {}).get("metafields", {})
+                # Process parent objects
+                for edge in data.get("edges", []):
+                    node = edge.get("node", {})
 
-                    for edge in metafields.get("edges", []):
-                        yield self.transform_object(edge["node"])
+                    # First handle the already fetched child objects
+                    child_edges = node.get(self.child_data_key).get("edges", [])
+                    for child_obj in child_edges:
+                        obj = self.transform_object(child_obj.get("node"))
+                        yield obj
 
-                    page_info = metafields.get("pageInfo", {})
-                    cursor = page_info.get("endCursor")
-                    has_next_page = page_info.get("hasNextPage", False)
-                continue
+                    # Check if we need to get more child pages
+                    child_page_info = node.get(self.child_data_key, {}).get("pageInfo", {})
+                    if child_page_info.get("hasNextPage", False):
+                        parent_id = node.get("id")
 
-            # Handle other resources
-            last_updated_at = self.get_bookmark_by_name(f'{self.name}_{resource_type}')
-            date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+                        # Get remaining child pages
+                        for child_obj in self.fetch_paginated_child_data(node.get(self.child_data_key), parent_id):
+                            transformed_obj = self.transform_object(child_obj.get("node"))
+                            yield transformed_obj
 
-            while last_updated_at < sync_start:
-                date_window_end = last_updated_at + timedelta(days=date_window_size)
-                query_end = min(sync_start, date_window_end)
+                page_info =  data.get("pageInfo", {})
+                cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
-                has_next_page = True
-                cursor = None
-
-                while has_next_page:
-                    query_params = self.get_query_params(last_updated_at, query_end, cursor)
-                    query = get_metafields_query(resource_type)
-                    data = self.call_api(query_params, query)
-
-                    resource_data = data.get(resource_type, {})
-                    for data_edge in resource_data.get("edges", []):
-                        metafields = data_edge["node"].get("metafields", {})
-                        for edge in metafields.get("edges", []):
-                            yield self.transform_object(edge["node"])
-                        meta_page_info = metafields.get("pageInfo", {})
-                        meta_has_next_page = meta_page_info.get("hasNextPage", False)
-                        if meta_has_next_page:
-                            for edge in self.get_next_page_metafields(
-                                metafields, query_params, gql_resource
-                            ):
-                                yield self.transform_object(edge["node"])
-
-                    page_info = resource_data.get("pageInfo", {})
-                    cursor = page_info.get("endCursor")
-                    has_next_page = page_info.get("hasNextPage", False)
-
-                last_updated_at = query_end
+            # Move to next date window
+            last_updated_at = query_end
 
     def sync(self):
         """Sync metafields and update bookmarks"""
         start_time = utils.now().replace(microsecond=0)
-        current_bookmarks = {}
+        max_bookmark_value = current_bookmark_value = self.get_bookmark()
 
         for obj in self.get_objects():
-            resource_type = obj["ownerType"].lower()
-            replication_value = utils.strptime_to_utc(obj["updated_at"])
-            current_bookmark_value = self.get_bookmark_by_name(f"{self.name}_{resource_type}")
+            replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
-            if replication_value >= current_bookmarks.get(resource_type, current_bookmark_value):
-                current_bookmarks[resource_type] = replication_value
+            # Track max bookmark value seen
+            if replication_value > max_bookmark_value:
+                max_bookmark_value = replication_value
 
+            # Only yield records that are new or updated since the last sync
             if replication_value >= current_bookmark_value:
                 yield obj
 
-        # Update bookmarks
-        for res, bookmark_val in current_bookmarks.items():
-            bookmark_val = min(start_time, bookmark_val)
-            self.update_bookmark(utils.strftime(bookmark_val), f"{self.name}_{res}")
-
-Context.stream_objects['metafields'] = Metafields
+        # Update bookmark to the latest value, but not beyond sync start time
+        max_bookmark_value = min(start_time, max_bookmark_value)
+        self.update_bookmark(utils.strftime(max_bookmark_value))
