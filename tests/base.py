@@ -27,7 +27,7 @@ class BaseTapTest(BaseCase):
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
-    DEFAULT_RESULTS_PER_PAGE = 175
+    DEFAULT_RESULTS_PER_PAGE = 250
 
     @staticmethod
     def tap_name():
@@ -77,7 +77,7 @@ class BaseTapTest(BaseCase):
         """The expected streams and metadata about the streams"""
 
         default = {
-                self.REPLICATION_KEYS: {"updated_at"},
+                self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
@@ -88,53 +88,29 @@ class BaseTapTest(BaseCase):
 
         return {
             "abandoned_checkouts": {
-                self.REPLICATION_KEYS: {"updated_at"},
+                self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                # BUG: https://jira.talendforge.org/browse/TDL-13180
+                # BUG: https://qlik-dev.atlassian.net/browse/TDL-13180
                 self.API_LIMIT: 50},
-            "collects": default,
-            "custom_collections": default,
+            "collections": default,
             "customers": default,
             "orders": default,
-            "order_refunds": {
-                self.REPLICATION_KEYS: {"created_at"},
-                self.PRIMARY_KEYS: {"id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "products":  {
-                self.REPLICATION_KEYS: {"updatedAt"},
-                self.PRIMARY_KEYS: {"id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "product_variants": {
-                self.REPLICATION_KEYS: {"updatedAt"},
-                self.PRIMARY_KEYS: {"id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "inventory_items": {self.REPLICATION_KEYS: {"updatedAt"},
-                self.PRIMARY_KEYS: {"id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 250},
+            "order_refunds": default,
+            "products": default,
+            "product_variants": default,
+            "inventory_items": default,
             "metafields": meta,
             "transactions": {
-                self.REPLICATION_KEYS: {"created_at"},
+                self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "locations": {
-                self.REPLICATION_KEYS: {"updated_at"},
-                self.PRIMARY_KEYS: {"id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 0},
-            "inventory_levels": {
-                self.REPLICATION_KEYS: {"updated_at"},
-                self.PRIMARY_KEYS: {"location_id", "inventory_item_id"},
-                self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+            "locations": default,
+            "inventory_levels": default,
             "events": {
-                self.REPLICATION_KEYS: {"created_at"},
+                self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 50
