@@ -1,5 +1,5 @@
 {
-  "type": "oject",
+  "type": "object",
   "properties": {
     "note": {"type": ["null", "string"]},
     "completedAt": {"type": ["null", "string"], "format": "date-time"},
