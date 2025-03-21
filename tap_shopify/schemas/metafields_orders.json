@@ -1,4 +1,5 @@
 {
+  "type": "object",
   "properties": {
     "owner": {
       "type": [
@@ -79,6 +80,5 @@
         "string"
       ]
     }
-  },
-  "type": "object"
+  }
 }

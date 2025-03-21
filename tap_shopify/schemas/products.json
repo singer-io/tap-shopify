@@ -1,4 +1,5 @@
 {
+  "type": "object",
   "properties": {
     "status": {
       "type": [
@@ -441,6 +442,5 @@
         }
       }
     }
-  },
-  "type": "object"
+  }
 }
