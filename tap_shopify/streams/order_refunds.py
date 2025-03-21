@@ -75,7 +75,8 @@ class OrderRefunds(ShopifyGqlStream):
 
             last_updated_at = query_end
 
-    def transform_object(self, obj):
+    @classmethod
+    def transform_object(cls, obj):
         """
         Transform refund objects by extracting refund line items from edges.
 
@@ -103,8 +104,7 @@ class OrderRefunds(ShopifyGqlStream):
         for obj in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
-            if replication_value > max_bookmark_value:
-                max_bookmark_value = replication_value
+            max_bookmark_value = max(max_bookmark_value, replication_value)
 
             if replication_value >= current_bookmark_value:
                 yield obj

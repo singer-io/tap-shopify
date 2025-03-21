@@ -134,8 +134,7 @@ class ShopifyGqlStream(Stream):
                 for edge in data.get("edges"):
                     obj = self.transform_object(edge.get("node"))
                     replication_value = utils.strptime_to_utc(obj[self.replication_key])
-                    if replication_value > current_bookmark:
-                        current_bookmark = replication_value
+                    current_bookmark = max(current_bookmark, replication_value)
                     yield obj
 
                 page_info =  data.get("pageInfo")
@@ -148,5 +147,4 @@ class ShopifyGqlStream(Stream):
         """
         Default implementation for sync method
         """
-        for obj in self.get_objects():
-            yield obj
+        yield from self.get_objects()

@@ -275,8 +275,7 @@ class Stream():
                         raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
                             obj.id, since_id))
                     replication_value = strptime_to_utc(getattr(obj, self.replication_key))
-                    if replication_value > max_bookmark:
-                        max_bookmark = replication_value
+                    max_bookmark = max(max_bookmark, replication_value)
                     yield obj
 
                 # You know you're at the end when the current page has

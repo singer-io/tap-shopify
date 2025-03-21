@@ -77,8 +77,7 @@ class Metafields(ShopifyGqlStream, ABC):
             first_edge = response_edges[0]
             child_data = first_edge.get("node", {}).get(self.child_data_key, {})
 
-            for edge in child_data.get("edges", []):
-                yield edge
+            yield from child_data.get("edges", [])
 
             page_info = child_data.get("pageInfo", {})
 
@@ -138,8 +137,7 @@ class Metafields(ShopifyGqlStream, ABC):
         for obj in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
-            if replication_value > max_bookmark_value:
-                max_bookmark_value = replication_value
+            max_bookmark_value = max(max_bookmark_value, replication_value)
 
             if replication_value >= current_bookmark_value:
                 yield obj
