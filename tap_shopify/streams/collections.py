@@ -3,14 +3,23 @@ from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 class Collections(ShopifyGqlStream):
-    name = 'collections'
+    """Stream class for Shopify collections."""
+    name = "collections"
     data_key = "collections"
     replication_key = "updatedAt"
 
-    # pylint: disable=W0221
+    # pylint: disable=arguments-differ
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns query and params for filtering, pagination
+        Returns query and params for filtering and pagination.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str, optional): Pagination cursor.
+
+        Returns:
+            dict: Query parameters.
         """
         filter_key = "updated_at"
         params = {
@@ -23,13 +32,20 @@ class Collections(ShopifyGqlStream):
 
     def transform_products(self, data):
         """
-        Transforms the products data by extracting product IDs, handling pagination.
+        Transforms the products data by extracting product IDs and handling pagination.
+
+        Args:
+            data (dict): Product data.
+
+        Returns:
+            list: List of product IDs.
         """
         product_ids = []
 
         # Extract product IDs from the first page
         product_ids.extend(
-            node["id"] for item in data["products"]["edges"]
+            node["id"]
+            for item in data["products"]["edges"]
             if (node := item.get("node")) and "id" in node
         )
 
@@ -39,40 +55,44 @@ class Collections(ShopifyGqlStream):
             params = {
                 "first": self.results_per_page,
                 "query": f"id:{data['id'].split('/')[-1]}",
-                "childafter": page_info.get("endCursor")
+                "childafter": page_info.get("endCursor"),
             }
-            next_edges = []
 
             # Fetch the next page of data
             response = self.call_api(params)
-            edge = response.get("edges", [{}])[0]  # Directly access the first (only) edge
-            products_data = edge.get("node", {}).get("products", {})
+            products_data = response.get("node", {}).get("products", {})
             product_ids.extend(
-                node["id"] for item in products_data.get("edges", [])
+                node["id"]
+                for item in products_data.get("edges", [])
                 if (node := item.get("node")) and "id" in node
             )
             page_info = products_data.get("pageInfo", {})
 
-            # Extract product IDs from the next page
-            product_ids.extend(
-                node["id"] for item in next_edges
-                if (node := item.get("node")) and "id" in node
-            )
-
-            # Break if no more pages
-            if not page_info.get("hasNextPage"):
-                break
-
         return product_ids
 
     def transform_object(self, obj):
+        """
+        Transforms a collection object.
+
+        Args:
+            obj (dict): Collection object.
+
+        Returns:
+            dict: Transformed collection object.
+        """
         obj["collections_type"] = "SMART" if obj.get("ruleSet") else "MANUAL"
         if obj.get("products"):
             obj["products"] = self.transform_products(obj)
         return obj
 
     def get_query(self):
-        qry = """
+        """
+        Returns the GraphQL query for fetching collections.
+
+        Returns:
+            str: GraphQL query string.
+        """
+        return """
         query Collections($first: Int!, $after: String, $query: String, $childafter: String) {
             collections(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
@@ -121,6 +141,6 @@ class Collections(ShopifyGqlStream):
             }
         }
         """
-        return qry
 
-Context.stream_objects['collections'] = Collections
+
+Context.stream_objects["collections"] = Collections

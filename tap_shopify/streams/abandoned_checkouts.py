@@ -3,14 +3,23 @@ from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 class AbandonedCheckouts(ShopifyGqlStream):
+    """Stream class for Abandoned Checkouts in Shopify."""
     name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
 
-    # pylint: disable=W0221
+    # pylint: disable=arguments-differ
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns query and params for filtering, pagination
+        Returns query parameters for filtering and pagination.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str, optional): Pagination cursor.
+
+        Returns:
+            dict: Query parameters.
         """
         filter_key = "updated_at"
         params = {
@@ -21,21 +30,45 @@ class AbandonedCheckouts(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-    def process_sub_entities(self, data, entity_name):
+    @classmethod
+    def process_sub_entities(cls, data, entity_name):
+        """
+        Processes sub-entities from the response data.
+
+        Args:
+            data (dict): Response data.
+            entity_name (str): Name of the entity to process.
+
+        Returns:
+            list: List of processed sub-entities.
+        """
         sub_entities = []
-
         for item in data[entity_name]["edges"]:
-            if (node := item.get("node")):
+            if node := item.get("node"):
                 sub_entities.append(node)
-
         return sub_entities
 
     def transform_object(self, obj):
+        """
+        Transforms the object by processing its sub-entities.
+
+        Args:
+            obj (dict): Object to transform.
+
+        Returns:
+            dict: Transformed object.
+        """
         obj["lineItems"] = self.process_sub_entities(obj, entity_name="lineItems")
         return obj
 
     def get_query(self):
-        qry = """
+        """
+        Returns the GraphQL query for fetching abandoned checkouts.
+
+        Returns:
+            str: GraphQL query string.
+        """
+        return """
         query abandonedcheckouts($first: Int!, $after: String, $query: String) {
             abandonedCheckouts(first: $first, after: $after, query: $query) {
                 edges {
@@ -261,7 +294,6 @@ class AbandonedCheckouts(ShopifyGqlStream):
             }
         }
         """
-        return qry
 
 
 Context.stream_objects["abandoned_checkouts"] = AbandonedCheckouts

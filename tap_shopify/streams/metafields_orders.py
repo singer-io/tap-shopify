@@ -1,59 +1,57 @@
+"""MetafieldsOrders stream for Shopify tap."""
+
 from tap_shopify.context import Context
 from tap_shopify.streams.metafields import Metafields
 
 
 class MetafieldsOrders(Metafields):
-    name = 'metafields_orders'
+    """Stream class for metafields associated with orders."""
+    name = "metafields_orders"
     data_key = "orders"
 
     def get_query(self):
-        qry = """
-            query getProductMetafields($first: Int!, $after: String, $query: String, $childafter: String) {
-                orders(first: $first, after: $after, query: $query) {
-                    edges {
+        """Returns the GraphQL query for fetching order metafields."""
+        return """
+        query getProductMetafields(
+            $first: Int!, $after: String, $query: String, $childafter: String
+        ) {
+            orders(first: $first, after: $after, query: $query) {
+                edges {
                     node {
                         metafields(first: $first, after: $childafter) {
-                        edges {
-                            node {
-                            id
-                            ownerType
-                            value
-                            type
-                            key
-                            createdAt
-                            namespace
-                            description
-                            updatedAt
-                            owner {
-                                ... on Customer {
-                                id
-                                }
-                                ... on Product {
-                                id
-                                }
-                                ... on Order {
-                                id
-                                }
-                                ... on Collection {
-                                id
+                            edges {
+                                node {
+                                    id
+                                    ownerType
+                                    value
+                                    type
+                                    key
+                                    createdAt
+                                    namespace
+                                    description
+                                    updatedAt
+                                    owner {
+                                        ... on Order {
+                                            id
+                                        }
+                                    }
                                 }
                             }
+                            pageInfo {
+                                hasNextPage
+                                endCursor
                             }
-                        }
-                        pageInfo {
-                            hasNextPage
-                            endCursor
-                        }
                         }
                         id
                     }
-                    }
-                    pageInfo {
+                }
+                pageInfo {
                     endCursor
                     hasNextPage
-                    }
                 }
-                }"""
-        return qry
+            }
+        }"""
 
-Context.stream_objects['metafields_orders'] = MetafieldsOrders
+
+# Register the stream object in the context
+Context.stream_objects["metafields_orders"] = MetafieldsOrders

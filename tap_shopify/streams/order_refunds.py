@@ -6,14 +6,24 @@ from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
 class OrderRefunds(ShopifyGqlStream):
-    name = 'order_refunds'
+    """Stream class for fetching order refunds from Shopify"""
+
+    name = "order_refunds"
     data_key = "orders"
     child_data_key = "refunds"
     replication_key = "updatedAt"
 
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns query and params for filtering, pagination
+        Returns query and params for filtering and pagination.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str, optional): Pagination cursor. Defaults to None.
+
+        Returns:
+            dict: Query parameters.
         """
         filter_key = "updated_at"
         params = {
@@ -26,7 +36,10 @@ class OrderRefunds(ShopifyGqlStream):
 
     def get_objects(self):
         """
-        Fetch order refund objects within date windows, yielding each refund individually
+        Fetch order refund objects within date windows, yielding each refund individually.
+
+        Yields:
+            dict: Transformed refund object.
         """
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
@@ -60,27 +73,39 @@ class OrderRefunds(ShopifyGqlStream):
                 if not page_info.get("hasNextPage", False):
                     break
 
-            # Move to next date window
             last_updated_at = query_end
 
     def transform_object(self, obj):
-        """Transform refund objects by extracting refund line items from edges"""
-        obj["refundLineItems"] = [edge.get("node") for edge in obj.get("refundLineItems", {}).get("edges", [])]
+        """
+        Transform refund objects by extracting refund line items from edges.
+
+        Args:
+            obj (dict): Refund object.
+
+        Returns:
+            dict: Transformed refund object.
+        """
+        obj["refundLineItems"] = [
+            edge.get("node") for edge in obj.get("refundLineItems", {}).get("edges", [])
+        ]
         return obj
 
     def sync(self):
-        """Sync order refunds and update bookmarks"""
+        """
+        Sync order refunds and update bookmarks.
+
+        Yields:
+            dict: Synced refund object.
+        """
         start_time = utils.now().replace(microsecond=0)
         max_bookmark_value = current_bookmark_value = self.get_bookmark()
 
         for obj in self.get_objects():
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
-            # Track max bookmark value seen
             if replication_value > max_bookmark_value:
                 max_bookmark_value = replication_value
 
-            # Only yield records that are new or updated since the last sync
             if replication_value >= current_bookmark_value:
                 yield obj
 
@@ -89,7 +114,13 @@ class OrderRefunds(ShopifyGqlStream):
         self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def get_query(self):
-        qry = """query GetOrderRefunds($first: Int!, $after: String, $query: String) {
+        """
+        Returns the GraphQL query for fetching order refunds.
+
+        Returns:
+            str: GraphQL query string.
+        """
+        return """query GetOrderRefunds($first: Int!, $after: String, $query: String) {
                     orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                         edges {
                             node {
@@ -151,6 +182,6 @@ class OrderRefunds(ShopifyGqlStream):
                         }
                     }
                 }"""
-        return qry
 
-Context.stream_objects['order_refunds'] = OrderRefunds
+
+Context.stream_objects["order_refunds"] = OrderRefunds

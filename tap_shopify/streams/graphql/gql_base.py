@@ -53,7 +53,8 @@ class ShopifyGqlStream(Stream):
         """
         raise NotImplementedError("Function Not Implemented")
 
-    def transform_object(self, obj):
+    @classmethod
+    def transform_object(cls, obj):
         """
         Modify this to perform custom transformation on each object
         """

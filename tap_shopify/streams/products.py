@@ -1,18 +1,26 @@
-
 from tap_shopify.context import Context
 from tap_shopify.streams.graphql import ShopifyGqlStream
 
 
-
 class Products(ShopifyGqlStream):
-    name = 'products'
+    """Stream class for Shopify Products"""
+
+    name = "products"
     data_key = "products"
     replication_key = "updatedAt"
 
-    # pylint: disable=W0221
+    # pylint: disable=arguments-differ
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
-        Returns query and params for filtering, pagination
+        Returns query and params for filtering and pagination.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str, optional): Pagination cursor.
+
+        Returns:
+            dict: Query parameters.
         """
         filter_key = "updated_at"
         params = {
@@ -23,10 +31,18 @@ class Products(ShopifyGqlStream):
             params["after"] = cursor
         return params
 
-
     def transform_object(self, obj):
+        """
+        Transforms the product object by extracting media information.
+
+        Args:
+            obj (dict): Product object.
+
+        Returns:
+            dict: Transformed product object.
+        """
         media = obj.get("media")
-        media_list  = []
+        media_list = []
         if media and "edges" in media:
             for edge in media.get("edges"):
                 node = edge.get("node")
@@ -37,9 +53,11 @@ class Products(ShopifyGqlStream):
 
     def get_query(self):
         """
-        Returns GraphQL query to get all products
-        """
+        Returns the GraphQL query to fetch all products.
 
+        Returns:
+            str: GraphQL query string.
+        """
         return """
         query GetProducts($first: Int!, $after: String, $query: String) {
             products(first: $first, after: $after, query: $query) {
@@ -143,7 +161,6 @@ class Products(ShopifyGqlStream):
                                             mimeType
                                             fileSize
                                         }
-
                                     }
                                 }
                             }
@@ -158,4 +175,5 @@ class Products(ShopifyGqlStream):
         }
         """
 
-Context.stream_objects['products'] = Products
+
+Context.stream_objects["products"] = Products
