@@ -100,7 +100,10 @@ class BaseTapTest(BaseCase):
             "products": default,
             "product_variants": default,
             "inventory_items": default,
-            "metafields": meta,
+            "metafields_collections": meta,
+            "metafields_customers": meta,
+            "metafields_orders": meta,
+            "metafields_products": meta,
             "transactions": {
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
