@@ -238,8 +238,8 @@ def get_metafields_query(resource):
         return get_metafield_query_shop()
 
     qry = """
-        query getMetafields( $first: Int!, $after: String $query: String) {
-        RESOURCE(first: $first after: $after query: $query) {
+        query getMetafields( $first: Int!, $after: String, $query: String ) {
+        RESOURCE(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
             edges {
             node {
                 metafields(first: $first) {
