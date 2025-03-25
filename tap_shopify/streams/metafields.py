@@ -25,20 +25,6 @@ class Metafields(ShopifyGqlStream, ABC):
     def get_query(self):
         """Placeholder for get_query method."""
 
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query and params for filtering and pagination.
-        """
-        rkey = "updated_at"
-        params = {
-            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
-
     def transform_object(self, obj):
         """
         Transforms a metafield object for output.

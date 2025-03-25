@@ -1,5 +1,6 @@
 from datetime import timedelta
 import json
+import re
 import urllib
 import shopify
 
@@ -60,6 +61,25 @@ class ShopifyGqlStream(Stream):
         """
         return obj
 
+    @classmethod
+    def camel_to_snake(cls, name):
+        """
+        Convert camelCase to snake_case
+
+        Args:
+            name (str): Input string in camelCase
+
+        Returns:
+            str: Converted string in snake_case
+        """
+        # Handle special cases
+        if not name:
+            return name
+
+        # Use regex to insert underscore before capital letters
+        pattern = re.compile(r'(?<!^)(?=[A-Z])')
+        return pattern.sub('_', name).lower()
+
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
@@ -73,7 +93,7 @@ class ShopifyGqlStream(Stream):
         Returns:
             dict: Dictionary of query parameters.
         """
-        rkey = self.replication_key
+        rkey = self.camel_to_snake(self.replication_key)
         params = {
             "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
             "first": self.results_per_page,

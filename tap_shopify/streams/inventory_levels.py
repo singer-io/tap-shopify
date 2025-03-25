@@ -11,20 +11,6 @@ class InventoryLevels(ShopifyGqlStream):
     child_data_key = "inventoryLevels"
     replication_key = "updatedAt"
 
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query and params for filtering, pagination.
-        """
-        filter_key = "updated_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
-
     def get_next_page_child(self, parent_id, cursor):
         """
         Gets all child objects efficiently with pagination.

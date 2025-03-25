@@ -9,28 +9,6 @@ class Locations(ShopifyGqlStream):
     data_key = "locations"
     replication_key = "createdAt"
 
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query parameters for filtering and pagination.
-
-        Args:
-            updated_at_min (str): Minimum updated_at timestamp.
-            updated_at_max (str): Maximum updated_at timestamp.
-            cursor (str, optional): Pagination cursor.
-
-        Returns:
-            dict: Query parameters.
-        """
-        filter_key = "created_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
-
     def get_query(self):
         """
         Returns the GraphQL query for fetching locations.
