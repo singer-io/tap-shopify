@@ -2,4 +2,4 @@
 tap shopify graphql module
 """
 
-from .gql_base import ShopifyGqlStream, ShopifyGraphQLError
+from .gql_base import ShopifyGqlStream

@@ -1,8 +1,8 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream
 
 
-class Products(ShopifyGqlStream):
+class Products(Stream):
     """Stream class for Shopify Products"""
 
     name = "products"
