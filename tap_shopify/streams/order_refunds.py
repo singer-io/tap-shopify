@@ -53,8 +53,7 @@ class OrderRefunds(Stream):
 
             last_updated_at = query_end
 
-    @classmethod
-    def transform_object(cls, obj):
+    def transform_object(self, obj):
         """
         Transform refund objects by extracting refund line items from edges.
 

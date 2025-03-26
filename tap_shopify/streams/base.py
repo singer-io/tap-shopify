@@ -155,8 +155,7 @@ class Stream():
         """
         raise NotImplementedError("Function Not Implemented")
 
-    @classmethod
-    def transform_object(cls, obj):
+    def transform_object(self, obj):
         """
         Modify this to perform custom transformation on each object
         """
@@ -225,28 +224,35 @@ class Stream():
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 and 500 handling.
+    # pylint: disable=E1123
     @shopify_error_handling
     def call_api(self, query_params, query=None, data_key=None):
         """
-        - Modifies the default call api implementation to support GraphQL
+        - Modifies the default call API implementation to support GraphQL
         - Returns response Object dict
         """
-
         try:
             query = query or self.get_query()
             data_key = data_key or self.data_key
             LOGGER.info("Fetching %s %s", self.name, query_params)
-            response = shopify.GraphQL().execute(query=query, variables=query_params, timeout=self.request_timeout)
+            response = shopify.GraphQL().execute(
+                query=query,
+                variables=query_params,
+                timeout=self.request_timeout
+            )
             response = json.loads(response)
             if "errors" in response.keys():
-                raise ShopifyAPIError(response['errors'])
+                raise ShopifyAPIError(response["errors"])
+
             data = response.get("data", {}).get(data_key, {})
             return data
+
         except ShopifyAPIError as gql_error:
-            LOGGER.error("GraphQL Error %s", gql_error)
+            LOGGER.error("GraphQL Error: %s", gql_error)
             raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
+
         except Exception as exc:
-            LOGGER.error("Unexpected error occurred.",)
+            LOGGER.error("Unexpected error occurred.")
             raise exc
 
     # pylint: disable=W0221
