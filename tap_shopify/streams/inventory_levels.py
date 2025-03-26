@@ -1,11 +1,10 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import DATE_WINDOW_SIZE
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
 
 
-class InventoryLevels(ShopifyGqlStream):
+class InventoryLevels(Stream):
     name = "inventory_levels"
     data_key = "locations"
     child_data_key = "inventoryLevels"

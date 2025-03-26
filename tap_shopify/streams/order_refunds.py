@@ -1,11 +1,10 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import DATE_WINDOW_SIZE
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
 
 
-class OrderRefunds(ShopifyGqlStream):
+class OrderRefunds(Stream):
     """Stream class for fetching order refunds from Shopify"""
 
     name = "order_refunds"

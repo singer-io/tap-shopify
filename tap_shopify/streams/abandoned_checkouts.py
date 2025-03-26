@@ -1,8 +1,8 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream
 
 
-class AbandonedCheckouts(ShopifyGqlStream):
+class AbandonedCheckouts(Stream):
     """Stream class for Abandoned Checkouts in Shopify."""
     name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"

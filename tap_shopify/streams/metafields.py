@@ -5,15 +5,15 @@ import json
 from singer import utils, get_logger, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql.gql_base import (
-    ShopifyGqlStream,
+from tap_shopify.streams.base import (
+    Stream,
     DATE_WINDOW_SIZE,
 )
 
 LOGGER = get_logger()
 
 
-class Metafields(ShopifyGqlStream, ABC):
+class Metafields(Stream, ABC):
     """Stream class for Shopify Metafields"""
 
     name = None
