@@ -5,10 +5,7 @@ import json
 from singer import utils, get_logger, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.base import (
-    Stream,
-    DATE_WINDOW_SIZE,
-)
+from tap_shopify.streams.base import Stream
 
 LOGGER = get_logger()
 
@@ -74,10 +71,9 @@ class Metafields(Stream, ABC):
         """
         sync_start = utils.now().replace(microsecond=0)
         last_updated_at = self.get_bookmark()
-        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         while last_updated_at < sync_start:
-            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
 
             has_next_page = True

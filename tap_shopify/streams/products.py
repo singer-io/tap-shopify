@@ -38,7 +38,7 @@ class Products(Stream):
         """
         return """
         query GetProducts($first: Int!, $after: String, $query: String) {
-            products(first: $first, after: $after, query: $query) {
+            products(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
                     node {
                         id

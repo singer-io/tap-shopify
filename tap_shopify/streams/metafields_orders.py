@@ -12,7 +12,7 @@ class MetafieldsOrders(Metafields):
     def get_query(self):
         """Returns the GraphQL query for fetching order metafields."""
         return """
-        query getProductMetafields(
+        query getOrderMetafields(
             $first: Int!, $after: String, $query: String, $childafter: String
         ) {
             orders(first: $first, after: $after, query: $query) {

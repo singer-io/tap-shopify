@@ -13,7 +13,7 @@ class MetafieldsCollections(Metafields):
     def get_query(self):
         """Return the GraphQL query for fetching collection metafields."""
         return """
-            query getProductMetafields(
+            query getCollectionsMetafields(
                 $first: Int!, $after: String, $query: String, $childafter: String
             ) {
                 collections(first: $first, after: $after, query: $query) {

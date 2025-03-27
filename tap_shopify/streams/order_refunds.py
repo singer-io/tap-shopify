@@ -1,7 +1,7 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
+from tap_shopify.streams.base import Stream
 
 
 class OrderRefunds(Stream):
@@ -21,11 +21,10 @@ class OrderRefunds(Stream):
         """
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
-        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Process each date window
         while last_updated_at < sync_start:
-            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
             cursor = None
 
@@ -67,28 +66,6 @@ class OrderRefunds(Stream):
             edge.get("node") for edge in obj.get("refundLineItems", {}).get("edges", [])
         ]
         return obj
-
-    def sync(self):
-        """
-        Sync order refunds and update bookmarks.
-
-        Yields:
-            dict: Synced refund object.
-        """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
-
-        for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
-
-        # Update bookmark to the latest value, but not beyond sync start time
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def get_query(self):
         """
