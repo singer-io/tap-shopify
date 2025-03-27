@@ -43,6 +43,7 @@ class InventoryLevels(Stream):
             cursor = page_info.get("endCursor")
             has_next_page = page_info.get("hasNextPage", False)
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Retrieves objects in paginated batches.
