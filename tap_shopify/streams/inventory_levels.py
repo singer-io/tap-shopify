@@ -1,29 +1,14 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import DATE_WINDOW_SIZE
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
 
 
-class InventoryLevels(ShopifyGqlStream):
+class InventoryLevels(Stream):
     name = "inventory_levels"
     data_key = "locations"
     child_data_key = "inventoryLevels"
     replication_key = "updatedAt"
-
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query and params for filtering, pagination.
-        """
-        filter_key = "updated_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
 
     def get_next_page_child(self, parent_id, cursor):
         """
@@ -93,24 +78,6 @@ class InventoryLevels(ShopifyGqlStream):
 
             # Move to the next date window
             last_updated_at = query_end
-
-    def sync(self):
-        """
-        Sync inventory levels and update bookmarks.
-        """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
-
-        for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj["updatedAt"])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
-
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def get_query(self):
         """

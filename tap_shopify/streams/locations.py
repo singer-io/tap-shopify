@@ -1,35 +1,14 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream
 
-
-class Locations(ShopifyGqlStream):
+class Locations(Stream):
     """Stream class for Shopify Locations"""
 
     name = "locations"
     data_key = "locations"
+    # Currently, the replication key is set to 'createdAt' because the Shopify
+    # locations graphql endpoint doesn't allow the filter on 'updatedAt' field.
     replication_key = "createdAt"
-
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query parameters for filtering and pagination.
-
-        Args:
-            updated_at_min (str): Minimum updated_at timestamp.
-            updated_at_max (str): Maximum updated_at timestamp.
-            cursor (str, optional): Pagination cursor.
-
-        Returns:
-            dict: Query parameters.
-        """
-        filter_key = "created_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
 
     def get_query(self):
         """

@@ -5,15 +5,15 @@ import json
 from singer import utils, get_logger, metrics
 
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql.gql_base import (
-    ShopifyGqlStream,
+from tap_shopify.streams.base import (
+    Stream,
     DATE_WINDOW_SIZE,
 )
 
 LOGGER = get_logger()
 
 
-class Metafields(ShopifyGqlStream, ABC):
+class Metafields(Stream, ABC):
     """Stream class for Shopify Metafields"""
 
     name = None
@@ -24,20 +24,6 @@ class Metafields(ShopifyGqlStream, ABC):
     @abstractmethod
     def get_query(self):
         """Placeholder for get_query method."""
-
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query and params for filtering and pagination.
-        """
-        rkey = "updated_at"
-        params = {
-            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
 
     def transform_object(self, obj):
         """
@@ -126,22 +112,3 @@ class Metafields(ShopifyGqlStream, ABC):
                 cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
             last_updated_at = query_end
-
-    def sync(self):
-        """
-        Sync metafields and update bookmarks.
-        """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
-
-        for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
-
-        # Update bookmark to the latest value, but not beyond sync start time
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))

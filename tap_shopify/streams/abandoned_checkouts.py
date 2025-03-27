@@ -1,34 +1,12 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream
 
 
-class AbandonedCheckouts(ShopifyGqlStream):
+class AbandonedCheckouts(Stream):
     """Stream class for Abandoned Checkouts in Shopify."""
     name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
-
-    # pylint: disable=arguments-differ
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query parameters for filtering and pagination.
-
-        Args:
-            updated_at_min (str): Minimum updated_at timestamp.
-            updated_at_max (str): Maximum updated_at timestamp.
-            cursor (str, optional): Pagination cursor.
-
-        Returns:
-            dict: Query parameters.
-        """
-        filter_key = "updated_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
 
     @classmethod
     def process_sub_entities(cls, data, entity_name):

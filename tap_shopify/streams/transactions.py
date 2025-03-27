@@ -1,38 +1,16 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import DATE_WINDOW_SIZE
-from tap_shopify.streams.graphql import ShopifyGqlStream
+from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
 
 
-class Transactions(ShopifyGqlStream):
+class Transactions(Stream):
     """Stream class for Shopify transactions."""
 
     name = "transactions"
     data_key = "orders"
     child_data_key = "transactions"
     replication_key = "createdAt"
-
-    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
-        """
-        Returns query and params for filtering and pagination.
-
-        Args:
-            updated_at_min (str): Minimum updated_at timestamp.
-            updated_at_max (str): Maximum updated_at timestamp.
-            cursor (str, optional): Pagination cursor.
-
-        Returns:
-            dict: Query parameters.
-        """
-        filter_key = "updated_at"
-        params = {
-            "query": f"{filter_key}:>='{updated_at_min}' AND {filter_key}:<'{updated_at_max}'",
-            "first": self.results_per_page,
-        }
-        if cursor:
-            params["after"] = cursor
-        return params
 
     def get_objects(self):
         """
