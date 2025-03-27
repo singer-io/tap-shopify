@@ -3,8 +3,6 @@ from datetime import timedelta
 import json
 
 from singer import utils, get_logger, metrics
-
-from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
 LOGGER = get_logger()

@@ -5,6 +5,8 @@ from tap_shopify.streams.base import Stream
 
 
 class InventoryLevels(Stream):
+    """Stream class for inventory levels."""
+
     name = "inventory_levels"
     data_key = "locations"
     child_data_key = "inventoryLevels"
@@ -13,6 +15,14 @@ class InventoryLevels(Stream):
     def get_next_page_child(self, parent_id, cursor, child_query):
         """
         Gets all child objects efficiently with pagination.
+
+        Args:
+            parent_id (str): The ID of the parent object.
+            cursor (str): The cursor for pagination.
+            child_query (str): The query for child objects.
+
+        Yields:
+            dict: The child object.
         """
         has_next_page = True
         while has_next_page:
@@ -25,25 +35,24 @@ class InventoryLevels(Stream):
             data = self.call_api(child_query_params)
             for edge in data.get("edges", []):
                 node = edge.get("node", {})
-
                 child_data = node.get(self.child_data_key, {})
                 child_edges = child_data.get("edges", [])
-                for child_obj in child_edges:
-                    yield child_obj
+                yield from child_edges
 
             page_info = child_data.get("pageInfo", {})
             cursor = page_info.get("endCursor")
             has_next_page = page_info.get("hasNextPage", False)
 
-    # pylint: disable=too-many-locals, too-many-nested-blocks
     def get_objects(self):
         """
         Retrieves objects in paginated batches.
+
+        Yields:
+            dict: The transformed object.
         """
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
 
-        # Process each date window
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
@@ -71,19 +80,25 @@ class InventoryLevels(Stream):
                         child_cursor = child_page_info.get("endCursor")
 
                         # Get remaining child pages
-                        for child_obj in self.get_next_page_child(parent_id, child_cursor, query_params["query"]):
+                        for child_obj in self.get_next_page_child(
+                            parent_id, child_cursor, query_params["query"]
+                        ):
                             transformed_obj = self.transform_object(child_obj.get("node"))
                             yield transformed_obj
 
                 page_info = data.get("pageInfo", {})
-                cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+                cursor = page_info.get("endCursor")
+                has_next_page = page_info.get("hasNextPage")
 
-            # Move to the next date window
             last_updated_at = query_end
 
+    # pylint: disable=C0301
     def get_query(self):
         """
         Returns the GraphQL query for inventory levels.
+
+        Returns:
+            str: The GraphQL query string.
         """
         return """query GetInventoryLevels($first: Int!, $after: String, $query: String, $childafter: String, $parentquery: String) {
             locations(first: $first, after: $after, query: $parentquery, sortKey: ID, includeInactive: true, includeLegacy: true) {
@@ -128,5 +143,6 @@ class InventoryLevels(Stream):
                 }
             }
         }"""
+
 
 Context.stream_objects["inventory_levels"] = InventoryLevels
