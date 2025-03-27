@@ -45,7 +45,7 @@ class BaseTapTest(BaseCase):
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
-            'date_window_size': 30,
+            'date_window_size': 180,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
             # 'results_per_page': '50'
         }
@@ -109,12 +109,12 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
+                self.API_LIMIT: 150},
             "locations": {
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "inventory_levels": default,
             "events": {
@@ -300,13 +300,13 @@ class BaseTapTest(BaseCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
-        self.store_1_streams = {'custom_collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+        self.store_1_streams = {'collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'events'}
         # removed 'abandoned_checkouts' from store 2 streams, as per the Doc:
         #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        self.store_2_streams = {'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
+        self.store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'events'}
 
     #modified this method to accommodate replication key in the current_state
     def calculated_states_by_stream(self, current_state):

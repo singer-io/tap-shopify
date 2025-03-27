@@ -29,14 +29,7 @@ class BookmarkTest(BaseTapTest):
         """
         max_bookmarks = {}
         for stream, batch in sync_records.items():
-            # The metafields fetches the fields from `products`, `customers`, `orders` and `custom_collections`
-            # if the parent streams are selected along with the `shop` fields.
-            # These different streams have its own bookmark based on its parent.
-            # Hence filtered out the main records i.e. the `shop` records from all the records.
-            if stream != 'metafields':
-                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
-            else:
-                upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert' and m.get('data').get('owner_resource') == 'shop']
+            upsert_messages = [m for m in batch.get('messages') if m['action'] == 'upsert']
             stream_bookmark_key = self.expected_replication_keys().get(stream, set())
             assert len(stream_bookmark_key) == 1  # There shouldn't be a compound replication key
             stream_bookmark_key = stream_bookmark_key.pop()
@@ -85,7 +78,7 @@ class BookmarkTest(BaseTapTest):
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
                                if value == self.INCREMENTAL and key in testable_streams}
-        incremental_streams = incremental_streams - {'metafields'} # Created a separate test for metafields
+        incremental_streams = incremental_streams
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
