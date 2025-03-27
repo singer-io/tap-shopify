@@ -37,7 +37,7 @@ class InterruptedSyncTest(BaseTapTest):
         conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
         expected_streams = {'customers',
-                            'events',
+                            'collections'
                             'orders',
                             'products',
                             'transactions'}
@@ -89,7 +89,6 @@ class InterruptedSyncTest(BaseTapTest):
         base_state = {'bookmarks':
                      {'currently_sync_stream': currently_syncing_stream,
                       'customers': first_sync_state.get('bookmarks').get('customers'),
-                      'events': first_sync_state.get('bookmarks').get('events'),
                       'orders': first_sync_state.get('bookmarks').get('orders'),
                       'products': first_sync_state.get('bookmarks').get('products'),
                       'transactions': first_sync_state.get('bookmarks').get('transactions')
