@@ -110,7 +110,12 @@ class BaseTapTest(BaseCase):
                 self.FOREIGN_KEYS: {"order_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE},
-            "locations": default,
+            "locations": {
+                self.REPLICATION_KEYS: {"createdAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            },
             "inventory_levels": default,
             "events": {
                 self.REPLICATION_KEYS: {"createdAt"},
