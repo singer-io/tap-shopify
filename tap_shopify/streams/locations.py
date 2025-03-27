@@ -1,12 +1,13 @@
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
-
 class Locations(Stream):
     """Stream class for Shopify Locations"""
 
     name = "locations"
     data_key = "locations"
+    # Currently, the replication key is set to 'createdAt' because the Shopify
+    # locations graphql endpoint doesn't allow the filter on 'updatedAt' field.
     replication_key = "createdAt"
 
     def get_query(self):
