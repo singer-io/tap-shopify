@@ -23,7 +23,7 @@ class TestShopifyErrorHandling(unittest.TestCase):
         ["connection_reset_error", lambda: ConnectionResetError("Connection reset by peer"), ConnectionResetError],
         ["shopify_api_error", lambda: ShopifyAPIError("Shopify API error"), ShopifyAPIError],
         ["pyactiveresource_connection_error", lambda: pyactiveresource.connection.Error("Resource connection error with timed out"), pyactiveresource.connection.Error],
-        ["socket_timeout_error", lambda: socket.timeout("The read operation timed out"), TimeoutError],
+        ["socket_timeout_error", lambda: socket.timeout("The read operation timed out"), socket.timeout],
         ["server_error", lambda: pyactiveresource.connection.ServerError(MockResponse("Server error", "https://shopify.com", 500)), pyactiveresource.connection.ServerError],
         ["formats_error", lambda: pyactiveresource.formats.Error("Format error"), pyactiveresource.formats.Error],
         ["json_decode_error", lambda: simplejson.scanner.JSONDecodeError("JSON decode error", "doc", 0), simplejson.scanner.JSONDecodeError],
