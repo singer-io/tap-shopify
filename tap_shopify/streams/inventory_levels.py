@@ -1,7 +1,7 @@
 from datetime import timedelta
 from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream, DATE_WINDOW_SIZE
+from tap_shopify.streams.base import Stream
 
 
 class InventoryLevels(Stream):
@@ -42,11 +42,10 @@ class InventoryLevels(Stream):
         """
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
-        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # Process each date window
         while last_updated_at < sync_start:
-            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
             has_next_page, cursor = True, None
 

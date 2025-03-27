@@ -138,6 +138,7 @@ class Stream():
     replication_method = 'INCREMENTAL'
     replication_key = 'updatedAt'
     key_properties = ['id']
+    date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
     data_key = None
     results_per_page = None
 
@@ -286,10 +287,9 @@ class Stream():
 
         last_updated_at = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
-        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         while last_updated_at < sync_start:
-            date_window_end = last_updated_at + timedelta(days=date_window_size)
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
             has_next_page, cursor = True, None
 
