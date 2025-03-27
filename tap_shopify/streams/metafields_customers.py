@@ -13,7 +13,7 @@ class MetafieldsCustomers(Metafields):
     def get_query(self):
         """Return the GraphQL query for fetching customer metafields."""
         return """
-            query getProductMetafields(
+            query getCustomerMetafields(
                 $first: Int!, $after: String, $query: String, $childafter: String
             ) {
                 customers(first: $first, after: $after, query: $query) {

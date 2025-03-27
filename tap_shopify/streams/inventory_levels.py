@@ -10,23 +10,26 @@ class InventoryLevels(Stream):
     child_data_key = "inventoryLevels"
     replication_key = "updatedAt"
 
-    def get_next_page_child(self, parent_id, cursor):
+    def get_next_page_child(self, parent_id, cursor, child_query):
         """
         Gets all child objects efficiently with pagination.
         """
-        query = self.get_child_query(parent_id)
         has_next_page = True
         while has_next_page:
             child_query_params = {
-                "after": cursor,
-                "parent_id": parent_id,
                 "first": self.results_per_page,
+                "parentquery": f"id:{parent_id.split('/')[-1]}",
+                "query": child_query,
+                "childafter": cursor,
             }
-            data = self.call_api(child_query_params, query, "location")
-            child_data = data.get(self.child_data_key, {})
+            data = self.call_api(child_query_params)
+            for edge in data.get("edges", []):
+                node = edge.get("node", {})
 
-            # Yield all edges in the current page
-            yield from child_data.get("edges", [])
+                child_data = node.get(self.child_data_key, {})
+                child_edges = child_data.get("edges", [])
+                for child_obj in child_edges:
+                    yield child_obj
 
             page_info = child_data.get("pageInfo", {})
             cursor = page_info.get("endCursor")
@@ -69,7 +72,7 @@ class InventoryLevels(Stream):
                         child_cursor = child_page_info.get("endCursor")
 
                         # Get remaining child pages
-                        for child_obj in self.get_next_page_child(parent_id, child_cursor):
+                        for child_obj in self.get_next_page_child(parent_id, child_cursor, query_params["query"]):
                             transformed_obj = self.transform_object(child_obj.get("node"))
                             yield transformed_obj
 
@@ -83,11 +86,11 @@ class InventoryLevels(Stream):
         """
         Returns the GraphQL query for inventory levels.
         """
-        return """query GetInventoryLevels($first: Int!, $after: String, $query: String) {
-            locations(first: $first, after: $after, sortKey: ID, includeInactive: true, includeLegacy: true) {
+        return """query GetInventoryLevels($first: Int!, $after: String, $query: String, $childafter: String, $parentquery: String) {
+            locations(first: $first, after: $after, query: $parentquery, sortKey: ID, includeInactive: true, includeLegacy: true) {
                 edges {
                     node {
-                        inventoryLevels(first: $first, query: $query) {
+                        inventoryLevels(first: $first, query: $query, after: $childafter) {
                             edges {
                                 node {
                                     canDeactivate
@@ -126,50 +129,5 @@ class InventoryLevels(Stream):
                 }
             }
         }"""
-
-    @classmethod
-    def get_child_query(cls, parent_id):
-        """
-        Returns the GraphQL query for child inventory levels.
-        """
-        return f"""
-            query GetInventoryLevels($first: Int!, $after: String, $query: String) {{
-                location(id: "{parent_id}") {{
-                    inventoryLevels(first: $first, after: $after, query: $query) {{
-                        edges {{
-                            node {{
-                                canDeactivate
-                                createdAt
-                                deactivationAlert
-                                id
-                                updatedAt
-                                item {{
-                                    id
-                                    variant {{
-                                        id
-                                    }}
-                                }}
-                                location {{
-                                    id
-                                }}
-                                quantities(
-                                    names: ["available", "committed", "damaged", "incoming", "on_hand", "quality_control", "reserved", "safety_stock"]
-                                ) {{
-                                    id
-                                    name
-                                    quantity
-                                    updatedAt
-                                }}
-                            }}
-                        }}
-                        pageInfo {{
-                            endCursor
-                            hasNextPage
-                        }}
-                    }}
-                }}
-            }}
-        """
-
 
 Context.stream_objects["inventory_levels"] = InventoryLevels

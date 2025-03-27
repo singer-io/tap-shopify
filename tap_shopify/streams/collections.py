@@ -18,14 +18,12 @@ class Collections(Stream):
         Returns:
             list: List of product IDs.
         """
-        product_ids = []
-
         # Extract product IDs from the first page
-        product_ids.extend(
+        product_ids = [
             node["id"]
             for item in data["products"]["edges"]
             if (node := item.get("node")) and "id" in node
-        )
+        ]
 
         # Handle pagination
         page_info = data["products"].get("pageInfo", {})
