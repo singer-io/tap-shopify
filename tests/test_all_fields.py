@@ -3,6 +3,18 @@ import os
 from tap_tester import runner, menagerie
 from base import BaseTapTest
 
+
+KNOWN_MISSING_FIELDS = {
+    'events': {
+        'attachments',
+        'edited',
+        'author',
+        'canDelete',
+        'rawMessage',
+        'canEdit',
+    }
+}
+
 class AllFieldsTest(BaseTapTest):
 
     @staticmethod
@@ -91,15 +103,5 @@ class AllFieldsTest(BaseTapTest):
                 self.assertTrue(expected_automatic_keys.issubset(expected_all_keys),
                                 msg=f'{expected_automatic_keys-expected_all_keys} is not in "expected_all_keys"')
 
-                if stream == 'orders':
-                    # No field named 'order_adjustments', 'total_price_usd' present in the 'order' object
-                    # Documentation: https://shopify.dev/api/admin-rest/2021-10/resources/order#resource_object
-                    # https://jira.talendforge.org/browse/TDL-15985
-                    # total_price_usd showing up in syncd records Sep 2023, still missing from docs
-                    bad_schema_fields = {'order_adjustments'}
-                    # missing data for 'taxExempt' and 'poNumber' in 'orders' stream
-                    # https://jira.talendforge.org/browse/TDL-25173
-                    missing_fields = {'taxExempt', 'poNumber'}
-                    expected_all_keys = expected_all_keys - bad_schema_fields - missing_fields
-
+                expected_all_keys = expected_all_keys - KNOWN_MISSING_FIELDS.get(stream, set())
                 self.assertSetEqual(expected_all_keys, actual_all_keys)
