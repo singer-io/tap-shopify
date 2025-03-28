@@ -108,7 +108,7 @@ class BaseTapTest(BaseCase):
             "transactions": {
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
-                self.FOREIGN_KEYS: {"order_id"},
+                self.FOREIGN_KEYS: {"order"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 150},
             "locations": {
