@@ -37,7 +37,7 @@ class InterruptedSyncTest(BaseTapTest):
         conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
         expected_streams = {'customers',
-                            'collections'
+                            'collections',
                             'orders',
                             'products',
                             'transactions'}
