@@ -1,85 +1,181 @@
-import shopify
-import singer
-from singer.utils import strptime_to_utc
+from datetime import timedelta
+from singer import metrics, utils
 from tap_shopify.context import Context
-from tap_shopify.streams.base import (Stream,
-                                      shopify_error_handling,
-                                      canonicalize)
-
-LOGGER = singer.get_logger()
-
-# https://help.shopify.com/en/api/reference/orders/transaction An
-# order can have no more than 100 transactions associated with it.
-TRANSACTIONS_RESULTS_PER_PAGE = 100
+from tap_shopify.streams.base import Stream
 
 
 class Transactions(Stream):
-    name = 'transactions'
-    replication_key = 'created_at'
-    replication_object = shopify.Transaction
-    parent_stream = None
-    # Added decorator over functions of shopify SDK
-    replication_object.find = shopify_error_handling(replication_object.find)
-    # Transactions have no updated_at property. Therefore we have
-    # nothing to set the `replication_method` member to.
-    # https://help.shopify.com/en/api/reference/orders/transaction#properties
+    """Stream class for Shopify transactions."""
 
-    def call_api_for_transactions(self, parent_object):
-        # set timeout
-        self.replication_object.set_timeout(self.request_timeout)
-        return self.replication_object.find(
-            limit=TRANSACTIONS_RESULTS_PER_PAGE,
-            order_id=parent_object.id,
-        )
-
-    def get_transactions(self, parent_object):
-        # We do not need to support paging on this substream. If that
-        # were to become untrue, reference Metafields.
-        #
-        # We do not user the `transactions` method of the order object
-        # like in metafield because they overrode it here to not
-        # support limit overrides.
-        #
-        # https://github.com/Shopify/shopify_python_api/blob/e8c475ccc84b1516912b37f691d00ecd24921e9b/shopify/resources/order.py#L17-L18
-
-        page = self.call_api_for_transactions(parent_object)
-        yield from page
-
-        while page.has_next_page():
-            page = page.next_page()
-            yield from page
+    name = "transactions"
+    data_key = "orders"
+    child_data_key = "transactions"
+    replication_key = "createdAt"
 
     def get_objects(self):
-        # Right now, it's ok for the user to select 'transactions' but not
-        # 'orders'. This data may not be all that useful but we're taking
-        # the less opinionated approach to begin with to favor simplicity.
-        # This is where you would need to add the behavior for enforcing
-        # that 'orders' is selected if we want to go that route in the
-        # future.
+        """
+        Fetch transaction objects within date windows, yielding each transaction individually.
 
-        # Get transactions, bookmarking at `transaction_orders`
-        selected_parent = Context.stream_objects['orders']()
-        selected_parent.name = "transaction_orders"
-        self.parent_stream = selected_parent
+        Yields:
+            dict: Transformed transaction object.
+        """
+        # Will always fetch the data from the start date and filter it in the code
+        # Shopify doesn't support filtering by updated_at for metafields
+        last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
+        sync_start = utils.now().replace(microsecond=0)
 
-        # Page through all `orders`, bookmarking at `transaction_orders`
-        for parent_object in selected_parent.get_objects():
-            transactions = self.get_transactions(parent_object)
-            for transaction in transactions:
-                yield transaction
+        while last_updated_at < sync_start:
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
+            query_end = min(sync_start, date_window_end)
+            cursor = None
+
+            while True:
+                query_params = self.get_query_params(last_updated_at, query_end, cursor)
+
+                with metrics.http_request_timer(self.name):
+                    data = self.call_api(query_params)
+
+                edges = data.get("edges", [])
+                for edge in edges:
+                    node = edge.get("node", {})
+                    child_edges = node.get(self.child_data_key, [])
+
+                    yield from (self.transform_object(child_obj) for child_obj in child_edges)
+
+                page_info = data.get("pageInfo", {})
+                cursor = page_info.get("endCursor")
+                if not page_info.get("hasNextPage", False):
+                    break
+
+            last_updated_at = query_end
 
     def sync(self):
-        bookmark = self.get_bookmark()
-        for transaction in self.get_objects():
-            transaction_dict = transaction.to_dict()
-            replication_value = strptime_to_utc(transaction_dict[self.replication_key])
-            if replication_value >= bookmark:
-                for field_name in ['token', 'version', 'ack', 'timestamp', 'build']:
-                    canonicalize(transaction_dict, field_name)
-                yield transaction_dict
+        """
+        Performs pseudo incremental sync.
+        """
+        start_time = utils.now().replace(microsecond=0)
+        max_bookmark_value = current_bookmark_value = self.get_bookmark()
 
-        max_bookmark = singer.get_bookmark(
-            Context.state, self.parent_stream.name, self.parent_stream.replication_key)
-        self.update_bookmark(max_bookmark)
+        for obj in self.get_objects():
+            replication_value = utils.strptime_to_utc(obj[self.replication_key])
 
-Context.stream_objects['transactions'] = Transactions
+            max_bookmark_value = max(max_bookmark_value, replication_value)
+
+            if replication_value >= current_bookmark_value:
+                yield obj
+
+        # Update bookmark to the latest value, but not beyond sync start time
+        max_bookmark_value = min(start_time, max_bookmark_value)
+        self.update_bookmark(utils.strftime(max_bookmark_value))
+
+    def get_query(self):
+        """
+        Returns query for fetching transactions.
+
+        Note:
+            Shopify has a limit of 100 transactions per order.
+
+        Returns:
+            str: GraphQL query string.
+        """
+        return """
+            query GetTransactions($first: Int!, $after: String, $query: String) {
+                orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+                    edges {
+                        node {
+                            transactions(first: 100) {
+                                accountNumber
+                                amountRoundingSet {
+                                    presentmentMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                    shopMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                                amountSet {
+                                    presentmentMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                    shopMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                                authorizationCode
+                                authorizationExpiresAt
+                                createdAt
+                                errorCode
+                                formattedGateway
+                                gateway
+                                id
+                                kind
+                                manualPaymentGateway
+                                maximumRefundableV2 {
+                                    amount
+                                    currencyCode
+                                }
+                                multiCapturable
+                                order {
+                                    id
+                                }
+                                parentTransaction {
+                                    accountNumber
+                                    createdAt
+                                    id
+                                    status
+                                    paymentId
+                                    processedAt
+                                    amountSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
+                                }
+                                paymentId
+                                processedAt
+                                receiptJson
+                                settlementCurrency
+                                settlementCurrencyRate
+                                shopifyPaymentsSet {
+                                    extendedAuthorizationSet {
+                                        extendedAuthorizationExpiresAt
+                                        standardAuthorizationExpiresAt
+                                    }
+                                    refundSet {
+                                        acquirerReferenceNumber
+                                    }
+                                }
+                                status
+                                test
+                                totalUnsettledSet {
+                                    presentmentMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                    shopMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
+                }
+            }
+        """
+
+
+Context.stream_objects["transactions"] = Transactions

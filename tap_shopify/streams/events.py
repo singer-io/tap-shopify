@@ -1,21 +1,84 @@
-import shopify
-
-from tap_shopify.streams.base import Stream
 from tap_shopify.context import Context
+from tap_shopify.streams.base import Stream
 
 
 class Events(Stream):
-    name = 'events'
-    replication_object = shopify.Event
-    replication_key = "created_at"
+    """Stream class for Shopify Events."""
 
-    def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):
-        return {
-            "since_id": since_id,
-            "created_at_min": updated_at_min,
-            "created_at_max": updated_at_max,
-            "limit": self.results_per_page,
-            status_key: "any"
-        }
+    name = "events"
+    data_key = "events"
+    replication_key = "createdAt"
 
-Context.stream_objects['events'] = Events
+    def get_query(self):
+        """
+        Returns the GraphQL query for fetching events.
+
+        Returns:
+            str: GraphQL query string.
+        """
+        return """
+            query GetEvents($first: Int!, $after: String, $query: String) {
+                events(first: $first, after: $after, query: $query, sortKey: CREATED_AT) {
+                    edges {
+                        node {
+                            id
+                            createdAt
+                            action
+                            appTitle
+                            attributeToApp
+                            attributeToUser
+                            criticalAlert
+                            message
+                            ... on BasicEvent {
+                                id
+                                subjectId
+                                subjectType
+                                action
+                                additionalContent
+                                additionalData
+                                appTitle
+                                arguments
+                                attributeToApp
+                                attributeToUser
+                                createdAt
+                                criticalAlert
+                                hasAdditionalContent
+                                message
+                                secondaryMessage
+                            }
+                            ... on CommentEvent {
+                                id
+                                action
+                                appTitle
+                                attachments {
+                                    fileExtension
+                                    id
+                                    name
+                                    size
+                                    url
+                                }
+                                attributeToApp
+                                attributeToUser
+                                author {
+                                    id
+                                }
+                                canDelete
+                                canEdit
+                                createdAt
+                                criticalAlert
+                                edited
+                                message
+                                rawMessage
+                            }
+                        }
+                    }
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
+                }
+            }
+        """
+
+
+Context.stream_objects["events"] = Events

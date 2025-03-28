@@ -37,7 +37,7 @@ class InterruptedSyncTest(BaseTapTest):
         conn_id = self.create_connection(original_properties=False, original_credentials=False)
 
         expected_streams = {'customers',
-                            'events',
+                            'collections',
                             'orders',
                             'products',
                             'transactions'}
@@ -89,7 +89,6 @@ class InterruptedSyncTest(BaseTapTest):
         base_state = {'bookmarks':
                      {'currently_sync_stream': currently_syncing_stream,
                       'customers': first_sync_state.get('bookmarks').get('customers'),
-                      'events': first_sync_state.get('bookmarks').get('events'),
                       'orders': first_sync_state.get('bookmarks').get('orders'),
                       'products': first_sync_state.get('bookmarks').get('products'),
                       'transactions': first_sync_state.get('bookmarks').get('transactions')
@@ -144,34 +143,15 @@ class InterruptedSyncTest(BaseTapTest):
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 resuming_sync_count = resuming_sync_record_count.get(stream, 0)
 
-                # The metafields fetches the fields from `products`, `customers`, `orders` and
-                # `custom_collections` if the parent streams are selected along with the `shop`
-                # fields.  These different streams have their own bookmark based on the parent.
-                # Hence filtered out the main records i.e. the `shop` records from all the records.
+                first_sync_messages = [
+                    record.get('data') for record
+                    in first_sync_records.get(stream, {}).get('messages', [])
+                    if record.get('action') == 'upsert']
 
-                if stream != 'metafields':
-                    first_sync_messages = [
-                        record.get('data') for record
-                        in first_sync_records.get(stream, {}).get('messages', [])
-                        if record.get('action') == 'upsert']
-
-                    resuming_sync_messages = [
-                        record.get('data') for record
-                        in resuming_sync_records.get(stream, {}).get('messages', [])
-                        if record.get('action') == 'upsert']
-
-                else:
-                    first_sync_messages = [
-                        record.get('data') for record
-                        in first_sync_records.get(stream, {}).get('messages', [])
-                        if record.get('action') == 'upsert'
-                        and record.get('data', {}).get('owner_resource') == 'shop']
-
-                    resuming_sync_messages = [
-                        record.get('data') for record
-                        in resuming_sync_records.get(stream, {}).get('messages', [])
-                        if record.get('action') == 'upsert'
-                        and record.get('data', {}).get('owner_resource') == 'shop']
+                resuming_sync_messages = [
+                    record.get('data') for record
+                    in resuming_sync_records.get(stream, {}).get('messages', [])
+                    if record.get('action') == 'upsert']
 
                 replication_key = next(iter(expected_replication_keys[stream]))
                 first_bookmark_stream = first_sync_state.get('bookmarks', {}).get(stream, {})

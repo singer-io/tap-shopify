@@ -1,71 +1,32 @@
-import datetime
+from datetime import timedelta
 import functools
+import json
+import re
 import socket
+import urllib
 from urllib.error import URLError
 import http
 import backoff
 import pyactiveresource
 import pyactiveresource.formats
+import shopify
 import simplejson
 import singer
 from singer import metrics, utils
-from singer.utils import strptime_to_utc
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 175
+RESULTS_PER_PAGE = 250
 
 # set default timeout of 300 seconds
 REQUEST_TIMEOUT = 300
 
-# We've observed 500 errors returned if this is too large (30 days was too
-# large for a customer)
-DATE_WINDOW_SIZE = 1
+DATE_WINDOW_SIZE = 30
 
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
 
-# We have observed transactions with receipt objects that contain both:
-#   - `token` and `Token`
-#   - `version` and `Version`
-#   - `ack` and `Ack`
-# keys on transactions where PayPal is the payment type. We reached out to
-# PayPal support and they told us the values should be the same, so one
-# can be safely ignored since its a duplicate. Example: The logic is to
-# prefer `token` if both are present and equal, convert `Token` -> `token`
-# if only `Token` is present, and throw an error if both are present and
-# their values are not equal.
-def canonicalize(transaction_dict, field_name):
-    field_name_upper = field_name.capitalize()
-    # Not all Shopify transactions have receipts. Facebook has been shown
-    # to push a null receipt through the transaction
-    receipt = transaction_dict.get('receipt', {})
-    if receipt:
-        value_lower = receipt.get(field_name)
-        value_upper = receipt.get(field_name_upper)
-        if value_lower and value_upper:
-            if value_lower == value_upper:
-                LOGGER.info((
-                    "Transaction (id=%d) contains a receipt "
-                    "that has `%s` and `%s` keys with the same "
-                    "value. Removing the `%s` key."),
-                            transaction_dict['id'],
-                            field_name,
-                            field_name_upper,
-                            field_name_upper)
-                transaction_dict['receipt'].pop(field_name_upper)
-            else:
-                raise ValueError((
-                    "Found Transaction (id={}) with a receipt that has "
-                    "`{}` and `{}` keys with the different "
-                    "values. Contact Shopify/PayPal support.").format(
-                        transaction_dict['id'],
-                        field_name_upper,
-                        field_name))
-        elif value_upper:
-            # pylint: disable=line-too-long
-            transaction_dict["receipt"][field_name] = transaction_dict['receipt'].pop(field_name_upper)
 
 # function to return request timeout
 def get_request_timeout():
@@ -78,6 +39,27 @@ def get_request_timeout():
         request_timeout = float(timeout_from_config)
 
     return request_timeout
+
+def execute_gql(self, query, variables=None, operation_name=None, timeout=None):
+    """
+    This overrides the `execute` method from ShopifyAPI(v12.6.0) to remove the print statement
+    and also to explicitly pass the timeout value to the urlopen method.
+    Ensure to check the original impl before making any changes or upgrading the SDK version,
+    as this modification may affect future updates
+    """
+    default_headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    headers = self.merge_headers(default_headers, self.headers)
+    data = {"query": query, "variables": variables, "operationName": operation_name}
+
+    req = urllib.request.Request(self.endpoint, json.dumps(data).encode("utf-8"), headers)
+
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return response.read().decode("utf-8")
+    except urllib.error.HTTPError as http_error:
+        raise http_error
+
+shopify.GraphQL.execute  = execute_gql
 
 def is_not_status_code_fn(status_code):
     def gen_fn(exc):
@@ -154,12 +136,10 @@ class Stream():
     # subclasses to change the bookmark key.
     name = None
     replication_method = 'INCREMENTAL'
-    replication_key = 'updated_at'
+    replication_key = 'updatedAt'
     key_properties = ['id']
-    # Controls which SDK object we use to call the API by default.
-    replication_object = None
-    # Status parameter override option
-    status_key = None
+    date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+    data_key = None
     results_per_page = None
 
     def __init__(self):
@@ -167,6 +147,37 @@ class Stream():
 
         # set request timeout
         self.request_timeout = get_request_timeout()
+
+    def get_query(self):
+        """
+        Provides GraphQL query
+        """
+        raise NotImplementedError("Function Not Implemented")
+
+    def transform_object(self, obj):
+        """
+        Modify this to perform custom transformation on each object
+        """
+        return obj
+
+    @classmethod
+    def camel_to_snake(cls, name):
+        """
+        Convert camelCase to snake_case
+
+        Args:
+            name (str): Input string in camelCase
+
+        Returns:
+            str: Converted string in snake_case
+        """
+        # Handle special cases
+        if not name:
+            return name
+
+        # Use regex to insert underscore before capital letters
+        pattern = re.compile(r'(?<!^)(?=[A-Z])')
+        return pattern.sub('_', name).lower()
 
     def get_bookmark(self):
         bookmark = (singer.get_bookmark(Context.state,
@@ -212,108 +223,105 @@ class Stream():
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
     # with shopify_error_handling to get 429 and 500 handling.
+    # pylint: disable=E1123
     @shopify_error_handling
-    def call_api(self, query_params):
-        # set timeout
-        self.replication_object.set_timeout(self.request_timeout)
-        return self.replication_object.find(**query_params)
+    def call_api(self, query_params, query=None, data_key=None):
+        """
+        - Modifies the default call API implementation to support GraphQL
+        - Returns response Object dict
+        """
+        try:
+            query = query or self.get_query()
+            data_key = data_key or self.data_key
+            LOGGER.info("Fetching %s %s", self.name, query_params)
+            response = shopify.GraphQL().execute(
+                query=query,
+                variables=query_params,
+                timeout=self.request_timeout
+            )
+            response = json.loads(response)
+            if "errors" in response.keys():
+                raise ShopifyAPIError(response["errors"])
 
-    def get_query_params(self, since_id, status_key, updated_at_min, updated_at_max):
-        return {
-            "since_id": since_id,
-            "updated_at_min": updated_at_min,
-            "updated_at_max": updated_at_max,
-            "limit": self.results_per_page,
-            status_key: "any"
+            data = response.get("data", {}).get(data_key, {})
+            return data
+
+        except ShopifyAPIError as gql_error:
+            LOGGER.error("GraphQL Error: %s", gql_error)
+            raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
+
+        except Exception as exc:
+            LOGGER.error("Unexpected error occurred.")
+            raise exc
+
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
+        """
+        rkey = self.camel_to_snake(self.replication_key)
+        params = {
+            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
+            "first": self.results_per_page,
         }
+        if cursor:
+            params["after"] = cursor
+        return params
 
     def get_objects(self):
-        last_sync_interrupted_at = self.get_updated_at_max()
-        updated_at_min = self.get_bookmark()
-        max_bookmark = updated_at_min
+        """
+        Returns:
+            - Yields list of objects for the stream
+        Performs
+            - Pagination & Filtering of stream
+            - Transformation and bookmarking
+        """
 
-        stop_time = singer.utils.now().replace(microsecond=0)
-        date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+        last_updated_at = self.get_bookmark()
+        sync_start = utils.now().replace(microsecond=0)
 
-        # Page through till the end of the resultset
-        while updated_at_min < stop_time:
-            # Bookmarking can also occur on the since_id
-            since_id = self.get_since_id() or 1
+        while last_updated_at < sync_start:
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
+            query_end = min(sync_start, date_window_end)
+            has_next_page, cursor = True, None
 
-            if since_id != 1:
-                LOGGER.info("Resuming sync from since_id %d", since_id)
-
-            # It's important that `updated_at_min` has microseconds
-            # truncated. Why has been lost to the mists of time but we
-            # think it has something to do with how the API treats
-            # microseconds on its date windows. Maybe it's possible to
-            # drop data due to rounding errors or something like that?
-            # If last sync was interrupted, set updated_at_max to
-            # updated_at_max bookmarked in the interrupted sync.
-            # This will make sure that records with lower id than since_id
-            # which got updated later won't be missed
-            updated_at_max = (last_sync_interrupted_at
-                              or updated_at_min + datetime.timedelta(days=date_window_size))
-            last_sync_interrupted_at = None
-
-            updated_at_max = min(updated_at_max, stop_time)
-            while True:
-                status_key = self.status_key or "status"
-                query_params = self.get_query_params(since_id,
-                                                     status_key,
-                                                     updated_at_min,
-                                                     updated_at_max)
+            while has_next_page:
+                query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    objects = self.call_api(query_params)
+                    data = self.call_api(query_params)
 
-                for obj in objects:
-                    if obj.id < since_id:
-                        # This verifies the api behavior expectation we
-                        # have that all results actually honor the
-                        # since_id parameter.
-                        raise OutOfOrderIdsError("obj.id < since_id: {} < {}".format(
-                            obj.id, since_id))
-                    replication_value = strptime_to_utc(getattr(obj, self.replication_key))
-                    if replication_value > max_bookmark:
-                        max_bookmark = replication_value
+                for edge in data.get("edges"):
+                    obj = self.transform_object(edge.get("node"))
                     yield obj
 
-                # You know you're at the end when the current page has
-                # less than the request size limits you set.
-                if len(objects) < self.results_per_page:
-                    # Save the updated_at_max as our bookmark as we've synced all rows up in our
-                    # window and can move forward. Also remove the since_id because we want to
-                    # restart at 1.
-                    stream_bookmarks = Context.state.get('bookmarks', {}).get(self.name, {})
-                    stream_bookmarks.pop('since_id', None)
-                    stream_bookmarks.pop('updated_at_max', None)
-                    self.update_bookmark(utils.strftime(updated_at_max))
-                    break
+                page_info =  data.get("pageInfo")
+                cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
-                if objects[-1].id != max([o.id for o in objects]):
-                    # This verifies the api behavior expectation we have
-                    # that all pages are internally ordered by the
-                    # `since_id`.
-                    raise OutOfOrderIdsError("{} is not the max id in objects ({})".format(
-                        objects[-1].id, max([o.id for o in objects])))
-                since_id = objects[-1].id
-
-                # Put since_id and updated_at_max into the state.
-                self.update_bookmark(since_id, bookmark_key='since_id')
-                self.update_bookmark(utils.strftime(updated_at_max), bookmark_key='updated_at_max')
-
-            updated_at_min = updated_at_max
-        bookmark = max(min(stop_time,
-                           max_bookmark),
-                       (stop_time - datetime.timedelta(days=date_window_size)))
-        self.update_bookmark(utils.strftime(bookmark))
+            last_updated_at = query_end
 
     def sync(self):
-        """Yield's processed SDK object dicts to the caller.
-
-        This is the default implementation. Get's all of self's objects
-        and calls to_dict on them with no further processing.
         """
+        Default implementation for sync method
+        """
+        start_time = utils.now().replace(microsecond=0)
+        max_bookmark_value = self.get_bookmark()
+
         for obj in self.get_objects():
-            yield obj.to_dict()
+            max_bookmark_value = max(
+                max_bookmark_value,
+                utils.strptime_to_utc(obj[self.replication_key])
+            )
+            yield obj
+
+        # Update bookmark to the latest value, but not beyond sync start time
+        max_bookmark_value = min(start_time, max_bookmark_value)
+        self.update_bookmark(utils.strftime(max_bookmark_value))

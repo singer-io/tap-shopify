@@ -31,7 +31,7 @@ class BookmarkTest(BaseTapTest):
     # abandoned checkouts are saved in the Shopify admin for three months.
     # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
     # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-    store_2_streams = {'collects', 'metafields', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'events', 'customers', 'custom_collections', 'orders'}
+    store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'customers', 'collections', 'orders'}
 
     def test_run_store_2(self):
         with self.subTest(store="store_2"):
@@ -77,7 +77,20 @@ class BookmarkTest(BaseTapTest):
        #simulated_states = self.calculated_states_by_stream(first_sync_bookmark)
 
         # We are hardcoding the updated state to ensure that we get atleast 1 record in second sync. These values have been provided after reviewing the max bookmark value for each of the streams
-        simulated_states = {'products': {'updatedAt': '2024-09-14T03:01:11.000000Z'}, 'collects': {'updated_at': '2021-09-01T09:08:28.000000Z'}, 'abandoned_checkouts': {'updated_at': '2022-02-02T16:00:00.000000Z'}, 'inventory_levels': {'updated_at': '2021-12-20T05:09:34.000000Z'}, 'locations': {'updated_at': '2021-07-20T09:00:22.000000Z'}, 'events': {'created_at': '2021-12-20T05:09:01.000000Z'}, 'inventory_items': {'updatedAt': '2021-09-15T19:44:11.000000Z'}, 'transactions': {'created_at': '2021-12-20T00:08:52-05:00'}, 'metafields': {'metafields_customer': '2025-01-21T13:28:24.000000Z'}, 'order_refunds': {'created_at': '2021-05-01T17:41:18.000000Z'}, 'customers': {'updated_at': '2021-12-20T05:08:17.000000Z'}, 'orders': {'updated_at': '2021-12-20T05:09:01.000000Z'}, 'custom_collections': {'updated_at': '2024-12-13T08:42:56.000000Z'}}
+        simulated_states = {
+            'products': {'updatedAt': '2025-01-23T14:08:21.000000Z'},
+            'abandoned_checkouts': {'updatedAt': '2025-01-20T06:56:01.000000Z'},
+            'inventory_levels': {'updatedAt': '2024-12-05T09:26:47.000000Z'},
+            'locations': {'createdAt': '2021-07-29T08:38:44.000000Z'},
+            'inventory_items': {'updatedAt': '2021-09-15T19:44:11.000000Z'},
+            'transactions': {'createdAt': '2024-12-05T09:58:40.000000Z'},
+            'metafields_customer': '2025-01-21T13:28:24.000000Z',
+            'order_refunds': {'updatedAt': '2024-12-05T09:58:40.000000Z'},
+            'customers': {'updatedAt': '2025-01-19T20:55:07.000000Z'},
+            'orders': {'updatedAt': '2024-12-05T09:59:35.000000Z'},
+            'collections': {'updatedAt': '2025-01-21T13:29:06.000000Z'},
+            'metafields_products': {'updatedAt': '2025-01-21T03:11:54.000000Z'}
+        }
 
         for stream, updated_state in simulated_states.items():
             new_state['bookmarks'][stream] = updated_state
@@ -101,23 +114,11 @@ class BookmarkTest(BaseTapTest):
                 first_sync_count = first_sync_record_count.get(stream, 0)
                 second_sync_count = second_sync_record_count.get(stream, 0)
 
-                # The metafields fetches the fields from `products`, `customers`, `orders` and `custom_collections`
-                # if the parent streams are selected along with the `shop` fields.
-                # These different streams have its own bookmark based on its parent.
-                # Hence filtered out the main records i.e. the `shop` records from all the records.
-                if stream != 'metafields':
-                    first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
-                                           if record.get('action') == 'upsert']
-                else:
-                    first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
-                                           if record.get('action') == 'upsert' and record.get('data').get('owner_resource') == 'shop']
+                first_sync_messages = [record.get('data') for record in first_sync_records.get(stream, {}).get('messages', [])
+                                        if record.get('action') == 'upsert']
 
-                if stream != 'metafields':
-                    second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
-                                            if record.get('action') == 'upsert']
-                else:
-                    second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
-                                        if record.get('action') == 'upsert' and record.get('data').get('owner_resource') == 'shop']
+                second_sync_messages = [record.get('data') for record in second_sync_records.get(stream, {}).get('messages', [])
+                                        if record.get('action') == 'upsert']
 
                 first_bookmark_value = first_sync_bookmark.get('bookmarks', {stream: None}).get(stream)
                 first_bookmark_value = list(first_bookmark_value.values())[0]
@@ -153,11 +154,8 @@ class BookmarkTest(BaseTapTest):
                     self.assertLessEqual(replication_key_value, second_bookmark_value_utc, msg="Second sync bookmark was set incorrectly, a record with a greater replication key value was synced")
 
                 # verify that we get less data in the 2nd sync
-                # collects has all the records with the same value of replication key, so we are removing from this assertion
-                if stream not in ('collects'):
-                    self.assertLess(second_sync_count, first_sync_count,
-                                    msg="Second sync does not have less records, bookmark usage not verified")
+                self.assertLess(second_sync_count, first_sync_count,
+                                msg="Second sync does not have less records, bookmark usage not verified")
 
                 # verify that we get atleast 1 record in the second sync
-                if stream not in ('collects'):
-                    self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")
+                self.assertGreater(second_sync_count, 0, msg="Second sync did not yield any records")
