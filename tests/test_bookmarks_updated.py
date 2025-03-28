@@ -77,7 +77,20 @@ class BookmarkTest(BaseTapTest):
        #simulated_states = self.calculated_states_by_stream(first_sync_bookmark)
 
         # We are hardcoding the updated state to ensure that we get atleast 1 record in second sync. These values have been provided after reviewing the max bookmark value for each of the streams
-        simulated_states = {'products': {'updatedAt': '2025-01-23T14:08:21.000000Z'}, 'abandoned_checkouts': {'updatedAt': '2025-01-20T06:56:01.000000Z'}, 'inventory_levels': {'updatedAt': '2024-12-05T09:26:47.000000Z'}, 'locations': {'createdAt': '2025-03-27T15:03:30.000000Z'}, 'inventory_items': {'updatedAt': '2021-09-15T19:44:11.000000Z'}, 'transactions': {'createdAt': '2024-12-05T09:58:40.000000Z'}, 'metafields_customer': '2025-01-21T13:28:24.000000Z', 'order_refunds': {'updatedAt': '2024-12-05T09:58:40.000000Z'}, 'customers': {'updatedAt': '2025-01-19T20:55:07.000000Z'}, 'orders': {'updatedAt': '2024-12-05T09:59:35.000000Z'}, 'collections': {'updatedAt': '2025-01-23T14:08:22.000000Z'}}
+        simulated_states = {
+            'products': {'updatedAt': '2025-01-23T14:08:21.000000Z'},
+            'abandoned_checkouts': {'updatedAt': '2025-01-20T06:56:01.000000Z'},
+            'inventory_levels': {'updatedAt': '2024-12-05T09:26:47.000000Z'},
+            'locations': {'createdAt': '2021-07-29T08:38:44.000000Z'},
+            'inventory_items': {'updatedAt': '2021-09-15T19:44:11.000000Z'},
+            'transactions': {'createdAt': '2024-12-05T09:58:40.000000Z'},
+            'metafields_customer': '2025-01-21T13:28:24.000000Z',
+            'order_refunds': {'updatedAt': '2024-12-05T09:58:40.000000Z'},
+            'customers': {'updatedAt': '2025-01-19T20:55:07.000000Z'},
+            'orders': {'updatedAt': '2024-12-05T09:59:35.000000Z'},
+            'collections': {'updatedAt': '2025-01-21T13:29:06.000000Z'},
+            'metafields_products': {'updatedAt': '2025-01-21T03:11:54.000000Z'}
+        }
 
         for stream, updated_state in simulated_states.items():
             new_state['bookmarks'][stream] = updated_state
