@@ -1,60 +1,149 @@
-import shopify
-from singer.utils import strftime, strptime_to_utc
-from tap_shopify.streams.base import (Stream,
-                                      RESULTS_PER_PAGE,
-                                      shopify_error_handling)
+from datetime import timedelta
+from singer import metrics, utils
 from tap_shopify.context import Context
+from tap_shopify.streams.base import Stream
+
 
 class InventoryLevels(Stream):
-    name = 'inventory_levels'
-    replication_key = 'updated_at'
-    key_properties = ['location_id', 'inventory_item_id']
-    replication_object = shopify.InventoryLevel
-    # Added decorator over functions of shopify SDK
-    replication_object.find = shopify_error_handling(replication_object.find)
+    """Stream class for inventory levels."""
 
-    def api_call_for_inventory_levels(self, parent_object_id, bookmark):
-        # set timeout
-        self.replication_object.set_timeout(self.request_timeout)
-        return self.replication_object.find(
-            updated_at_min = bookmark,
-            limit = RESULTS_PER_PAGE,
-            location_ids=parent_object_id
-        )
+    name = "inventory_levels"
+    data_key = "locations"
+    child_data_key = "inventoryLevels"
+    replication_key = "updatedAt"
 
-    def get_inventory_levels(self, parent_object, bookmark):
-        inventory_page = self.api_call_for_inventory_levels(parent_object, bookmark)
-        yield from inventory_page
+    def get_next_page_child(self, parent_id, cursor, child_query):
+        """
+        Gets all child objects efficiently with pagination.
 
-        while inventory_page.has_next_page():
-            inventory_page = inventory_page.next_page()
-            yield from inventory_page
+        Args:
+            parent_id (str): The ID of the parent object.
+            cursor (str): The cursor for pagination.
+            child_query (str): The query for child objects.
 
+        Yields:
+            dict: The child object.
+        """
+        has_next_page = True
+        while has_next_page:
+            child_query_params = {
+                "first": self.results_per_page,
+                "parentquery": f"id:{parent_id.split('/')[-1]}",
+                "query": child_query,
+                "childafter": cursor,
+            }
+            data = self.call_api(child_query_params)
+            for edge in data.get("edges", []):
+                node = edge.get("node", {})
+                child_data = node.get(self.child_data_key, {})
+                child_edges = child_data.get("edges", [])
+                yield from child_edges
+
+            page_info = child_data.get("pageInfo", {})
+            cursor = page_info.get("endCursor")
+            has_next_page = page_info.get("hasNextPage", False)
+
+    # pylint: disable=too-many-locals
     def get_objects(self):
-        bookmark = self.get_bookmark()
+        """
+        Retrieves objects in paginated batches.
 
-        selected_parent = Context.stream_objects['locations']()
-        selected_parent.name = "inventory_level_locations"
+        Yields:
+            dict: The transformed object.
+        """
+        last_updated_at = self.get_bookmark()
+        sync_start = utils.now().replace(microsecond=0)
 
-        # Get all locations data as location id is used for Inventory Level
-        # If we get locations updated after a bookmark
-        # then there is possibility of data loss for Inventory Level
-        # because location is not updated when any Inventory Level is updated inside it.
-        for parent_object in selected_parent.get_locations_data():
-            yield from self.get_inventory_levels(parent_object.id, bookmark)
+        while last_updated_at < sync_start:
+            date_window_end = last_updated_at + timedelta(days=self.date_window_size)
+            query_end = min(sync_start, date_window_end)
+            has_next_page, cursor = True, None
 
-    def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
-        for inventory_level in self.get_objects():
-            inventory_level_dict = inventory_level.to_dict()
-            replication_value = strptime_to_utc(inventory_level_dict[self.replication_key])
-            if replication_value >= bookmark:
-                yield inventory_level_dict
+            while has_next_page:
+                query_params = self.get_query_params(last_updated_at, query_end, cursor)
+                with metrics.http_request_timer(self.name):
+                    data = self.call_api(query_params)
 
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
+                # Process parent objects
+                for edge in data.get("edges", []):
+                    node = edge.get("node", {})
 
-        self.update_bookmark(strftime(max_bookmark))
+                    # Handle already fetched child objects
+                    child_edges = node.get(self.child_data_key, {}).get("edges", [])
+                    for child_obj in child_edges:
+                        obj = self.transform_object(child_obj.get("node"))
+                        yield obj
 
-Context.stream_objects['inventory_levels'] = InventoryLevels
+                    # Check if more child pages are needed
+                    child_page_info = node.get(self.child_data_key, {}).get("pageInfo", {})
+                    if child_page_info.get("hasNextPage", False):
+                        parent_id = node.get("id")
+                        child_cursor = child_page_info.get("endCursor")
+
+                        # Get remaining child pages
+                        for child_obj in self.get_next_page_child(
+                            parent_id, child_cursor, query_params["query"]
+                        ):
+                            transformed_obj = self.transform_object(child_obj.get("node"))
+                            yield transformed_obj
+
+                page_info = data.get("pageInfo", {})
+                cursor = page_info.get("endCursor")
+                has_next_page = page_info.get("hasNextPage")
+
+            last_updated_at = query_end
+
+    # pylint: disable=C0301
+    def get_query(self):
+        """
+        Returns the GraphQL query for inventory levels.
+
+        Returns:
+            str: The GraphQL query string.
+        """
+        return """query GetInventoryLevels($first: Int!, $after: String, $query: String, $childafter: String, $parentquery: String) {
+            locations(first: $first, after: $after, query: $parentquery, sortKey: ID, includeInactive: true, includeLegacy: true) {
+                edges {
+                    node {
+                        inventoryLevels(first: $first, query: $query, after: $childafter) {
+                            edges {
+                                node {
+                                    canDeactivate
+                                    createdAt
+                                    deactivationAlert
+                                    id
+                                    location {
+                                        id
+                                    }
+                                    updatedAt
+                                    item {
+                                        id
+                                        variant {
+                                            id
+                                        }
+                                    }
+                                    quantities(names: ["available", "committed", "damaged", "incoming", "on_hand", "quality_control", "reserved", "safety_stock"]) {
+                                        id
+                                        name
+                                        quantity
+                                        updatedAt
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                hasNextPage
+                                endCursor
+                            }
+                        }
+                        id
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }"""
+
+
+Context.stream_objects["inventory_levels"] = InventoryLevels

@@ -1,3 +1,481 @@
 {
-  "$ref": "definitions.json#/customer"
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "multipassIdentifier": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "defaultAddress": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "city": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "address1": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "zip": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "province": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "phone": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "country": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "firstName": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "lastName": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "countryCodeV2": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "provinceCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "address2": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "company": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "timeZone": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "validationResultSummary": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "latitude": {
+          "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+        },
+        "longitude": {
+          "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+        },
+        "coordinatesValidated": {
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
+        "formattedArea": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "numberOfOrders": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "state": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "verifiedEmail": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "firstName": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "updatedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "note": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "phone": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "city": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address1": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "zip": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "province": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "country": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "firstName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "countryCodeV2": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "provinceCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "address2": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "company": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "timeZone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "validationResultSummary": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "coordinatesValidated": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "formattedArea": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "lastName": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "taxExempt": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "taxExemptions": {
+      "type": "array",
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    },
+    "emailMarketingConsent": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "consentUpdatedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "marketingOptInLevel": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "marketingState": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "smsMarketingConsent": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "consentCollectedFrom": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "consentUpdatedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "marketingOptInLevel": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "marketingState": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "validEmailAddress": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "productSubscriberStatus": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "amountSpent": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "amount": {
+          "type": [
+                "null",
+                "string"
+              ],
+            "format": "singer.decimal"
+        },
+        "currencyCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "dataSaleOptOut": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "displayName": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "locale": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "lifetimeDuration": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  }
 }

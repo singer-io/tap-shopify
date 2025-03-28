@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "properties": {
+    "owner": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "ownerType": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "value_type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "key": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "namespace": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "description": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "value": {
+      "type": [
+        "null",
+        "integer",
+        "object",
+        "string"
+      ],
+      "properties": {}
+    },
+    "updatedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "type": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  }
+}

@@ -6,22 +6,47 @@ spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
 
 This tap:
 
-- Pulls raw data from [Shopify](https://help.shopify.com/en/api/reference)
+- Pulls raw data from [Shopify Graphql Admin API](https://shopify.dev/docs/api/admin-graphql/latest)
 - Extracts the following resources:
-  - [Abandoned Checkouts](https://help.shopify.com/en/api/reference/orders/abandoned_checkouts)
-  - [Collects](https://help.shopify.com/en/api/reference/products/collect)
-  - [Custom Collections](https://help.shopify.com/en/api/reference/products/customcollection)
-  - [Customers](https://help.shopify.com/en/api/reference/customers)
-  - [Metafields](https://help.shopify.com/en/api/reference/metafield)
-  - [Orders](https://help.shopify.com/en/api/reference/orders)
-  - [Products](https://help.shopify.com/en/api/reference/products)
-  - [Transactions](https://help.shopify.com/en/api/reference/orders/transaction)
-  - [Locations](https://help.shopify.com/en/api/reference/inventory/location)
-  - [Inventory Levels](https://help.shopify.com/en/api/reference/inventory/inventorylevel)
-  - [Inventory Item](https://help.shopify.com/en/api/reference/inventory/inventoryitem)
+  - [Abandoned Checkouts](https://shopify.dev/docs/api/admin-graphql/latest/queries/abandonedcheckouts)
+  - [Collections](https://shopify.dev/docs/api/admin-graphql/latest/queries/collections)
+  - [Customers](https://shopify.dev/docs/api/admin-graphql/latest/queries/customers)
+  - [Metafields Collections](https://shopify.dev/docs/api/admin-graphql/latest/queries/collections)
+  - [Metafields Customers](https://shopify.dev/docs/api/admin-graphql/latest/queries/customers)
+  - [Metafields Orders](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
+  - [Metafields Products](https://shopify.dev/docs/api/admin-graphql/latest/queries/products)
+  - [Orders](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
+  - [Products](https://shopify.dev/docs/api/admin-graphql/latest/queries/products)
+  - [Product Variants](https://shopify.dev/docs/api/admin-graphql/latest/queries/productVariants)
+  - [Transactions](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
+  - [Locations](https://shopify.dev/docs/api/admin-graphql/latest/queries/locations)
+  - [Inventory Levels](https://shopify.dev/docs/api/admin-graphql/latest/queries/inventorylevel)
+  - [Inventory Item](https://shopify.dev/docs/api/admin-graphql/latest/queries/inventoryitems)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
-- When Metafields are selected, this tap will sync the Shopify store's top-level Metafields and any additional Metafields for selected tables that also have them (ie: Orders, Products, Customers)
+
+## Stream Details
+
+| Stream Name            | Replication Key | Key Properties |
+|------------------------|----------------|---------------|
+| abandoned_checkouts    | updatedAt      | id            |
+| collections            | updatedAt      | id            |
+| customers              | updatedAt      | id            |
+| events                 | createdAt      | id            |
+| inventory_items        | updatedAt      | id            |
+| inventory_levels       | updatedAt      | id            |
+| locations              | createdAt      | id            |
+| metafields_collections  | updatedAt      | id            |
+| metafields_customers   | updatedAt      | id            |
+| metafields_orders      | updatedAt      | id            |
+| metafields_products    | updatedAt      | id            |
+| order_refunds         | updatedAt      | id            |
+| orders                 | updatedAt      | id            |
+| product_variants      | updatedAt      | id            |
+| products               | updatedAt      | id            |
+| transactions           | createdAt      | id            |
+
+Currently, `locations` graphql endpoint doesn't support querying on the `updatedAt`, therefore, `createdAt` is made the replication key.
 
 ## Quick Start
 
@@ -64,4 +89,4 @@ This tap:
 
 ---
 
-Copyright &copy; 2019 Stitch
+Copyright &copy; 2025 Stitch

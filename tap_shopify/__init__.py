@@ -15,7 +15,6 @@ from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
-import tap_shopify.streams # Load stream objects into Context
 
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
@@ -25,7 +24,7 @@ SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 def initialize_shopify_client():
     api_key = Context.config['api_key']
     shop = Context.config['shop']
-    version = '2024-07'
+    version = '2025-01'
     session = shopify.Session(shop, version, api_key)
     shopify.ShopifyResource.activate_session(session)
 
@@ -44,7 +43,7 @@ def load_schemas():
 
     # This schema represents many of the currency values as JSON schema
     # 'number's, which may result in lost precision.
-    for filename in os.listdir(get_abs_path('schemas')):
+    for filename in sorted(os.listdir(get_abs_path('schemas'))):
         path = get_abs_path('schemas') + '/' + filename
         schema_name = filename.replace('.json', '')
         with open(path, encoding='UTF-8') as file:

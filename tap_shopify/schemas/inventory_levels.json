@@ -1,21 +1,67 @@
 {
+  "type": "object",
   "properties": {
-    "available": {
-      "type": ["null", "integer"]
+    "id": {
+      "type": ["null", "string"]
     },
-    "inventory_item_id": {
-      "type": ["null", "integer"]
+    "canDeactivate": {
+      "type": ["null", "boolean"]
     },
-    "updated_at": {
+    "createdAt": {
       "type": ["null", "string"],
       "format": "date-time"
     },
-    "location_id": {
-      "type": ["null", "integer"]
+    "updatedAt": {
+      "type": ["null", "string"],
+      "format": "date-time"
     },
-    "admin_graphql_api_id": {
+    "deactivationAlert": {
       "type": ["null", "string"]
+    },
+    "item": {
+      "type": ["null", "object"],
+      "properties": {
+        "id": {
+          "type": ["null", "string"]
+        },
+        "variant": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": {
+              "type": ["null", "string"]
+            }
+          }
+        }
+      }
+    },
+    "location": {
+      "type": ["null", "object"],
+      "properties": {
+        "id": {
+          "type": ["null", "string"]
+        }
+      }
+    },
+    "quantities": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": ["null", "string"]
+          },
+          "name": {
+            "type": ["null", "string"]
+          },
+          "quantity": {
+            "type": ["null", "integer"]
+          },
+          "updatedAt": {
+            "type": ["null", "string"],
+            "format": "date-time"
+          }
+        }
+      }
     }
-  },
-  "type": "object"
+  }
 }

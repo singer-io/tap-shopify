@@ -1,157 +1,142 @@
 {
+  "type": "object",
   "properties": {
-    "error_code": {
+    "accountNumber": {
       "type": [
         "null",
         "string"
       ]
     },
-    "device_id": {
+    "amountRoundingSet": {
       "type": [
         "null",
-        "integer"
-      ]
-    },
-    "user_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "parent_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "test": {
-      "type": [
-        "null",
-        "boolean"
-      ]
-    },
-    "kind": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "order_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "amount": {
-      "type": [
-        "null",
-        "string"
+        "object"
       ],
-      "format": "singer.decimal"
+      "properties": {
+        "presentmentMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "amount": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "shopMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "amount": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
     },
-    "authorization": {
+    "amountSet": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "presentmentMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "amount": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "shopMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "amount": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "authorizationCode": {
       "type": [
         "null",
         "string"
       ]
     },
-    "currency": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "source_name": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "message": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "created_at": {
+    "authorizationExpiresAt": {
       "type": [
         "null",
         "string"
       ],
       "format": "date-time"
     },
-    "status": {
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "errorCode": {
       "type": [
         "null",
         "string"
       ]
     },
-    "payment_details": {
-      "properties": {
-        "cvv_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_bin": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_company": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_expiration_month": {
-          "type": [
-            "null",
-            "integer"
-          ]
-        },
-        "credit_card_expiration_year": {
-          "type": [
-            "null",
-            "integer"
-          ]
-        },
-        "credit_card_name": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_number": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "credit_card_wallet": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
-        "avs_result_code": {
-          "type": [
-            "null",
-            "string"
-          ]
-        }
-      },
+    "formattedGateway": {
       "type": [
         "null",
-        "object"
+        "string"
       ]
     },
     "gateway": {
@@ -160,106 +145,283 @@
         "string"
       ]
     },
-    "admin_graphql_api_id": {
+    "id": {
       "type": [
         "null",
         "string"
       ]
     },
-    "receipt": {
+    "kind": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "manualPaymentGateway": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "maximumRefundableV2": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "multiCapturable": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "order": {
       "type": [
         "null",
         "object"
       ],
       "properties": {
-        "fee_amount": {
+        "id": {
           "type": [
             "null",
             "string"
-          ],
-          "format": "singer.decimal"
-        },
-        "gross_amount": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "singer.decimal"
-        },
-        "tax_amount": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "format": "singer.decimal"
+          ]
         }
-      },
-      "patternProperties": {".+": {}}
+      }
     },
-    "location_id": {
-      "type": [
-        "null",
-        "integer"
-      ]
-    },
-    "processed_at": {
-      "type": [
-        "null",
-        "string"
-      ]
-    },
-    "payments_refund_attributes": {
+    "parentTransaction": {
       "type": [
         "null",
         "object"
       ],
       "properties": {
+        "accountNumber": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "createdAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
         "status": {
           "type": [
             "null",
             "string"
           ]
         },
-        "acquirer_reference_number": {
+        "paymentId": {
           "type": [
             "null",
             "string"
           ]
+        },
+        "processedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "amountSet": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "presentmentMoney": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "amount": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "format": "singer.decimal"
+                },
+                "currencyCode": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            },
+            "shopMoney": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "amount": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "format": "singer.decimal"
+                },
+                "currencyCode": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            }
+          }
         }
       }
     },
-    "payment_id": {
+    "paymentId": {
       "type": [
         "null",
         "string"
       ]
     },
-    "total_unsettled_set": {
-      "type": ["null", "object"],
+    "processedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "receiptJson": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "settlementCurrency": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "settlementCurrencyRate": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "singer.decimal"
+    },
+    "shopifyPaymentsSet": {
+      "type": [
+        "null",
+        "object"
+      ],
       "properties": {
-        "presentment_money": {
-          "type": ["null", "object"],
+        "extendedAuthorizationSet": {
+          "type": [
+            "null",
+            "object"
+          ],
           "properties": {
-            "amount": {
-              "type": ["null", "string"],
-              "format": "singer.decimal"},
-            "currency": {
-              "type": ["null", "string"]
+            "extendedAuthorizationExpiresAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "standardAuthorizationExpiresAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
             }
           }
         },
-        "shop_money": {
-          "type": ["null", "object"],
+        "refundSet": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "acquirerReferenceNumber": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "test": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "totalUnsettledSet": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "presentmentMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
           "properties": {
             "amount": {
-              "type": ["null", "string"],
-              "format": "singer.decimal"},
-            "currency": {
-              "type": ["null", "string"]}
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "shopMoney": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "amount": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "singer.decimal"
+            },
+            "currencyCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
           }
         }
       }
     }
-  },
-  "type": "object"
+  }
 }

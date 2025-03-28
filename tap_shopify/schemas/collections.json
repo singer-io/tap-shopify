@@ -1,0 +1,154 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "title": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "handle": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "collectionType": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "updatedAt": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time"
+    },
+    "productsCount": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "count": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "precision": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "sortOrder": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "ruleSet": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "appliedDisjunctively": {
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
+        "rules": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "items": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "column": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "relation": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "seo": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "description": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "title": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "feedback": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "summary": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
+    },
+    "products": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      }
+    }
+  }
+}

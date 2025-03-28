@@ -1,40 +1,69 @@
-import shopify
-from singer import utils
-from tap_shopify.streams.base import (Stream, shopify_error_handling)
 from tap_shopify.context import Context
+from tap_shopify.streams.base import Stream
 
 class Locations(Stream):
-    name = 'locations'
-    replication_object = shopify.Location
-    # Added decorator over functions of shopify SDK
-    replication_object.find = shopify_error_handling(replication_object.find)
+    """Stream class for Shopify Locations"""
 
-    def get_locations_data(self):
-        # set timeout
-        self.replication_object.set_timeout(self.request_timeout)
-        location_page = self.replication_object.find()
-        yield from location_page
+    name = "locations"
+    data_key = "locations"
+    # Currently, the replication key is set to 'createdAt' because the Shopify
+    # locations graphql endpoint doesn't allow the filter on 'updatedAt' field.
+    replication_key = "createdAt"
 
-        while location_page.has_next_page():
-            location_page = location_page.next_page()
-            yield from location_page
+    def get_query(self):
+        """
+        Returns the GraphQL query for fetching locations.
 
-    def sync(self):
-        bookmark = self.get_bookmark()
-        max_bookmark = bookmark
+        Returns:
+            str: GraphQL query string.
+        """
+        return """
+        query GetLocations($first: Int!, $after: String, $query: String) {
+            locations(first: $first, after: $after, query: $query, sortKey: ID) {
+                edges {
+                    node {
+                        address {
+                            countryCode
+                            address1
+                            city
+                            address2
+                            provinceCode
+                            zip
+                            province
+                            phone
+                            country
+                            formatted
+                            latitude
+                            longitude
+                        }
+                        name
+                        id
+                        updatedAt
+                        createdAt
+                        isActive
+                        addressVerified
+                        deactivatable
+                        deactivatedAt
+                        deletable
+                        fulfillsOnlineOrders
+                        hasActiveInventory
+                        hasUnfulfilledOrders
+                        isFulfillmentService
+                        legacyResourceId
+                        localPickupSettingsV2 {
+                            instructions
+                            pickupTime
+                        }
+                        shipsInventory
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+        """
 
-        for location in self.get_locations_data():
 
-            location_dict = location.to_dict()
-            replication_value = utils.strptime_to_utc(location_dict[self.replication_key])
-
-            if replication_value >= bookmark:
-                yield location_dict
-
-            # update max bookmark if "replication_value" of current location is greater
-            if replication_value > max_bookmark:
-                max_bookmark = replication_value
-
-        self.update_bookmark(utils.strftime(max_bookmark))
-
-Context.stream_objects['locations'] = Locations
+Context.stream_objects["locations"] = Locations
