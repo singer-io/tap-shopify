@@ -4,6 +4,7 @@ import json
 
 from singer import utils, get_logger, metrics
 from tap_shopify.streams.base import Stream
+from tap_shopify.context import Context
 
 LOGGER = get_logger()
 
@@ -68,7 +69,9 @@ class Metafields(Stream, ABC):
         Main iterator to yield metafield objects.
         """
         sync_start = utils.now().replace(microsecond=0)
-        last_updated_at = self.get_bookmark()
+        # Will always fetch the data from the start date and filter it in the code
+        # Shopify doesn't support filtering by updated_at for metafields
+        last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -106,3 +109,22 @@ class Metafields(Stream, ABC):
                 cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
             last_updated_at = query_end
+
+    def sync(self):
+        """
+        Performs pseudo incremental sync.
+        """
+        start_time = utils.now().replace(microsecond=0)
+        max_bookmark_value = current_bookmark_value = self.get_bookmark()
+
+        for obj in self.get_objects():
+            replication_value = utils.strptime_to_utc(obj[self.replication_key])
+
+            max_bookmark_value = max(max_bookmark_value, replication_value)
+
+            if replication_value >= current_bookmark_value:
+                yield obj
+
+        # Update bookmark to the latest value, but not beyond sync start time
+        max_bookmark_value = min(start_time, max_bookmark_value)
+        self.update_bookmark(utils.strftime(max_bookmark_value))
