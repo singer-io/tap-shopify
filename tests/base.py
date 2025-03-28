@@ -133,7 +133,7 @@ class BaseTapTest(BaseCase):
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        return set(self.expected_metadata().keys()) - {"abandoned_checkouts", "events"}
+        return set(self.expected_metadata().keys()) - {"abandoned_checkouts"}
 
     def child_streams(self):
         """
