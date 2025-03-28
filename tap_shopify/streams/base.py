@@ -313,15 +313,11 @@ class Stream():
         Default implementation for sync method
         """
         start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
+        max_bookmark_value = self.get_bookmark()
 
         for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
+            max_bookmark_value = max(max_bookmark_value, utils.strptime_to_utc(obj[self.replication_key]))
+            yield obj
 
         # Update bookmark to the latest value, but not beyond sync start time
         max_bookmark_value = min(start_time, max_bookmark_value)
