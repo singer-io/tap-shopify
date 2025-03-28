@@ -56,7 +56,7 @@ class Collections(Stream):
         Returns:
             dict: Transformed collection object.
         """
-        obj["type"] = "SMART" if obj.get("ruleSet") else "MANUAL"
+        obj["collectionType"] = "SMART" if obj.get("ruleSet") else "MANUAL"
         if obj.get("products"):
             obj["products"] = self.transform_products(obj)
         return obj

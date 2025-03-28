@@ -19,7 +19,7 @@
         "string"
       ]
     },
-    "type": {
+    "collectionType": {
       "type": [
         "null",
         "string"
