@@ -316,7 +316,10 @@ class Stream():
         max_bookmark_value = self.get_bookmark()
 
         for obj in self.get_objects():
-            max_bookmark_value = max(max_bookmark_value, utils.strptime_to_utc(obj[self.replication_key]))
+            max_bookmark_value = max(
+                max_bookmark_value,
+                utils.strptime_to_utc(obj[self.replication_key])
+            )
             yield obj
 
         # Update bookmark to the latest value, but not beyond sync start time
