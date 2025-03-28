@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.0
+  * Migrate Remaining Shopify Streams from REST API to GraphQL API [#201](https://github.com/singer-io/tap-shopify/pull/201)
+  * Introduce new streams - `collections`, `metafields_collections`, `metafields_customers`, `metafields_orders`, `metafields_products`
+  * Delete streams - `collects`, `custom_collections` and `metafields`
+
 ## 2.1.0
   * Optimize Shopify Metafields Sync Performance [#200](https://github.com/singer-io/tap-shopify/pull/200)
   * Include the new field (= inventoryItem) in the product variants schema.
