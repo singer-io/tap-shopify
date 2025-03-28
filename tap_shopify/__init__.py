@@ -43,7 +43,7 @@ def load_schemas():
 
     # This schema represents many of the currency values as JSON schema
     # 'number's, which may result in lost precision.
-    for filename in os.listdir(get_abs_path('schemas')):
+    for filename in sorted(os.listdir(get_abs_path('schemas'))):
         path = get_abs_path('schemas') + '/' + filename
         schema_name = filename.replace('.json', '')
         with open(path, encoding='UTF-8') as file:
