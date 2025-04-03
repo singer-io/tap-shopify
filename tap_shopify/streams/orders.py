@@ -9,6 +9,56 @@ class Orders(Stream):
     data_key = "orders"
     replication_key = "updatedAt"
 
+    def transform_lineitems(self, data):
+        """
+        Transforms the products data by extracting product IDs and handling pagination.
+
+        Args:
+            data (dict): Product data.
+
+        Returns:
+            list: List of product IDs.
+        """
+        # Extract product IDs from the first page
+        lineitems = [
+            node for item in data["lineItems"]["edges"]
+            if (node := item.get("node"))
+        ]
+
+        # Handle pagination
+        page_info = data["lineItems"].get("pageInfo", {})
+        while page_info.get("hasNextPage"):
+            params = {
+                "first": self.results_per_page,
+                "query": f"id:{data['id'].split('/')[-1]}",
+                "childafter": page_info.get("endCursor"),
+            }
+
+            # Fetch the next page of data
+            response = self.call_api(params)
+            lineitems_data = response.get("node", {}).get("lineItems", {})
+            lineitems.extend(
+                node for item in data["lineItems"]["edges"]
+                if (node := item.get("node"))
+            )
+            page_info = lineitems_data.get("pageInfo", {})
+
+        return lineitems
+
+    def transform_object(self, obj):
+        """
+        Transforms a collection object.
+
+        Args:
+            obj (dict): Collection object.
+
+        Returns:
+            dict: Transformed collection object.
+        """
+        if obj.get("lineItems"):
+            obj["lineItems"] = self.transform_lineitems(obj)
+        return obj
+
     def get_query(self):
         """
         Returns the GraphQL query for fetching orders.
@@ -17,7 +67,7 @@ class Orders(Stream):
             str: GraphQL query string.
         """
         return """
-        query orders($first: Int!, $after: String, $query: String) {
+        query orders($first: Int!, $after: String, $query: String, $childafter: String) {
             orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
                     node {
@@ -521,6 +571,163 @@ class Orders(Stream):
                         }
                         unpaid
                         updatedAt
+                        fulfillments(first: 250) {
+                            id
+                            name
+                            status
+                            totalQuantity
+                            updatedAt
+                            createdAt
+                            deliveredAt
+                            estimatedDeliveryAt
+                            requiresShipping
+                            inTransitAt
+                            trackingInfo {
+                                number
+                                url
+                            }
+                            service {
+                                serviceName
+                                id
+                                handle
+                                trackingSupport
+                                type
+                                permitsSkuSharing
+                                inventoryManagement
+                            }
+                        }
+                        lineItems(first: 250, after: $childafter) {
+                            edges {
+                                node {
+                                    id
+                                    vendor
+                                    quantity
+                                    title
+                                    requiresShipping
+                                    originalTotalSet {
+                                        presentmentMoney {
+                                            currencyCode
+                                            amount
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
+                                    taxLines(first: 250) {
+                                        priceSet {
+                                            presentmentMoney {
+                                                amount
+                                                currencyCode
+                                            }
+                                            shopMoney {
+                                                amount
+                                                currencyCode
+                                            }
+                                        }
+                                        rate
+                                        title
+                                        source
+                                        channelLiable
+                                    }
+                                    taxable
+                                    isGiftCard
+                                    name
+                                    discountedTotalSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
+                                    sku
+                                    product {
+                                        id
+                                    }
+                                    discountAllocations {
+                                        allocatedAmountSet {
+                                            presentmentMoney {
+                                                amount
+                                                currencyCode
+                                            }
+                                            shopMoney {
+                                                amount
+                                                currencyCode
+                                            }
+                                        }
+                                        discountApplication {
+                                            index
+                                            targetType
+                                            targetSelection
+                                            allocationMethod
+                                            value {
+                                                ... on MoneyV2 {
+                                                    __typename
+                                                    amount
+                                                    currencyCode
+                                                }
+                                                ... on PricingPercentageValue {
+                                                    __typename
+                                                    percentage
+                                                }
+                                            }
+                                        }
+                                    }
+                                    customAttributes {
+                                        key
+                                        value
+                                    }
+                                    totalDiscountSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
+                                    duties {
+                                        harmonizedSystemCode
+                                        id
+                                        taxLines {
+                                            rate
+                                            source
+                                            title
+                                            channelLiable
+                                            priceSet {
+                                                presentmentMoney {
+                                                    amount
+                                                    currencyCode
+                                                }
+                                                shopMoney {
+                                                    amount
+                                                    currencyCode
+                                                }
+                                            }
+                                        }
+                                        countryCodeOfOrigin
+                                    }
+                                    discountedUnitPriceSet {
+                                        presentmentMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                        shopMoney {
+                                            amount
+                                            currencyCode
+                                        }
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                hasNextPage
+                                endCursor
+                            }
+                        }
                     }
                 }
                 pageInfo {
