@@ -596,7 +596,7 @@ class Orders(Stream):
                                 inventoryManagement
                             }
                         }
-                        lineItems(first: 250, after: $childafter) {
+                        lineItems(first: 100, after: $childafter) {
                             edges {
                                 node {
                                     id
