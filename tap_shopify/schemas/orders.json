@@ -860,6 +860,46 @@
       }
     },
     "unpaid": { "type": ["null", "boolean"] },
-    "updatedAt": { "type": ["null", "string"], "format": "date-time" }
+    "updatedAt": { "type": ["null", "string"], "format": "date-time" },
+    "fulfillments": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type":  ["null", "string"] },
+          "status": { "type":  ["null", "string"] },
+          "totalQuantity":  { "type": ["null", "number"] },
+          "updatedAt": { "type":  ["null", "string"], "format": "date-time" },
+          "deliveredAt": { "type":  ["null", "string"], "format": "date-time" },
+          "estimatedDeliveryAt": { "type":  ["null", "string"], "format": "date-time" },
+          "requiresShipping": { "type":   ["null", "boolean"] },
+          "inTransitAt"  : { "type":  ["null", "string"], "format": "date-time" },
+          "trackingInfo":  {
+           "type": ["null", "array"],
+            "items": {
+              "type": "object",
+              "properties": {
+              "number": { "type":  ["null", "string"] },
+              "company": { "type":  ["null", "string"] },
+              "url": { "type":  ["null", "string"] }
+            }
+          }
+          },
+          "service": {
+          "type": ["null", "object"],
+          "properties": {
+              "serviceName": { "type":  ["null", "string"] },
+              "id": { "type":  ["null", "string"] },
+              "handle": { "type":  ["null", "string"] },
+              "trackingSupport": { "type":  ["null", "boolean"] },
+              "type": { "type":  ["null", "string"] },
+              "permitsSkuSharing": { "type":  ["null", "boolean"] },
+              "inventoryManagement": { "type":  ["null", "boolean"] }
+            }
+          }
+        }
+      }
+      }
   }
-}
+  }
