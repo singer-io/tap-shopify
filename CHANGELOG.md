@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.1
+## 3.1.0
   * Add missing fields into the schema of orders stream [#208](https://github.com/singer-io/tap-shopify/pull/208)
 
 ## 3.0.0
