@@ -491,7 +491,7 @@
             }
           }
         },
-        "address": {
+        "addresses": {
           "type": [
             "null",
             "object"

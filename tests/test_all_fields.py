@@ -12,9 +12,6 @@ KNOWN_MISSING_FIELDS = {
         'canDelete',
         'rawMessage',
         'canEdit',
-    },
-    "orders":{
-        "merchantOfRecordApp"
     }
 }
 

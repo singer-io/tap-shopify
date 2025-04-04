@@ -251,6 +251,8 @@ class Orders(Stream):
                                 address1
                                 address2
                                 city
+                                countryCodeV2
+                                country
                                 company
                                 firstName
                                 lastName
@@ -292,6 +294,9 @@ class Orders(Stream):
                                 landingPage
                                 referrerUrl
                             }
+                        }
+                        merchantOfRecordApp {
+                            id
                         }
                         customerAcceptsMarketing
                         customerLocale
