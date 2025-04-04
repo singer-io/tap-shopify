@@ -873,7 +873,7 @@
           "quantity": {
             "type": [
               "null",
-              "integer"
+              "number"
             ]
           },
           "title": {

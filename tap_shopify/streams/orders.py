@@ -8,6 +8,7 @@ class Orders(Stream):
     name = "orders"
     data_key = "orders"
     replication_key = "updatedAt"
+    results_per_page = 200
 
     def transform_nested_object(self, data, key=""):
         """
