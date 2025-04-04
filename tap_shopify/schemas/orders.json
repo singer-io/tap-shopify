@@ -300,12 +300,328 @@
     },
     "currentTotalWeight": { "type": ["null", "number"] },
     "customer": {
-      "type": ["null", "object"],
+      "type": [
+        "null",
+        "object"
+      ],
       "properties": {
-        "id": { "type": ["null", "string"] },
-        "email": { "type": ["null", "string"] },
-        "firstName": { "type": ["null", "string"] },
-        "lastName": { "type": ["null", "string"] }
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "email": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "firstName": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "lastName": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "state": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "verifiedEmail": {
+          "type": [
+            "null",
+            "boolean"
+          ]
+        },
+        "lastOrder": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "updatedAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "format": "date-time"
+        },
+        "note": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "multipassIdentifier": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "tags": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "taxExempt": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "taxExemptions": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "defaultAddress": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "address1": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "address2": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "city": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "countryCodeV2": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "province": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "zip": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "country": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "phone": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "firstName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "provinceCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "company": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        },
+        "address": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "address1": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "address2": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "city": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "countryCodeV2": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "province": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "zip": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "id": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "country": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "lastName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "phone": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "firstName": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "name": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "provinceCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "company": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        }
+    },
+    "customerJourneySummary": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "lastVisit": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "landingPage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referrerUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "merchantOfRecordApp": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
       }
     },
     "customerAcceptsMarketing": { "type": ["null", "boolean"] },

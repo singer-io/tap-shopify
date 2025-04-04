@@ -248,6 +248,51 @@ class Orders(Stream):
                             email
                             firstName
                             lastName
+                            addresses {
+                                address1
+                                address2
+                                city
+                                company
+                                firstName
+                                lastName
+                                id
+                                name
+                                phone
+                                province
+                                provinceCode
+                                zip
+                            }
+                            state
+                            verifiedEmail
+                            updatedAt
+                            taxExempt
+                            tags
+                            taxExemptions
+                            note
+                            multipassIdentifier
+                            createdAt
+                            defaultAddress {
+                                address1
+                                address2
+                                city
+                                company
+                                country
+                                countryCodeV2
+                                firstName
+                                id
+                                lastName
+                                name
+                                province
+                                phone
+                                provinceCode
+                                zip
+                            }
+                        }
+                        customerJourneySummary {
+                            lastVisit {
+                                landingPage
+                                referrerUrl
+                            }
                         }
                         customerAcceptsMarketing
                         customerLocale
@@ -567,7 +612,7 @@ class Orders(Stream):
                                 inventoryManagement
                             }
                         }
-                        lineItems(first: 50, after: $childafter) {
+                        lineItems(first: 25, after: $childafter) {
                             edges {
                                 node {
                                     id
