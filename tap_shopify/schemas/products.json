@@ -27,6 +27,59 @@
         "string"
       ]
     },
+    "bodyHtml": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "altText": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "height": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "width": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "src": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
     "updatedAt": {
       "type": [
         "null",

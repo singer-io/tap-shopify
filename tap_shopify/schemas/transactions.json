@@ -7,6 +7,12 @@
         "string"
       ]
     },
+    "amount": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
     "amountRoundingSet": {
       "type": [
         "null",
