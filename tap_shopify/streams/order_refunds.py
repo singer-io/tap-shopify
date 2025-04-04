@@ -124,6 +124,9 @@ class OrderRefunds(Stream):
                                                 }
                                                 restockType
                                                 restocked
+                                                location {
+                                                    id
+                                                }
                                                 subtotalSet {
                                                     presentmentMoney {
                                                         amount
@@ -142,6 +145,130 @@ class OrderRefunds(Stream):
                                                     shopMoney {
                                                         amount
                                                         currencyCode
+                                                    }
+                                                }
+                                                lineItem {
+                                                    id
+                                                    vendor
+                                                    quantity
+                                                    title
+                                                    requiresShipping
+                                                    originalTotalSet {
+                                                        presentmentMoney {
+                                                            currencyCode
+                                                            amount
+                                                        }
+                                                        shopMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                    }
+                                                    taxLines(first: 250) {
+                                                        priceSet {
+                                                            presentmentMoney {
+                                                                amount
+                                                                currencyCode
+                                                            }
+                                                            shopMoney {
+                                                                amount
+                                                                currencyCode
+                                                            }
+                                                        }
+                                                        rate
+                                                        title
+                                                        source
+                                                        channelLiable
+                                                    }
+                                                    taxable
+                                                    isGiftCard
+                                                    name
+                                                    discountedTotalSet {
+                                                        presentmentMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                        shopMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                    }
+                                                    sku
+                                                    product {
+                                                        id
+                                                    }
+                                                    discountAllocations {
+                                                        allocatedAmountSet {
+                                                            presentmentMoney {
+                                                                amount
+                                                                currencyCode
+                                                            }
+                                                            shopMoney {
+                                                                amount
+                                                                currencyCode
+                                                            }
+                                                        }
+                                                        discountApplication {
+                                                            index
+                                                            targetType
+                                                            targetSelection
+                                                            allocationMethod
+                                                            value {
+                                                                ... on MoneyV2 {
+                                                                    __typename
+                                                                    amount
+                                                                    currencyCode
+                                                                }
+                                                                ... on PricingPercentageValue {
+                                                                    __typename
+                                                                    percentage
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    customAttributes {
+                                                        key
+                                                        value
+                                                    }
+                                                    totalDiscountSet {
+                                                        presentmentMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                        shopMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                    }
+                                                    duties {
+                                                        harmonizedSystemCode
+                                                        id
+                                                        taxLines {
+                                                            rate
+                                                            source
+                                                            title
+                                                            channelLiable
+                                                            priceSet {
+                                                                presentmentMoney {
+                                                                    amount
+                                                                    currencyCode
+                                                                }
+                                                                shopMoney {
+                                                                    amount
+                                                                    currencyCode
+                                                                }
+                                                            }
+                                                        }
+                                                        countryCodeOfOrigin
+                                                    }
+                                                    discountedUnitPriceSet {
+                                                        presentmentMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                        shopMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
                                                     }
                                                 }
                                             }

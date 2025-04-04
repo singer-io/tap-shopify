@@ -8,9 +8,8 @@ class Orders(Stream):
     name = "orders"
     data_key = "orders"
     replication_key = "updatedAt"
-    results_per_page = 200
 
-    def transform_nested_object(self, data, key=""):
+    def transform_lineitems(self, data):
         """
         Transforms the products data by extracting product IDs and handling pagination.
 
@@ -22,12 +21,12 @@ class Orders(Stream):
         """
         # Extract product IDs from the first page
         lineitems = [
-            node for item in data[key]["edges"]
+            node for item in data["lineItems"]["edges"]
             if (node := item.get("node"))
         ]
 
         # Handle pagination
-        page_info = data[key].get("pageInfo", {})
+        page_info = data["lineItems"].get("pageInfo", {})
         while page_info.get("hasNextPage"):
             params = {
                 "first": self.results_per_page,
@@ -37,9 +36,9 @@ class Orders(Stream):
 
             # Fetch the next page of data
             response = self.call_api(params)
-            lineitems_data = response.get("node", {}).get(key, {})
+            lineitems_data = response.get("node", {}).get("lineItems", {})
             lineitems.extend(
-                node for item in data[key]["edges"]
+                node for item in data["lineItems"]["edges"]
                 if (node := item.get("node"))
             )
             page_info = lineitems_data.get("pageInfo", {})
@@ -57,15 +56,7 @@ class Orders(Stream):
             dict: Transformed collection object.
         """
         if obj.get("lineItems"):
-            obj["lineItems"] = self.transform_nested_object(obj, key="lineItems")
-
-        refunds = obj.get("refunds")
-        if obj.get("refunds"):
-            for refund in refunds:
-                if refund.get("refundLineItems"):
-                    refund["refundLineItems"] = self.transform_nested_object(
-                        refund, key="refundLineItems"
-                    )
+            obj["lineItems"] = self.transform_lineitems(obj)
         return obj
 
     def get_query(self):
@@ -576,155 +567,7 @@ class Orders(Stream):
                                 inventoryManagement
                             }
                         }
-                        refunds(first: 250) {
-                            id
-                            note
-                            updatedAt
-                            createdAt
-                            refundLineItems(first: 5, after: $childafter) {
-                                edges {
-                                    node {
-                                        id
-                                        quantity
-                                        restockType
-                                        totalTax
-                                        subtotal
-                                        location {
-                                            id
-                                        }
-                                        lineItem {
-                                            id
-                                            vendor
-                                            quantity
-                                            title
-                                            requiresShipping
-                                            originalTotalSet {
-                                                presentmentMoney {
-                                                    currencyCode
-                                                    amount
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                            taxLines(first: 100) {
-                                                priceSet {
-                                                    presentmentMoney {
-                                                        amount
-                                                        currencyCode
-                                                    }
-                                                    shopMoney {
-                                                        amount
-                                                        currencyCode
-                                                    }
-                                                }
-                                                rate
-                                                title
-                                                source
-                                                channelLiable
-                                            }
-                                            taxable
-                                            isGiftCard
-                                            name
-                                            discountedTotalSet {
-                                                presentmentMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                            sku
-                                            product {
-                                                id
-                                            }
-                                            discountAllocations {
-                                                allocatedAmountSet {
-                                                    presentmentMoney {
-                                                        amount
-                                                        currencyCode
-                                                    }
-                                                    shopMoney {
-                                                        amount
-                                                        currencyCode
-                                                    }
-                                                }
-                                                discountApplication {
-                                                    index
-                                                    targetType
-                                                    targetSelection
-                                                    allocationMethod
-                                                    value {
-                                                        ... on MoneyV2 {
-                                                            __typename
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        ... on PricingPercentageValue {
-                                                            __typename
-                                                            percentage
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            customAttributes {
-                                                key
-                                                value
-                                            }
-                                            totalDiscountSet {
-                                                presentmentMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                            duties {
-                                                harmonizedSystemCode
-                                                id
-                                                taxLines {
-                                                    rate
-                                                    source
-                                                    title
-                                                    channelLiable
-                                                    priceSet {
-                                                        presentmentMoney {
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        shopMoney {
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                    }
-                                                }
-                                                countryCodeOfOrigin
-                                            }
-                                            discountedUnitPriceSet {
-                                                presentmentMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                pageInfo {
-                                    hasNextPage
-                                    endCursor
-                                }
-                            }
-                        }
-                        lineItems(first: 5, after: $childafter) {
+                        lineItems(first: 50, after: $childafter) {
                             edges {
                                 node {
                                     id
