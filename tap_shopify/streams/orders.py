@@ -19,7 +19,6 @@ class Orders(Stream):
         Returns:
             list: List of lineItems.
         """
-        # Extract product IDs from the first page
         lineitems = [
             node for item in data["lineItems"]["edges"]
             if (node := item.get("node"))

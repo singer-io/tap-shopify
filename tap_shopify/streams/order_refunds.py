@@ -56,15 +56,15 @@ class OrderRefunds(Stream):
 
     def transform_lineitems(self, data):
         """
-        Transforms the products data by extracting product IDs and handling pagination.
+        Transforms the order lineitems data by extracting order IDs and handling pagination.
 
         Args:
-            data (dict): Product data.
+            data (dict): Order data.
 
         Returns:
-            list: List of product IDs.
+            list: List of refunds with lineitems.
         """
-        # Extract product IDs from the first page
+
         lineitems = [
             node for item in data["refundLineItems"]["edges"]
             if (node := item.get("node"))
