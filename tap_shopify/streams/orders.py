@@ -59,10 +59,12 @@ class Orders(Stream):
             obj["lineItems"] = self.transform_nested_object(obj, key="lineItems")
 
         refunds = obj.get("refunds")
-        if  obj.get("refunds"):
+        if obj.get("refunds"):
             for refund in refunds:
                 if refund.get("refundLineItems"):
-                    refund["refundLineItems"] = self.transform_nested_object(refund, key="refundLineItems")
+                    refund["refundLineItems"] = self.transform_nested_object(
+                        refund, key="refundLineItems"
+                    )
         return obj
 
     def get_query(self):
