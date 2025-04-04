@@ -125,6 +125,20 @@
               "boolean"
             ]
           },
+          "location": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
           "subtotalSet": {
             "type": [
               "null",
@@ -846,20 +860,6 @@
                     }
                   }
                 }
-              }
-            }
-          },
-          "location": {
-            "type": [
-              "null",
-              "object"
-            ],
-            "properties": {
-              "id": {
-                "type": [
-                  "null",
-                  "string"
-                ]
               }
             }
           }
