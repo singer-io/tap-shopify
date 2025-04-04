@@ -133,6 +133,7 @@ class OrderRefunds(Stream):
         Returns:
             str: GraphQL query string.
         """
+        # pylint: disable=line-too-long
         return """query GetOrderRefunds($first: Int!, $after: String, $query: String, $childafter: String) {
                     orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                         edges {
