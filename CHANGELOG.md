@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.0
+  * Add missing fields into the schema of orders and order_refunds stream [#208](https://github.com/singer-io/tap-shopify/pull/208)
+
 ## 3.0.0
   * Migrate Remaining Shopify Streams from REST API to GraphQL API [#201](https://github.com/singer-io/tap-shopify/pull/201)
   * Introduce new streams - `collections`, `metafields_collections`, `metafields_customers`, `metafields_orders`, `metafields_products`
