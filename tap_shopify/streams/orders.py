@@ -11,13 +11,13 @@ class Orders(Stream):
 
     def transform_lineitems(self, data):
         """
-        Transforms the products data by extracting product IDs and handling pagination.
+        Transforms the order lineitems data by extracting order IDs and handling pagination.
 
         Args:
-            data (dict): Product data.
+            data (dict): Order data.
 
         Returns:
-            list: List of product IDs.
+            list: List of lineItems.
         """
         # Extract product IDs from the first page
         lineitems = [
@@ -36,9 +36,9 @@ class Orders(Stream):
 
             # Fetch the next page of data
             response = self.call_api(params)
-            lineitems_data = response.get("node", {}).get("lineItems", {})
+            lineitems_data = response.get("edges", [])[0].get("node", {})
             lineitems.extend(
-                node for item in data["lineItems"]["edges"]
+                node for item in lineitems_data["lineItems"]["edges"]
                 if (node := item.get("node"))
             )
             page_info = lineitems_data.get("pageInfo", {})
