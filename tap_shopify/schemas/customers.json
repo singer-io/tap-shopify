@@ -25,12 +25,6 @@
             "string"
           ]
         },
-        "countryCode": {
-          "type": [
-            "null",
-            "string"
-          ]
-        },
         "address1": {
           "type": [
             "null",
@@ -237,12 +231,6 @@
             ]
           },
           "country": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "countryCode": {
             "type": [
               "null",
               "string"
