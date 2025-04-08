@@ -125,6 +125,20 @@
               "boolean"
             ]
           },
+          "location": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
           "subtotalSet": {
             "type": [
               "null",
@@ -220,6 +234,630 @@
                       "null",
                       "string"
                     ]
+                  }
+                }
+              }
+            }
+          },
+          "lineItem": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "vendor": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "quantity": {
+                "type": [
+                  "null",
+                  "integer"
+                ]
+              },
+              "title": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "requiresShipping": {
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              "originalTotalSet": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "presentmentMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "shopMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "taxLines": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "properties": {
+                    "priceSet": {
+                      "type": [
+                        "null",
+                        "object"
+                      ],
+                      "properties": {
+                        "presentmentMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        },
+                        "shopMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "rate": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "title": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "source": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "channelLiable": {
+                      "type": [
+                        "null",
+                        "boolean"
+                      ]
+                    }
+                  }
+                }
+              },
+              "taxable": {
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              "isGiftCard": {
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              "name": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "discountedTotalSet": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "presentmentMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "shopMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "sku": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "product": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              },
+              "discountAllocations": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "properties": {
+                    "allocatedAmountSet": {
+                      "type": [
+                        "null",
+                        "object"
+                      ],
+                      "properties": {
+                        "presentmentMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        },
+                        "shopMoney": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "amount": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "discountApplication": {
+                      "type": [
+                        "null",
+                        "object"
+                      ],
+                      "properties": {
+                        "index": {
+                          "type": [
+                            "null",
+                            "integer"
+                          ]
+                        },
+                        "targetType": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "targetSelection": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "allocationMethod": {
+                          "type": [
+                            "null",
+                            "string"
+                          ]
+                        },
+                        "value": {
+                          "type": [
+                            "null",
+                            "object"
+                          ],
+                          "properties": {
+                            "__typename": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "amount": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            },
+                            "currencyCode": {
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "percentage": {
+                              "type": [
+                                "null",
+                                "number"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "customAttributes": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "properties": {
+                    "key": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "value": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "totalDiscountSet": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "presentmentMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "shopMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "duties": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "properties": {
+                    "harmonizedSystemCode": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "id": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "taxLines": {
+                      "type": [
+                        "null",
+                        "array"
+                      ],
+                      "items": {
+                        "type": [
+                          "null",
+                          "object"
+                        ],
+                        "properties": {
+                          "rate": {
+                            "type": [
+                              "null",
+                              "number"
+                            ]
+                          },
+                          "source": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "title": {
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          "channelLiable": {
+                            "type": [
+                              "null",
+                              "boolean"
+                            ]
+                          },
+                          "priceSet": {
+                            "type": [
+                              "null",
+                              "object"
+                            ],
+                            "properties": {
+                              "presentmentMoney": {
+                                "type": [
+                                  "null",
+                                  "object"
+                                ],
+                                "properties": {
+                                  "amount": {
+                                    "type": [
+                                      "null",
+                                      "number"
+                                    ]
+                                  },
+                                  "currencyCode": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              },
+                              "shopMoney": {
+                                "type": [
+                                  "null",
+                                  "object"
+                                ],
+                                "properties": {
+                                  "amount": {
+                                    "type": [
+                                      "null",
+                                      "number"
+                                    ]
+                                  },
+                                  "currencyCode": {
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "countryCodeOfOrigin": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  }
+                }
+              },
+              "discountedUnitPriceSet": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "presentmentMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
+                  },
+                  "shopMoney": {
+                    "type": [
+                      "null",
+                      "object"
+                    ],
+                    "properties": {
+                      "currencyCode": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      "amount": {
+                        "type": [
+                          "null",
+                          "number"
+                        ]
+                      }
+                    }
                   }
                 }
               }
