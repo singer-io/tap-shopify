@@ -80,100 +80,141 @@ class Transactions(Stream):
         """
         return """
             query GetTransactions($first: Int!, $after: String, $query: String) {
-                orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
-                    edges {
-                        node {
-                            transactions(first: 100) {
-                                accountNumber
-                                amountRoundingSet {
-                                    presentmentMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                    shopMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                }
-                                amountSet {
-                                    presentmentMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                    shopMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                }
-                                authorizationCode
-                                authorizationExpiresAt
-                                createdAt
-                                errorCode
-                                formattedGateway
-                                gateway
-                                id
-                                kind
-                                manualPaymentGateway
-                                maximumRefundableV2 {
-                                    amount
-                                    currencyCode
-                                }
-                                multiCapturable
-                                order {
-                                    id
-                                }
-                                parentTransaction {
-                                    accountNumber
-                                    createdAt
-                                    id
-                                    status
-                                    paymentId
-                                    processedAt
-                                    amountSet {
-                                        presentmentMoney {
-                                            amount
-                                            currencyCode
-                                        }
-                                        shopMoney {
-                                            amount
-                                            currencyCode
-                                        }
-                                    }
-                                }
-                                paymentId
-                                processedAt
-                                receiptJson
-                                settlementCurrency
-                                settlementCurrencyRate
-                                shopifyPaymentsSet {
-                                    extendedAuthorizationSet {
-                                        extendedAuthorizationExpiresAt
-                                        standardAuthorizationExpiresAt
-                                    }
-                                    refundSet {
-                                        acquirerReferenceNumber
-                                    }
-                                }
-                                status
-                                test
-                                totalUnsettledSet {
-                                    presentmentMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                    shopMoney {
-                                        amount
-                                        currencyCode
-                                    }
-                                }
-                            }
+            orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+                edges {
+                node {
+                    transactions(first: 100) {
+                    accountNumber
+                    amountRoundingSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
                         }
                     }
-                    pageInfo {
-                        endCursor
-                        hasNextPage
+                    amountSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    authorizationCode
+                    authorizationExpiresAt
+                    createdAt
+                    errorCode
+                    formattedGateway
+                    gateway
+                    id
+                    kind
+                    manualPaymentGateway
+                    maximumRefundableV2 {
+                        amount
+                        currencyCode
+                    }
+                    multiCapturable
+                    order {
+                        id
+                    }
+                    parentTransaction {
+                        accountNumber
+                        createdAt
+                        id
+                        status
+                        paymentId
+                        processedAt
+                        amountSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                    }
+                    paymentId
+                    processedAt
+                    receiptJson
+                    settlementCurrency
+                    settlementCurrencyRate
+                    shopifyPaymentsSet {
+                        extendedAuthorizationSet {
+                        extendedAuthorizationExpiresAt
+                        standardAuthorizationExpiresAt
+                        }
+                        refundSet {
+                        acquirerReferenceNumber
+                        }
+                    }
+                    status
+                    test
+                    totalUnsettledSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    fees {
+                        id
+                        rate
+                        rateName
+                        taxAmount {
+                        amount
+                        currencyCode
+                        }
+                        type
+                        flatFeeName
+                        amount {
+                        amount
+                        currencyCode
+                        }
+                        flatFee {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    manuallyCapturable
+                    paymentDetails {
+                        ... on CardPaymentDetails {
+                        avsResultCode
+                        bin
+                        company
+                        cvvResultCode
+                        expirationMonth
+                        expirationYear
+                        name
+                        number
+                        paymentMethodName
+                        wallet
+                        }
+                        ... on LocalPaymentMethodsPaymentDetails {
+                        paymentDescriptor
+                        paymentMethodName
+                        }
+                        ... on ShopPayInstallmentsPaymentDetails {
+                        paymentMethodName
+                        }
+                    }
                     }
                 }
+                }
+                pageInfo {
+                endCursor
+                hasNextPage
+                }
+            }
             }
         """
 
