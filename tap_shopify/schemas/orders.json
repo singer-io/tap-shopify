@@ -1499,6 +1499,12 @@
                         "integer"
                       ]
                     },
+                    "title": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
                     "targetType": {
                       "type": [
                         "null",

@@ -683,6 +683,15 @@ class Orders(Stream):
                                             targetType
                                             targetSelection
                                             allocationMethod
+                                            ... on AutomaticDiscountApplication {
+                                                title
+                                            }
+                                            ... on ManualDiscountApplication {
+                                                title
+                                            }
+                                            ... on ScriptDiscountApplication {
+                                                title
+                                            }
                                             value {
                                                 ... on MoneyV2 {
                                                     __typename
