@@ -68,16 +68,6 @@ def get_discovery_metadata(stream, schema):
 
     return metadata.to_list(mdata)
 
-def load_schema_references():
-    shared_schema_file = "definitions.json"
-    shared_schema_path = get_abs_path('schemas/')
-
-    refs = {}
-    with open(os.path.join(shared_schema_path, shared_schema_file), encoding='UTF-8') as data_file:
-        refs[shared_schema_file] = json.load(data_file)
-
-    return refs
-
 def add_synthetic_key_to_schema(schema):
     for k in SDC_KEYS:
         schema['properties']['_sdc_shop_' + k] = {'type': ["null", SDC_KEYS[k]]}
@@ -89,20 +79,12 @@ def discover():
     raw_schemas = load_schemas()
     streams = []
 
-    refs = load_schema_references()
     for schema_name, schema in raw_schemas.items():
         if schema_name not in Context.stream_objects:
             continue
 
         stream = Context.stream_objects[schema_name]()
-
-        # resolve_schema_references() is changing value of passed refs.
-        # Customer is a stream and it's a nested field of orders and abandoned_checkouts streams
-        # and those 3 _sdc fields are also added inside nested field customer for above 2 stream
-        # so create a copy of refs before passing it to resolve_schema_references().
-        refs_copy = copy.deepcopy(refs)
-        catalog_schema = add_synthetic_key_to_schema(
-            singer.resolve_schema_references(schema, refs_copy))
+        catalog_schema = add_synthetic_key_to_schema(schema)
 
         # create and add catalog entry
         catalog_entry = {

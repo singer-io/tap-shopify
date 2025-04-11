@@ -476,6 +476,20 @@
         "null",
         "string"
       ]
+    },
+    "lastOrder": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     }
   }
 }

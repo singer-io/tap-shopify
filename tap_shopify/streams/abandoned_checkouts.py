@@ -263,6 +263,12 @@ class AbandonedCheckouts(Stream):
                                 currencyCode
                             }
                         }
+                        customer {
+                            id
+                            lastOrder {
+                                id
+                            }
+                        }
                     }
                 }
                 pageInfo {

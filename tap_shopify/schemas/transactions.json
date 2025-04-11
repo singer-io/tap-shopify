@@ -422,6 +422,193 @@
           }
         }
       }
+    },
+    "fees": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rate": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "rateName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "taxAmount": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "singer.decimal"
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "flatFeeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "amount": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "singer.decimal"
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          },
+          "flatFee": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "amount": {
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "format": "singer.decimal"
+              },
+              "currencyCode": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "manuallyCapturable": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "paymentDetails": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "properties": {
+        "avsResultCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "bin": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "company": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "cvvResultCode": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "expirationMonth": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "expirationYear": {
+          "type": [
+            "null",
+            "integer"
+          ]
+        },
+        "name": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "number": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "paymentMethodName": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "wallet": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "paymentDescriptor": {
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      }
     }
   }
 }
