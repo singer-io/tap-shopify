@@ -71,7 +71,11 @@ class Metafields(Stream, ABC):
         sync_start = utils.now().replace(microsecond=0)
         # Will always fetch the data from the start date and filter it in the code
         # Shopify doesn't support filtering by updated_at for metafields
-        last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
+        # last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
+
+        # Use the lastest bookmark value as the starting point, contrary to the earlier
+        # implementation where the start date was used.
+        last_updated_at = self.get_bookmark()
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
