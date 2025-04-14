@@ -4,7 +4,6 @@ import json
 
 from singer import utils, get_logger, metrics
 from tap_shopify.streams.base import Stream
-from tap_shopify.context import Context
 
 LOGGER = get_logger()
 
@@ -69,9 +68,6 @@ class Metafields(Stream, ABC):
         Main iterator to yield metafield objects.
         """
         sync_start = utils.now().replace(microsecond=0)
-        # Will always fetch the data from the start date and filter it in the code
-        # Shopify doesn't support filtering by updated_at for metafields
-        # last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
 
         # Use the lastest bookmark value as the starting point, contrary to the earlier
         # implementation where the start date was used.
