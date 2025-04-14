@@ -1799,6 +1799,164 @@
                 }
               }
             }
+          },
+          "originalUnitPriceSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "unfulfilledDiscountedTotalSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "unfulfilledOriginalTotalSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "null",
+                      "number"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "variant": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
           }
         }
       }
