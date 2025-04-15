@@ -171,33 +171,33 @@
                         "null",
                         "string"
                     ]
-                }
-            }
-        },
-        "measurement": {
-            "type": [
-                "null",
-                "object"
-            ],
-            "properties": {
-                "weight": {
+                },
+                "measurement": {
                     "type": [
                         "null",
                         "object"
                     ],
                     "properties": {
-                        "unit": {
+                        "weight": {
                             "type": [
                                 "null",
-                                "string"
-                            ]
-                        },
-                        "value": {
-                            "type": [
-                                "null",
-                                "string"
+                                "object"
                             ],
-                            "format": "singer.decimal"
+                            "properties": {
+                                "unit": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ],
+                                    "format": "singer.decimal"
+                                }
+                            }
                         }
                     }
                 }
