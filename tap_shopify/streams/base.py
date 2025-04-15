@@ -286,6 +286,7 @@ class Stream():
         """
 
         last_updated_at = self.get_bookmark()
+        current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
 
         while last_updated_at < sync_start:
@@ -301,27 +302,21 @@ class Stream():
 
                 for edge in data.get("edges"):
                     obj = self.transform_object(edge.get("node"))
+                    replication_value = utils.strptime_to_utc(obj[self.replication_key])
+                    current_bookmark = max(current_bookmark, replication_value)
                     yield obj
 
                 page_info =  data.get("pageInfo")
                 cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
 
             last_updated_at = query_end
+            # Update bookmark to the latest value, but not beyond sync start time
+            max_bookmark_value = min(sync_start, current_bookmark)
+            self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def sync(self):
         """
         Default implementation for sync method
         """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = self.get_bookmark()
-
         for obj in self.get_objects():
-            max_bookmark_value = max(
-                max_bookmark_value,
-                utils.strptime_to_utc(obj[self.replication_key])
-            )
             yield obj
-
-        # Update bookmark to the latest value, but not beyond sync start time
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))
