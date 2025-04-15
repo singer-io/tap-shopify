@@ -1,0 +1,123 @@
+{
+  "type": "object",
+  "properties": {
+    "assignedLocation": {
+      "type": ["null", "object"],
+      "properties": {
+        "address1": { "type": ["null", "string"] },
+        "address2": { "type": ["null", "string"] },
+        "city": { "type": ["null", "string"] },
+        "countryCode": { "type": ["null", "string"] },
+        "location": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": { "type": ["null", "string"] },
+            "updatedAt": { "type": ["null", "string"], "format": "date-time" }
+          }
+        },
+        "name": { "type": ["null", "string"] },
+        "phone": { "type": ["null", "string"] },
+        "province": { "type": ["null", "string"] },
+        "zip": { "type": ["null", "string"] }
+      }
+    },
+    "createdAt": { "type": ["null", "string"], "format": "date-time" },
+    "deliveryMethod": {
+      "type": ["null", "object"],
+      "properties": {
+        "additionalInformation": {
+          "type": ["null", "object"],
+          "properties": {
+            "instructions": { "type": ["null", "string"] },
+            "phone": { "type": ["null", "string"] }
+          }
+        },
+        "brandedPromise": {
+          "type": ["null", "object"],
+          "properties": {
+            "handle": { "type": ["null", "string"] },
+            "name": { "type": ["null", "string"] }
+          }
+        },
+        "id": { "type": ["null", "string"] },
+        "maxDeliveryDateTime": { "type": ["null", "string"], "format": "date-time" },
+        "methodType": { "type": ["null", "string"] },
+        "minDeliveryDateTime": { "type": ["null", "string"], "format": "date-time" },
+        "presentedName": { "type": ["null", "string"] },
+        "serviceCode": { "type": ["null", "string"] },
+        "sourceReference": { "type": ["null", "string"] }
+      }
+    },
+    "destination": {
+      "type": ["null", "object"],
+      "properties": {
+        "address1": { "type": ["null", "string"] },
+        "address2": { "type": ["null", "string"] },
+        "city": { "type": ["null", "string"] },
+        "company": { "type": ["null", "string"] },
+        "countryCode": { "type": ["null", "string"] },
+        "email": { "type": ["null", "string"] },
+        "firstName": { "type": ["null", "string"] },
+        "id": { "type": ["null", "string"] },
+        "lastName": { "type": ["null", "string"] },
+        "location": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": { "type": ["null", "string"] }
+          }
+        },
+        "phone": { "type": ["null", "string"] },
+        "province": { "type": ["null", "string"] },
+        "zip": { "type": ["null", "string"] }
+      }
+    },
+    "fulfillAt": { "type": ["null", "string"], "format": "date-time" },
+    "fulfillBy": { "type": ["null", "string"], "format": "date-time" },
+    "fulfillmentHolds": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "displayReason": { "type": ["null", "string"] },
+          "handle": { "type": ["null", "string"] },
+          "heldByApp": {
+            "type": ["null", "object"],
+            "properties": {
+              "id": { "type": ["null", "string"] }
+            }
+          },
+          "heldByRequestingApp": { "type": ["null", "boolean"] },
+          "id": { "type": ["null", "string"] },
+          "reason": { "type": ["null", "string"] },
+          "reasonNotes": { "type": ["null", "string"] }
+        }
+      }
+    },
+    "id": { "type": ["null", "string"] },
+    "internationalDuties": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "incoterm": { "type": ["null", "string"] }
+        }
+      }
+    },
+    "orderId": { "type": ["null", "string"] },
+    "orderName": { "type": ["null", "string"] },
+    "orderProcessedAt": { "type": ["null", "string"], "format": "date-time" },
+    "requestStatus": { "type": ["null", "string"] },
+    "status": { "type": ["null", "string"] },
+    "supportedActions": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": { "type": ["null", "string"] },
+          "externalUrl": { "type": ["null", "string"] }
+        }
+      }
+    },
+    "updatedAt": { "type": ["null", "string"], "format": "date-time" }
+  }
+}
