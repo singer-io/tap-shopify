@@ -178,7 +178,42 @@ class Fulfillmentorders(Stream):
                                             id
                                         }
                                         location {
-                                            LocationId: id
+                                            id
+                                        }
+                                        fulfillmentLineItems(first: 10) {
+                                            edges {
+                                                node {
+                                                    id
+                                                    quantity
+                                                    originalTotalSet {
+                                                        presentmentMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                        shopMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                    }
+                                                    discountedTotalSet {
+                                                        presentmentMoney {
+                                                            amount
+                                                            currencyCode
+                                                        }
+                                                        shopMoney {
+                                                            currencyCode
+                                                            amount
+                                                        }
+                                                    }
+                                                    lineItem {
+                                                        id
+                                                    }
+                                                }
+                                            }
+                                            pageInfo {
+                                            hasNextPage
+                                            endCursor
+                                            }
                                         }
                                     }
                                 }
