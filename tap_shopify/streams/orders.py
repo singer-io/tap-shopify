@@ -790,6 +790,170 @@ class Orders(Stream):
                         endCursor
                     }
                     }
+                    shippingLine {
+                    carrierIdentifier
+                    code
+                    currentDiscountedPriceSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    custom
+                    deliveryCategory
+                    discountAllocations {
+                        allocatedAmountSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        discountApplication {
+                        allocationMethod
+                        index
+                        targetSelection
+                        targetType
+                        value {
+                            ... on MoneyV2 {
+                            __typename
+                            amount
+                            currencyCode
+                            }
+                            ... on PricingPercentageValue {
+                            __typename
+                            percentage
+                            }
+                        }
+                        ... on AutomaticDiscountApplication {
+                            __typename
+                            allocationMethod
+                            index
+                            targetSelection
+                            targetType
+                            title
+                            value {
+                            ... on MoneyV2 {
+                                __typename
+                                amount
+                                currencyCode
+                            }
+                            ... on PricingPercentageValue {
+                                __typename
+                                percentage
+                            }
+                            }
+                        }
+                        ... on DiscountCodeApplication {
+                            __typename
+                            allocationMethod
+                            code
+                            index
+                            targetSelection
+                            targetType
+                            value {
+                            ... on MoneyV2 {
+                                __typename
+                                amount
+                                currencyCode
+                            }
+                            ... on PricingPercentageValue {
+                                __typename
+                                percentage
+                            }
+                            }
+                        }
+                        ... on ManualDiscountApplication {
+                            description
+                            allocationMethod
+                            index
+                            targetSelection
+                            targetType
+                            title
+                            value {
+                            ... on MoneyV2 {
+                                __typename
+                                amount
+                                currencyCode
+                            }
+                            ... on PricingPercentageValue {
+                                __typename
+                                percentage
+                            }
+                            }
+                        }
+                        ... on ScriptDiscountApplication {
+                            __typename
+                            allocationMethod
+                            index
+                            targetSelection
+                            targetType
+                            title
+                            value {
+                            ... on MoneyV2 {
+                                __typename
+                                amount
+                                currencyCode
+                            }
+                            ... on PricingPercentageValue {
+                                __typename
+                                percentage
+                            }
+                            }
+                        }
+                        }
+                    }
+                    discountedPriceSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    id
+                    isRemoved
+                    originalPriceSet {
+                        presentmentMoney {
+                        amount
+                        currencyCode
+                        }
+                        shopMoney {
+                        amount
+                        currencyCode
+                        }
+                    }
+                    phone
+                    shippingRateHandle
+                    source
+                    taxLines {
+                        channelLiable
+                        priceSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        rate
+                        ratePercentage
+                        source
+                        title
+                    }
+                    title
+                    }
                 }
                 }
                 pageInfo {

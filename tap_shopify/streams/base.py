@@ -272,6 +272,13 @@ class Stream():
             "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
             "first": self.results_per_page,
         }
+
+        # TODO: In future once the dynamic query generation logic is setup remove the below
+        # condition for the orders stream. As by default we will ask the customers to select
+        # few fields or reduce the page size
+        if self.name == "orders":
+            params["first"] = self.results_per_page if self.results_per_page <= 150 else 150
+
         if cursor:
             params["after"] = cursor
         return params
