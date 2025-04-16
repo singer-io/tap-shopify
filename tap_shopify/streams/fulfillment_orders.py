@@ -325,6 +325,25 @@ class Fulfillmentorders(Stream):
                                                 hasNextPage
                                             }
                                         }
+                                        merchantRequests(first: 250) {
+                                            edges {
+                                                node {
+                                                    id
+                                                    kind
+                                                    message
+                                                    requestOptions
+                                                    responseData
+                                                    sentAt
+                                                    fulfillmentOrder {
+                                                        id
+                                                    }
+                                                }
+                                            }
+                                            pageInfo {
+                                                endCursor
+                                                hasNextPage
+                                            }
+                                        }
                                     }
                                 }
                                 pageInfo {
