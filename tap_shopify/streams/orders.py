@@ -51,11 +51,14 @@ class Orders(Stream):
             if (node := item.get("node"))
         ]
 
+        # TODO: In future once the dynamic query generation logic is setup remove the below
+        # condition for the orders stream. Moving forward we should ask the customers to select
+        # few fields or reduce the page size
         # Handle pagination
         page_info = data["lineItems"].get("pageInfo", {})
         while page_info.get("hasNextPage"):
             params = {
-                "first": self.results_per_page,
+                "first": self.results_per_page if self.results_per_page <= 150 else 150,
                 "query": f"id:{data['id'].split('/')[-1]}",
                 "childafter": page_info.get("endCursor"),
             }
