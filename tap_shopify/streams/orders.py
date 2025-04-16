@@ -9,6 +9,33 @@ class Orders(Stream):
     data_key = "orders"
     replication_key = "updatedAt"
 
+    # pylint: disable=W0221,fixme
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
+        """
+        rkey = self.camel_to_snake(self.replication_key)
+
+        # TODO: In future once the dynamic query generation logic is setup remove the below
+        # condition for the orders stream. As by default we will ask the customers to select
+        # few fields or reduce the page size
+        params = {
+            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
+            "first": self.results_per_page if self.results_per_page <= 150 else 150,
+        }
+
+        if cursor:
+            params["after"] = cursor
+        return params
+
     def transform_lineitems(self, data):
         """
         Transforms the order lineitems data by extracting order IDs and handling pagination.
