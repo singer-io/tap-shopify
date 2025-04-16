@@ -187,7 +187,7 @@ class OrderRefunds(Stream):
                                     order {
                                         id
                                     }
-                                    orderAdjustments(first: 1, after: $orderadjustments_after) {
+                                    orderAdjustments(first: 100, after: $orderadjustments_after) {
                                         edges {
                                             node {
                                                 amountSet {
