@@ -147,6 +147,66 @@ class Fulfillmentorders(Stream):
                                     id
                                 }
                             }
+                            merchantRequests(first: 250) {
+                                edges {
+                                    node {
+                                        id
+                                        kind
+                                        message
+                                        requestOptions
+                                        responseData
+                                        sentAt
+                                        fulfillmentOrder {
+                                            id
+                                        }
+                                    }
+                                }
+                                pageInfo {
+                                    endCursor
+                                    hasNextPage
+                                }
+                            }
+                            locationsForMove(first: 250) {
+                                edges {
+                                    node {
+                                        message
+                                        movable
+                                        location {
+                                            id
+                                        }
+                                        unavailableLineItemsCount {
+                                            count
+                                            precision
+                                        }
+                                        availableLineItemsCount {
+                                            count
+                                            precision
+                                        }
+                                        availableLineItems(first: 10) {
+                                            edges {
+                                                node {
+                                                    id
+                                                }
+                                            }
+                                            pageInfo {
+                                                endCursor
+                                                hasNextPage
+                                            }
+                                        }
+                                        unavailableLineItems(first: 10) {
+                                            edges {
+                                                node {
+                                                    id
+                                                }
+                                            }
+                                            pageInfo {
+                                                endCursor
+                                                hasNextPage
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             fulfillments(first: 250) {
                                 edges {
                                     node {
@@ -231,25 +291,6 @@ class Fulfillmentorders(Stream):
                                                     country
                                                     address1
                                                     city
-                                                }
-                                            }
-                                            pageInfo {
-                                                endCursor
-                                                hasNextPage
-                                            }
-                                        }
-                                        merchantRequests(first: 250) {
-                                            edges {
-                                                node {
-                                                    id
-                                                    kind
-                                                    message
-                                                    requestOptions
-                                                    responseData
-                                                    sentAt
-                                                    fulfillmentOrder {
-                                                        id
-                                                    }
                                                 }
                                             }
                                             pageInfo {
