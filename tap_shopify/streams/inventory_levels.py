@@ -52,6 +52,7 @@ class InventoryLevels(Stream):
             dict: The transformed object.
         """
         last_updated_at = self.get_bookmark()
+        current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
 
         while last_updated_at < sync_start:
@@ -72,6 +73,8 @@ class InventoryLevels(Stream):
                     child_edges = node.get(self.child_data_key, {}).get("edges", [])
                     for child_obj in child_edges:
                         obj = self.transform_object(child_obj.get("node"))
+                        replication_value = utils.strptime_to_utc(obj[self.replication_key])
+                        current_bookmark = max(current_bookmark, replication_value)
                         yield obj
 
                     # Check if more child pages are needed
@@ -85,6 +88,10 @@ class InventoryLevels(Stream):
                             parent_id, child_cursor, query_params["query"]
                         ):
                             transformed_obj = self.transform_object(child_obj.get("node"))
+                            replication_value = utils.strptime_to_utc(
+                                transformed_obj[self.replication_key]
+                            )
+                            current_bookmark = max(current_bookmark, replication_value)
                             yield transformed_obj
 
                 page_info = data.get("pageInfo", {})
@@ -92,6 +99,9 @@ class InventoryLevels(Stream):
                 has_next_page = page_info.get("hasNextPage")
 
             last_updated_at = query_end
+            # Update bookmark to the latest value, but not beyond sync start time
+            max_bookmark_value = min(sync_start, current_bookmark)
+            self.update_bookmark(utils.strftime(max_bookmark_value))
 
     # pylint: disable=C0301
     def get_query(self):

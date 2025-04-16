@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+  * Enhance tap with additional fields across streams [#209](https://github.com/singer-io/tap-shopify/pull/209)
+  * Bookmarks are now updated after fetching records within the specified date range.
+
 ## 3.1.0
   * Add missing fields into the schema of orders and order_refunds stream [#208](https://github.com/singer-io/tap-shopify/pull/208)
 

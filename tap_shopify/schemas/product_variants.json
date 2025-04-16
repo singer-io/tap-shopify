@@ -28,11 +28,11 @@
         },
         "compareAtPrice": {
             "type": [
-              "null",
-             "string"
+                "null",
+                "string"
             ],
             "format": "singer.decimal"
-          },
+        },
         "displayName": {
             "type": [
                 "null",
@@ -98,11 +98,11 @@
         },
         "price": {
             "type": [
-              "null",
-             "string"
+                "null",
+                "string"
             ],
             "format": "singer.decimal"
-          },
+        },
         "requiresComponents": {
             "type": [
                 "null",
@@ -171,6 +171,35 @@
                         "null",
                         "string"
                     ]
+                },
+                "measurement": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "weight": {
+                            "type": [
+                                "null",
+                                "object"
+                            ],
+                            "properties": {
+                                "unit": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "value": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ],
+                                    "format": "singer.decimal"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

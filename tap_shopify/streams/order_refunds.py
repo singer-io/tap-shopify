@@ -92,6 +92,44 @@ class OrderRefunds(Stream):
 
         return lineitems
 
+    def transform_orderadjustments(self, data):
+        """
+        Transforms the order adjustments data by extracting order IDs and handling pagination.
+
+        Args:
+            data (dict): Order data.
+
+        Returns:
+            list: List of adjustments.
+        """
+
+        orderadjustments = [
+            node for item in data["orderAdjustments"]["edges"]
+            if (node := item.get("node"))
+        ]
+
+        # Handle pagination
+        page_info = data["orderAdjustments"].get("pageInfo", {})
+        order_parent = data.get("order").get("id")
+        while page_info.get("hasNextPage"):
+            params = {
+                "first": self.results_per_page,
+                "query": f"id:{order_parent.split('/')[-1]}",
+                "orderadjustments_after": page_info.get("endCursor"),
+            }
+
+            # Fetch the next page of data
+            response = self.call_api(params)
+            nodes = response.get("edges", [])[0].get("node", {})
+            refunds_data = nodes.get("refunds")[0]
+            orderadjustments.extend(
+                node for item in refunds_data["orderAdjustments"]["edges"]
+                if (node := item.get("node"))
+            )
+            page_info = refunds_data.get("pageInfo", {})
+
+        return orderadjustments
+
     def transform_object(self, obj):
         """
         Transform refund objects by extracting refund line items from edges.
@@ -105,6 +143,9 @@ class OrderRefunds(Stream):
 
         if obj.get("refundLineItems"):
             obj["refundLineItems"] = self.transform_lineitems(obj)
+
+        if obj.get("orderAdjustments"):
+            obj["orderAdjustments"] = self.transform_orderadjustments(obj)
         return obj
 
     def sync(self):
@@ -134,7 +175,7 @@ class OrderRefunds(Stream):
             str: GraphQL query string.
         """
         # pylint: disable=line-too-long
-        return """query GetOrderRefunds($first: Int!, $after: String, $query: String, $childafter: String) {
+        return """query GetOrderRefunds($first: Int!, $after: String, $query: String, $childafter: String, $orderadjustments_after: String) {
                     orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                         edges {
                             node {
@@ -145,6 +186,38 @@ class OrderRefunds(Stream):
                                     note
                                     order {
                                         id
+                                    }
+                                    orderAdjustments(first: 100, after: $orderadjustments_after) {
+                                        edges {
+                                            node {
+                                                amountSet {
+                                                    presentmentMoney {
+                                                        amount
+                                                        currencyCode
+                                                    }
+                                                    shopMoney {
+                                                        amount
+                                                        currencyCode
+                                                    }
+                                                }
+                                                id
+                                                reason
+                                                taxAmountSet {
+                                                    presentmentMoney {
+                                                        amount
+                                                        currencyCode
+                                                    }
+                                                    shopMoney {
+                                                        amount
+                                                        currencyCode
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        pageInfo {
+                                            endCursor
+                                            hasNextPage
+                                        }
                                     }
                                     refundLineItems(first: 50, after: $childafter) {
                                         edges {

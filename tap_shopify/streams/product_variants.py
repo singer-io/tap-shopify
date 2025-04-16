@@ -56,8 +56,18 @@ class ProductVariants(Stream):
                         taxable
                         title
                         updatedAt
-                        product { id }
-                        inventoryItem { id }
+                        product {
+                            id
+                        }
+                        inventoryItem {
+                            id
+                            measurement {
+                                weight {
+                                    unit
+                                    value
+                                }
+                            }
+                        }
                     }
                 }
                 pageInfo {
