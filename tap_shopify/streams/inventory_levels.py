@@ -88,7 +88,9 @@ class InventoryLevels(Stream):
                             parent_id, child_cursor, query_params["query"]
                         ):
                             transformed_obj = self.transform_object(child_obj.get("node"))
-                            replication_value = utils.strptime_to_utc(transformed_obj[self.replication_key])
+                            replication_value = utils.strptime_to_utc(
+                                transformed_obj[self.replication_key]
+                            )
                             current_bookmark = max(current_bookmark, replication_value)
                             yield transformed_obj
 
