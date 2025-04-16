@@ -180,7 +180,7 @@ class Fulfillmentorders(Stream):
                                         location {
                                             id
                                         }
-                                        fulfillmentLineItems(first: 10) {
+                                        fulfillmentLineItems(first: 250) {
                                             edges {
                                                 node {
                                                     id
@@ -213,6 +213,29 @@ class Fulfillmentorders(Stream):
                                             pageInfo {
                                             hasNextPage
                                             endCursor
+                                            }
+                                        }
+                                        events(first: 250) {
+                                            edges {
+                                                node {
+                                                    zip
+                                                    status
+                                                    province
+                                                    message
+                                                    longitude
+                                                    latitude
+                                                    id
+                                                    happenedAt
+                                                    estimatedDeliveryAt
+                                                    createdAt
+                                                    country
+                                                    address1
+                                                    city
+                                                }
+                                            }
+                                            pageInfo {
+                                                endCursor
+                                                hasNextPage
                                             }
                                         }
                                     }
