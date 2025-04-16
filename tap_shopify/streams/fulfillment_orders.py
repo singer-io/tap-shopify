@@ -147,6 +147,46 @@ class Fulfillmentorders(Stream):
                                     id
                                 }
                             }
+                            fulfillments(first: 250) {
+                                edges {
+                                    node {
+                                        createdAt
+                                        deliveredAt
+                                        displayStatus
+                                        estimatedDeliveryAt
+                                        id
+                                        inTransitAt
+                                        name
+                                        requiresShipping
+                                        status
+                                        totalQuantity
+                                        updatedAt
+                                        originAddress {
+                                            address1
+                                            address2
+                                            city
+                                            countryCode
+                                            provinceCode
+                                            zip
+                                        }
+                                        trackingInfo {
+                                            company
+                                            number
+                                            url
+                                        }
+                                        service {
+                                            id
+                                        }
+                                        location {
+                                            LocationId: id
+                                        }
+                                    }
+                                }
+                                pageInfo {
+                                    endCursor
+                                    hasNextPage
+                                }
+                            }
                         }
                     }
                     pageInfo {
