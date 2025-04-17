@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.1
+  * Remove the pseudo incremental sync logic from the order_refunds stream [#212](https://github.com/singer-io/tap-shopify/pull/212)
+
 ## 3.2.0
   * Enhance tap with additional fields across streams [#209](https://github.com/singer-io/tap-shopify/pull/209)
   * Bookmarks are now updated after fetching records within the specified date range.

@@ -12,6 +12,7 @@ class OrderRefunds(Stream):
     child_data_key = "refunds"
     replication_key = "updatedAt"
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Fetch order refund objects within date windows, yielding each refund individually.
