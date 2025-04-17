@@ -19,9 +19,12 @@ class OrderRefunds(Stream):
         Yields:
             dict: Transformed refund object.
         """
-        # Will always fetch the data from the start date and filter it in the code
-        # Shopify doesn't support filtering by updated_at for metafields
-        last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
+
+        # Set the initial last updated time to the bookmark minus one minute
+        # to ensure we don't miss any updates as its observed shopify updates
+        # the parent object initially and then the child objects
+        last_updated_at = self.get_bookmark() - timedelta(minutes=1)
+        current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
 
         # Process each date window
@@ -44,6 +47,8 @@ class OrderRefunds(Stream):
 
                     # Yield each transformed refund
                     for child_obj in child_edges:
+                        replication_value = utils.strptime_to_utc(child_obj[self.replication_key])
+                        current_bookmark = max(current_bookmark, replication_value)
                         yield self.transform_object(child_obj)
 
                 # Handle pagination
@@ -53,6 +58,9 @@ class OrderRefunds(Stream):
                     break
 
             last_updated_at = query_end
+            # Update bookmark to the latest value, but not beyond sync start time
+            max_bookmark_value = min(sync_start, current_bookmark)
+            self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def transform_lineitems(self, data):
         """
@@ -148,24 +156,6 @@ class OrderRefunds(Stream):
             obj["orderAdjustments"] = self.transform_orderadjustments(obj)
         return obj
 
-    def sync(self):
-        """
-        Performs pseudo incremental sync.
-        """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
-
-        for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
-
-        # Update bookmark to the latest value, but not beyond sync start time
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def get_query(self):
         """
