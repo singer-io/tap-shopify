@@ -69,9 +69,10 @@ class Metafields(Stream, ABC):
         """
         sync_start = utils.now().replace(microsecond=0)
 
-        # Use the lastest bookmark value as the starting point, contrary to the earlier
-        # implementation where the start date was used.
-        last_updated_at = self.get_bookmark()
+        # Set the initial last updated time to the bookmark minus one minute
+        # to ensure we don't miss any updates as it was observed shopify
+        # updates the parent object initially and then the child objects
+        last_updated_at = self.get_bookmark() - timedelta(minutes=1)
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
