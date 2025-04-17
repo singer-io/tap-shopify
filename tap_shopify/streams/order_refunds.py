@@ -25,7 +25,7 @@ class OrderRefunds(Stream):
         # to ensure we don't miss any updates as its observed shopify updates
         # the parent object initially and then the child objects
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
-        current_bookmark = last_updated_at
+        current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
 
         # Process each date window
