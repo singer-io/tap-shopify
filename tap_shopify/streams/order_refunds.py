@@ -25,7 +25,7 @@ class OrderRefunds(Stream):
         # to ensure we don't miss any updates as its observed shopify updates
         # the parent object initially and then the child objects
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
-        current_bookmark = self.get_bookmark()
+        initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
 
         # Process each date window
@@ -50,7 +50,9 @@ class OrderRefunds(Stream):
                     for child_obj in child_edges:
                         replication_value = utils.strptime_to_utc(child_obj[self.replication_key])
                         current_bookmark = max(current_bookmark, replication_value)
-                        yield self.transform_object(child_obj)
+                        # Perform the pseudo sync for the child objects
+                        if replication_value > initial_bookmark_time:
+                            yield self.transform_object(child_obj)
 
                 # Handle pagination
                 page_info = data.get("pageInfo", {})
