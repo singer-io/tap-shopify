@@ -48,10 +48,10 @@ class OrderRefunds(Stream):
 
                     # Yield each transformed refund
                     for child_obj in child_edges:
-                        replication_value = utils.strptime_to_utc(child_obj[self.replication_key])
+                        replication_value = utils.strptime_with_tz(child_obj[self.replication_key])
                         current_bookmark = max(current_bookmark, replication_value)
                         # Perform the pseudo sync for the child objects
-                        if replication_value > initial_bookmark_time:
+                        if replication_value >= initial_bookmark_time:
                             yield self.transform_object(child_obj)
 
                 # Handle pagination
