@@ -66,7 +66,7 @@ class Transactions(Stream):
                     node = edge.get("node", {})
                     child_edges = node.get(self.child_data_key, [])
 
-                    # Yield each transformed refund
+                    # Yield each transformed transaction object
                     for child_obj in child_edges:
                         replication_value = utils.strptime_with_tz(child_obj[self.replication_key])
                         current_bookmark = max(current_bookmark, replication_value)

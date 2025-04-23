@@ -1,7 +1,7 @@
 # Changelog
 
 ## 3.2.1
-  * Remove the pseudo incremental sync logic from the order_refunds stream [#212](https://github.com/singer-io/tap-shopify/pull/212)
+  * Refactor refund and transactions sync logic to rely on updated parent objects [#212](https://github.com/singer-io/tap-shopify/pull/212)
 
 ## 3.2.0
   * Enhance tap with additional fields across streams [#209](https://github.com/singer-io/tap-shopify/pull/209)
