@@ -26,8 +26,12 @@ class Transactions(Stream):
             dict: Dictionary of query parameters.
         """
         parent_filter_key = "updated_at"
+        query = (
+            f"{parent_filter_key}:>='{updated_at_min}' "
+            f"AND {parent_filter_key}:<'{updated_at_max}'"
+        )
         params = {
-            "query": f"{parent_filter_key}:>='{updated_at_min}' AND {parent_filter_key}:<'{updated_at_max}'",
+            "query": query,
             "first": self.results_per_page,
         }
 
