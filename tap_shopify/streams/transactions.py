@@ -12,6 +12,29 @@ class Transactions(Stream):
     child_data_key = "transactions"
     replication_key = "createdAt"
 
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
+        """
+        parent_filter_key = "updated_at"
+        params = {
+            "query": f"{parent_filter_key}:>='{updated_at_min}' AND {parent_filter_key}:<'{updated_at_max}'",
+            "first": self.results_per_page,
+        }
+
+        if cursor:
+            params["after"] = cursor
+        return params
+
     # pylint: disable=too-many-locals
     def get_objects(self):
         """
@@ -66,7 +89,8 @@ class Transactions(Stream):
         Returns query for fetching transactions.
 
         Note:
-            Shopify has a limit of 100 transactions per order.
+            Shopify has a limit of 100 transactions per order as per shopify support.
+            To be on the safer side, we are limiting the transactions to 250.
 
         Returns:
             str: GraphQL query string.
@@ -76,7 +100,7 @@ class Transactions(Stream):
             orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
                 node {
-                    transactions(first: 100) {
+                    transactions(first: 250) {
                     accountNumber
                     amountRoundingSet {
                         presentmentMoney {
