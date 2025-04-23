@@ -12,6 +12,7 @@ class Transactions(Stream):
     child_data_key = "transactions"
     replication_key = "createdAt"
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Fetch transaction objects within date windows, yielding each transaction individually.
