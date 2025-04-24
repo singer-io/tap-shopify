@@ -12,6 +12,34 @@ class Transactions(Stream):
     child_data_key = "transactions"
     replication_key = "createdAt"
 
+    # pylint: disable=W0221
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
+        """
+        parent_filter_key = "updated_at"
+        query = (
+            f"{parent_filter_key}:>='{updated_at_min}' "
+            f"AND {parent_filter_key}:<'{updated_at_max}'"
+        )
+        params = {
+            "query": query,
+            "first": self.results_per_page,
+        }
+
+        if cursor:
+            params["after"] = cursor
+        return params
+
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Fetch transaction objects within date windows, yielding each transaction individually.
@@ -19,9 +47,11 @@ class Transactions(Stream):
         Yields:
             dict: Transformed transaction object.
         """
-        # Will always fetch the data from the start date and filter it in the code
-        # Shopify doesn't support filtering by updated_at for metafields
-        last_updated_at = utils.strptime_with_tz(Context.config["start_date"])
+        # Set the initial last updated time to the bookmark minus one minute
+        # to ensure we don't miss any updates as its observed shopify updates
+        # the parent object initially and then the child objects
+        last_updated_at = self.get_bookmark() - timedelta(minutes=1)
+        initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
 
         while last_updated_at < sync_start:
@@ -40,7 +70,13 @@ class Transactions(Stream):
                     node = edge.get("node", {})
                     child_edges = node.get(self.child_data_key, [])
 
-                    yield from (self.transform_object(child_obj) for child_obj in child_edges)
+                    # Yield each transformed transaction object
+                    for child_obj in child_edges:
+                        replication_value = utils.strptime_with_tz(child_obj[self.replication_key])
+                        current_bookmark = max(current_bookmark, replication_value)
+                        # Perform the pseudo sync for the child objects
+                        if replication_value >= initial_bookmark_time:
+                            yield self.transform_object(child_obj)
 
                 page_info = data.get("pageInfo", {})
                 cursor = page_info.get("endCursor")
@@ -48,32 +84,17 @@ class Transactions(Stream):
                     break
 
             last_updated_at = query_end
-
-    def sync(self):
-        """
-        Performs pseudo incremental sync.
-        """
-        start_time = utils.now().replace(microsecond=0)
-        max_bookmark_value = current_bookmark_value = self.get_bookmark()
-
-        for obj in self.get_objects():
-            replication_value = utils.strptime_to_utc(obj[self.replication_key])
-
-            max_bookmark_value = max(max_bookmark_value, replication_value)
-
-            if replication_value >= current_bookmark_value:
-                yield obj
-
-        # Update bookmark to the latest value, but not beyond sync start time
-        max_bookmark_value = min(start_time, max_bookmark_value)
-        self.update_bookmark(utils.strftime(max_bookmark_value))
+            # Update bookmark to the latest value, but not beyond sync start time
+            max_bookmark_value = min(sync_start, current_bookmark)
+            self.update_bookmark(utils.strftime(max_bookmark_value))
 
     def get_query(self):
         """
         Returns query for fetching transactions.
 
         Note:
-            Shopify has a limit of 100 transactions per order.
+            Shopify has a limit of 100 transactions per order as per shopify support.
+            To be on the safer side, we are limiting the transactions to 250.
 
         Returns:
             str: GraphQL query string.
@@ -83,7 +104,7 @@ class Transactions(Stream):
             orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
                 edges {
                 node {
-                    transactions(first: 100) {
+                    transactions(first: 250) {
                     accountNumber
                     amountRoundingSet {
                         presentmentMoney {

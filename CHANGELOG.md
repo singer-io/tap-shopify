@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.1
+  * Refactor refund and transactions sync logic to rely on updated parent objects [#212](https://github.com/singer-io/tap-shopify/pull/212)
+
 ## 3.2.0
   * Enhance tap with additional fields across streams [#209](https://github.com/singer-io/tap-shopify/pull/209)
   * Bookmarks are now updated after fetching records within the specified date range.
