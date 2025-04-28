@@ -147,7 +147,7 @@ class Fulfillmentorders(Stream):
                                     id
                                 }
                             }
-                            merchantRequests(first: 250) {
+                            merchantRequests(first: 10) {
                                 edges {
                                     node {
                                         id
@@ -166,7 +166,7 @@ class Fulfillmentorders(Stream):
                                     hasNextPage
                                 }
                             }
-                            locationsForMove(first: 250) {
+                            locationsForMove(first: 10) {
                                 edges {
                                     node {
                                         message
@@ -207,7 +207,7 @@ class Fulfillmentorders(Stream):
                                     }
                                 }
                             }
-                            fulfillments(first: 250) {
+                            fulfillments(first: 10) {
                                 edges {
                                     node {
                                         createdAt
@@ -240,7 +240,18 @@ class Fulfillmentorders(Stream):
                                         location {
                                             id
                                         }
-                                        fulfillmentLineItems(first: 250) {
+                                        fulfillmentOrders(first: 10) {
+                                            edges {
+                                                node {
+                                                    id
+                                                }
+                                            }
+                                            pageInfo {
+                                                hasNextPage
+                                                endCursor
+                                            }
+                                        }
+                                        fulfillmentLineItems(first: 10) {
                                             edges {
                                                 node {
                                                     id
@@ -275,7 +286,7 @@ class Fulfillmentorders(Stream):
                                             endCursor
                                             }
                                         }
-                                        events(first: 250) {
+                                        events(first: 10) {
                                             edges {
                                                 node {
                                                     zip
