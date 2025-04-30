@@ -1,5 +1,8 @@
+import singer
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
+
+LOGGER = singer.get_logger()
 
 
 class Fulfillmentorders(Stream):
@@ -9,7 +12,7 @@ class Fulfillmentorders(Stream):
     data_key = "fulfillmentOrders"
     replication_key = "updatedAt"
 
-    def transform_lineitems(self, data):
+    def transform_childitems(self, data, key):
         """
         Transforms the order lineitems data by extracting order IDs and handling pagination.
 
@@ -19,30 +22,30 @@ class Fulfillmentorders(Stream):
         Returns:
             list: List of lineItems.
         """
-        lineitems = [
-            node for item in data["lineItems"]["edges"]
+        children = [
+            node for item in data["edges"]
             if (node := item.get("node"))
         ]
 
-        # Handle pagination
-        page_info = data["lineItems"].get("pageInfo", {})
-        while page_info.get("hasNextPage"):
-            params = {
-                "first": self.results_per_page,
-                "query": f"id:{data['id'].split('/')[-1]}",
-                "childafter": page_info.get("endCursor"),
-            }
+        # # Handle pagination
+        # page_info = data[key].get("pageInfo", {})
+        # while page_info.get("hasNextPage"):
+            # params = {
+            #     "first": self.results_per_page,
+            #     "query": f"id:{data['id'].split('/')[-1]}",
+            #     "childafter": page_info.get("endCursor"),
+            # }
 
-            # Fetch the next page of data
-            response = self.call_api(params)
-            lineitems_data = response.get("edges", [])[0].get("node", {})
-            lineitems.extend(
-                node for item in lineitems_data["lineItems"]["edges"]
-                if (node := item.get("node"))
-            )
-            page_info = lineitems_data.get("pageInfo", {})
+            # # Fetch the next page of data
+            # response = self.call_api(params)
+            # lineitems_data = response.get("edges", [])[0].get("node", {})
+            # lineitems.extend(
+            #     node for item in lineitems_data["lineItems"]["edges"]
+            #     if (node := item.get("node"))
+            # )
+            # page_info = lineitems_data.get("pageInfo", {})
 
-        return lineitems
+        return children
 
     def transform_object(self, obj):
         """
@@ -54,8 +57,19 @@ class Fulfillmentorders(Stream):
         Returns:
             dict: Transformed collection object.
         """
-        if obj.get("lineItems"):
-            obj["lineItems"] = self.transform_lineitems(obj)
+        if obj.get("merchantRequests"):
+            obj["merchantRequests"] = self.transform_childitems(obj.get("merchantRequests"), "merchantRequests")
+
+        if obj.get("locationsForMove"):
+            obj["locationsForMove"] = self.transform_childitems(obj.get("locationsForMove"), "locationsForMove")
+
+        if obj.get("fulfillments"):
+            obj["fulfillments"] = self.transform_childitems(obj.get("fulfillments"), "fulfillments")
+
+        # LOGGER.info("merchantRequests %s", obj["merchantRequests"])
+        LOGGER.info("locationsForMove %s", obj["locationsForMove"])
+        # LOGGER.info("fulfillments %s", obj["fulfillments"])
+
         return obj
 
     def get_query(self):
