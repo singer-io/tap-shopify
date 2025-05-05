@@ -40,7 +40,7 @@ class OrderShippingLines(Stream):
                 with metrics.http_request_timer(self.name):
                     data = self.call_api(query_params)
 
-                # Process parent objects and their refunds
+                # Process parent objects and their shippinglines
                 edges = data.get("edges", [])
                 for edge in edges:
                     node = edge.get("node", {})
@@ -75,180 +75,188 @@ class OrderShippingLines(Stream):
         """
         return """
             query GetShippingLines($first: Int!, $after: String, $query: String, $childafter: String) {
-                orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+            orders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+                edges {
+                node {
+                    shippingLines(first: $first, after: $childafter) {
                     edges {
                         node {
-                            shippingLines(first: 50, after: $childafter) {
-                                edges {
-                                    node {
-                                        carrierIdentifier
-                                        code
-                                        currentDiscountedPriceSet {
-                                            presentmentMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                            shopMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                        }
-                                        custom
-                                        deliveryCategory
-                                        discountAllocations {
-                                            allocatedAmountSet {
-                                                presentmentMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                            discountApplication {
-                                                allocationMethod
-                                                index
-                                                targetSelection
-                                                targetType
-                                                value {
-                                                    ... on MoneyV2 {
-                                                        __typename
-                                                        amount
-                                                        currencyCode
-                                                    }
-                                                    ... on PricingPercentageValue {
-                                                        __typename
-                                                        percentage
-                                                    }
-                                                }
-                                                ... on AutomaticDiscountApplication {
-                                                    __typename
-                                                    allocationMethod
-                                                    index
-                                                    targetSelection
-                                                    targetType
-                                                    title
-                                                    value {
-                                                        ... on MoneyV2 {
-                                                            __typename
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        ... on PricingPercentageValue {
-                                                            __typename
-                                                            percentage
-                                                        }
-                                                    }
-                                                }
-                                                ... on DiscountCodeApplication {
-                                                    __typename
-                                                    allocationMethod
-                                                    code
-                                                    index
-                                                    targetSelection
-                                                    targetType
-                                                    value {
-                                                        ... on MoneyV2 {
-                                                            __typename
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        ... on PricingPercentageValue {
-                                                            __typename
-                                                            percentage
-                                                        }
-                                                    }
-                                                }
-                                                ... on ManualDiscountApplication {
-                                                    description
-                                                    allocationMethod
-                                                    index
-                                                    targetSelection
-                                                    targetType
-                                                    title
-                                                    value {
-                                                        ... on MoneyV2 {
-                                                            __typename
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        ... on PricingPercentageValue {
-                                                            __typename
-                                                            percentage
-                                                        }
-                                                    }
-                                                }
-                                                ... on ScriptDiscountApplication {
-                                                    __typename
-                                                    allocationMethod
-                                                    index
-                                                    targetSelection
-                                                    targetType
-                                                    title
-                                                    value {
-                                                        ... on MoneyV2 {
-                                                            __typename
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        ... on PricingPercentageValue {
-                                                            __typename
-                                                            percentage
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        discountedPriceSet {
-                                            presentmentMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                            shopMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                        }
-                                        id
-                                        isRemoved
-                                        originalPriceSet {
-                                            presentmentMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                            shopMoney {
-                                                amount
-                                                currencyCode
-                                            }
-                                        }
-                                        phone
-                                        shippingRateHandle
-                                        source
-                                        taxLines {
-                                            channelLiable
-                                            priceSet {
-                                                presentmentMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                                shopMoney {
-                                                    amount
-                                                    currencyCode
-                                                }
-                                            }
-                                            rate
-                                            ratePercentage
-                                            source
-                                            title
-                                        }
-                                        title
-                                    }
-                                }
+                        carrierIdentifier
+                        code
+                        currentDiscountedPriceSet {
+                            presentmentMoney {
+                            amount
+                            currencyCode
+                            }
+                            shopMoney {
+                            amount
+                            currencyCode
                             }
                         }
+                        custom
+                        deliveryCategory
+                        discountAllocations {
+                            allocatedAmountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            discountApplication {
+                            allocationMethod
+                            index
+                            targetSelection
+                            targetType
+                            value {
+                                ... on MoneyV2 {
+                                __typename
+                                amount
+                                currencyCode
+                                }
+                                ... on PricingPercentageValue {
+                                __typename
+                                percentage
+                                }
+                            }
+                            ... on AutomaticDiscountApplication {
+                                __typename
+                                allocationMethod
+                                index
+                                targetSelection
+                                targetType
+                                title
+                                value {
+                                ... on MoneyV2 {
+                                    __typename
+                                    amount
+                                    currencyCode
+                                }
+                                ... on PricingPercentageValue {
+                                    __typename
+                                    percentage
+                                }
+                                }
+                            }
+                            ... on DiscountCodeApplication {
+                                __typename
+                                allocationMethod
+                                code
+                                index
+                                targetSelection
+                                targetType
+                                value {
+                                ... on MoneyV2 {
+                                    __typename
+                                    amount
+                                    currencyCode
+                                }
+                                ... on PricingPercentageValue {
+                                    __typename
+                                    percentage
+                                }
+                                }
+                            }
+                            ... on ManualDiscountApplication {
+                                description
+                                allocationMethod
+                                index
+                                targetSelection
+                                targetType
+                                title
+                                value {
+                                ... on MoneyV2 {
+                                    __typename
+                                    amount
+                                    currencyCode
+                                }
+                                ... on PricingPercentageValue {
+                                    __typename
+                                    percentage
+                                }
+                                }
+                            }
+                            ... on ScriptDiscountApplication {
+                                __typename
+                                allocationMethod
+                                index
+                                targetSelection
+                                targetType
+                                title
+                                value {
+                                ... on MoneyV2 {
+                                    __typename
+                                    amount
+                                    currencyCode
+                                }
+                                ... on PricingPercentageValue {
+                                    __typename
+                                    percentage
+                                }
+                                }
+                            }
+                            }
+                        }
+                        discountedPriceSet {
+                            presentmentMoney {
+                            amount
+                            currencyCode
+                            }
+                            shopMoney {
+                            amount
+                            currencyCode
+                            }
+                        }
+                        id
+                        isRemoved
+                        originalPriceSet {
+                            presentmentMoney {
+                            amount
+                            currencyCode
+                            }
+                            shopMoney {
+                            amount
+                            currencyCode
+                            }
+                        }
+                        phone
+                        shippingRateHandle
+                        source
+                        taxLines {
+                            channelLiable
+                            priceSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                            }
+                            rate
+                            ratePercentage
+                            source
+                            title
+                        }
+                        title
+                        }
+                    }
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
                     }
                 }
+                }
+                pageInfo {
+                endCursor
+                hasNextPage
+                }
+            }
             }
         """
 
