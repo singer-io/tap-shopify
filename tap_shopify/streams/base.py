@@ -13,6 +13,8 @@ import shopify
 import simplejson
 import singer
 from singer import metrics, utils
+from graphql import parse, print_ast, visit
+from graphql.language import Visitor, FieldNode, SelectionSetNode, VariableDefinitionNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
@@ -219,6 +221,41 @@ class Stream():
         )
         singer.write_state(Context.state)
 
+    def remove_fields_from_query(self, fields_to_remove: list) -> str:
+        ast = parse(self.get_query())
+        used_variable_names = set()
+
+        class FieldRemover(Visitor):
+            def enter_selection_set(self, node, key, parent, path, ancestors):
+                new_selections = []
+                for selection in node.selections:
+                    if isinstance(selection, FieldNode):
+                        if selection.name.value in fields_to_remove:
+                            continue
+                        # Check field arguments for variable usage
+                        for arg in selection.arguments or []:
+                            if hasattr(arg.value, "name") and isinstance(arg.value.name, NameNode):
+                                used_variable_names.add(arg.value.name.value)
+                    new_selections.append(selection)
+                return SelectionSetNode(selections=new_selections)
+
+            def leave_operation_definition(self, node, *_):
+                # Keep only variable definitions that are used
+                new_var_defs = [
+                    var_def for var_def in node.variable_definitions or []
+                    if var_def.variable.name.value in used_variable_names
+                ]
+                return OperationDefinitionNode(
+                    operation=node.operation,
+                    name=node.name,
+                    variable_definitions=new_var_defs,
+                    directives=node.directives,
+                    selection_set=node.selection_set
+                )
+
+        # Start visiting the AST and dynamically gather used variable names
+        modified_ast = visit(ast, FieldRemover())
+        return print_ast(modified_ast)
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
@@ -289,6 +326,7 @@ class Stream():
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -299,7 +337,7 @@ class Stream():
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 for edge in data.get("edges"):
                     obj = self.transform_object(edge.get("node"))
