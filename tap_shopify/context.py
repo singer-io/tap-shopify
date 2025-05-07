@@ -34,7 +34,7 @@ class Context():
         selected_fields = set()
         for breadcrumb, data in stream_metadata.items():
             if len(breadcrumb) != 2:
-                    continue # Skip root and nested metadata
+                continue # Skip root and nested metadata
 
             if data.get('selected') or data.get('inclusion') == 'automatic':
                 selected_fields.add(breadcrumb[1])

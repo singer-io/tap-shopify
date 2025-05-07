@@ -14,7 +14,7 @@ import simplejson
 import singer
 from singer import metrics, utils
 from graphql import parse, print_ast, visit
-from graphql.language import Visitor, FieldNode, SelectionSetNode, VariableDefinitionNode, OperationDefinitionNode, NameNode
+from graphql.language import Visitor, FieldNode, SelectionSetNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
@@ -226,7 +226,7 @@ class Stream():
         used_variable_names = set()
 
         class FieldRemover(Visitor):
-            def enter_selection_set(self, node, key, parent, path, ancestors):
+            def enter_selection_set(self, node, _key, _parent, _path, _ancestors):
                 new_selections = []
                 for selection in node.selections:
                     if isinstance(selection, FieldNode):
@@ -314,11 +314,12 @@ class Stream():
             params["after"] = cursor
         return params
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Returns:
             - Yields list of objects for the stream
-        Performs
+        Performs:
             - Pagination & Filtering of stream
             - Transformation and bookmarking
         """
