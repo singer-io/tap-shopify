@@ -80,8 +80,8 @@ class Fulfillmentorders(Stream):
             str: GraphQL query string.
         """
         return """
-            query fulfillmentOrders($first: Int!, $after: String, $query: String,) {
-                fulfillmentOrders(first: $first, after: $after, query: $query, sortKey: UPDATED_AT) {
+            query fulfillmentOrders($after: String, $query: String,) {
+                fulfillmentOrders(first: 20, after: $after, query: $query, sortKey: UPDATED_AT) {
                     edges {
                         node {
                             id
