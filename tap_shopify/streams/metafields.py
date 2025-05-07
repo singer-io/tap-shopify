@@ -3,6 +3,7 @@ from datetime import timedelta
 import json
 
 from singer import utils, get_logger, metrics
+from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
 LOGGER = get_logger()
@@ -42,6 +43,7 @@ class Metafields(Stream, ABC):
         # Extract the numeric ID from the full path
         numeric_id = parent_id.split('/')[-1]
         page_info = initial_child_data.get("pageInfo", {})
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         while page_info.get("hasNextPage"):
             query_params = {
@@ -50,7 +52,7 @@ class Metafields(Stream, ABC):
                 "childafter": page_info.get("endCursor"),
             }
 
-            response = self.call_api(query_params)
+            response = self.call_api(query_params, query=query)
             response_edges = response.get("edges", [])
             if not response_edges:
                 break
@@ -73,6 +75,7 @@ class Metafields(Stream, ABC):
         # to ensure we don't miss any updates as it was observed shopify
         # updates the parent object initially and then the child objects
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -84,7 +87,7 @@ class Metafields(Stream, ABC):
             while has_next_page:
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 # Process parent objects
                 for edge in data.get("edges", []):

@@ -25,6 +25,7 @@ class InventoryLevels(Stream):
             dict: The child object.
         """
         has_next_page = True
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         while has_next_page:
             child_query_params = {
                 "first": self.results_per_page,
@@ -32,7 +33,7 @@ class InventoryLevels(Stream):
                 "query": child_query,
                 "childafter": cursor,
             }
-            data = self.call_api(child_query_params)
+            data = self.call_api(child_query_params, query=query)
             for edge in data.get("edges", []):
                 node = edge.get("node", {})
                 child_data = node.get(self.child_data_key, {})
@@ -54,6 +55,7 @@ class InventoryLevels(Stream):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -63,7 +65,7 @@ class InventoryLevels(Stream):
             while has_next_page:
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 # Process parent objects
                 for edge in data.get("edges", []):
