@@ -37,7 +37,7 @@ class StartDateTest(BaseTapTest):
         if original:
             return return_value
 
-        return_value["start_date"] = '2021-04-21T00:00:00Z'
+        return_value["start_date"] = '2021-09-15T00:00:00Z'
         return return_value
 
     @staticmethod
