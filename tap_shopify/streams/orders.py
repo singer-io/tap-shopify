@@ -56,6 +56,7 @@ class Orders(Stream):
         # few fields or reduce the page size
         # Handle pagination
         page_info = data["lineItems"].get("pageInfo", {})
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         while page_info.get("hasNextPage"):
             params = {
                 "first": self.results_per_page if self.results_per_page <= 150 else 150,
@@ -64,7 +65,7 @@ class Orders(Stream):
             }
 
             # Fetch the next page of data
-            response = self.call_api(params)
+            response = self.call_api(params, query=query)
             lineitems_data = response.get("edges", [])[0].get("node", {})
             lineitems.extend(
                 node for item in lineitems_data["lineItems"]["edges"]

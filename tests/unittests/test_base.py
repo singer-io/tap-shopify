@@ -9,14 +9,46 @@ from tap_shopify.context import Context
 
 class TestStream(unittest.TestCase):
 
+    def mock_query():
+        return """
+            {
+                products(first: 10, after: "cursor") {
+                    edges {
+                        node {
+                            id
+                            updatedAt
+                        }
+                    }
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
+                }
+            }
+            """
     def setUp(self):
         self.stream = Stream()
         self.stream.data_key = "products"
+        self.stream.name = "products"
         # Mock the Context.config to include start_date
         self.original_config = Context.config
         Context.config = {
             "start_date": "2025-01-01T00:00:00Z",
             "date_window_size": 30
+        }
+        Context.catalog = {
+            "streams": [
+                {
+                    "tap_stream_id": "products",
+                    "schema": {
+                        "properties": {
+                            "id": {"type": "string"},
+                            "updatedAt": {"type": "string"}
+                        }
+                    },
+                    "metadata": []
+                }
+            ]
         }
 
     def tearDown(self):
@@ -69,7 +101,7 @@ class TestStream(unittest.TestCase):
         self.assertEqual(result, {})
 
     @patch('shopify.GraphQL')
-    @patch.object(Stream, 'get_query', return_value='mocked_query')
+    @patch.object(Stream, 'get_query', return_value=mock_query())
     @patch.object(Stream, 'transform_object', side_effect=lambda x: x)
     @patch('tap_shopify.streams.base.utils.now', return_value=datetime(2025, 2, 1, 0, 0, tzinfo=tzlocal()))
     def test_get_objects(self, mock_now, mock_transform_object, mock_get_query, mock_graphql):
