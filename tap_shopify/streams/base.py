@@ -17,7 +17,7 @@ from tap_shopify.context import Context
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 250
+RESULTS_PER_PAGE = 10
 
 # set default timeout of 300 seconds
 REQUEST_TIMEOUT = 300
