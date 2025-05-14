@@ -1,4 +1,6 @@
+import json
 import singer
+from tap_shopify.streams.base import shopify
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
@@ -161,7 +163,7 @@ class Fulfillmentorders(Stream):
                                     id
                                 }
                             }
-                            merchantRequests(first: 10) {
+                            merchantRequests(first: 3) {
                                 edges {
                                     node {
                                         id
@@ -180,7 +182,7 @@ class Fulfillmentorders(Stream):
                                     hasNextPage
                                 }
                             }
-                            locationsForMove(first: 10) {
+                            locationsForMove(first: 3) {
                                 edges {
                                     node {
                                         message
@@ -196,7 +198,7 @@ class Fulfillmentorders(Stream):
                                             count
                                             precision
                                         }
-                                        availableLineItems(first: 10) {
+                                        availableLineItems(first: 3) {
                                             edges {
                                                 node {
                                                     id
@@ -207,7 +209,7 @@ class Fulfillmentorders(Stream):
                                                 hasNextPage
                                             }
                                         }
-                                        unavailableLineItems(first: 10) {
+                                        unavailableLineItems(first: 3) {
                                             edges {
                                                 node {
                                                     id
@@ -221,7 +223,7 @@ class Fulfillmentorders(Stream):
                                     }
                                 }
                             }
-                            fulfillments(first: 10) {
+                            fulfillments(first: 3) {
                                 edges {
                                     node {
                                         createdAt
@@ -254,7 +256,7 @@ class Fulfillmentorders(Stream):
                                         location {
                                             id
                                         }
-                                        fulfillmentOrders(first: 10) {
+                                        fulfillmentOrders(first: 3) {
                                             edges {
                                                 node {
                                                     id
@@ -265,7 +267,7 @@ class Fulfillmentorders(Stream):
                                                 endCursor
                                             }
                                         }
-                                        fulfillmentLineItems(first: 10) {
+                                        fulfillmentLineItems(first: 3) {
                                             edges {
                                                 node {
                                                     id
@@ -300,7 +302,7 @@ class Fulfillmentorders(Stream):
                                             endCursor
                                             }
                                         }
-                                        events(first: 10) {
+                                        events(first: 3) {
                                             edges {
                                                 node {
                                                     zip
