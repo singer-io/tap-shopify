@@ -16,6 +16,7 @@ from singer import metrics, utils
 from graphql import parse, print_ast, visit
 from graphql.language import Visitor, FieldNode, SelectionSetNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
+from tap_shopify.exceptions import ShopifyError
 
 LOGGER = singer.get_logger()
 
@@ -126,9 +127,6 @@ def shopify_error_handling(fnc):
 
 class Error(Exception):
     """Base exception for the API interaction module"""
-
-class OutOfOrderIdsError(Error):
-    """Raised if our expectation of ordering by ID is violated"""
 
 class ShopifyAPIError(Error):
     """Raised for any unexpected api error without a valid status code"""
@@ -287,6 +285,16 @@ class Stream():
             LOGGER.error("GraphQL Error: %s", gql_error)
             raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
 
+        except urllib.error.HTTPError as http_error:
+            # Extract X-Request-ID from the error response headers
+            request_id = http_error.headers.get("X-Request-ID")
+            error_body = http_error.read().decode("utf-8") if http_error.fp else None
+            error_message = f"{http_error.reason} — {error_body}" if error_body else http_error.reason
+            raise ShopifyError(http_error,
+                f"GraphQL request failed for stream '{self.name}' with status {http_error.code} "
+                f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
+            )
+
         except Exception as exc:
             LOGGER.error("Unexpected error occurred.")
             raise exc
@@ -328,6 +336,7 @@ class Stream():
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
+        LOGGER.info(f"GraphQL query for stream '{self.name}': {' '.join(query.split())}")
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
