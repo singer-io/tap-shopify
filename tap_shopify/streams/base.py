@@ -289,11 +289,15 @@ class Stream():
             # Extract X-Request-ID from the error response headers
             request_id = http_error.headers.get("X-Request-ID")
             error_body = http_error.read().decode("utf-8") if http_error.fp else None
-            error_message = f"{http_error.reason} — {error_body}" if error_body else http_error.reason
+            error_message = (
+                f"{http_error.reason} - {error_body}"
+                if error_body
+                else http_error.reason
+            )
             raise ShopifyError(http_error,
                 f"GraphQL request failed for stream '{self.name}' with status {http_error.code} "
                 f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
-            )
+            ) from http_error
 
         except Exception as exc:
             LOGGER.error("Unexpected error occurred.")
@@ -336,7 +340,7 @@ class Stream():
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
-        LOGGER.info(f"GraphQL query for stream '{self.name}': {' '.join(query.split())}")
+        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
