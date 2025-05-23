@@ -93,7 +93,7 @@ def is_timeout_error(error_raised):
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
-                          (http.client.IncompleteRead, ConnectionResetError, ShopifyAPIError),
+                          (http.client.IncompleteRead, ConnectionResetError, ShopifyAPIError, ShopifyError),
                           max_tries=MAX_RETRIES,
                           factor=2)
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
