@@ -27,6 +27,7 @@ class OrderRefunds(Stream):
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
         initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         # Process each date window
         while last_updated_at < sync_start:
@@ -38,7 +39,7 @@ class OrderRefunds(Stream):
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 # Process parent objects and their refunds
                 edges = data.get("edges", [])
@@ -80,6 +81,7 @@ class OrderRefunds(Stream):
             node for item in data["refundLineItems"]["edges"]
             if (node := item.get("node"))
         ]
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         # Handle pagination
         page_info = data["refundLineItems"].get("pageInfo", {})
@@ -92,7 +94,7 @@ class OrderRefunds(Stream):
             }
 
             # Fetch the next page of data
-            response = self.call_api(params)
+            response = self.call_api(params, query=query)
             nodes = response.get("edges", [])[0].get("node", {})
             lineitems_data = nodes.get("refunds")[0]
             lineitems.extend(
@@ -118,6 +120,7 @@ class OrderRefunds(Stream):
             node for item in data["orderAdjustments"]["edges"]
             if (node := item.get("node"))
         ]
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         # Handle pagination
         page_info = data["orderAdjustments"].get("pageInfo", {})
@@ -130,7 +133,7 @@ class OrderRefunds(Stream):
             }
 
             # Fetch the next page of data
-            response = self.call_api(params)
+            response = self.call_api(params, query=query)
             nodes = response.get("edges", [])[0].get("node", {})
             refunds_data = nodes.get("refunds")[0]
             orderadjustments.extend(

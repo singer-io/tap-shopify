@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.0
+  * Dynamically generate graphql query [#214](https://github.com/singer-io/tap-shopify/pull/214)
+
 ## 3.2.1
   * Refactor refund and transactions sync logic to rely on updated parent objects [#212](https://github.com/singer-io/tap-shopify/pull/212)
 

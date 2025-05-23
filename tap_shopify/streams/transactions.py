@@ -53,6 +53,7 @@ class Transactions(Stream):
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
         initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -63,7 +64,7 @@ class Transactions(Stream):
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 edges = data.get("edges", [])
                 for edge in edges:
