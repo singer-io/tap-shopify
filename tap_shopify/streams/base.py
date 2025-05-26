@@ -13,7 +13,10 @@ import shopify
 import simplejson
 import singer
 from singer import metrics, utils
+from graphql import parse, print_ast, visit
+from graphql.language import Visitor, FieldNode, SelectionSetNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
+from tap_shopify.exceptions import ShopifyError
 
 LOGGER = singer.get_logger()
 
@@ -90,7 +93,8 @@ def is_timeout_error(error_raised):
 
 def shopify_error_handling(fnc):
     @backoff.on_exception(backoff.expo,
-                          (http.client.IncompleteRead, ConnectionResetError, ShopifyAPIError),
+                          (http.client.IncompleteRead, ConnectionResetError,
+                           ShopifyAPIError, ShopifyError),
                           max_tries=MAX_RETRIES,
                           factor=2)
     @backoff.on_exception(backoff.expo, # timeout error raise by Shopify
@@ -124,9 +128,6 @@ def shopify_error_handling(fnc):
 
 class Error(Exception):
     """Base exception for the API interaction module"""
-
-class OutOfOrderIdsError(Error):
-    """Raised if our expectation of ordering by ID is violated"""
 
 class ShopifyAPIError(Error):
     """Raised for any unexpected api error without a valid status code"""
@@ -219,6 +220,41 @@ class Stream():
         )
         singer.write_state(Context.state)
 
+    def remove_fields_from_query(self, fields_to_remove: list) -> str:
+        ast = parse(self.get_query())
+        used_variable_names = set()
+
+        class FieldRemover(Visitor):
+            def enter_selection_set(self, node, _key, _parent, _path, _ancestors):
+                new_selections = []
+                for selection in node.selections:
+                    if isinstance(selection, FieldNode):
+                        if selection.name.value in fields_to_remove:
+                            continue
+                        # Check field arguments for variable usage
+                        for arg in selection.arguments or []:
+                            if hasattr(arg.value, "name") and isinstance(arg.value.name, NameNode):
+                                used_variable_names.add(arg.value.name.value)
+                    new_selections.append(selection)
+                return SelectionSetNode(selections=new_selections)
+
+            def leave_operation_definition(self, node, *_):
+                # Keep only variable definitions that are used
+                new_var_defs = [
+                    var_def for var_def in node.variable_definitions or []
+                    if var_def.variable.name.value in used_variable_names
+                ]
+                return OperationDefinitionNode(
+                    operation=node.operation,
+                    name=node.name,
+                    variable_definitions=new_var_defs,
+                    directives=node.directives,
+                    selection_set=node.selection_set
+                )
+
+        # Start visiting the AST and dynamically gather used variable names
+        modified_ast = visit(ast, FieldRemover())
+        return print_ast(modified_ast)
 
     # This function can be overridden by subclasses for specialized API
     # interactions. If you override it you need to remember to decorate it
@@ -250,6 +286,20 @@ class Stream():
             LOGGER.error("GraphQL Error: %s", gql_error)
             raise ShopifyAPIError("An error occurred with the GraphQL API.") from gql_error
 
+        except urllib.error.HTTPError as http_error:
+            # Extract X-Request-ID from the error response headers
+            request_id = http_error.headers.get("X-Request-ID")
+            error_body = http_error.read().decode("utf-8") if http_error.fp else None
+            error_message = (
+                f"{http_error.reason} - {error_body}"
+                if error_body
+                else http_error.reason
+            )
+            raise ShopifyError(http_error,
+                f"GraphQL request failed for stream '{self.name}' with status {http_error.code} "
+                f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
+            ) from http_error
+
         except Exception as exc:
             LOGGER.error("Unexpected error occurred.")
             raise exc
@@ -277,11 +327,12 @@ class Stream():
             params["after"] = cursor
         return params
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         """
         Returns:
             - Yields list of objects for the stream
-        Performs
+        Performs:
             - Pagination & Filtering of stream
             - Transformation and bookmarking
         """
@@ -289,6 +340,8 @@ class Stream():
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
+        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -299,7 +352,7 @@ class Stream():
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 for edge in data.get("edges"):
                     obj = self.transform_object(edge.get("node"))

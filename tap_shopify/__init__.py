@@ -206,6 +206,8 @@ def main():
             msg = body.get('errors')
         finally:
             raise ShopifyError(exc, msg) from exc
+    except ShopifyError as error:
+        raise error
     except Exception as exc:
         raise ShopifyError(exc) from exc
 

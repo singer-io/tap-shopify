@@ -24,6 +24,7 @@ class Collections(Stream):
             for item in data["products"]["edges"]
             if (node := item.get("node")) and "id" in node
         ]
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         # Handle pagination
         page_info = data["products"].get("pageInfo", {})
@@ -35,7 +36,7 @@ class Collections(Stream):
             }
 
             # Fetch the next page of data
-            response = self.call_api(params)
+            response = self.call_api(params, query=query)
             products_data = response.get("node", {}).get("products", {})
             product_ids.extend(
                 node["id"]
