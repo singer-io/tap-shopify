@@ -2113,6 +2113,74 @@
         },
         "title": { "type": ["null", "string"] }
       }
+    },
+    "retailLocation": {
+      "type": ["null", "object"],
+      "properties": {
+        "activatable": { "type": ["null", "boolean"] },
+        "address": {
+          "type": ["null", "object"],
+          "properties": {
+            "address1": { "type": ["null", "string"] },
+            "address2": { "type": ["null", "string"] },
+            "city": { "type": ["null", "string"] },
+            "country": { "type": ["null", "string"] },
+            "countryCode": { "type": ["null", "string"] },
+            "formatted": { "type": ["null", "string"] },
+            "latitude": { "type": ["null", "number"] },
+            "longitude": { "type": ["null", "number"] },
+            "phone": { "type": ["null", "string"] },
+            "province": { "type": ["null", "string"] },
+            "provinceCode": { "type": ["null", "string"] },
+            "zip": { "type": ["null", "string"] }
+          }
+        },
+        "addressVerified": { "type": ["null", "boolean"] },
+        "createdAt": { "type": ["null", "string"], "format": "date-time" },
+        "deactivatable": { "type": ["null", "boolean"] },
+        "deactivatedAt": { "type": ["null", "string"], "format": "date-time" },
+        "deletable": { "type": ["null", "boolean"] },
+        "fulfillmentService": {
+          "type": ["null", "object"],
+          "properties": {
+            "id": { "type": ["null", "string"] }
+          }
+        },
+        "fulfillsOnlineOrders": { "type": ["null", "boolean"] },
+        "hasActiveInventory": { "type": ["null", "boolean"] },
+        "hasUnfulfilledOrders": { "type": ["null", "boolean"] },
+        "id": { "type": ["null", "string"] },
+        "isActive": { "type": ["null", "boolean"] },
+        "isFulfillmentService": { "type": ["null", "boolean"] },
+        "legacyResourceId": { "type": ["null", "string"] },
+        "localPickupSettingsV2": {
+          "type": ["null", "object"],
+          "properties": {
+            "instructions": { "type": ["null", "string"] },
+            "pickupTime": { "type": ["null", "string"] }
+          }
+        },
+        "name": { "type": ["null", "string"] },
+        "shipsInventory": { "type": ["null", "boolean"] },
+        "updatedAt": { "type": ["null", "string"], "format": "date-time" },
+        "suggestedAddresses": {
+          "type": ["null", "array"],
+          "items": {
+            "type": "object",
+            "properties": {
+              "address1": { "type": ["null", "string"] },
+              "address2": { "type": ["null", "string"] },
+              "city": { "type": ["null", "string"] },
+              "country": { "type": ["null", "string"] },
+              "countryCode": { "type": ["null", "string"] },
+              "formatted": { "type": ["null", "string"] },
+              "province": { "type": ["null", "string"] },
+              "provinceCode": { "type": ["null", "string"] },
+              "zip": { "type": ["null", "string"] }
+            }
+          }
+        }
+      }
     }
   }
 }
