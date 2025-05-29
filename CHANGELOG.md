@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.1
+  * Fix transformation bug for abandoned checkouts [#218](https://github.com/singer-io/tap-shopify/pull/218)
+
 ## 3.3.0
   * Dynamically generate graphql query [#214](https://github.com/singer-io/tap-shopify/pull/214)
 
