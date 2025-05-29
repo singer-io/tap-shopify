@@ -20,7 +20,7 @@ from tap_shopify.exceptions import ShopifyError
 
 LOGGER = singer.get_logger()
 
-RESULTS_PER_PAGE = 10
+RESULTS_PER_PAGE = 250
 
 # set default timeout of 300 seconds
 REQUEST_TIMEOUT = 300
