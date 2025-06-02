@@ -1163,6 +1163,12 @@
               "permitsSkuSharing": { "type":  ["null", "boolean"] },
               "inventoryManagement": { "type":  ["null", "boolean"] }
             }
+          },
+          "location": {
+          "type": ["null", "object"],
+          "properties": {
+              "id": { "type":  ["null", "string"] }
+            }
           }
         }
       }
