@@ -1,7 +1,6 @@
 # Changelog
 
 ## 3.4.0
-  * Dynamically generate graphql query [#214](https://github.com/singer-io/tap-shopify/pull/214)
   * Introduce new stream order_shipping_lines. [#213](https://github.com/singer-io/tap-shopify/pull/213)
   * shippingLine is a nested object within the orders stream and it represents individual shipping methods.
 ## 3.3.1
