@@ -117,13 +117,9 @@ class FulfillmentOrders(Stream):
                             fulfillmentHolds {
                                 displayReason
                                 handle
-                                heldByRequestingApp
                                 id
                                 reason
                                 reasonNotes
-                                heldByApp {
-                                    id
-                                }
                             }
                             internationalDuties {
                                 incoterm

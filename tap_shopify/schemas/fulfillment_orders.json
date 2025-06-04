@@ -221,31 +221,11 @@
                             "string"
                         ]
                     },
-                    "heldByRequestingApp": {
-                        "type": [
-                            "null",
-                            "boolean"
-                        ]
-                    },
                     "id": {
                         "type": [
                             "null",
                             "string"
                         ]
-                    },
-                    "heldByApp": {
-                        "type": [
-                            "null",
-                            "object"
-                        ],
-                        "properties": {
-                            "id": {
-                                "type": [
-                                    "null",
-                                    "string"
-                                ]
-                            }
-                        }
                     }
                 }
             }
