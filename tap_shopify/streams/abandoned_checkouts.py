@@ -36,7 +36,8 @@ class AbandonedCheckouts(Stream):
         Returns:
             dict: Transformed object.
         """
-        obj["lineItems"] = self.process_sub_entities(obj, entity_name="lineItems")
+        if obj.get("lineItems"):
+            obj["lineItems"] = self.process_sub_entities(obj, entity_name="lineItems")
         return obj
 
     def get_query(self):
