@@ -646,6 +646,9 @@ class Orders(Stream):
                                     permitsSkuSharing
                                     inventoryManagement
                                 }
+                                location {
+                                    id
+                                }
                             }
                             lineItems(first: 25, after: $childafter) {
                                 edges {

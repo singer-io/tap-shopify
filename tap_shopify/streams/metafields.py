@@ -76,6 +76,7 @@ class Metafields(Stream, ABC):
         # updates the parent object initially and then the child objects
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
+        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
