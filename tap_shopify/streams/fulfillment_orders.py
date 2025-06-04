@@ -13,7 +13,7 @@ class FulfillmentOrders(Stream):
     data_key = "fulfillmentOrders"
     replication_key = "updatedAt"
 
-    def transform_childitems(self, data, key, next_page_key):
+    def transform_childitems(self, data, parent_id, key, next_page_key):
         """
         Paginate child items.
         """
@@ -21,14 +21,13 @@ class FulfillmentOrders(Stream):
             node for item in data["edges"]
             if (node := item.get("node"))
         ]
-
         # Handle pagination
-        page_info = data[key].get("pageInfo", {})
+        page_info = data.get("pageInfo", {})
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         while page_info.get("hasNextPage"):
             params = {
                 "first": self.results_per_page,
-                "query": f"id:{data['id'].split('/')[-1]}",
+                "query": f"id:{parent_id.split('/')[-1]}",
                 next_page_key: page_info.get("endCursor"),
             }
 
@@ -52,24 +51,29 @@ class FulfillmentOrders(Stream):
             dict: Transformed collection object.
         """
         if obj.get("merchantRequests"):
-            obj["merchantRequests"] = self.transform_childitems(obj.get("merchantRequests"), "merchantRequests", "merchant_request_after")
+            obj["merchantRequests"] = self.transform_childitems(obj.get("merchantRequests"), obj["id"], "merchantRequests", "merchant_request_after")
 
         if obj.get("locationsForMove"):
-            obj["locationsForMove"] = self.transform_childitems(obj.get("locationsForMove"), "locationsForMove", "locations_move_after")
-            obj["locationsForMove"]["availableLineItems"] = [node for item in obj["locationsForMove"]["availableLineItems"]["edges"] if (node := item.get("node"))]
-            obj["locationsForMove"]["unavailableLineItems"] = [node for item in obj["locationsForMove"]["unavailableLineItems"]["edges"] if (node := item.get("node"))]
+            obj["locationsForMove"] = self.transform_childitems(obj.get("locationsForMove"), obj["id"], "locationsForMove", "locations_move_after")
+            for item in obj["locationsForMove"]:
+                item["availableLineItems"] = item["availableLineItems"]["nodes"]
+                item["unavailableLineItems"] = item["unavailableLineItems"]["nodes"]
 
         if obj.get("fulfillments"):
-            obj["fulfillments"] = self.transform_childitems(obj.get("fulfillments"), "fulfillments", "fulfillments_after")
-            obj["fulfillments"]["fulfillmentOrders"] = [node for item in obj["fulfillments"]["fulfillmentOrders"]["edges"] if (node := item.get("node"))]
-            obj["fulfillments"]["fulfillmentLineItems"] = [node for item in obj["fulfillments"]["fulfillmentLineItems"]["edges"] if (node := item.get("node"))]
-            obj["fulfillments"]["events"] = [node for item in obj["fulfillments"]["events"]["edges"] if (node := item.get("node"))]
+            obj["fulfillments"] = self.transform_childitems(obj.get("fulfillments"), obj["id"], "fulfillments", "fulfillments_after")
+            for item in obj["fulfillments"]:
+                item["fulfillmentOrders"] = item["fulfillmentOrders"]["nodes"]
+                item["fulfillmentLineItems"] = item["fulfillmentLineItems"]["nodes"]
+                item["events"] = item["fulfillmentLineItems"]["events"]
+        
+        if obj.get("fulfillmentOrdersForMerge"):
+            obj["fulfillmentOrdersForMerge"] = obj["fulfillmentOrdersForMerge"]["nodes"]
 
         return obj
 
     def get_query(self):
         """
-        Returns the GraphQL query for fetching orders.
+        Returns the GraphQL query for fetching fulfillmentOrders.
         Returns:
             str: GraphQL query string.
         """
@@ -151,7 +155,6 @@ class FulfillmentOrders(Stream):
                                 province
                                 zip
                                 location {
-                                    updatedAt
                                     id
                                 }
                             }
@@ -191,26 +194,13 @@ class FulfillmentOrders(Stream):
                                             precision
                                         }
                                         availableLineItems(first: 250) {
-                                            edges {
-                                                node {
-                                                    id
-                                                }
+                                            nodes {
+                                                id
                                             }
-                                            pageInfo {
-                                                endCursor
-                                                hasNextPage
-                                            }
-
                                         }
                                         unavailableLineItems(first:250) {
-                                            edges {
-                                                node {
-                                                    id
-                                                }
-                                            }
-                                            pageInfo {
-                                                endCursor
-                                                hasNextPage
+                                            nodes {
+                                                id
                                             }
                                         }
                                     }
@@ -218,6 +208,11 @@ class FulfillmentOrders(Stream):
                                 pageInfo {
                                     endCursor
                                     hasNextPage
+                                }
+                            }
+                            fulfillmentOrdersForMerge(first: 250) {
+                                nodes {
+                                    id
                                 }
                             }
                             fulfillments(first: 3, after: $fulfillments_after) {
@@ -254,60 +249,47 @@ class FulfillmentOrders(Stream):
                                             id
                                         }
                                         fulfillmentOrders(first: 250) {
-                                            edges {
-                                                node {
-                                                    id
-                                                }
-                                            }
-                                            pageInfo {
-                                                hasNextPage
-                                                endCursor
+                                            nodes {
+                                                id
                                             }
                                         }
                                         fulfillmentLineItems(first: 10) {
-                                            edges {
-                                                node {
-                                                    id
-                                                    quantity
-                                                    originalTotalSet {
-                                                        presentmentMoney {
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        shopMoney {
-                                                            amount
-                                                            currencyCode
-                                                        }
+                                            nodes {
+                                                id
+                                                quantity
+                                                originalTotalSet {
+                                                    presentmentMoney {
+                                                        amount
+                                                        currencyCode
                                                     }
-                                                    discountedTotalSet {
-                                                        presentmentMoney {
-                                                            amount
-                                                            currencyCode
-                                                        }
-                                                        shopMoney {
-                                                            currencyCode
-                                                            amount
-                                                        }
-                                                    }
-                                                    lineItem {
-                                                        id
+                                                    shopMoney {
+                                                        amount
+                                                        currencyCode
                                                     }
                                                 }
+                                                discountedTotalSet {
+                                                    presentmentMoney {
+                                                        amount
+                                                        currencyCode
+                                                    }
+                                                    shopMoney {
+                                                        currencyCode
+                                                        amount
+                                                    }
+                                                }
+                                                lineItem {
+                                                    id
+                                                }
                                             }
-                                            pageInfo {
-                                                hasNextPage
-                                                endCursor
-                                            }
+                                            
+                                        }
+                                        legacyResourceId
+                                        order {
+                                            id
                                         }
                                         events(first: 10) {
-                                            edges {
-                                                node {
-                                                    id
-                                                }
-                                            }
-                                            pageInfo {
-                                                endCursor
-                                                hasNextPage
+                                            nodes {
+                                                id
                                             }
                                         }
                                     }

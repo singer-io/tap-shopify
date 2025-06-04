@@ -424,13 +424,6 @@
                                 "null",
                                 "string"
                             ]
-                        },
-                        "updatedAt": {
-                            "type": [
-                                "null",
-                                "string"
-                            ],
-                            "format": "date-time"
                         }
                     }
                 }
@@ -480,6 +473,20 @@
                             "string"
                         ],
                         "format": "date-time"
+                    },
+                    "fulfillmentOrder": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
                     }
                 }
             }
@@ -557,6 +564,57 @@
                                 ]
                             }
                         }
+                    },
+                    "availableLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "action": {
+                                    "id": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unavailableLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "fulfillmentOrdersForMerge": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
                     }
                 }
             }
@@ -705,6 +763,221 @@
                                     ]
                                 },
                                 "url": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "service": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "location": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "fulfillmentOrders": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "fulfillmentLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "quantity": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "originalTotalSet": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "presentmentMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "shopMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "discountedTotalSet": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "presentmentMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "shopMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "lineItem": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "legacyResourceId": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "order": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "events": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
                                     "type": [
                                         "null",
                                         "string"
