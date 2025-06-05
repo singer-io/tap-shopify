@@ -2,7 +2,7 @@ import unittest
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
-class TestShopifyErrorHandling(unittest.TestCase):
+class TestShopifyDateWindowHandling(unittest.TestCase):
     
     def test_no_date_window_value(self):
         """Test that no value for date_window is handled correctly."""
