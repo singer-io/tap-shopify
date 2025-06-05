@@ -86,7 +86,7 @@ class Orders(Stream):
         start = time.time()
         wait = 10
         while time.time() - start < timeout:
-            response = shopify.GraphQL().execute(query="""
+            response = json.loads(shopify.GraphQL().execute(query="""
                 {
                 currentBulkOperation {
                     id
@@ -99,7 +99,7 @@ class Orders(Stream):
                     url
                 }
                 }
-            """)
+            """))
 
             if not isinstance(response, dict):
                 raise ShopifyError(f"Unexpected GraphQL response: {response}")
