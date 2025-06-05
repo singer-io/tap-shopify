@@ -145,7 +145,7 @@ class Stream():
 
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
-        self.date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+        self.date_window_size = float(Context.config.get("date_window_size") or DATE_WINDOW_SIZE)
 
         # set request timeout
         self.request_timeout = get_request_timeout()
