@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.3.1=2
+## 3.3.2
   * Fix date_window bug[#221](https://github.com/singer-io/tap-shopify/pull/221)
 
 ## 3.3.1
