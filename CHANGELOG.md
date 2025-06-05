@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.1=2
+  * Fix date_window bug[#221](https://github.com/singer-io/tap-shopify/pull/221)
+
 ## 3.3.1
   * Fix transformation bug for abandoned checkouts [#218](https://github.com/singer-io/tap-shopify/pull/218)
 

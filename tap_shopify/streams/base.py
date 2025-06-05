@@ -139,12 +139,13 @@ class Stream():
     replication_method = 'INCREMENTAL'
     replication_key = 'updatedAt'
     key_properties = ['id']
-    date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
+    date_window_size = None
     data_key = None
     results_per_page = None
 
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
+        self.date_window_size = float(Context.config.get("date_window_size", DATE_WINDOW_SIZE))
 
         # set request timeout
         self.request_timeout = get_request_timeout()
