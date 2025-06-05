@@ -25,7 +25,7 @@ RESULTS_PER_PAGE = 250
 # set default timeout of 300 seconds
 REQUEST_TIMEOUT = 300
 
-DATE_WINDOW_SIZE = 30
+DEFAULT_DATE_WINDOW = 30
 
 # We will retry a 500 error a maximum of 5 times before giving up
 MAX_RETRIES = 5
@@ -145,7 +145,7 @@ class Stream():
 
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
-        self.date_window_size = float(Context.config.get("date_window_size") or DATE_WINDOW_SIZE)
+        self.date_window_size = float(Context.config.get("date_window_size") or DEFAULT_DATE_WINDOW) or DEFAULT_DATE_WINDOW
 
         # set request timeout
         self.request_timeout = get_request_timeout()
