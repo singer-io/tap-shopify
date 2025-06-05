@@ -64,7 +64,7 @@ class FulfillmentOrders(Stream):
             for item in obj["fulfillments"]:
                 item["fulfillmentOrders"] = item["fulfillmentOrders"]["nodes"]
                 item["fulfillmentLineItems"] = item["fulfillmentLineItems"]["nodes"]
-                item["events"] = item["fulfillmentLineItems"]["events"]
+                item["events"] = item["events"]["nodes"]
         
         if obj.get("fulfillmentOrdersForMerge"):
             obj["fulfillmentOrdersForMerge"] = obj["fulfillmentOrdersForMerge"]["nodes"]
@@ -117,9 +117,13 @@ class FulfillmentOrders(Stream):
                             fulfillmentHolds {
                                 displayReason
                                 handle
+                                heldByRequestingApp
                                 id
                                 reason
                                 reasonNotes
+                                heldByApp {
+                                    id
+                                }
                             }
                             internationalDuties {
                                 incoterm
