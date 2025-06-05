@@ -230,6 +230,26 @@
                 }
             }
         },
+        "heldByRequestingApp": {
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        "heldByApp": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
+        },
         "internationalDuties": {
             "type": [
                 "null",
