@@ -34,6 +34,29 @@ def initialize_shopify_client():
     # Shop.current() makes a call for shop details with provided shop and api_key
     return shopify.Shop.current().attributes
 
+# Add helper
+def fetch_app_scopes():
+    query = """
+    query {
+      currentAppInstallation {
+        accessScopes {
+          handle
+        }
+      }
+    }
+    """
+    resp = shopify.GraphQL().execute(query)
+    data = json.loads(resp)
+    return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
+
+def handle_special_scenarios(raw_schemas):
+    scopes = fetch_app_scopes()
+    # If the app does not have the 'read_users' scope, remove author field
+    if 'read_users' not in scopes:
+        LOGGER.warning("Skipping 'author' field in events stream: 'read_users' scope not granted.")
+        raw_schemas["events"]["properties"].pop("author", None)
+    return raw_schemas
+
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
@@ -77,6 +100,7 @@ def discover():
     initialize_shopify_client() # Checking token in discover mode
 
     raw_schemas = load_schemas()
+    raw_schemas = handle_special_scenarios(raw_schemas)
     streams = []
 
     for schema_name, schema in raw_schemas.items():
