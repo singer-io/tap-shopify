@@ -1103,6 +1103,10 @@ class Orders(Stream):
                                     zip
                                 }
                             }
+                            customAttributes {
+                                key
+                                value
+                            }
                         }
                     }
                     pageInfo {
