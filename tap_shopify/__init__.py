@@ -19,6 +19,7 @@ from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
+UNSUPPORTED_FIELDS = {"author"}
 
 @shopify_error_handling
 def initialize_shopify_client():
@@ -49,13 +50,13 @@ def fetch_app_scopes():
     data = json.loads(resp)
     return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
 
-def handle_special_scenarios(raw_schemas):
+def has_read_users_access():
     scopes = fetch_app_scopes()
-    # If the app does not have the 'read_users' scope, remove author field
+    # If the app does not have the 'read_users' scope, return False
     if 'read_users' not in scopes:
-        LOGGER.warning("Skipping 'author' field in events stream: 'read_users' scope not granted.")
-        raw_schemas["events"]["properties"].pop("author", None)
-    return raw_schemas
+        LOGGER.warning("Skipping '%s' field: 'read_users' scope is not granted for public apps.", ", ".join(UNSUPPORTED_FIELDS))
+        return False
+    return True
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -86,6 +87,8 @@ def get_discovery_metadata(stream, schema):
     for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
+        elif field_name in UNSUPPORTED_FIELDS and not has_read_users_access():
+            mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'unsupported')
         else:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
 
@@ -100,7 +103,6 @@ def discover():
     initialize_shopify_client() # Checking token in discover mode
 
     raw_schemas = load_schemas()
-    raw_schemas = handle_special_scenarios(raw_schemas)
     streams = []
 
     for schema_name, schema in raw_schemas.items():
