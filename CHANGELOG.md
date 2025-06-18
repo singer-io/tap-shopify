@@ -3,6 +3,10 @@
 ## 3.4.0
   * Introduce new stream order_shipping_lines. [#213](https://github.com/singer-io/tap-shopify/pull/213)
   * shippingLine is a nested object within the orders stream and it represents individual shipping methods.
+
+## 3.3.2
+  * Fix date_window bug[#221](https://github.com/singer-io/tap-shopify/pull/221)
+
 ## 3.3.1
   * Fix transformation bug for abandoned checkouts [#218](https://github.com/singer-io/tap-shopify/pull/218)
 
