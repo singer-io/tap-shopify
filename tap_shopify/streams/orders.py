@@ -944,9 +944,9 @@ class Orders(Stream):
         }
         return shopify.GraphQL().execute(**operation)
 
-    def poll_bulk_completion(self, timeout=900):
+    def poll_bulk_completion(self, timeout=3600):
         start = time.time()
-        wait = 10
+        wait = 30
         while time.time() - start < timeout:
             response = json.loads(shopify.GraphQL().execute(query="""
                 {
@@ -977,7 +977,6 @@ class Orders(Stream):
                 raise Exception(f"Bulk operation failed: {op.get('errorCode')}")
 
             time.sleep(wait)
-            wait = min(wait * 1.5, 60)
 
         raise Exception("Timed out waiting for bulk operation.")
 
