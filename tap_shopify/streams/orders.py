@@ -1004,8 +1004,6 @@ class Orders(Stream):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
-        query = self.get_query()
-        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -1017,7 +1015,7 @@ class Orders(Stream):
                     utils.strftime(query_end)
                 )
                 query = self.get_query() % query_filter
-                LOGGER.info("Fetching the records in the date range of %s", query_filter)
+                LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
                 self.submit_bulk_query(query)
                 url = self.poll_bulk_completion()
 
