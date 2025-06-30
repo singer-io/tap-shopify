@@ -54,7 +54,10 @@ def has_read_users_access():
     scopes = fetch_app_scopes()
     # If the app does not have the 'read_users' scope, return False
     if 'read_users' not in scopes:
-        LOGGER.warning("Skipping '%s' field: 'read_users' scope is not granted for public apps.", ", ".join(UNSUPPORTED_FIELDS))
+        LOGGER.warning(
+            "Skipping '%s' field: 'read_users' scope is not granted for public apps.",
+            ", ".join(UNSUPPORTED_FIELDS)
+        )
         return False
     return True
 
