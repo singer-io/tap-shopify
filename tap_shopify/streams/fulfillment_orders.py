@@ -1,4 +1,3 @@
-import json
 import singer
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
@@ -51,21 +50,33 @@ class FulfillmentOrders(Stream):
             dict: Transformed collection object.
         """
         if obj.get("merchantRequests"):
-            obj["merchantRequests"] = self.transform_childitems(obj.get("merchantRequests"), obj["id"], "merchantRequests", "merchant_request_after")
+            obj["merchantRequests"] = self.transform_childitems(
+                obj.get("merchantRequests"),
+                obj["id"], "merchantRequests",
+                "merchant_request_after"
+            )
 
         if obj.get("locationsForMove"):
-            obj["locationsForMove"] = self.transform_childitems(obj.get("locationsForMove"), obj["id"], "locationsForMove", "locations_move_after")
+            obj["locationsForMove"] = self.transform_childitems(
+                obj.get("locationsForMove"), obj["id"],
+                "locationsForMove",
+                "locations_move_after"
+            )
             for item in obj["locationsForMove"]:
                 item["availableLineItems"] = item["availableLineItems"]["nodes"]
                 item["unavailableLineItems"] = item["unavailableLineItems"]["nodes"]
 
         if obj.get("fulfillments"):
-            obj["fulfillments"] = self.transform_childitems(obj.get("fulfillments"), obj["id"], "fulfillments", "fulfillments_after")
+            obj["fulfillments"] = self.transform_childitems(
+                obj.get("fulfillments"), obj["id"],
+                "fulfillments",
+                "fulfillments_after"
+            )
             for item in obj["fulfillments"]:
                 item["fulfillmentOrders"] = item["fulfillmentOrders"]["nodes"]
                 item["fulfillmentLineItems"] = item["fulfillmentLineItems"]["nodes"]
                 item["events"] = item["events"]["nodes"]
-        
+
         if obj.get("fulfillmentOrdersForMerge"):
             obj["fulfillmentOrdersForMerge"] = obj["fulfillmentOrdersForMerge"]["nodes"]
 
@@ -253,7 +264,7 @@ class FulfillmentOrders(Stream):
                                                 id
                                             }
                                         }
-                                        fulfillmentLineItems(first: 10) {
+                                        fulfillmentLineItems(first: 3) {
                                             nodes {
                                                 id
                                                 quantity
@@ -287,7 +298,7 @@ class FulfillmentOrders(Stream):
                                         order {
                                             id
                                         }
-                                        events(first: 10) {
+                                        events(first: 250) {
                                             nodes {
                                                 id
                                             }

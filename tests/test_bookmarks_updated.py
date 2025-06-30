@@ -48,7 +48,7 @@ class BookmarkTest(BaseTapTest):
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in incremental_streams]
-        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
+        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=False)
 
         #################################
         # Run first sync

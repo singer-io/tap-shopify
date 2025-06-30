@@ -19,7 +19,7 @@ class PaginationTest(BaseTapTest):
 
     def get_properties(self, *args, **kwargs):
         props = super().get_properties(*args, **kwargs)
-        props['results_per_page'] = '50'
+        props['results_per_page'] = '30'
         return props
 
     def test_run(self):
