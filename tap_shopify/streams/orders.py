@@ -947,6 +947,8 @@ class Orders(Stream):
     def poll_bulk_completion(self, timeout=7200):
         start = time.time()
         wait = 60
+        last_status = None
+
         while time.time() - start < timeout:
             response = json.loads(shopify.GraphQL().execute(query="""
                 {
@@ -964,21 +966,43 @@ class Orders(Stream):
             """))
 
             if not isinstance(response, dict):
-                raise ShopifyError(f"Unexpected GraphQL response: {response}")
+                raise ShopifyError("Unexpected GraphQL response: {}".format(response))
 
             op = response.get("data", {}).get("currentBulkOperation")
 
             if not isinstance(op, dict):
-                raise ShopifyError(f"Unexpected bulk operation format: {op}")
+                raise ShopifyError("Unexpected bulk operation format: {}".format(op))
 
-            if op.get("status") == "COMPLETED":
+            current_status = op.get("status")
+            operation_id = op.get("id")
+
+            # Log only if status has changed
+            if current_status != last_status:
+                LOGGER.info(
+                    "Bulk operation {} status changed: {} → {}".format(
+                        operation_id,
+                        last_status or "N/A",
+                        current_status
+                    )
+                )
+                last_status = current_status
+
+            if current_status == "COMPLETED":
                 return op.get("url")
-            elif op.get("status") in ["FAILED", "CANCELED"]:
-                raise Exception(f"Bulk operation failed: {op.get('errorCode')}")
+            elif current_status in ["FAILED", "CANCELED"]:
+                raise Exception(
+                    "Bulk operation failed: {}".format(op.get("errorCode"))
+                )
 
             time.sleep(wait)
 
-        raise Exception("Timed out waiting for bulk operation.")
+        elapsed = int(time.time() - start)
+        raise ShopifyError(
+            "Bulk operation {} did not complete within {} seconds. "
+            "Please contact Shopify support with the operation ID for assistance.".format(
+                operation_id or "UNKNOWN", elapsed
+            )
+        )
 
     def parse_bulk_jsonl(self, url):
         orders, line_items = {}, {}
@@ -1004,6 +1028,8 @@ class Orders(Stream):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
+        query = self.get_query()
+        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
@@ -1015,7 +1041,7 @@ class Orders(Stream):
                     utils.strftime(query_end)
                 )
                 query = self.get_query() % query_filter
-                LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
+                LOGGER.info("Fetching the records in the date range of %s", query_filter)
                 self.submit_bulk_query(query)
                 url = self.poll_bulk_completion()
 
