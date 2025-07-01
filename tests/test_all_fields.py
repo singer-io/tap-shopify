@@ -27,7 +27,7 @@ class AllFieldsTest(BaseTapTest):
             'start_date': '2025-01-01T00:00:00Z',
             'shop': 'talenddatawearhouse',
             'date_window_size': 30,
-            'results_per_page': 30
+            'results_per_page': '30'
         }
 
         return return_value

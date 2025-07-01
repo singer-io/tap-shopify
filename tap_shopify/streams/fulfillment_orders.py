@@ -132,9 +132,6 @@ class FulfillmentOrders(Stream):
                                 id
                                 reason
                                 reasonNotes
-                                heldByApp {
-                                    id
-                                }
                             }
                             internationalDuties {
                                 incoterm
