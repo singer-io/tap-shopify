@@ -7,7 +7,7 @@ import singer
 from singer import metrics, utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
-from tap_shopify.exceptions import ShopifyError
+from tap_shopify.exceptions import ShopifyAPIError
 
 LOGGER = singer.get_logger()
 class Orders(Stream):
@@ -1033,30 +1033,37 @@ class Orders(Stream):
             response = json.loads(shopify.GraphQL().execute(query=query))
 
             if not isinstance(response, dict):
-                raise ShopifyError(Exception, "Unexpected GraphQL response: {}".format(response))
+                raise ShopifyAPIError("Unexpected GraphQL response: {}".format(response))
 
             op = response.get("data", {}).get("node")
 
+            if not op:
+                LOGGER.warning("Bulk operation not found: {}".format(bulk_op_id))
+                return None
+
             if not isinstance(op, dict):
-                raise ShopifyError(Exception, "Unexpected bulk operation format: {}".format(op))
+                raise ShopifyAPIError("Unexpected bulk operation format: {}".format(op))
 
             current_status = op.get("status")
             operation_id = op.get("id")
+            created_at = op.get("createdAt")
+            completed_at = op.get("completedAt")
 
             # Log only if status has changed
             if current_status != last_status:
                 LOGGER.info(
-                    "Bulk operation %s status changed: %s → %s",
+                    "Bulk operation - %s, status: %s, created at - %s, completed at - %s",
                     operation_id,
-                    last_status or "N/A",
-                    current_status
+                    current_status,
+                    created_at,
+                    completed_at if completed_at else "N/A"
                 )
                 last_status = current_status
 
             if current_status == "COMPLETED":
                 return op.get("url")
             if current_status in ["FAILED", "CANCELED"]:
-                raise ShopifyError(Exception,
+                raise ShopifyAPIError(
                     "Bulk operation failed: {}".format(op.get("errorCode"))
                 )
 
@@ -1073,7 +1080,7 @@ class Orders(Stream):
         )
 
         elapsed = int(time.time() - start)
-        raise ShopifyError(Exception,
+        raise ShopifyAPIError(
             "Bulk operation id - {} did not complete within {} seconds. "
             "Please contact Shopify support with the operation ID for assistance.".format(
                 operation_id or "UNKNOWN", str(elapsed)
@@ -1154,7 +1161,7 @@ class Orders(Stream):
                         .get("userErrors")
                     )
                     if user_errors:
-                        raise ShopifyError("Bulk query error: {}".format(user_errors))
+                        raise ShopifyAPIError("Bulk query error: {}".format(user_errors))
 
                     bulk_operation = (
                         bulk_op_data.get("data", {})
@@ -1163,7 +1170,7 @@ class Orders(Stream):
                     )
                     bulk_op_id = bulk_operation.get("id") if bulk_operation else None
                     if not bulk_op_id:
-                        raise ShopifyError(Exception, "Invalid bulk operation response: {}".
+                        raise ShopifyAPIError("Invalid bulk operation response: {}".
                                            format(response))
 
                     existing_url = self.poll_bulk_completion(current_bookmark, bulk_op_id)
