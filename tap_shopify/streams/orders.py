@@ -570,6 +570,9 @@ class Orders(Stream):
                         permitsSkuSharing
                         inventoryManagement
                     }
+                    location {
+                        id
+                        }
                     }
                     lineItems {
                     edges {
@@ -740,10 +743,6 @@ class Orders(Stream):
                         }
                         }
                     }
-                    pageInfo {
-                        hasNextPage
-                        endCursor
-                    }
                     }
                     shippingLine {
                     carrierIdentifier
@@ -909,11 +908,57 @@ class Orders(Stream):
                     }
                     title
                     }
+                    retailLocation {
+                        activatable
+                        address {
+                            address1
+                            address2
+                            city
+                            country
+                            countryCode
+                            formatted
+                            latitude
+                            longitude
+                            phone
+                            province
+                            provinceCode
+                            zip
+                        }
+                        addressVerified
+                        createdAt
+                        deactivatable
+                        deactivatedAt
+                        deletable
+                        fulfillmentService {
+                            id
+                        }
+                        fulfillsOnlineOrders
+                        hasActiveInventory
+                        hasUnfulfilledOrders
+                        id
+                        isActive
+                        isFulfillmentService
+                        legacyResourceId
+                        localPickupSettingsV2 {
+                            instructions
+                            pickupTime
+                        }
+                        name
+                        shipsInventory
+                        updatedAt
+                        suggestedAddresses {
+                            address1
+                            address2
+                            city
+                            country
+                            countryCode
+                            formatted
+                            province
+                            provinceCode
+                            zip
+                        }
+                        }
                 }
-                }
-                pageInfo {
-                endCursor
-                hasNextPage
                 }
           }
         }
