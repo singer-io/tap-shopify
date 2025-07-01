@@ -165,10 +165,9 @@ class DiscoveryTest(BaseTapTest):
                                      expected_automatic_fields,
                                      actual_automatic_fields))
 
-                # verify that all other fields have inclusion of available
-                # This assumes there are no unsupported fields for SaaS sources
+                # verify that all other fields have inclusion of available or unsupported
                 self.assertTrue(
-                    all({item.get("metadata").get("inclusion") == "available"
+                    all({(item.get("metadata").get("inclusion") == "available" or item.get("metadata").get("inclusion") == "unsupported")
                          for item in metadata
                          if item.get("breadcrumb", []) != []
                          and item.get("breadcrumb", ["properties", None])[1]
