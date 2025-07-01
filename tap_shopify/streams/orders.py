@@ -3,10 +3,10 @@ import json
 import time
 import requests
 import shopify
-from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream
 import singer
 from singer import metrics, utils
+from tap_shopify.context import Context
+from tap_shopify.streams.base import Stream
 from tap_shopify.exceptions import ShopifyError
 
 LOGGER = singer.get_logger()
@@ -930,7 +930,8 @@ class Orders(Stream):
 
         # Store under orders -> bulk_operation
         if bulk_op_metadata:
-            Context.state.setdefault("bookmarks", {}).setdefault("orders", {})["bulk_operation"] = bulk_op_metadata
+            orders_bookmark = Context.state.setdefault("bookmarks", {}).setdefault("orders", {})
+            orders_bookmark["bulk_operation"] = bulk_op_metadata
 
         singer.write_state(Context.state)
 
@@ -1000,18 +1001,17 @@ class Orders(Stream):
             # Log only if status has changed
             if current_status != last_status:
                 LOGGER.info(
-                    "Bulk operation {} status changed: {} → {}".format(
-                        operation_id,
-                        last_status or "N/A",
-                        current_status
-                    )
+                    "Bulk operation %s status changed: %s → %s",
+                    operation_id,
+                    last_status or "N/A",
+                    current_status
                 )
                 last_status = current_status
 
             if current_status == "COMPLETED":
                 return op.get("url")
-            elif current_status in ["FAILED", "CANCELED"]:
-                raise Exception(
+            if current_status in ["FAILED", "CANCELED"]:
+                raise ShopifyError(Exception,
                     "Bulk operation failed: {}".format(op.get("errorCode"))
                 )
 
@@ -1037,7 +1037,7 @@ class Orders(Stream):
 
     def parse_bulk_jsonl(self, url):
         orders, line_items = {}, {}
-        resp = requests.get(url, stream=True)
+        resp = requests.get(url, stream=True, timeout=60)
         for line in resp.iter_lines():
             if line:
                 rec = json.loads(line)
@@ -1061,12 +1061,17 @@ class Orders(Stream):
             del orders_bookmark["bulk_operation"]
             singer.write_state(Context.state)
 
+    # pylint: disable=too-many-locals
     def get_objects(self):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
-        query = self.get_query()
-        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
+        query_template = self.get_query()
+        LOGGER.info(
+            "GraphQL query for stream '%s': %s",
+            self.name,
+            ' '.join(query_template.split())
+        )
 
         bulk_op = Context.state.get("bookmarks", {}).get("orders", {}).get("bulk_operation")
         op_id = None
@@ -1092,20 +1097,29 @@ class Orders(Stream):
                         utils.strftime(last_updated_at),
                         utils.strftime(query_end)
                     )
-                    query = self.get_query() % query_filter
+                    query = query_template % query_filter
                     LOGGER.info("Fetching records in date range: %s", query_filter)
 
-                    # SUBMIT BULK QUERY AND EXTRACT RESPONSE
                     response = self.submit_bulk_query(query)
                     bulk_op_data = json.loads(response)
 
-                    user_errors = bulk_op_data.get("data", {}).get("bulkOperationRunQuery", {}).get("userErrors")
+                    user_errors = (
+                        bulk_op_data.get("data", {})
+                        .get("bulkOperationRunQuery", {})
+                        .get("userErrors")
+                    )
                     if user_errors:
-                        raise ShopifyError(Exception, "Bulk query error: {}".format(user_errors))
+                        raise ShopifyError("Bulk query error: {}".format(user_errors))
 
-                    bulk_op_id = bulk_op_data.get("data", {}).get("bulkOperationRunQuery", {}).get("bulkOperation").get("id")
+                    bulk_operation = (
+                        bulk_op_data.get("data", {})
+                        .get("bulkOperationRunQuery", {})
+                        .get("bulkOperation")
+                    )
+                    bulk_op_id = bulk_operation.get("id") if bulk_operation else None
                     if not bulk_op_id:
-                        raise ShopifyError(Exception, "Invalid bulk operation response: {}".format(response))
+                        raise ShopifyError(Exception, "Invalid bulk operation response: {}".
+                                           format(response))
 
                     existing_url = self.poll_bulk_completion(current_bookmark, bulk_op_id)
 
@@ -1117,7 +1131,8 @@ class Orders(Stream):
 
                 self.clear_bulk_operation_state()
             else:
-                LOGGER.warning("No data returned for the date range: %s to %s", last_updated_at, query_end)
+                LOGGER.warning("No data returned for the date range: %s to %s",
+                               last_updated_at, query_end)
 
             last_updated_at = query_end
             max_bookmark_value = min(sync_start, current_bookmark)
