@@ -31,7 +31,7 @@ class BookmarkTest(BaseTapTest):
     # abandoned checkouts are saved in the Shopify admin for three months.
     # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
     # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-    store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'customers', 'collections', 'orders'}
+    store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_items', 'customers', 'collections', 'orders', 'order_shipping_lines'}
 
     def test_run_store_2(self):
         with self.subTest(store="store_2"):
@@ -89,6 +89,7 @@ class BookmarkTest(BaseTapTest):
             'customers': {'updatedAt': '2025-01-19T20:55:07.000000Z'},
             'orders': {'updatedAt': '2024-12-05T09:59:35.000000Z'},
             'collections': {'updatedAt': '2025-01-21T13:29:06.000000Z'},
+            'order_shipping_lines': {'updatedAt': '2021-09-30T01:02:21.000000Z'},
             'metafields_products': {'updatedAt': '2025-01-21T03:11:54.000000Z'}
         }
 

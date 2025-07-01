@@ -103,6 +103,12 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 30
             },
+            "order_shipping_lines": {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 15
+            },
             "order_refunds": default,
             "products": default,
             "product_variants": default,
@@ -313,7 +319,7 @@ class BaseTapTest(BaseCase):
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        self.store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items'}
+        self.store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'order_shipping_lines'}
 
     #modified this method to accommodate replication key in the current_state
     def calculated_states_by_stream(self, current_state):
