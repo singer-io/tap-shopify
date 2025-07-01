@@ -919,6 +919,21 @@ class Orders(Stream):
         }
         """
 
+    def update_bookmark(self, bookmark_value, bookmark_key=None, bulk_op_metadata=None):
+        # Standard Singer bookmark
+        singer.write_bookmark(
+            Context.state,
+            self.name,
+            bookmark_key or self.replication_key,
+            bookmark_value
+        )
+
+        # Store under orders -> bulk_operation
+        if bulk_op_metadata:
+            Context.state.setdefault("bookmarks", {}).setdefault("orders", {})["bulk_operation"] = bulk_op_metadata
+
+        singer.write_state(Context.state)
+
     def build_query_filter(self, updated_at_min, updated_at_max):
         return f"updated_at:>='{updated_at_min}' AND updated_at:<'{updated_at_max}'"
 
@@ -930,6 +945,7 @@ class Orders(Stream):
                     bulkOperation {
                       id
                       status
+                      createdAt
                     }
                     userErrors {
                       field
@@ -944,34 +960,39 @@ class Orders(Stream):
         }
         return shopify.GraphQL().execute(**operation)
 
-    def poll_bulk_completion(self, timeout=10800):
+    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=5):
         start = time.time()
+        op = {}
         wait = 60
         last_status = None
 
         while time.time() - start < timeout:
-            response = json.loads(shopify.GraphQL().execute(query="""
-                {
-                currentBulkOperation {
-                    id
-                    status
-                    errorCode
-                    createdAt
-                    completedAt
-                    objectCount
-                    fileSize
-                    url
+            query = """
+            {
+                node(id: "%s") {
+                    ... on BulkOperation {
+                        id
+                        status
+                        errorCode
+                        createdAt
+                        completedAt
+                        objectCount
+                        fileSize
+                        url
+                    }
                 }
-                }
-            """))
+            }
+            """ % bulk_op_id
+
+            response = json.loads(shopify.GraphQL().execute(query=query))
 
             if not isinstance(response, dict):
-                raise ShopifyError("Unexpected GraphQL response: {}".format(response))
+                raise ShopifyError(Exception, "Unexpected GraphQL response: {}".format(response))
 
-            op = response.get("data", {}).get("currentBulkOperation")
+            op = response.get("data", {}).get("node")
 
             if not isinstance(op, dict):
-                raise ShopifyError("Unexpected bulk operation format: {}".format(op))
+                raise ShopifyError(Exception, "Unexpected bulk operation format: {}".format(op))
 
             current_status = op.get("status")
             operation_id = op.get("id")
@@ -996,11 +1017,21 @@ class Orders(Stream):
 
             time.sleep(wait)
 
+        # Save bulk operation metadata (excluding URL)
+        self.update_bookmark(
+            bookmark_value=utils.strftime(current_bookmark),
+            bulk_op_metadata={
+                "bulk_operation_id": op.get("id"),
+                "status": op.get("status"),
+                "created_at": op.get("createdAt")
+            }
+        )
+
         elapsed = int(time.time() - start)
-        raise ShopifyError(
-            "Bulk operation {} did not complete within {} seconds. "
+        raise ShopifyError(Exception,
+            "Bulk operation id - {} did not complete within {} seconds. "
             "Please contact Shopify support with the operation ID for assistance.".format(
-                operation_id or "UNKNOWN", elapsed
+                operation_id or "UNKNOWN", str(elapsed)
             )
         )
 
@@ -1024,6 +1055,12 @@ class Orders(Stream):
             obj["lineItems"] = [item["node"] for item in obj["lineItems"]["edges"]]
         return obj
 
+    def clear_bulk_operation_state(self):
+        orders_bookmark = Context.state.get("bookmarks", {}).get("orders", {})
+        if "bulk_operation" in orders_bookmark:
+            del orders_bookmark["bulk_operation"]
+            singer.write_state(Context.state)
+
     def get_objects(self):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
@@ -1031,31 +1068,60 @@ class Orders(Stream):
         query = self.get_query()
         LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
+        bulk_op = Context.state.get("bookmarks", {}).get("orders", {}).get("bulk_operation")
+        op_id = None
+        existing_url = None
+
+        if bulk_op:
+            op_id = bulk_op.get("bulk_operation_id")
+            op_status = bulk_op.get("status")
+
+            if op_status == "RUNNING":
+                LOGGER.info("Resuming polling for existing bulk operation ID: %s", op_id)
+                existing_url = self.poll_bulk_completion(current_bookmark, op_id)
+            else:
+                self.clear_bulk_operation_state()
+
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
             query_end = min(sync_start, date_window_end)
 
-            with metrics.http_request_timer(self.name):
-                query_filter = self.build_query_filter(
-                    utils.strftime(last_updated_at),
-                    utils.strftime(query_end)
-                )
-                query = self.get_query() % query_filter
-                LOGGER.info("Fetching the records in the date range of %s", query_filter)
-                self.submit_bulk_query(query)
-                url = self.poll_bulk_completion()
+            if not existing_url:
+                with metrics.http_request_timer(self.name):
+                    query_filter = self.build_query_filter(
+                        utils.strftime(last_updated_at),
+                        utils.strftime(query_end)
+                    )
+                    query = self.get_query() % query_filter
+                    LOGGER.info("Fetching records in date range: %s", query_filter)
 
-            if url:
-              for obj in self.parse_bulk_jsonl(url):
-                  # obj = self.transform_object(obj)
-                  replication_value = utils.strptime_to_utc(obj[self.replication_key])
-                  current_bookmark = max(current_bookmark, replication_value)
-                  yield obj
+                    # SUBMIT BULK QUERY AND EXTRACT RESPONSE
+                    response = self.submit_bulk_query(query)
+                    bulk_op_data = json.loads(response)
+
+                    user_errors = bulk_op_data.get("data", {}).get("bulkOperationRunQuery", {}).get("userErrors")
+                    if user_errors:
+                        raise ShopifyError(Exception, "Bulk query error: {}".format(user_errors))
+
+                    bulk_op_id = bulk_op_data.get("data", {}).get("bulkOperationRunQuery", {}).get("bulkOperation").get("id")
+                    if not bulk_op_id:
+                        raise ShopifyError(Exception, "Invalid bulk operation response: {}".format(response))
+
+                    existing_url = self.poll_bulk_completion(current_bookmark, bulk_op_id)
+
+            if existing_url:
+                for obj in self.parse_bulk_jsonl(existing_url):
+                    replication_value = utils.strptime_to_utc(obj[self.replication_key])
+                    current_bookmark = max(current_bookmark, replication_value)
+                    yield obj
+
+                self.clear_bulk_operation_state()
             else:
                 LOGGER.warning("No data returned for the date range: %s to %s", last_updated_at, query_end)
 
             last_updated_at = query_end
             max_bookmark_value = min(sync_start, current_bookmark)
             self.update_bookmark(utils.strftime(max_bookmark_value))
+            existing_url = None
 
 Context.stream_objects["orders"] = Orders
