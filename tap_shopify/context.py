@@ -34,6 +34,8 @@ class Context():
         selected_fields = set()
         for breadcrumb, data in stream_metadata.items():
             if len(breadcrumb) == 2:
+                if data.get('inclusion') == 'unsupported':
+                    continue
                 if data.get('selected') or data.get('inclusion') == 'automatic':
                     selected_fields.add(breadcrumb[1])
 
