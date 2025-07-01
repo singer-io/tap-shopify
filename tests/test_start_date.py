@@ -31,7 +31,7 @@ class StartDateTest(BaseTapTest):
             'shop': 'talenddatawearhouse',
             'date_window_size': 30,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
-            'results_per_page': '50'
+            'results_per_page': '30'
         }
 
         if original:

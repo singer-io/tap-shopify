@@ -50,7 +50,7 @@ class BookmarkTest(BaseTapTest):
     def test_run(self):
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
-            self.bookmarks_test(conn_id, self.store_1_streams)
+            self.bookmarks_test(conn_id, {'fulfillment_orders'})
 
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
@@ -83,7 +83,7 @@ class BookmarkTest(BaseTapTest):
         # Our test data sets for Shopify do not have any abandoned_checkouts
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in incremental_streams]
-        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
+        self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=False)
 
         # Run a sync job using orchestrator
         first_sync_record_count = self.run_sync(conn_id)

@@ -24,9 +24,10 @@ class AllFieldsTest(BaseTapTest):
     def get_properties(self, original: bool = True):
         """Configuration properties required for the tap."""
         return_value = {
-            'start_date': '2021-04-01T00:00:00Z',
+            'start_date': '2025-01-01T00:00:00Z',
             'shop': 'talenddatawearhouse',
-            'date_window_size': 30
+            'date_window_size': 30,
+            'results_per_page': '30'
         }
 
         return return_value
