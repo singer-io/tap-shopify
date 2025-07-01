@@ -1006,7 +1006,7 @@ class Orders(Stream):
         }
         return shopify.GraphQL().execute(**operation)
 
-    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=5):
+    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=10800):
         start = time.time()
         op = {}
         wait = 60
