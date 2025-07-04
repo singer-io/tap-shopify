@@ -1128,6 +1128,11 @@ class Orders(Stream):
         bulk_op = Context.state.get("bookmarks", {}).get("orders", {}).get("bulk_operation")
         op_id = None
         existing_url = None
+        # TODO: Remove this after the bulk operation is completed
+        if bulk_op:
+            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4254737596494":
+                self.clear_bulk_operation_state()
+                bulk_op = None
 
         if bulk_op:
             op_id = bulk_op.get("bulk_operation_id")
