@@ -46,14 +46,12 @@ def fetch_app_scopes():
       }
     }
     """
-    resp = shopify.GraphQL().execute(query)
-    data = json.loads(resp)
+    data = json.loads(shopify.GraphQL().execute(query))
     return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
 
 def has_read_users_access():
-    scopes = fetch_app_scopes()
     # If the app does not have the 'read_users' scope, return False
-    if 'read_users' not in scopes:
+    if 'read_users' not in fetch_app_scopes():
         LOGGER.warning(
             "Skipping '%s' field: 'read_users' scope is not granted for public apps.",
             ", ".join(UNSUPPORTED_FIELDS)
