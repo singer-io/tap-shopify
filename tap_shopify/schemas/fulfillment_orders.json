@@ -1,0 +1,979 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "orderId": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "updatedAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "supportedActions": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "externalUrl": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
+            }
+        },
+        "status": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "requestStatus": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "orderProcessedAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "orderName": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "channelId": {
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        "fulfillAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "fulfillBy": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "createdAt": {
+            "type": [
+                "null",
+                "string"
+            ],
+            "format": "date-time"
+        },
+        "destination": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "address1": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "address2": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "city": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "province": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "zip": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "countryCode": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "company": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "email": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "firstName": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "lastName": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "phone": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "location": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "fulfillmentHolds": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "displayReason": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "handle": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "reason": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "reasonNotes": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "heldByRequestingApp": {
+                        "type": [
+                            "null",
+                            "boolean"
+                        ]
+                    }
+                }
+            }
+        },
+        "internationalDuties": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "incoterm": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
+            }
+        },
+        "deliveryMethod": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "methodType": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "presentedName": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "serviceCode": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "sourceReference": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "minDeliveryDateTime": {
+                    "type": [
+                        "null",
+                        "string"
+                    ],
+                    "format": "date-time"
+                },
+                "maxDeliveryDateTime": {
+                    "type": [
+                        "null",
+                        "string"
+                    ],
+                    "format": "date-time"
+                },
+                "brandedPromise": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "handle": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "name": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                },
+                "additionalInformation": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "instructions": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "phone": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "assignedLocation": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "address1": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "address2": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "city": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "province": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "zip": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "countryCode": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "name": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "phone": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "location": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "merchantRequests": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "kind": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "message": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "requestOptions": {
+                        "type": [
+                            "null",
+                            "object"
+                        ]
+                    },
+                    "responseData": {
+                        "type": [
+                            "null",
+                            "object"
+                        ]
+                    },
+                    "sentAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "fulfillmentOrder": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "locationsForMove": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "movable": {
+                        "type": [
+                            "null",
+                            "boolean"
+                        ]
+                    },
+                    "unavailableLineItemsCount": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "count": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "precision": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "availableLineItemsCount": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "count": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "precision": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "location": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "availableLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "action": {
+                                    "id": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "unavailableLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "fulfillmentOrdersForMerge": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
+            }
+        },
+        "fulfillments": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "name": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "status": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "displayStatus": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "requiresShipping": {
+                        "type": [
+                            "null",
+                            "boolean"
+                        ]
+                    },
+                    "totalQuantity": {
+                        "type": [
+                            "null",
+                            "integer"
+                        ]
+                    },
+                    "createdAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "inTransitAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deliveredAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "estimatedDeliveryAt": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "format": "date-time"
+                    },
+                    "originAddress": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "address1": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "address2": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "city": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "provinceCode": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "zip": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "countryCode": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "trackingInfo": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "company": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "number": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "url": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "service": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "location": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "fulfillmentOrders": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "fulfillmentLineItems": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "quantity": {
+                                    "type": [
+                                        "null",
+                                        "number"
+                                    ]
+                                },
+                                "originalTotalSet": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "presentmentMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "shopMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "discountedTotalSet": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "presentmentMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "shopMoney": {
+                                            "type": [
+                                                "null",
+                                                "object"
+                                            ],
+                                            "properties": {
+                                                "currencyCode": {
+                                                    "type": [
+                                                        "null",
+                                                        "string"
+                                                    ]
+                                                },
+                                                "amount": {
+                                                    "type": [
+                                                        "null",
+                                                        "number"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "lineItem": {
+                                    "type": [
+                                        "null",
+                                        "object"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "legacyResourceId": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "order": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "events": {
+                        "type": [
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

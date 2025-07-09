@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.6.0
+  * Introduce new stream fulfillment_orders. [#222](https://github.com/singer-io/tap-shopify/pull/222)
+
 ## 3.5.0
   * Add fields in orders stream - retailLocation and location ID (within fulfillments) [#219](https://github.com/singer-io/tap-shopify/pull/219)
   * Skip the author field on missing read_users scope [#223](https://github.com/singer-io/tap-shopify/pull/223)
