@@ -50,7 +50,7 @@ class BookmarkTest(BaseTapTest):
     def test_run(self):
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
-            self.bookmarks_test(conn_id, {'fulfillment_orders'})
+            self.bookmarks_test(conn_id, self.store_1_streams)
 
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
