@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.5.0
+  * Add fields in orders stream - retailLocation and location ID (within fulfillments) [#219](https://github.com/singer-io/tap-shopify/pull/219)
+  * Skip the author field on missing read_users scope [#223](https://github.com/singer-io/tap-shopify/pull/223)
+
 ## 3.4.0
   * Introduce new stream order_shipping_lines. [#213](https://github.com/singer-io/tap-shopify/pull/213)
   * shippingLine is a nested object within the orders stream and it represents individual shipping methods.

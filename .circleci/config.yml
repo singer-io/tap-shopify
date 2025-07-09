@@ -39,7 +39,7 @@ jobs:
           name: 'pylint'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pylint tap_shopify -d missing-docstring,too-many-branches,consider-using-f-string,consider-using-generator,consider-using-dict-items,unnecessary-dunder-call,duplicate-code
+            pylint tap_shopify -d missing-docstring,too-many-branches,consider-using-f-string,consider-using-generator,consider-using-dict-items,unnecessary-dunder-call,duplicate-code,too-many-lines
   json_validator:
     executor: docker-executor
     steps:

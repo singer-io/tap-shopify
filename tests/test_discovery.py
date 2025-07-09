@@ -140,13 +140,18 @@ class DiscoveryTest(BaseTapTest):
                                      expected_automatic_fields,
                                      actual_automatic_fields))
 
-                # verify that all other fields have inclusion of available
-                # This assumes there are no unsupported fields for SaaS sources
+                # verify that all other fields have inclusion of available or unsupported
                 self.assertTrue(
-                    all({value.get("inclusion") == "available" for key, value
-                         in schema["properties"].items()
-                         if key not in actual_automatic_fields}),
-                    msg="Not all non key properties are set to available in annotated schema")
+                    all(
+                        (
+                            value.get("inclusion") == "available"
+                            or value.get("inclusion") == "unsupported"
+                        )
+                        for key, value in schema["properties"].items()
+                        if key not in actual_automatic_fields
+                    ),
+                    msg="Not all non key properties are set to available in annotated schema"
+                )
 
                 # verify that primary, replication and foreign keys
                 # are given the inclusion of automatic in metadata.
@@ -160,10 +165,9 @@ class DiscoveryTest(BaseTapTest):
                                      expected_automatic_fields,
                                      actual_automatic_fields))
 
-                # verify that all other fields have inclusion of available
-                # This assumes there are no unsupported fields for SaaS sources
+                # verify that all other fields have inclusion of available or unsupported
                 self.assertTrue(
-                    all({item.get("metadata").get("inclusion") == "available"
+                    all({(item.get("metadata").get("inclusion") == "available" or item.get("metadata").get("inclusion") == "unsupported")
                          for item in metadata
                          if item.get("breadcrumb", []) != []
                          and item.get("breadcrumb", ["properties", None])[1]
