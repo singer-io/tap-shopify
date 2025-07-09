@@ -97,6 +97,12 @@ class BaseTapTest(BaseCase):
             "collections": default,
             "customers": default,
             "orders": default,
+            "fulfillment_orders": {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 30
+            },
             "order_shipping_lines": {
                 self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
