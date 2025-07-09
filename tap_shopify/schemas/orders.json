@@ -2187,6 +2187,16 @@
           }
         }
       }
-    }
+    },
+    "customAttributes": {
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "object"],
+        "properties": {
+          "key": {"type": ["null", "string"]},
+          "value": {"type": ["null", "string"]}
+          }
+        }
+      }
   }
 }
