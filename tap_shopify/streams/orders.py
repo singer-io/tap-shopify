@@ -1118,7 +1118,7 @@ class Orders(Stream):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
         sync_start = utils.now().replace(microsecond=0)
-        query_template = self.get_query()
+        query_template = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         LOGGER.info(
             "GraphQL query for stream '%s': %s",
             self.name,
@@ -1130,7 +1130,7 @@ class Orders(Stream):
         existing_url = None
         # TODO: Remove this after the bulk operation is completed
         if bulk_op:
-            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4285235593294":
+            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4290152497230":
                 self.clear_bulk_operation_state()
                 bulk_op = None
 
