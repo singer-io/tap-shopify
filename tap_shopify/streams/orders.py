@@ -984,29 +984,37 @@ class Orders(Stream):
         return f"updated_at:>='{updated_at_min}' AND updated_at:<'{updated_at_max}'"
 
     def submit_bulk_query(self, query_string):
+        url = f"https://{Context.config.get('shop')}.myshopify.com/admin/api/2025-07/graphql.json"
+        headers = {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": Context.config.get("api_key"),
+        }
         operation = {
             "query": """
                 mutation bulkOperationRunQuery($query: String!) {
-                  bulkOperationRunQuery(query: $query) {
+                bulkOperationRunQuery(query: $query) {
                     bulkOperation {
-                      id
-                      status
-                      createdAt
+                    id
+                    status
+                    createdAt
                     }
                     userErrors {
-                      field
-                      message
+                    field
+                    message
                     }
-                  }
+                }
                 }
             """,
             "variables": {
                 "query": query_string
             }
         }
-        return shopify.GraphQL().execute(**operation)
+        response = requests.post(url, headers=headers, json=operation)
+        LOGGER.info("X-request-ID for the bulk operation: %s", response.headers.get("X-Request-ID"))
 
-    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=10800):
+        return response.json()
+
+    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=10800, request_id=None):
         start = time.time()
         op = {}
         wait = 60
@@ -1130,7 +1138,7 @@ class Orders(Stream):
         existing_url = None
         # TODO: Remove this after the bulk operation is completed
         if bulk_op:
-            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4290152497230":
+            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4293986353230":
                 self.clear_bulk_operation_state()
                 bulk_op = None
 
@@ -1157,8 +1165,7 @@ class Orders(Stream):
                     query = query_template % query_filter
                     LOGGER.info("Fetching records in date range: %s", query_filter)
 
-                    response = self.submit_bulk_query(query)
-                    bulk_op_data = json.loads(response)
+                    bulk_op_data = self.submit_bulk_query(query)
 
                     user_errors = (
                         bulk_op_data.get("data", {})
@@ -1176,7 +1183,7 @@ class Orders(Stream):
                     bulk_op_id = bulk_operation.get("id") if bulk_operation else None
                     if not bulk_op_id:
                         raise ShopifyAPIError("Invalid bulk operation response: {}".
-                                           format(response))
+                                           format(bulk_op_data))
 
                     existing_url = self.poll_bulk_completion(current_bookmark, bulk_op_id)
 
