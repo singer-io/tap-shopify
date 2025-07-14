@@ -324,6 +324,13 @@ class Orders(Stream):
                                 lastVisit {
                                     landingPage
                                     referrerUrl
+                                    utmParameters {
+                                        campaign
+                                        content
+                                        medium
+                                        source
+                                        term
+                                    }
                                 }
                             }
                             merchantOfRecordApp {
@@ -881,6 +888,17 @@ class Orders(Stream):
                                         }
                                         variant {
                                             id
+                                        }
+                                        lineItemGroup {
+                                            customAttributes {
+                                                key
+                                                value
+                                            }
+                                            id
+                                            quantity
+                                            title
+                                            variantId
+                                            variantSku
                                         }
                                     }
                                 }

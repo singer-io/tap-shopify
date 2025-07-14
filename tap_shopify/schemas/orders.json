@@ -593,23 +593,63 @@
         "null",
         "object"
       ],
-      "lastVisit": {
-        "type": [
-          "null",
-          "object"
-        ],
-        "properties": {
-          "landingPage": {
+      "properties": {
+        "lastVisit": {
             "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "landingPage": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "referrerUrl": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
+        },
+        "utmParameters": {
+          "type": [
               "null",
-              "string"
-            ]
-          },
-          "referrerUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
+              "object"
+          ],
+          "properties": {
+              "campaign": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "content": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "medium": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "source": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "term": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              }
           }
         }
       }
@@ -1962,6 +2002,67 @@
                   "string"
                 ]
               }
+            }
+          },
+          "lineItemGroup": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "customAttributes": {
+                    "type": [
+                        "null",
+                        "array"
+                    ],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "value": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "quantity": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                },
+                "title": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "variantId": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "variantSku": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
             }
           }
         }
