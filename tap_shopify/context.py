@@ -44,7 +44,6 @@ class Context():
     @classmethod
     def get_all_fields(cls, stream_name):
         stream = cls.get_catalog_entry(stream_name)
-        stream_metadata = metadata.to_map(stream['metadata'])
         # All fields defined in the schema
         all_fields = set(stream["schema"]["properties"].keys())
         return all_fields

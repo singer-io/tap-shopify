@@ -38,7 +38,8 @@ class Orders(Stream):
 
     def transform_discount_applications(self, data):
         """
-        Transforms the order discount applications data by extracting order IDs and handling pagination.
+        Transforms the order discount applications data by extracting order IDs 
+        and handling pagination.
 
         Args:
             data (dict): Order data.
@@ -52,7 +53,9 @@ class Orders(Stream):
         ]
         # Handle pagination
         page_info = data["discountApplications"].get("pageInfo", {})
-        query = self.remove_fields_from_query(Context.get_all_fields(self.name) - {"discountApplications", "id"})
+        query = self.remove_fields_from_query(
+            Context.get_all_fields(self.name) - {"discountApplications", "id"}
+        )
         while page_info.get("hasNextPage"):
             params = {
                 "first": self.results_per_page if self.results_per_page <= 150 else 150,
@@ -88,7 +91,9 @@ class Orders(Stream):
 
         # Handle pagination
         page_info = data["lineItems"].get("pageInfo", {})
-        query = self.remove_fields_from_query(Context.get_all_fields(self.name) - {"lineItems", "id"})
+        query = self.remove_fields_from_query(
+            Context.get_all_fields(self.name) - {"lineItems", "id"}
+        )
         while page_info.get("hasNextPage"):
             params = {
                 "first": self.results_per_page if self.results_per_page <= 150 else 150,
