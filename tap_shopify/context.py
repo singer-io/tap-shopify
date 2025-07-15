@@ -42,6 +42,14 @@ class Context():
         return list(all_fields - selected_fields)
 
     @classmethod
+    def get_all_fields(cls, stream_name):
+        stream = cls.get_catalog_entry(stream_name)
+        stream_metadata = metadata.to_map(stream['metadata'])
+        # All fields defined in the schema
+        all_fields = set(stream["schema"]["properties"].keys())
+        return all_fields
+
+    @classmethod
     def get_results_per_page(cls, default_results_per_page):
         results_per_page = default_results_per_page
         try:

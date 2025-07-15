@@ -2288,6 +2288,100 @@
           }
         }
       }
-    }
+    },
+    "discountApplications": {
+    "type": [
+        "null",
+        "array"
+    ],
+    "items": {
+        "type": [
+            "null",
+            "object"
+        ],
+        "properties": {
+            "allocationMethod": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "index": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "targetSelection": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "targetType": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "value": {
+                "type": [
+                    "null",
+                    "object"
+                ],
+                "properties": {
+                    "__typename": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "amount": {
+                        "type": [
+                            "null",
+                            "number"
+                        ]
+                    },
+                    "currencyCode": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "percentage": {
+                        "type": [
+                            "null",
+                            "number"
+                        ]
+                    }
+                }
+            },
+            "__typename": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "title": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "description": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "code": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+          }
+        }
+      }
   }
 }
