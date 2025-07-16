@@ -21,7 +21,7 @@ setup(
         'dev': [
             'pylint==3.3.6',
             'ipdb',
-            'requests==2.32.3',
+            'requests==2.32.4',
             'nose',
         ]
     },
