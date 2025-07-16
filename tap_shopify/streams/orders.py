@@ -1186,7 +1186,7 @@ class Orders(Stream):
         existing_url = None
         # TODO: Remove this after the bulk operation is completed
         if bulk_op:
-            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4293986353230":
+            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4297992339534":
                 self.clear_bulk_operation_state()
                 bulk_op = None
 
