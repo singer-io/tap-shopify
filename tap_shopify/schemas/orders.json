@@ -299,6 +299,32 @@
       }
     },
     "currentTotalWeight": { "type": ["null", "number"] },
+    "customAttributes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "key": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
     "customer": {
       "type": [
         "null",
@@ -683,6 +709,7 @@
     },
     "name": { "type": ["null", "string"] },
     "note": { "type": ["null", "string"] },
+    "number": { "type": ["null", "number"] },
     "netPaymentSet": {
       "type": ["null", "object"],
       "properties": {
