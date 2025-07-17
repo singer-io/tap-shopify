@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name="tap-shopify",
-    version="3.6.0",
+    version="3.6.1",
     description="Singer.io tap for extracting Shopify data",
     author="Stitch",
     url="http://github.com/singer-io/tap-shopify",
@@ -21,7 +21,7 @@ setup(
         'dev': [
             'pylint==3.3.6',
             'ipdb',
-            'requests==2.32.3',
+            'requests==2.32.4',
             'nose',
         ]
     },

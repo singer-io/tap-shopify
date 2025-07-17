@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.6.1
+  * Dependency upgrades [#228](https://github.com/singer-io/tap-shopify/pull/228)
+
 ## 3.6.0
   * Introduce new stream fulfillment_orders. [#222](https://github.com/singer-io/tap-shopify/pull/222)
 
