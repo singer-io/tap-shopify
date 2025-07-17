@@ -1062,7 +1062,7 @@ class Orders(Stream):
 
         return response.json()
 
-    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=10800, request_id=None):
+    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=82800, request_id=None):
         start = time.time()
         op = {}
         wait = 60
