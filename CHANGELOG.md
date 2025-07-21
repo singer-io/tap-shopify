@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.6.2
+  * Set max_size of pagination to 30 for fullfilment_orders [#230](https://github.com/singer-io/tap-shopify/pull/230)
+
 ## 3.6.1
   * Dependency upgrades [#228](https://github.com/singer-io/tap-shopify/pull/228)
 
