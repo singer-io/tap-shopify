@@ -1177,6 +1177,7 @@
           "status": { "type":  ["null", "string"] },
           "totalQuantity":  { "type": ["null", "number"] },
           "updatedAt": { "type":  ["null", "string"], "format": "date-time" },
+          "createdAt": { "type":  ["null", "string"], "format": "date-time" },
           "deliveredAt": { "type":  ["null", "string"], "format": "date-time" },
           "estimatedDeliveryAt": { "type":  ["null", "string"], "format": "date-time" },
           "requiresShipping": { "type":   ["null", "boolean"] },
