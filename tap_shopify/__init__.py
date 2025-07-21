@@ -228,8 +228,8 @@ def main():
 
                 # Raise exception to trigger Stitch notification
                 raise Exception(
-                    "IMPORTANT: Version 3 of this tap has been in production for over 3 months. "
-                    "Stitch will no longer guarantee support for version 2. "
+                    "Version 3 of this integration has been available as of 2025-03-29. "
+                    "Stitch does not guarantee support for deprecated integrations. "
                     "Please upgrade to version 3 to ensure continued support."
                 )
     except pyactiveresource.connection.ResourceNotFound as exc:
