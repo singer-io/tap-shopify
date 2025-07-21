@@ -213,7 +213,7 @@ def main():
 
             sync()
 
-            today = datetime.datetime.now()
+            today = datetime.datetime.now(datetime.timezone.utc)
 
             # Get the last triggered date from state
             last_triggered_raw = Context.state.get('last_exception_triggered')
