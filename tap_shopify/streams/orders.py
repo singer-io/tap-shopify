@@ -1117,6 +1117,11 @@ class Orders(Stream):
                 last_status = current_status
 
             if current_status == "COMPLETED":
+                file_size = op.get("fileSize")
+                LOGGER.info(
+                    "Bulk operation completed successfully. File size: %s bytes",
+                    file_size
+                )
                 return op.get("url")
             if current_status in ["FAILED", "CANCELED"]:
                 raise ShopifyAPIError(
