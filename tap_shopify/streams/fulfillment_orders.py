@@ -12,6 +12,30 @@ class FulfillmentOrders(Stream):
     data_key = "fulfillmentOrders"
     replication_key = "updatedAt"
 
+    # pylint: disable=W0221,fixme
+    def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
+        """
+        Construct query parameters for GraphQL requests.
+
+        Args:
+            updated_at_min (str): Minimum updated_at timestamp.
+            updated_at_max (str): Maximum updated_at timestamp.
+            cursor (str): Pagination cursor, if any.
+
+        Returns:
+            dict: Dictionary of query parameters.
+        """
+        rkey = self.camel_to_snake(self.replication_key)
+
+        params = {
+            "query": f"{rkey}:>='{updated_at_min}' AND {rkey}:<'{updated_at_max}'",
+            "first": self.results_per_page if self.results_per_page <= 30 else 30,
+        }
+
+        if cursor:
+            params["after"] = cursor
+        return params
+
     def transform_childitems(self, data, parent_id, key, next_page_key):
         """
         Paginate child items.
