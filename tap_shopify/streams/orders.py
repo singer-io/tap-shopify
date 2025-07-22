@@ -273,6 +273,10 @@ class Orders(Stream):
                                 }
                             }
                             currentTotalWeight
+                            customAttributes {
+                                key
+                                value
+                            }
                             customer {
                                 id
                                 email
@@ -369,6 +373,7 @@ class Orders(Stream):
                             }
                             name
                             note
+                            number
                             netPaymentSet {
                                 presentmentMoney {
                                     amount
