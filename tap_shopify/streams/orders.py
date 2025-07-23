@@ -10,6 +10,7 @@ from tap_shopify.streams.base import Stream
 from tap_shopify.exceptions import ShopifyAPIError
 
 LOGGER = singer.get_logger()
+
 class Orders(Stream):
     name = "orders"
     data_key = "orders"
@@ -1057,22 +1058,17 @@ class Orders(Stream):
                 "query": query_string
             }
         }
-        response = requests.post(url, headers=headers, json=operation)
+        response = requests.post(url, headers=headers, json=operation, timeout=300)
         LOGGER.info("X-request-ID for the bulk operation: %s", response.headers.get("X-Request-ID"))
 
         return response.json()
 
-    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=82800, request_id=None):
-        start = time.time()
-        op = {}
-        wait = 60
-        last_status = None
-
-        while time.time() - start < timeout:
-            query = """
-            {
-                node(id: "%s") {
-                    ... on BulkOperation {
+    def poll_bulk_completion(self, current_bookmark, bulk_op_id, timeout=82800):
+        def fetch_bulk_operation(op_id):
+            query = f"""
+            {{
+                node(id: "{op_id}") {{
+                    ... on BulkOperation {{
                         id
                         status
                         errorCode
@@ -1081,56 +1077,49 @@ class Orders(Stream):
                         objectCount
                         fileSize
                         url
-                    }
-                }
-            }
-            """ % bulk_op_id
-
+                    }}
+                }}
+            }}
+            """
             response = json.loads(shopify.GraphQL().execute(query=query))
-
             if not isinstance(response, dict):
-                raise ShopifyAPIError("Unexpected GraphQL response: {}".format(response))
+                raise ShopifyAPIError(f"Unexpected GraphQL response: {response}")
+            return response.get("data", {}).get("node")
 
-            op = response.get("data", {}).get("node")
+        start = time.time()
+        last_status = None
+
+        while time.time() - start < timeout:
+            op = fetch_bulk_operation(bulk_op_id)
 
             if not op:
-                LOGGER.warning("Bulk operation not found: {}".format(bulk_op_id))
+                LOGGER.warning("Bulk operation not found: %s", bulk_op_id)
                 return None
-
             if not isinstance(op, dict):
-                raise ShopifyAPIError("Unexpected bulk operation format: {}".format(op))
+                raise ShopifyAPIError(f"Unexpected bulk operation format: {op}")
 
             current_status = op.get("status")
-            operation_id = op.get("id")
-            created_at = op.get("createdAt")
-            completed_at = op.get("completedAt")
 
-            # Log only if status has changed
             if current_status != last_status:
                 LOGGER.info(
                     "Bulk operation - %s, status: %s, created at - %s, completed at - %s",
-                    operation_id,
+                    op.get("id"),
                     current_status,
-                    created_at,
-                    completed_at if completed_at else "N/A"
+                    op.get("createdAt"),
+                    op.get("completedAt") or "N/A"
                 )
                 last_status = current_status
 
             if current_status == "COMPLETED":
-                file_size = op.get("fileSize")
-                LOGGER.info(
-                    "Bulk operation completed successfully. File size: %s bytes",
-                    file_size
-                )
+                LOGGER.info("Bulk operation completed. File size: %s bytes", op.get("fileSize"))
                 return op.get("url")
+
             if current_status in ["FAILED", "CANCELED"]:
-                raise ShopifyAPIError(
-                    "Bulk operation failed: {}".format(op.get("errorCode"))
-                )
+                raise ShopifyAPIError(f"Bulk operation failed: {op.get('errorCode')}")
 
-            time.sleep(wait)
+            time.sleep(60)
 
-        # Save bulk operation metadata (excluding URL)
+        # Save bookmark if timeout occurs
         self.update_bookmark(
             bookmark_value=utils.strftime(current_bookmark),
             bulk_op_metadata={
@@ -1142,26 +1131,43 @@ class Orders(Stream):
 
         elapsed = int(time.time() - start)
         raise ShopifyAPIError(
-            "Bulk operation id - {} did not complete within {} seconds. "
-            "Please contact Shopify support with the operation ID for assistance.".format(
-                operation_id or "UNKNOWN", str(elapsed)
-            )
+            f"Bulk operation id - {op.get('id') or 'UNKNOWN'} did not complete "
+            f"within {elapsed} seconds. "
+            "Please contact Shopify support with the operation ID for assistance."
         )
 
+    # pylint: disable=unsupported-assignment-operation
     def parse_bulk_jsonl(self, url):
-        orders, line_items = {}, {}
+        """
+        Streams and yields one order at a time, with its associated line items,
+        without holding all orders/line_items in memory.
+        """
         resp = requests.get(url, stream=True, timeout=60)
-        for line in resp.iter_lines():
-            if line:
-                rec = json.loads(line)
-                if "__parentId" in rec:
-                    line_items.setdefault(rec["__parentId"], []).append(rec)
-                else:
-                    orders[rec["id"]] = rec
+        current_order = None
+        current_line_items = []
 
-        for oid, order in orders.items():
-            order["lineItems"] = line_items.get(oid, [])
-        return list(orders.values())
+        for line in resp.iter_lines():
+            if not line:
+                continue
+            rec = json.loads(line)
+            if not isinstance(rec, dict):
+                LOGGER.warning("Skipping unexpected JSONL line (not a dict): %s", rec)
+                continue
+            # Detect line item (child) or order (parent)
+            if '__parentId' in rec:
+                # It's a line item belonging to current_order
+                current_line_items.append(rec)
+            else:
+                if current_order:
+                    current_order["lineItems"] = current_line_items
+                    yield current_order
+                # Start tracking new parent group
+                current_order = rec
+                current_line_items = []
+        # Yield the last parent group (if exists)
+        if current_order:
+            current_order["lineItems"] = current_line_items
+            yield current_order
 
     def transform_object(self, obj):
         if obj.get("lineItems", {}).get("edges"):
@@ -1189,11 +1195,6 @@ class Orders(Stream):
         bulk_op = Context.state.get("bookmarks", {}).get("orders", {}).get("bulk_operation")
         op_id = None
         existing_url = None
-        # TODO: Remove this after the bulk operation is completed
-        if bulk_op:
-            if bulk_op.get("bulk_operation_id") == "gid://shopify/BulkOperation/4297992339534":
-                self.clear_bulk_operation_state()
-                bulk_op = None
 
         if bulk_op:
             op_id = bulk_op.get("bulk_operation_id")
@@ -1244,6 +1245,7 @@ class Orders(Stream):
                 for obj in self.parse_bulk_jsonl(existing_url):
                     replication_value = utils.strptime_to_utc(obj[self.replication_key])
                     current_bookmark = max(current_bookmark, replication_value)
+
                     yield obj
 
                 self.clear_bulk_operation_state()
