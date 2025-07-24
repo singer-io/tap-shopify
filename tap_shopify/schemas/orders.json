@@ -1210,6 +1210,12 @@
           "properties": {
               "id": { "type":  ["null", "string"] }
             }
+          },
+          "location": {
+          "type": ["null", "object"],
+          "properties": {
+              "id": { "type":  ["null", "string"] }
+            }
           }
         }
       }

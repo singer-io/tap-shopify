@@ -19,6 +19,7 @@ from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
+UNSUPPORTED_FIELDS = {"author"}
 
 @shopify_error_handling
 def initialize_shopify_client():
@@ -33,6 +34,30 @@ def initialize_shopify_client():
 
     # Shop.current() makes a call for shop details with provided shop and api_key
     return shopify.Shop.current().attributes
+
+# Add helper
+def fetch_app_scopes():
+    query = """
+    query {
+      currentAppInstallation {
+        accessScopes {
+          handle
+        }
+      }
+    }
+    """
+    data = json.loads(shopify.GraphQL().execute(query))
+    return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
+
+def has_read_users_access():
+    # If the app does not have the 'read_users' scope, return False
+    if 'read_users' not in fetch_app_scopes():
+        LOGGER.warning(
+            "Skipping '%s' field: 'read_users' scope is not granted for public apps.",
+            ", ".join(UNSUPPORTED_FIELDS)
+        )
+        return False
+    return True
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -63,6 +88,8 @@ def get_discovery_metadata(stream, schema):
     for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
+        elif field_name in UNSUPPORTED_FIELDS and not has_read_users_access():
+            mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'unsupported')
         else:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'available')
 
@@ -117,6 +144,7 @@ def shuffle_streams(stream_name):
 def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
+    require_reauth = False
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
@@ -149,19 +177,25 @@ def sync():
         Context.state['bookmarks']['currently_sync_stream'] = stream_id
         singer.write_state(Context.state)
 
-        # some fields have epoch-time as date, hence transform into UTC date
-        with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:
-            for rec in stream.sync():
-                extraction_time = singer.utils.now()
-                record_schema = catalog_entry['schema']
-                record_metadata = metadata.to_map(catalog_entry['metadata'])
-                rec = transformer.transform({**rec, **sdc_fields},
-                                            record_schema,
-                                            record_metadata)
-                singer.write_record(stream_id,
-                                    rec,
-                                    time_extracted=extraction_time)
-                Context.counts[stream_id] += 1
+        try:
+            # some fields have epoch-time as date, hence transform into UTC date
+            with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:
+                for rec in stream.sync():
+                    extraction_time = singer.utils.now()
+                    record_schema = catalog_entry['schema']
+                    record_metadata = metadata.to_map(catalog_entry['metadata'])
+                    rec = transformer.transform({**rec, **sdc_fields},
+                                                record_schema,
+                                                record_metadata)
+                    singer.write_record(stream_id,
+                                        rec,
+                                        time_extracted=extraction_time)
+                    Context.counts[stream_id] += 1
+        except ShopifyAPIError as e:
+            if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
+                require_reauth = True
+                continue
+            raise e
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
@@ -170,6 +204,10 @@ def sync():
     for stream_id, stream_count in Context.counts.items():
         LOGGER.info('%s: %d', stream_id, stream_count)
     LOGGER.info('----------------------')
+
+    if require_reauth:
+        raise ShopifyAPIError("Required scopes are missing for the `fulfillment_orders` stream. " \
+            "Please re-authorize the connection to sync this stream.")
 
 @utils.handle_top_exception(LOGGER)
 def main():

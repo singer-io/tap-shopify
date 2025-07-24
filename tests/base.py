@@ -97,6 +97,12 @@ class BaseTapTest(BaseCase):
             "collections": default,
             "customers": default,
             "orders": default,
+            "fulfillment_orders": {
+                self.REPLICATION_KEYS: {"updatedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 30
+            },
             "order_shipping_lines": {
                 self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
@@ -307,7 +313,7 @@ class BaseTapTest(BaseCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
-        self.store_1_streams = {'collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items'}
+        self.store_1_streams = {'collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'fulfillment_orders'}
         # removed 'abandoned_checkouts' from store 2 streams, as per the Doc:
         #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
         # abandoned checkouts are saved in the Shopify admin for three months.

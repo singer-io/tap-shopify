@@ -14,4 +14,5 @@ import tap_shopify.streams.inventory_items
 import tap_shopify.streams.product_variants
 import tap_shopify.streams.events
 import tap_shopify.streams.collections
+import tap_shopify.streams.fulfillment_orders
 import tap_shopify.streams.order_shipping_lines
