@@ -15,7 +15,8 @@ setup(
         # Important: review the monkey-patched method in the GraphQL client when upgrading this dependency.
         "ShopifyAPI==12.7.0",
         "singer-python==6.1.1",
-        "graphql-core==3.2.6"
+        "graphql-core==3.2.6",
+        'requests==2.32.4',
     ],
     extras_require={
         'dev': [
