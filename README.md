@@ -16,6 +16,8 @@ This tap:
   - [Metafields Orders](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
   - [Metafields Products](https://shopify.dev/docs/api/admin-graphql/latest/queries/products)
   - [Orders](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
+  - [OrderShippingLines](https://shopify.dev/docs/api/admin-graphql/latest/objects/ShippingLine)
+  - [FulfillmentOrders](https://shopify.dev/docs/api/admin-graphql/latest/queries/fulfillmentorders)
   - [Products](https://shopify.dev/docs/api/admin-graphql/latest/queries/products)
   - [Product Variants](https://shopify.dev/docs/api/admin-graphql/latest/queries/productVariants)
   - [Transactions](https://shopify.dev/docs/api/admin-graphql/latest/queries/orders)
@@ -42,6 +44,8 @@ This tap:
 | metafields_products    | updatedAt      | id            |
 | order_refunds         | updatedAt      | id            |
 | orders                 | updatedAt      | id            |
+| order_shipping_lines   | updatedAt      | id            |
+| fulfillment_orders     | updatedAt      | id            |
 | product_variants      | updatedAt      | id            |
 | products               | updatedAt      | id            |
 | transactions           | createdAt      | id            |

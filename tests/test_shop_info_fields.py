@@ -13,11 +13,16 @@ class ShopInfoFieldsTest(BaseTapTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_date = '2021-04-01T00:00:00Z'
+        self.start_date = '2024-12-01T00:00:00Z'
 
     @staticmethod
     def name():
         return "tap_tester_shopify_shop_info_fields_test"
+
+    def get_properties(self, *args, **kwargs):
+        props = super().get_properties(*args, **kwargs)
+        props['results_per_page'] = '30'
+        return props
 
     def test_run(self):
         """
