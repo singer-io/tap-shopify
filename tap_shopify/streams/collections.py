@@ -37,7 +37,7 @@ class Collections(Stream):
 
             # Fetch the next page of data
             response = self.call_api(params, query=query)
-            products_data = response.get("node", {}).get("products", {})
+            products_data = response.get("edges", [{}])[0].get("node", {}).get("products", {})
             product_ids.extend(
                 node["id"]
                 for item in products_data.get("edges", [])
