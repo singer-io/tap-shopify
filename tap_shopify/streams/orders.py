@@ -198,6 +198,10 @@ class Orders(Stream):
                 }
                 }
                 currentTotalWeight
+                customAttributes {
+                    key
+                    value
+                }
                 customer {
                 id
                 email
@@ -304,6 +308,7 @@ class Orders(Stream):
                     currencyCode
                 }
                 }
+                number
                 originalTotalAdditionalFeesSet {
                 presentmentMoney {
                     amount
