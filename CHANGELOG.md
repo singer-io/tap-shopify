@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.7.0
+  * Refactor Orders Stream: standard GraphQL → Bulk API Migration [#227](https://github.com/singer-io/tap-shopify/pull/227)
+
 ### 3.6.2
   * Set max_size of pagination to 30 for fullfilment_orders [#230](https://github.com/singer-io/tap-shopify/pull/230)
 

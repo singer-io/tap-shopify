@@ -1255,7 +1255,7 @@ class Orders(Stream):
 
                 self.clear_bulk_operation_state()
             else:
-                LOGGER.warning("No data returned for the date range: %s to %s",
+                LOGGER.info("No data returned for the date range: %s to %s",
                                last_updated_at, query_end)
 
             last_updated_at = query_end
