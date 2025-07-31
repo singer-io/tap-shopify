@@ -1205,7 +1205,8 @@ class Orders(Stream):
         if bulk_op:
             if bulk_op.get("last_date_window") != self.date_window_size:
                 LOGGER.info(
-                    "Clearing existing bulk operation state due to date window size change from %s to %s",
+                    "Clearing existing bulk operation state due to date "
+                    "window size change from %s to %s",
                     bulk_op.get("last_date_window"),
                     self.date_window_size
                 )
@@ -1215,7 +1216,7 @@ class Orders(Stream):
                 op_id = bulk_op.get("bulk_operation_id")
                 op_status = bulk_op.get("status")
 
-                if op_status == "RUNNING":
+                if op_status in ["RUNNING", "COMPLETED"]:
                     LOGGER.info("Resuming polling for existing bulk operation ID: %s", op_id)
                     existing_url = self.poll_bulk_completion(current_bookmark, op_id)
                 else:
@@ -1242,6 +1243,18 @@ class Orders(Stream):
                         .get("userErrors")
                     )
                     if user_errors:
+                        for error in user_errors:
+                            message = error.get("message", "")
+                            if "bulk query operation for this app and shop is already in progress" in message:
+                                # Try to extract BulkOperation ID using regex
+                                import re
+                                match = re.search(r"gid://shopify/BulkOperation/\d+", message)
+                                bulk_op_id = match.group(0) if match else "UNKNOWN"
+                                raise ShopifyAPIError(
+                                    f"Shopify limitation: Only one bulk operation of this type is allowed at a time. "
+                                    f"A bulk operation is already in progress (ID: {bulk_op_id}). "
+                                    f"To proceed, please adjust the anchor time to avoid overlapping operations."
+                                )
                         raise ShopifyAPIError("Bulk query error: {}".format(user_errors))
 
                     bulk_operation = (
