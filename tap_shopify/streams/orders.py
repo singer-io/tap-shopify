@@ -1130,7 +1130,8 @@ class Orders(Stream):
             bulk_op_metadata={
                 "bulk_operation_id": op.get("id"),
                 "status": op.get("status"),
-                "created_at": op.get("createdAt")
+                "created_at": op.get("createdAt"),
+                "last_date_window": self.date_window_size,
             }
         )
 
@@ -1202,14 +1203,23 @@ class Orders(Stream):
         existing_url = None
 
         if bulk_op:
-            op_id = bulk_op.get("bulk_operation_id")
-            op_status = bulk_op.get("status")
-
-            if op_status == "RUNNING":
-                LOGGER.info("Resuming polling for existing bulk operation ID: %s", op_id)
-                existing_url = self.poll_bulk_completion(current_bookmark, op_id)
-            else:
+            if bulk_op.get("last_date_window") != self.date_window_size:
+                LOGGER.info(
+                    "Clearing existing bulk operation state due to date window size change from %s to %s",
+                    bulk_op.get("last_date_window"),
+                    self.date_window_size
+                )
                 self.clear_bulk_operation_state()
+
+            else:
+                op_id = bulk_op.get("bulk_operation_id")
+                op_status = bulk_op.get("status")
+
+                if op_status == "RUNNING":
+                    LOGGER.info("Resuming polling for existing bulk operation ID: %s", op_id)
+                    existing_url = self.poll_bulk_completion(current_bookmark, op_id)
+                else:
+                    self.clear_bulk_operation_state()
 
         while last_updated_at < sync_start:
             date_window_end = last_updated_at + timedelta(days=self.date_window_size)
