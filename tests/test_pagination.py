@@ -28,9 +28,11 @@ class PaginationTest(BaseTapTest):
         #       limit of records returned in 1 page
         #       Documentation: https://help.shopify.com/en/manual/locations/setting-up-your-locations
         # 'inventory_items':
-        #       As it can call for max 100 product_variants and   
+        #       As it can call for max 100 product_variants and
         #       we can generate only one inventory_item for one product_variants
-        excepted_streams = {'locations', 'inventory_items'}
+        # 'orders':
+        #       Pagination is not supported for orders BULK API
+        excepted_streams = {'locations', 'inventory_items', 'orders'}
 
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
@@ -40,7 +42,6 @@ class PaginationTest(BaseTapTest):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
             self.pagination_test(conn_id, self.store_2_streams - excepted_streams)
 
-    
     def pagination_test(self, conn_id, testable_streams):
         """
         Verify that for each stream you can get multiple pages of data
