@@ -1,6 +1,7 @@
 from datetime import timedelta
 import json
 import time
+import re
 import requests
 import shopify
 import singer
@@ -1186,7 +1187,7 @@ class Orders(Stream):
             del orders_bookmark["bulk_operation"]
             singer.write_state(Context.state)
 
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     def get_objects(self):
         last_updated_at = self.get_bookmark()
         current_bookmark = last_updated_at
@@ -1245,15 +1246,20 @@ class Orders(Stream):
                     if user_errors:
                         for error in user_errors:
                             message = error.get("message", "")
-                            if "bulk query operation for this app and shop is already in progress" in message:
+                            if (
+                                "bulk query operation for this app and shop is already in progress"
+                                in message
+                            ):
                                 # Try to extract BulkOperation ID using regex
-                                import re
-                                match = re.search(r"gid://shopify/BulkOperation/\d+", message)
+                                match = re.search(
+                                    r"gid://shopify/BulkOperation/\d+", message
+                                )
                                 bulk_op_id = match.group(0) if match else "UNKNOWN"
                                 raise ShopifyAPIError(
-                                    f"Shopify limitation: Only one bulk operation of this type is allowed at a time. "
-                                    f"A bulk operation is already in progress (ID: {bulk_op_id}). "
-                                    f"To proceed, please adjust the anchor time to avoid overlapping operations."
+                                    "Shopify limitation: Only one bulk operation of this type "
+                                    "is allowed at a time. A bulk operation is already in progress "
+                                    f"(ID: {bulk_op_id}). To proceed, please adjust the anchor time"
+                                    " to avoid overlapping operations."
                                 )
                         raise ShopifyAPIError("Bulk query error: {}".format(user_errors))
 
