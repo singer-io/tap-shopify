@@ -63,6 +63,7 @@ class StartDateTest(BaseTapTest):
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
         expected_replication_method = self.expected_replication_method()
         expected_replication_method.pop("abandoned_checkouts")
+        expected_replication_method.pop("orders")
         incremental_streams = {key for key, value in expected_replication_method.items()
                                if value == self.INCREMENTAL}
 
