@@ -16,7 +16,7 @@ from singer import metrics, utils
 from graphql import parse, print_ast, visit
 from graphql.language import Visitor, FieldNode, SelectionSetNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError
+from tap_shopify.exceptions import ShopifyError, ShopifyAPIError
 
 LOGGER = singer.get_logger()
 
@@ -125,12 +125,6 @@ def shopify_error_handling(fnc):
     def wrapper(*args, **kwargs):
         return fnc(*args, **kwargs)
     return wrapper
-
-class Error(Exception):
-    """Base exception for the API interaction module"""
-
-class ShopifyAPIError(Error):
-    """Raised for any unexpected api error without a valid status code"""
 
 class Stream():
     # Used for bookmarking and stream identification. Is overridden by

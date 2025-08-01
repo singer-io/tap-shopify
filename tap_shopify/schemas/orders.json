@@ -299,6 +299,32 @@
       }
     },
     "currentTotalWeight": { "type": ["null", "number"] },
+    "customAttributes": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "key": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      }
+    },
     "customer": {
       "type": [
         "null",
@@ -593,23 +619,63 @@
         "null",
         "object"
       ],
-      "lastVisit": {
-        "type": [
-          "null",
-          "object"
-        ],
-        "properties": {
-          "landingPage": {
+      "properties": {
+        "lastVisit": {
             "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "landingPage": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "referrerUrl": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
+        },
+        "utmParameters": {
+          "type": [
               "null",
-              "string"
-            ]
-          },
-          "referrerUrl": {
-            "type": [
-              "null",
-              "string"
-            ]
+              "object"
+          ],
+          "properties": {
+              "campaign": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "content": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "medium": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "source": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              },
+              "term": {
+                  "type": [
+                      "null",
+                      "string"
+                  ]
+              }
           }
         }
       }
@@ -683,6 +749,7 @@
     },
     "name": { "type": ["null", "string"] },
     "note": { "type": ["null", "string"] },
+    "number": { "type": ["null", "number"] },
     "netPaymentSet": {
       "type": ["null", "object"],
       "properties": {
@@ -1137,6 +1204,7 @@
           "status": { "type":  ["null", "string"] },
           "totalQuantity":  { "type": ["null", "number"] },
           "updatedAt": { "type":  ["null", "string"], "format": "date-time" },
+          "createdAt": { "type":  ["null", "string"], "format": "date-time" },
           "deliveredAt": { "type":  ["null", "string"], "format": "date-time" },
           "estimatedDeliveryAt": { "type":  ["null", "string"], "format": "date-time" },
           "requiresShipping": { "type":   ["null", "boolean"] },
@@ -1162,6 +1230,12 @@
               "type": { "type":  ["null", "string"] },
               "permitsSkuSharing": { "type":  ["null", "boolean"] },
               "inventoryManagement": { "type":  ["null", "boolean"] }
+            }
+          },
+          "location": {
+          "type": ["null", "object"],
+          "properties": {
+              "id": { "type":  ["null", "string"] }
             }
           },
           "location": {
@@ -1963,6 +2037,67 @@
                 ]
               }
             }
+          },
+          "lineItemGroup": {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "customAttributes": {
+                    "type": [
+                        "null",
+                        "array"
+                    ],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "value": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "id": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "quantity": {
+                    "type": [
+                        "null",
+                        "integer"
+                    ]
+                },
+                "title": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "variantId": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "variantSku": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                }
+            }
           }
         }
       }
@@ -2187,6 +2322,100 @@
           }
         }
       }
-    }
+    },
+    "discountApplications": {
+    "type": [
+        "null",
+        "array"
+    ],
+    "items": {
+        "type": [
+            "null",
+            "object"
+        ],
+        "properties": {
+            "allocationMethod": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "index": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "targetSelection": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "targetType": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "value": {
+                "type": [
+                    "null",
+                    "object"
+                ],
+                "properties": {
+                    "__typename": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "amount": {
+                        "type": [
+                            "null",
+                            "number"
+                        ]
+                    },
+                    "currencyCode": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "percentage": {
+                        "type": [
+                            "null",
+                            "number"
+                        ]
+                    }
+                }
+            },
+            "__typename": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "title": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "description": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "code": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
+          }
+        }
+      }
   }
 }
