@@ -17,7 +17,7 @@ class BookmarkTest(BaseTapTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_date = '2025-01-01T00:00:00Z'
+        self.start_date = '2021-04-01T00:00:00Z'
 
     def max_bookmarks_by_stream(self, sync_records):
         """

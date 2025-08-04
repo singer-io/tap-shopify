@@ -45,7 +45,7 @@ class BaseTapTest(BaseCase):
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
-            'date_window_size': 60,
+            'date_window_size': 180,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
             # 'results_per_page': '50'
         }
