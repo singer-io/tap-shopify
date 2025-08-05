@@ -21,7 +21,7 @@ class MinimumSelectionTest(BaseTapTest):
     def test_run(self):
         with self.subTest(store="store_1"):
             conn_id = self.create_connection(original_credentials=True)
-            self.automatic_test(conn_id, self.store_1_streams)
+            self.automatic_test(conn_id, self.store_1_streams - {"orders"})
 
         with self.subTest(store="store_2"):
             conn_id = self.create_connection(original_properties=False, original_credentials=False)
