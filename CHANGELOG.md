@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.7.1
+  * Query and extract multiple pages of products for each collection [#227](https://github.com/singer-io/tap-shopify/pull/231)
+
 ### 3.7.0
   * Refactor Orders Stream: standard GraphQL → Bulk API Migration [#227](https://github.com/singer-io/tap-shopify/pull/227)
 
