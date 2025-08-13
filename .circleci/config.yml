@@ -5,7 +5,7 @@ orbs:
 executors:
   docker-executor:
     docker:
-      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:stitch-tap-tester
+      - image: 218546966473.dkr.ecr.us-east-1.amazonaws.com/circle-ci:stitch-tap-tester-uv
 
 jobs:
   build:
@@ -20,21 +20,23 @@ jobs:
       - run:
           name: 'Setup virtual env'
           command: |
-            python3 -mvenv /usr/local/share/virtualenvs/tap-shopify
+            uv venv --python 3.11 /usr/local/share/virtualenvs/tap-shopify
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pip install -U 'pip==23.3.2' 'setuptools<56.0.0'
-            pip install .[dev]
+            uv pip install -U 'pip==23.3.2' 'setuptools<56.0.0'
+            uv pip install .[dev]
+            uv pip install --upgrade awscli
       - persist_to_workspace:
-          root: /usr/local/share/virtualenvs
+          root: /
           paths:
-            - tap-shopify
-            - dev_env.sh
+            - root/.local/share/uv/python
+            - usr/local/share/virtualenvs/tap-shopify
+
   run_pylint:
     executor: docker-executor
     steps:
       - checkout
       - attach_workspace:
-          at: /usr/local/share/virtualenvs
+          at: /
       - run:
           name: 'pylint'
           command: |
@@ -45,7 +47,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /usr/local/share/virtualenvs
+          at: /
       - run:
           name: 'JSON Validator'
           command: |
@@ -56,13 +58,14 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /usr/local/share/virtualenvs
+          at: /
       - run:
           name: 'Unit Tests'
           command: |
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            pip install nose2 parameterized nose2[coverage_plugin]>=0.6.5
-            nose2 --with-coverage -v -s tests/unittests
+            pip install pytest coverage parameterized nose2[coverage_plugin]>=0.6.5
+            coverage run -m pytest tests/unittests
+            coverage html
       - store_test_results:
           path: test_output/report.xml
       - store_artifacts:
@@ -73,10 +76,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /usr/local/share/virtualenvs
+          at: /
       - run:
           name: 'Integration Tests'
           command: |
+            source /usr/local/share/virtualenvs/tap-shopify/bin/activate
             aws s3 cp s3://com-stitchdata-dev-deployment-assets/environments/tap-tester/tap_tester_sandbox dev_env.sh
             source dev_env.sh
             mkdir /tmp/${CIRCLE_PROJECT_REPONAME}
