@@ -72,7 +72,7 @@ jobs:
           path: htmlcov
   run_integration_tests:
     executor: docker-executor
-    parallelism: 10
+    parallelism: 2
     steps:
       - checkout
       - attach_workspace:
