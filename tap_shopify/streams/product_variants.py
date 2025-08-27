@@ -50,6 +50,10 @@ class ProductVariants(Stream):
                         position
                         price
                         requiresComponents
+                        selectedOptions{
+                            name
+                            value
+                        }
                         sellableOnlineQuantity
                         sku
                         taxCode
