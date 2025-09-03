@@ -10,7 +10,7 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "start_date": "2025-01-01T00:00:00Z",
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 30)
+        self.assertEqual(streams.date_window_size, 30)
 
     def test_valid_int_date_window_value(self):
         """Test that valid integer value for date_window is handled correctly."""
@@ -19,7 +19,7 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "date_window_size": 10
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 10)
+        self.assertEqual(streams.date_window_size, 10)
 
     def test_valid_str_date_window_value(self):
         """Test that valid str value for date_window is handled correctly.."""
@@ -28,7 +28,7 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "date_window_size": "10"
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 10)
+        self.assertEqual(streams.date_window_size, 10)
 
     def test_valid_float_date_window_value(self):
         """Test that valid float value for date_window is handled correctly."""
@@ -37,7 +37,7 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "date_window_size": "11.00"
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 11)
+        self.assertEqual(streams.date_window_size, 11)
 
     def test_zero_str_date_window_value(self):
         """Test that valid zero string value for date_window is handled correctly."""
@@ -46,7 +46,7 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "date_window_size": "0"
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 30)
+        self.assertEqual(streams.date_window_size, 30)
 
     def test_zero_int_date_window_value(self):
         """Test that valid zero integer value for date_window is handled correctly."""
@@ -55,4 +55,4 @@ class TestShopifyDateWindowHandling(unittest.TestCase):
             "date_window_size": 0
         }
         streams = Stream()
-        self.assertEquals(streams.date_window_size, 30)
+        self.assertEqual(streams.date_window_size, 30)
