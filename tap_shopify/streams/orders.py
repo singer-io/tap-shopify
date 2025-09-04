@@ -1162,7 +1162,7 @@ class Orders(Stream):
         current_order = None
         current_line_items = []
 
-        for line in resp.iter_lines(chunk_size=1024*1024):
+        for line in resp.iter_lines():
             if not line:
                 continue
             rec = json.loads(line)
