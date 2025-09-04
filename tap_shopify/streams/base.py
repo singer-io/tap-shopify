@@ -132,6 +132,7 @@ class Stream():
     name = None
     replication_method = 'INCREMENTAL'
     replication_key = 'updatedAt'
+    automatic_keys = []
     key_properties = ['id']
     date_window_size = None
     data_key = None

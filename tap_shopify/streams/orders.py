@@ -1118,6 +1118,15 @@ class Orders(Stream):
 
             if current_status == "COMPLETED":
                 LOGGER.info("Bulk operation completed. File size: %s bytes", op.get("fileSize"))
+                self.update_bookmark(
+                    bookmark_value=utils.strftime(current_bookmark),
+                    bulk_op_metadata={
+                        "bulk_operation_id": op.get("id"),
+                        "status": current_status,
+                        "created_at": op.get("createdAt"),
+                        "last_date_window": self.date_window_size,
+                    }
+                )
                 return op.get("url")
 
             if current_status in ["FAILED", "CANCELED"]:
@@ -1281,12 +1290,11 @@ class Orders(Stream):
                     current_bookmark = max(current_bookmark, replication_value)
 
                     yield obj
-
-                self.clear_bulk_operation_state()
             else:
                 LOGGER.info("No data returned for the date range: %s to %s",
                                last_updated_at, query_end)
 
+            self.clear_bulk_operation_state()
             last_updated_at = query_end
             max_bookmark_value = min(sync_start, current_bookmark)
             self.update_bookmark(utils.strftime(max_bookmark_value))
