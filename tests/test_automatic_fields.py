@@ -64,6 +64,9 @@ class MinimumSelectionTest(BaseTapTest):
                 stream_metadata = self.expected_metadata().get(stream, {})
                 expected_primary_keys = self.expected_primary_keys().get(stream, set())
 
+                if stream == "order_refunds":
+                    expected_primary_keys = expected_primary_keys | {"order"}
+
                 # collect records
                 messages = synced_records.get(stream)
 
