@@ -1,8 +1,9 @@
 from datetime import timedelta
-from singer import metrics, utils
+from singer import metrics, utils, get_logger
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
+LOGGER = get_logger()
 
 class OrderRefunds(Stream):
     """Stream class for fetching order refunds from Shopify"""
@@ -29,6 +30,7 @@ class OrderRefunds(Stream):
         initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
+        LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
 
         # Process each date window
         while last_updated_at < sync_start:
