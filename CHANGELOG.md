@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.7.2
+  * New automatic_keys Support and Bulk State Persistence Logic [#237](https://github.com/singer-io/tap-shopify/pull/237)
+
 ### 3.7.1
   * Query and extract multiple pages of products for each collection [#227](https://github.com/singer-io/tap-shopify/pull/231)
 
