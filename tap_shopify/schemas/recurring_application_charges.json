@@ -1,0 +1,186 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "name": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "currentPeriodEnd": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "returnUrl": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "status": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "test": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "trialDays": {
+            "type": [
+                "integer",
+                "null"
+            ]
+        },
+        "lineItems": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "plan": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "pricingDetails": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "__typename": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "planHandle": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "interval": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "discount": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "durationLimitInIntervals": {
+                                                "type": [
+                                                    "integer",
+                                                    "null"
+                                                ]
+                                            },
+                                            "remainingDurationInIntervals": {
+                                                "type": [
+                                                    "integer",
+                                                    "null"
+                                                ]
+                                            },
+                                            "priceAfterDiscount": {
+                                                "type": [
+                                                    "object",
+                                                    "null"
+                                                ],
+                                                "properties": {
+                                                    "amount": {
+                                                        "type": [
+                                                            "number",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "currencyCode": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "value": {
+                                                "type": [
+                                                    "object",
+                                                    "null"
+                                                ],
+                                                "properties": {
+                                                    "__typename": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "percentage": {
+                                                        "type": [
+                                                            "number",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "amount": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "amount": {
+                                                                "type": [
+                                                                    "number",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "currencyCode": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

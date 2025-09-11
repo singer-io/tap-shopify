@@ -118,6 +118,32 @@
                 }
             }
         },
+        "countriesInShippingZones": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "countryCodes": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "includeRestOfWorld": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            }
+        },
         "checkoutApiSupported": {
             "type": [
                 "boolean",
