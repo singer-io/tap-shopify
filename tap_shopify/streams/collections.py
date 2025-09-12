@@ -47,13 +47,13 @@ class Collections(Stream):
 
         return product_ids
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         Transforms a collection object.
 
         Args:
             obj (dict): Collection object.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed collection object.
         """

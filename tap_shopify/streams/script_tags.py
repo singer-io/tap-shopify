@@ -3,7 +3,7 @@ from tap_shopify.streams.base import Stream
 
 
 class ScriptTags(Stream):
-    """Stream class for Webhooks in Shopify."""
+    """Stream class for Script Tags in Shopify."""
     name = "script_tags"
     data_key = "scriptTags"
     replication_key = "updatedAt"

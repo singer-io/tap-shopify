@@ -1,24 +1,21 @@
 import singer
 from singer import metrics
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream
+from tap_shopify.streams.base import FullTableStream
 
 LOGGER = singer.get_logger()
 
 
-class ArticleTags(Stream):
+class ArticleTags(FullTableStream):
     """Stream class for Article Tags in Shopify."""
     name = "article_tags"
     data_key = "articleTags"
+    key_properties = ["article_tag"]
 
     # pylint: disable=W0221
     def get_query_params(self):
         """
         Construct query parameters for GraphQL requests.
-
-        Args:
-            cursor (str): Pagination cursor, if any.
-
         Returns:
             dict: Dictionary of query parameters.
         """
@@ -26,6 +23,12 @@ class ArticleTags(Stream):
             "limit": 250,
         }
         return params
+
+    def transform_object(self, obj, **_kwargs):
+        """
+        Modify this to perform custom transformation on each object
+        """
+        return {"article_tag": obj}
 
     # pylint: disable=too-many-locals
     def get_objects(self):

@@ -8,13 +8,13 @@ class ProductVariants(Stream):
     data_key = "productVariants"
     replication_key = "updatedAt"
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         Transforms the object if needed.
 
         Args:
             obj (dict): The object to transform.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: The transformed object.
         """

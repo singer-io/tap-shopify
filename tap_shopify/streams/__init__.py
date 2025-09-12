@@ -18,6 +18,7 @@ import tap_shopify.streams.fulfillment_orders
 import tap_shopify.streams.order_shipping_lines
 import tap_shopify.streams.application_charges
 import tap_shopify.streams.application_credits
+import tap_shopify.streams.article_authors
 import tap_shopify.streams.article_tags
 import tap_shopify.streams.blogs
 import tap_shopify.streams.carrier_services
@@ -37,4 +38,6 @@ import tap_shopify.streams.smart_collections
 import tap_shopify.streams.tender_transactions
 import tap_shopify.streams.themes
 import tap_shopify.streams.redirects
+import tap_shopify.streams.resource_feedback
+import tap_shopify.streams.recurring_application_charges
 import tap_shopify.streams.webhooks

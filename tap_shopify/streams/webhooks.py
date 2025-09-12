@@ -6,7 +6,6 @@ class Webhooks(Stream):
     """Stream class for Webhooks in Shopify."""
     name = "webhooks"
     data_key = "webhookSubscriptions"
-    replication_key = "updatedAt"
 
     def get_query(self):
         return """

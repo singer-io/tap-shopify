@@ -82,8 +82,14 @@ def get_discovery_metadata(stream, schema):
     mdata = metadata.write(mdata, (), 'table-key-properties', stream.key_properties)
     mdata = metadata.write(mdata, (), 'forced-replication-method', stream.replication_method)
 
-    if stream.replication_key:
+    if stream.replication_method=="INCREMENTAL" and stream.replication_key:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [stream.replication_key])
+    else:
+        mdata = metadata.write(mdata, (), 'valid-replication-keys', [])
+
+    parent_tap_stream_id = getattr(stream, "parent", None)
+    if parent_tap_stream_id:
+        mdata = metadata.write(mdata, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
     for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
@@ -112,6 +118,11 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
         catalog_schema = add_synthetic_key_to_schema(schema)
+        replication_key = (
+            stream.replication_key
+            if stream.replication_method=="INCREMENTAL"
+            else []
+        )
 
         # create and add catalog entry
         catalog_entry = {
@@ -120,7 +131,7 @@ def discover():
             'schema': catalog_schema,
             'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
-            'replication_key': stream.replication_key,
+            'replication_key': replication_key,
             'replication_method': stream.replication_method
         }
         streams.append(catalog_entry)

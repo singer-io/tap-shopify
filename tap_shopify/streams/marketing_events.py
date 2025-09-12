@@ -3,7 +3,7 @@ from tap_shopify.streams.base import Stream
 
 
 class MarketingEvents(Stream):
-    """Stream class for Webhooks in Shopify."""
+    """Stream class for Marketing Events in Shopify."""
     name = "marketing_events"
     data_key = "marketingEvents"
     replication_key = "started_at"

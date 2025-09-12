@@ -1,18 +1,17 @@
 from tap_shopify.context import Context
-from tap_shopify.streams.base import Stream
+from tap_shopify.streams.base import FullTableStream
 
 
-class ApplicationCharges(Stream):
+class ApplicationCharges(FullTableStream):
     """Stream class for Application Charges in Shopify."""
     name = "application_charges"
     data_key = "currentAppInstallation"
-    replication_key = "createdAt"
 
-    def call_api(self, query_params, query=None):
+    def call_api(self, query_params, query=None, data_key=None):
         """
-        Overriding call_api method to extract data from nested data_key 'oneTimePurchases'.
+        Overriding call_api method to extract data from nested data_key.
         """
-        root_data = super().call_api(query_params, query=query, data_key=self.data_key)
+        root_data = super().call_api(query_params, query=query, data_key=data_key)
         data = (
             root_data
             .get("oneTimePurchases", {})

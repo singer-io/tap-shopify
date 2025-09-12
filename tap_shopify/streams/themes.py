@@ -44,7 +44,6 @@ class Themes(Stream):
         current_bookmark = last_updated_at
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
-        sync_start = utils.now().replace(microsecond=0)
         has_next_page, cursor = True, None
 
         while has_next_page:
@@ -56,13 +55,13 @@ class Themes(Stream):
             for edge in data.get("edges"):
                 obj = self.transform_object(edge.get("node"))
                 replication_value = utils.strptime_to_utc(obj[self.replication_key])
-                current_bookmark = max(current_bookmark, replication_value)
-                yield obj
+                if replication_value >= current_bookmark:
+                    current_bookmark = max(current_bookmark, replication_value)
+                    yield obj
 
-            page_info =  data.get("pageInfo")
-            cursor , has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
-            max_bookmark_value = min(sync_start, current_bookmark)
-            self.update_bookmark(utils.strftime(max_bookmark_value))
+            page_info = data.get("pageInfo")
+            cursor, has_next_page = page_info.get("endCursor"), page_info.get("hasNextPage")
+            self.update_bookmark(utils.strftime(current_bookmark))
 
     def get_query(self):
         return """

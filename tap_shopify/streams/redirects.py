@@ -1,4 +1,3 @@
-from singer import utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
@@ -9,7 +8,7 @@ class Redirects(Stream):
     data_key = "urlRedirects"
     replication_key = "createdAt"
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         If the replication key is missing in the input node, a fallback timestamp (current UTC time)
         is injected to allow the pipeline to continue operating in incremental sync mode.
@@ -17,12 +16,13 @@ class Redirects(Stream):
 
         Args:
             obj (dict): Product object.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed product object.
         """
         if self.replication_key not in obj or not obj[self.replication_key]:
-            obj[self.replication_key] = utils.now().replace(microsecond=0).isoformat()
+            last_updated_at = _kwargs["last_updated_at"]
+            obj[self.replication_key] = last_updated_at.isoformat()
         return obj
 
     def get_query(self):

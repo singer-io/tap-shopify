@@ -9,13 +9,13 @@ class Products(Stream):
     data_key = "products"
     replication_key = "updatedAt"
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         Transforms the product object by extracting media information.
 
         Args:
             obj (dict): Product object.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed product object.
         """
