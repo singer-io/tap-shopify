@@ -7,7 +7,7 @@ LOGGER = singer.get_logger()
 
 
 class Themes(Stream):
-    """Stream class for Application Credits in Shopify."""
+    """Stream class for Themes in Shopify."""
     name = "themes"
     data_key = "themes"
     replication_key = "updatedAt"
