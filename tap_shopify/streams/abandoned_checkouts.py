@@ -26,13 +26,13 @@ class AbandonedCheckouts(Stream):
                 sub_entities.append(node)
         return sub_entities
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         Transforms the object by processing its sub-entities.
 
         Args:
             obj (dict): Object to transform.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed object.
         """
