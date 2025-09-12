@@ -3,7 +3,7 @@ from tap_shopify.streams.base import Stream
 
 
 class DraftOrders(Stream):
-    """Stream class for Application Credits in Shopify."""
+    """Stream class for Draft Orders in Shopify."""
     name = "draft_orders"
     data_key = "draftOrders"
     replication_key = "updatedAt"

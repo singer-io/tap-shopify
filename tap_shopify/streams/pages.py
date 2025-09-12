@@ -3,10 +3,9 @@ from tap_shopify.streams.base import Stream
 
 
 class Pages(Stream):
-    """Stream class for Webhooks in Shopify."""
+    """Stream class for Pages in Shopify."""
     name = "pages"
     data_key = "pages"
-    replication_key = "updatedAt"
 
     def get_query(self):
         return """

@@ -7,7 +7,7 @@ LOGGER = singer.get_logger()
 
 
 class Shop(Stream):
-    """Stream class for hop in Shopify."""
+    """Stream class for Shop in Shopify."""
     name = "shop"
     data_key = "shop"
 
@@ -17,17 +17,24 @@ class Shop(Stream):
         Returns:
             - Yields list of objects for the stream
         Performs:
-            - Transformation
+            - Transformation and Bookmarking
         """
+        last_updated_at = self.get_bookmark()
+        current_bookmark = last_updated_at
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
         LOGGER.info("GraphQL query for stream '%s': %s", self.name, ' '.join(query.split()))
-
         query_params = {}
 
         with metrics.http_request_timer(self.name):
             data = self.call_api(query_params, query=query)
-            obj = self.transform_object(data)
+
+        obj = self.transform_object(data)
+        replication_value = utils.strptime_to_utc(obj[self.replication_key])
+        if replication_value >= current_bookmark:
             yield obj
+
+        current_bookmark = max(current_bookmark, replication_value)
+        self.update_bookmark(utils.strftime(current_bookmark))
 
     def get_query(self):
         return """
@@ -53,6 +60,10 @@ class Shop(Stream):
                     province
                     provinceCode
                     zip
+                }
+                countriesInShippingZones {
+                    countryCodes
+                    includeRestOfWorld
                 }
                 checkoutApiSupported
                 contactEmail
