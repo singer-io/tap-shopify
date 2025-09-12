@@ -35,7 +35,10 @@ class Policies(Stream):
             dict: Transformed product object.
         """
         if self.replication_key not in obj or not obj[self.replication_key]:
-            last_updated_at = _kwargs["last_updated_at"]
+            last_updated_at = _kwargs.get(
+                "last_updated_at",
+                utils.now().replace(microsecond=0)
+            )
             obj[self.replication_key] = last_updated_at.isoformat()
         return obj
 
@@ -57,7 +60,7 @@ class Policies(Stream):
             data = self.call_api(query_params, query=query)
 
         for record in data:
-            obj = self.transform_object(record)
+            obj = self.transform_object(record, last_updated_at=last_updated_at)
             replication_value = utils.strptime_to_utc(obj[self.replication_key])
             if replication_value >= current_bookmark:
                 yield obj

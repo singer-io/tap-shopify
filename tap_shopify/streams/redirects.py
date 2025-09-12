@@ -1,3 +1,4 @@
+from singer import utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
@@ -21,7 +22,10 @@ class Redirects(Stream):
             dict: Transformed product object.
         """
         if self.replication_key not in obj or not obj[self.replication_key]:
-            last_updated_at = _kwargs["last_updated_at"]
+            last_updated_at = _kwargs.get(
+                "last_updated_at",
+                utils.now().replace(microsecond=0)
+            )
             obj[self.replication_key] = last_updated_at.isoformat()
         return obj
 
