@@ -18,6 +18,13 @@
                 "string",
                 "null"
             ]
+        },
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
         }
     }
 }

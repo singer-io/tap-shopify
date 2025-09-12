@@ -1,12 +1,6 @@
 {
     "type": "object",
     "properties": {
-        "body": {
-            "type": [
-                "string",
-                "null"
-            ]
-        },
         "createdAt": {
             "type": [
                 "string",
