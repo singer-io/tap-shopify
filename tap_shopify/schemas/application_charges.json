@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "name": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "price": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "amount": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "currencyCode": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "status": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "test": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+}
