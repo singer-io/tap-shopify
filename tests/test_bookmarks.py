@@ -99,7 +99,7 @@ class BookmarkTest(BaseTapTest):
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
         first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
         #first_sync_bookmarks = menagerie.get_state(conn_id)
-        
+
         #######################
         # Update State between Syncs
         #######################
