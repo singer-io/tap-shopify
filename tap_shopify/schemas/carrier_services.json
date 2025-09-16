@@ -1,0 +1,41 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "name": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "active": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "callbackUrl": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "formattedName": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "supportsServiceDiscovery": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        }
+    }
+}

@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "cache": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "updatedAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "displayScope": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "legacyResourceId": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "src": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    }
+}
