@@ -129,6 +129,10 @@ class DiscoveryTest(BaseTapTest):
                 expected_primary_keys = self.expected_primary_keys()[stream]
                 expected_replication_keys = self.expected_replication_keys()[stream]
                 expected_automatic_fields = expected_primary_keys | expected_replication_keys
+                
+                # In the order_refunds stream, order field is explicitly marked as automatic
+                if stream == "order_refunds":
+                    expected_automatic_fields = expected_automatic_fields | {"order"}
 
                 # verify that primary, replication and foreign keys
                 # are given the inclusion of automatic in annotated schema.
