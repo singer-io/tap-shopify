@@ -87,6 +87,10 @@ def get_discovery_metadata(stream, schema):
     else:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [])
 
+    parent_tap_stream_id = getattr(stream, "parent", None)
+    if parent_tap_stream_id:
+        mdata = metadata.write(mdata, (), 'parent-tap-stream-id', parent_tap_stream_id)
+
     for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
