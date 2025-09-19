@@ -11,7 +11,7 @@ class PaginationTest(BaseTapTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_date = '2021-04-01T00:00:00Z'        
+        self.start_date = '2021-04-01T00:00:00Z'
 
     @staticmethod
     def name():

@@ -144,13 +144,13 @@ class OrderRefunds(Stream):
 
         return orderadjustments
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         """
         Transform refund objects by extracting refund line items from edges.
 
         Args:
             obj (dict): Refund object.
-
+            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed refund object.
         """

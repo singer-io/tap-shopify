@@ -82,6 +82,13 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
 
+        full_default = {
+                self.REPLICATION_KEYS: set(),
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL,
+                self.API_LIMIT: 20
+            }
+
         meta = default.copy()
         meta[self.REPLICATION_KEYS] =  {"updatedAt"}
         meta[self.API_LIMIT] = 30
@@ -135,7 +142,72 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 50
-            }
+            },
+            "application_charges": full_default,
+            "application_credits": full_default,
+            "article_authors": {
+                self.REPLICATION_KEYS: set(),
+                self.PRIMARY_KEYS: {"name"},
+                self.REPLICATION_METHOD: self.FULL,
+                self.API_LIMIT: 20
+            },
+            "article_tags": {
+                self.REPLICATION_KEYS: set(),
+                self.PRIMARY_KEYS: {"article_tag"},
+                self.REPLICATION_METHOD: self.FULL,
+                self.API_LIMIT: 20
+            },
+            "blogs": default,
+            "carrier_services": full_default,
+            "comments": default,
+            "currencies": {
+                self.REPLICATION_KEYS: set(),
+                self.PRIMARY_KEYS: {"currencyCode"},
+                self.REPLICATION_METHOD: self.FULL,
+                self.API_LIMIT: 20
+            },
+            "custom_collections": default,
+            "draft_orders": default,
+            "fulfillment_services": full_default,
+            "marketing_events": {
+                self.REPLICATION_KEYS: {"started_at"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            },
+            "pages": default,
+            "policies": default,
+            "price_rules": full_default,
+            "recurring_application_charges": full_default,
+            "redirects": {
+                self.REPLICATION_KEYS: {"createdAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            },
+            "resource_feedback": {
+                self.REPLICATION_KEYS: {"feedback_generated_at"},
+                self.PRIMARY_KEYS: {"app_id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            },
+            "script_tags": default,
+            "shipping_zones": {
+                self.REPLICATION_KEYS: set(),
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL,
+                self.API_LIMIT: 10
+            },
+            "shop": default,
+            "smart_collections": default,
+            "tender_transactions": {
+                self.REPLICATION_KEYS: {"processedAt"},
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.API_LIMIT: 50
+            },
+            "themes": default,
+            "webhooks": default
         }
 
     def expected_streams(self):

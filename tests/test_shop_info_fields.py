@@ -44,7 +44,7 @@ class ShopInfoFieldsTest(BaseTapTest):
 
         for stream in self.expected_streams():
             with self.subTest(stream=stream):
-                
+
                 # Verify that every stream schema contains shop info fields
                 catalog = next(iter([catalog for catalog in found_catalogs
                                      if catalog["stream_name"] == stream]))

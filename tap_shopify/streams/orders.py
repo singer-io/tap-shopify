@@ -1176,7 +1176,7 @@ class Orders(Stream):
             current_order["lineItems"] = current_line_items
             yield current_order
 
-    def transform_object(self, obj):
+    def transform_object(self, obj, **_kwargs):
         if obj.get("lineItems", {}).get("edges"):
             obj["lineItems"] = [item["node"] for item in obj["lineItems"]["edges"]]
         return obj
