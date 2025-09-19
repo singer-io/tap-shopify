@@ -1,8 +1,7 @@
 # tap-shopify
 
 This is a [Singer](https://singer.io) tap that produces JSON-formatted data
-following the [Singer
-spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
+following the [Singer spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
 
 This tap:
 
@@ -24,33 +23,89 @@ This tap:
   - [Locations](https://shopify.dev/docs/api/admin-graphql/latest/queries/locations)
   - [Inventory Levels](https://shopify.dev/docs/api/admin-graphql/latest/queries/inventorylevel)
   - [Inventory Item](https://shopify.dev/docs/api/admin-graphql/latest/queries/inventoryitems)
+  - [Application Charges](https://shopify.dev/docs/api/admin-graphql/latest/queries/currentAppInstallation?example=retrieves-a-list-of-application-charges)
+  - [Application Credits](https://shopify.dev/docs/api/admin-graphql/latest/queries/appInstallation?example=retrieves-all-application-credits)
+  - [Article Authors](https://shopify.dev/docs/api/admin-rest/latest/resources/article#get-articles-authors)
+  - [Article Tags](https://shopify.dev/docs/api/admin-rest/latest/resources/article#get-articles-tags)
+  - [Blogs](https://shopify.dev/docs/api/admin-graphql/latest/queries/blogs?example=retrieve-a-list-of-all-blogs)
+  - [Carrier Services](https://shopify.dev/docs/api/admin-rest/latest/resources/carrierservice#get-carrier-services)
+  - [Comments](https://shopify.dev/docs/api/admin-graphql/latest/queries/comments?example=retrieves-a-list-of-comments)
+  - [Currencies](https://shopify.dev/docs/api/admin-graphql/latest/queries/shop?example=retrieves-a-list-of-currencies-enabled-on-a-shop)
+  - [Custom Collections](https://shopify.dev/docs/api/admin-graphql/latest/queries/collections?example=retrieve-a-list-of-custom-collections)
+  - [Draft Orders](https://shopify.dev/docs/api/admin-graphql/latest/queries/draftOrders?example=retrieves-a-list-of-draft-orders)
+  - [Fulfillment Services](https://shopify.dev/docs/api/admin-graphql/latest/queries/shop?example=receive-a-list-of-all-fulfillmentservices)
+  - [Marketing Events](https://shopify.dev/docs/api/admin-graphql/latest/queries/marketingEvents?example=retrieves-a-list-of-all-marketing-events)
+  - [Pages](https://shopify.dev/docs/api/admin-graphql/latest/queries/pages?example=retrieves-a-list-of-pages)
+  - [Policies](https://shopify.dev/docs/api/admin-graphql/latest/queries/shop?example=retrieves-a-list-of-the-shops-policies)
+  - [Price Rules](https://shopify.dev/docs/api/admin-graphql/latest/queries/discountNodes)
+  - [Recurring Application Charges](https://shopify.dev/docs/api/admin-graphql/latest/queries/currentAppInstallationexample=retrieves-a-list-of-recurring-application-charges)
+  - [Redirects](https://shopify.dev/docs/api/admin-graphql/latest/queries/urlRedirects?example=retrieves-a-list-of-url-redirects)
+  - [Resource Feedback](https://shopify.dev/docs/api/admin-graphql/latest/queries/app?example=get-the-feedback-field)
+  - [Script Tags](https://shopify.dev/docs/api/admin-graphql/latest/queries/scriptTags?example=retrieves-a-list-of-all-script-tags)
+  - [Shipping Zones](https://shopify.dev/docs/api/admin-graphql/latest/queries/deliveryProfiles?example=receive-a-list-of-all-shippingzones)
+  - [Shop](https://shopify.dev/docs/api/admin-rest/latest/resources/shop#get-shop)
+  - [Smart Collections](https://shopify.dev/docs/api/admin-graphql/latest/queries/collections?example=retrieve-a-list-of-smart-collections)
+  - [Tender Transactions](https://shopify.dev/docs/api/admin-graphql/latest/queries/tenderTransactions?example=retrieves-a-list-of-tender-transactions)
+  - [Themes](https://shopify.dev/docs/api/admin-graphql/latest/queries/themes?example=retrieves-a-list-of-themes)
+  - [Webhooks](https://shopify.dev/docs/api/admin-graphql/latest/queries/webhookSubscriptions)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
 
 ## Stream Details
 
-| Stream Name            | Replication Key | Key Properties |
-|------------------------|----------------|---------------|
-| abandoned_checkouts    | updatedAt      | id            |
-| collections            | updatedAt      | id            |
-| customers              | updatedAt      | id            |
-| events                 | createdAt      | id            |
-| inventory_items        | updatedAt      | id            |
-| inventory_levels       | updatedAt      | id            |
-| locations              | createdAt      | id            |
-| metafields_collections  | updatedAt      | id            |
-| metafields_customers   | updatedAt      | id            |
-| metafields_orders      | updatedAt      | id            |
-| metafields_products    | updatedAt      | id            |
-| order_refunds         | updatedAt      | id            |
-| orders                 | updatedAt      | id            |
-| order_shipping_lines   | updatedAt      | id            |
-| fulfillment_orders     | updatedAt      | id            |
-| product_variants      | updatedAt      | id            |
-| products               | updatedAt      | id            |
-| transactions           | createdAt      | id            |
+| Stream Name            | Replication Key          | Key Properties|
+|------------------------|--------------------------|---------------|
+| abandoned_checkouts    | updatedAt                | id            |
+| collections            | updatedAt                | id            |
+| customers              | updatedAt                | id            |
+| events                 | createdAt                | id            |
+| inventory_items        | updatedAt                | id            |
+| inventory_levels       | updatedAt                | id            |
+| locations              | createdAt                | id            |
+| metafields_collections | updatedAt                | id            |
+| metafields_customers   | updatedAt                | id            |
+| metafields_orders      | updatedAt                | id            |
+| metafields_products    | updatedAt                | id            |
+| order_refunds          | updatedAt                | id            |
+| orders                 | updatedAt                | id            |
+| order_shipping_lines   | updatedAt                | id            |
+| fulfillment_orders     | updatedAt                | id            |
+| product_variants       | updatedAt                | id            |
+| products               | updatedAt                | id            |
+| transactions           | createdAt                | id            |
+| blogs                  | updatedAt                | id            |
+| comments               | updatedAt                | id            |
+| custom_collections     | updatedAt                | id            |
+| draft_orders           | updatedAt                | id            |
+| marketing_events       | started_at               | id            |
+| pages                  | updatedAt                | id            |
+| policies               | updatedAt                | id            |
+| redirects              | createdAt                | id            |
+| resource_feedback      | feedback_generated_at    | app_id        |
+| script_tags            | updatedAt                | id            |
+| shop                   | updatedAt                | id            |
+| smart_collections      | updatedAt                | id            |
+| tender_transactions    | processedAt              | id            |
+| themes                 | updatedAt                | id            |
+| webhooks               | updatedAt                | id            |
 
 Currently, `locations` graphql endpoint doesn't support querying on the `updatedAt`, therefore, `createdAt` is made the replication key.
+
+## Required Account Access Scopes
+
+1. Carrier Service - shipping
+2. Comments, Pages, Redirect - content
+3. Custom Collection - products
+4. Smart Collection - products
+5. Draft Order - draft_orders
+6. TenderTransaction - orders
+7. FulfillmentService - fulfillments
+8. Marketing Events - marketing_events
+9. ResourceFeedback - resource_feedbacks
+10. Script Tags  - script_tags
+11. Themes - themes
+12. Price Rules - price_rules
+
 
 ## Quick Start
 
