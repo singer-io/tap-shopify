@@ -84,8 +84,6 @@ def get_discovery_metadata(stream, schema):
 
     if stream.replication_method=="INCREMENTAL" and stream.replication_key:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [stream.replication_key])
-    else:
-        mdata = metadata.write(mdata, (), 'valid-replication-keys', [])
 
     parent_tap_stream_id = getattr(stream, "parent", None)
     if parent_tap_stream_id:

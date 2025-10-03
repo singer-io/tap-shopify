@@ -83,7 +83,6 @@ class BaseTapTest(BaseCase):
                 self.API_LIMIT: self.DEFAULT_RESULTS_PER_PAGE}
 
         full_default = {
-                self.REPLICATION_KEYS: set(),
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: 20
@@ -146,13 +145,11 @@ class BaseTapTest(BaseCase):
             "application_charges": full_default,
             "application_credits": full_default,
             "article_authors": {
-                self.REPLICATION_KEYS: set(),
                 self.PRIMARY_KEYS: {"name"},
                 self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: 20
             },
             "article_tags": {
-                self.REPLICATION_KEYS: set(),
                 self.PRIMARY_KEYS: {"article_tag"},
                 self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: 20
@@ -161,7 +158,6 @@ class BaseTapTest(BaseCase):
             "carrier_services": full_default,
             "comments": default,
             "currencies": {
-                self.REPLICATION_KEYS: set(),
                 self.PRIMARY_KEYS: {"currencyCode"},
                 self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: 20
@@ -193,7 +189,6 @@ class BaseTapTest(BaseCase):
             },
             "script_tags": default,
             "shipping_zones": {
-                self.REPLICATION_KEYS: set(),
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.FULL,
                 self.API_LIMIT: 10
