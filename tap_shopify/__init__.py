@@ -116,11 +116,6 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
         catalog_schema = add_synthetic_key_to_schema(schema)
-        replication_key = (
-            stream.replication_key
-            if stream.replication_method=="INCREMENTAL"
-            else []
-        )
 
         # create and add catalog entry
         catalog_entry = {
@@ -129,8 +124,6 @@ def discover():
             'schema': catalog_schema,
             'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
-            'replication_key': replication_key,
-            'replication_method': stream.replication_method
         }
         streams.append(catalog_entry)
 
@@ -166,8 +159,7 @@ def sync():
         if Context.is_selected(stream["tap_stream_id"]):
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
-                                stream["key_properties"],
-                                bookmark_properties=stream["replication_key"])
+                                stream["key_properties"])
             Context.counts[stream["tap_stream_id"]] = 0
 
     # Loop over streams in catalog
