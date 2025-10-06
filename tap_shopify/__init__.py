@@ -120,6 +120,8 @@ def discover():
     raw_schemas = load_schemas()
     streams = []
 
+    LOGGER.info(f"App Scope::: {fetch_app_scopes()}")
+
     for schema_name, schema in raw_schemas.items():
         LOGGER.info(schema_name)
         if schema_name not in Context.stream_objects:
@@ -208,8 +210,8 @@ def sync():
             if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
                 require_reauth = True
                 continue
-            # raise e
-            LOGGER.warning("ShopifyAPIError occurred while processing stream '%s' - %s", stream_id, str(e))
+            raise e
+            # LOGGER.warning("ShopifyAPIError occurred while processing stream '%s' - %s", stream_id, str(e))
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
