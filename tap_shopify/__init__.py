@@ -59,6 +59,16 @@ def has_read_users_access():
         return False
     return True
 
+def has_access_scope(stream, scope):
+    """If the app does not have the required scope, return False"""
+    if scope not in fetch_app_scopes():
+        LOGGER.warning(
+            "Skipping '%s' stream: '%s' scope is not granted.",
+            stream, scope
+        )
+        return False
+    return True
+
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
@@ -111,10 +121,12 @@ def discover():
     streams = []
 
     for schema_name, schema in raw_schemas.items():
+        LOGGER.info(schema_name)
         if schema_name not in Context.stream_objects:
             continue
 
         stream = Context.stream_objects[schema_name]()
+        # here we have to add logic to check access scope
         catalog_schema = add_synthetic_key_to_schema(schema)
 
         # create and add catalog entry
@@ -196,7 +208,8 @@ def sync():
             if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
                 require_reauth = True
                 continue
-            raise e
+            # raise e
+            LOGGER.warning("ShopifyAPIError occurred while processing stream '%s' - %s", stream_id, str(e))
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
