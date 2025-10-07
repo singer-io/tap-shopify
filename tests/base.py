@@ -380,13 +380,34 @@ class BaseTapTest(BaseCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = self.get_properties().get("start_date")
-        self.store_1_streams = {'collections', 'orders', 'products', 'customers', 'locations', 'inventory_levels', 'inventory_items', 'fulfillment_orders'}
+        self.store_1_streams = {
+            'collections',
+            'orders',
+            'products',
+            'customers',
+            'locations',
+            'inventory_levels',
+            'inventory_items',
+            'fulfillment_orders',
+            'events'
+        }
         # removed 'abandoned_checkouts' from store 2 streams, as per the Doc:
         #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        self.store_2_streams = {'metafields_products', 'transactions', 'order_refunds', 'products', 'locations', 'inventory_levels', 'inventory_items', 'order_shipping_lines'}
+        self.store_2_streams = {
+            'metafields_products',
+            'transactions',
+            'order_refunds',
+            'products',
+            'locations',
+            'inventory_levels',
+            'inventory_items',
+            'order_shipping_lines',
+            'product_variants',
+            'tender_transactions'
+        }
 
     #modified this method to accommodate replication key in the current_state
     def calculated_states_by_stream(self, current_state):

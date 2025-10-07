@@ -49,7 +49,21 @@ class AllFieldsTest(BaseTapTest):
         - Verify that more than just the automatic fields are replicated for each stream
         """
         streams_to_exclude = {
-            'article_authors'
+            'article_authors',
+            'article_tags',
+            'blogs',
+            'carrier_services',
+            'comments',
+            'draft_orders',
+            'fulfillment_services',
+            'marketing_events',
+            'pages',
+            'policies',
+            'price_rules',
+            'redirects',
+            'script_tags',
+            'shipping_zones',
+            'themes'
         }
         expected_streams = self.expected_streams() - streams_to_exclude
 

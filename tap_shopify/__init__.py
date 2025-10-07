@@ -63,14 +63,14 @@ def has_access_scope(stream, scopes):
     """If the app does not have the required scope, return False"""
     app_access_scopes = fetch_app_scopes()
 
-    if any(access_scope in scopes for access_scope in app_access_scopes):
-        return True
-    else:
+    if not any(access_scope in scopes for access_scope in app_access_scopes):
         message = "The account credentials supplied do not have '{0}' access scope " \
         "to the following stream: {1}. The data for these streams would not be " \
         "collected due to lack of required permission.".format(", ".join(scopes), stream)
         LOGGER.warning(message)
         return False
+
+    return True
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -146,18 +146,17 @@ def discover():
     if error_list:
         total_stream = len(raw_schemas.keys())
         missing_scopes_msg = [
-            f"{stream}: {', '.join(scopes)}" for item in error_list for stream, scopes in item.items()
+            f"{stream}: {', '.join(scopes)}"
+            for item in error_list
+            for stream, scopes in item.items()
         ]
-        message = "The account credentials supplied do not have access to the following stream(s): {}. "\
-                "The data for these streams would not be collected due to lack of required " \
-                "permission.".format(", ".join(missing_scopes_msg))
+        message = "The account credentials supplied do not have access to the following " \
+        "stream(s): {}. The data for these streams would not be collected due to lack of " \
+        "required permission.".format(", ".join(missing_scopes_msg))
 
         if len(error_list) != total_stream:
-            # If atleast one stream have read permission then just print warning message for all streams
-            # which does not have read permission
             LOGGER.warning(message)
         else:
-            # If none of the streams are having the 'read' access, then the code will raise an error
             raise ShopifyAPIError(message)
 
     return {'streams': streams}
@@ -230,7 +229,6 @@ def sync():
                 require_reauth = True
                 continue
             raise e
-            # LOGGER.warning("ShopifyAPIError occurred while processing stream '%s' - %s", stream_id, str(e))
 
         Context.state['bookmarks'].pop('currently_sync_stream')
         singer.write_state(Context.state)
