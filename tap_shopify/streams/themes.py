@@ -11,6 +11,7 @@ class Themes(Stream):
     name = "themes"
     data_key = "themes"
     replication_key = "updatedAt"
+    access_scope = ["read_themes"]
 
     # pylint: disable=W0221
     def get_query_params(self, cursor=None):

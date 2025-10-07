@@ -9,6 +9,7 @@ class MetafieldsCustomers(Metafields):
 
     name = "metafields_customers"
     data_key = "customers"
+    access_scope = ["read_customers"]
 
     def get_query(self):
         """Return the GraphQL query for fetching customer metafields."""

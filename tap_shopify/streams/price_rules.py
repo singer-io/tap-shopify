@@ -6,6 +6,7 @@ class PriceRules(FullTableStream):
     """Stream class for Price Rules in Shopify."""
     name = "price_rules"
     data_key = "discountNodes"
+    access_scope = ["read_discounts"]
 
     def get_query(self):
         return """

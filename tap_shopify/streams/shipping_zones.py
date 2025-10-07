@@ -7,6 +7,7 @@ class ShippingZones(FullTableStream):
     """Stream class for Shipping Zones in Shopify."""
     name = "shipping_zones"
     data_key = "deliveryProfiles"
+    access_scope = ["read_shipping"]
 
     def __init__(self):
         super().__init__()

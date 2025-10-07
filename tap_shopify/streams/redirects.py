@@ -8,6 +8,7 @@ class Redirects(Stream):
     name = "redirects"
     data_key = "urlRedirects"
     replication_key = "createdAt"
+    access_scope = ["read_online_store_navigation"]
 
     def transform_object(self, obj, **_kwargs):
         """

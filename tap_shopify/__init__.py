@@ -59,15 +59,18 @@ def has_read_users_access():
         return False
     return True
 
-def has_access_scope(stream, scope):
+def has_access_scope(stream, scopes):
     """If the app does not have the required scope, return False"""
-    if scope not in fetch_app_scopes():
-        LOGGER.warning(
-            "Skipping '%s' stream: '%s' scope is not granted.",
-            stream, scope
-        )
+    app_access_scopes = fetch_app_scopes()
+
+    if any(access_scope in scopes for access_scope in app_access_scopes):
+        return True
+    else:
+        message = "The account credentials supplied do not have '{0}' access scope " \
+        "to the following stream: {1}. The data for these streams would not be " \
+        "collected due to lack of required permission.".format(", ".join(scopes), stream)
+        LOGGER.warning(message)
         return False
-    return True
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -119,16 +122,15 @@ def discover():
 
     raw_schemas = load_schemas()
     streams = []
-
-    LOGGER.info(f"App Scope::: {fetch_app_scopes()}")
+    error_list = []
 
     for schema_name, schema in raw_schemas.items():
-        LOGGER.info(schema_name)
         if schema_name not in Context.stream_objects:
             continue
 
         stream = Context.stream_objects[schema_name]()
-        # here we have to add logic to check access scope
+        if stream.access_scope and not has_access_scope(stream.name, stream.access_scope):
+            error_list.append({stream.name: stream.access_scope})
         catalog_schema = add_synthetic_key_to_schema(schema)
 
         # create and add catalog entry
@@ -140,6 +142,23 @@ def discover():
             'key_properties': stream.key_properties,
         }
         streams.append(catalog_entry)
+
+    if error_list:
+        total_stream = len(raw_schemas.keys())
+        missing_scopes_msg = [
+            f"{stream}: {', '.join(scopes)}" for item in error_list for stream, scopes in item.items()
+        ]
+        message = "The account credentials supplied do not have access to the following stream(s): {}. "\
+                "The data for these streams would not be collected due to lack of required " \
+                "permission.".format(", ".join(missing_scopes_msg))
+
+        if len(error_list) != total_stream:
+            # If atleast one stream have read permission then just print warning message for all streams
+            # which does not have read permission
+            LOGGER.warning(message)
+        else:
+            # If none of the streams are having the 'read' access, then the code will raise an error
+            raise ShopifyAPIError(message)
 
     return {'streams': streams}
 

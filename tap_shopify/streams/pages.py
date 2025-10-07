@@ -6,6 +6,7 @@ class Pages(Stream):
     """Stream class for Pages in Shopify."""
     name = "pages"
     data_key = "pages"
+    access_scope = ["read_content" ,"read_online_store_pages"]
 
     def get_query(self):
         return """

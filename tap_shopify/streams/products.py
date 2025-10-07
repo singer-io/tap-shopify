@@ -8,6 +8,7 @@ class Products(Stream):
     name = "products"
     data_key = "products"
     replication_key = "updatedAt"
+    access_scope = ["read_products"]
 
     def transform_object(self, obj, **_kwargs):
         """

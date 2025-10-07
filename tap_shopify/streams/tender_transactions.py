@@ -7,6 +7,7 @@ class TenderTransactions(Stream):
     name = "tender_transactions"
     data_key = "tenderTransactions"
     replication_key = "processedAt"
+    access_scope = ["read_orders"]
 
     def get_query(self):
         return """

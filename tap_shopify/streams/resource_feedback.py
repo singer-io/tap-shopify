@@ -12,6 +12,7 @@ class ResourceFeedback(Stream):
     data_key = "app"
     replication_key = "feedback_generated_at"
     key_properties = ["app_id"]
+    access_scope = ["read_products"]
 
     def transform_object(self, obj, **_kwargs):
         """

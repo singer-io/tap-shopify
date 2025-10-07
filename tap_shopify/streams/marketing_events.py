@@ -7,6 +7,7 @@ class MarketingEvents(Stream):
     name = "marketing_events"
     data_key = "marketingEvents"
     replication_key = "started_at"
+    access_scope = ["read_marketing_events"]
 
     def get_query(self):
         return """

@@ -7,6 +7,7 @@ class Comments(Stream):
     name = "comments"
     data_key = "comments"
     replication_key = "updatedAt"
+    access_scope = ["read_content" ,"read_online_store_pages"]
 
     def get_query(self):
         return """

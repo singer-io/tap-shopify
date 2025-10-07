@@ -16,6 +16,7 @@ class Orders(Stream):
     name = "orders"
     data_key = "orders"
     replication_key = "updatedAt"
+    access_scope = ["read_orders"]
 
     def get_query(self):
         """

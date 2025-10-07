@@ -6,6 +6,7 @@ class CarrierServices(FullTableStream):
     """Stream class for Carrier Services in Shopify."""
     name = "carrier_services"
     data_key = "carrierServices"
+    access_scope = ["read_shipping"]
 
     def get_query(self):
         return """

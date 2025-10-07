@@ -7,6 +7,7 @@ class DraftOrders(Stream):
     name = "draft_orders"
     data_key = "draftOrders"
     replication_key = "updatedAt"
+    access_scope = ["read_draft_orders"]
 
     def get_query(self):
         return """

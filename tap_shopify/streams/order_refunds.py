@@ -11,6 +11,7 @@ class OrderRefunds(Stream):
     data_key = "orders"
     child_data_key = "refunds"
     replication_key = "updatedAt"
+    access_scope = ["read_orders"]
 
     # pylint: disable=too-many-locals
     def get_objects(self):

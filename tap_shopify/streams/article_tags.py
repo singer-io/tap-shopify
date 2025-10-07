@@ -11,6 +11,7 @@ class ArticleTags(FullTableStream):
     name = "article_tags"
     data_key = "articleTags"
     key_properties = ["article_tag"]
+    access_scope = ["read_content" ,"read_online_store_pages"]
 
     # pylint: disable=W0221
     def get_query_params(self):

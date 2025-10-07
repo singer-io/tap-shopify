@@ -7,6 +7,7 @@ class ScriptTags(Stream):
     name = "script_tags"
     data_key = "scriptTags"
     replication_key = "updatedAt"
+    access_scope = ["read_script_tags"]
 
     def get_query(self):
         return """

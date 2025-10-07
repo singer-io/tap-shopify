@@ -7,6 +7,7 @@ class ArticleAuthors(FullTableStream):
     name = "article_authors"
     data_key = "articleAuthors"
     key_properties = ["name"]
+    access_scope = ["read_content" ,"read_online_store_pages"]
 
     def get_query(self):
         return """

@@ -7,6 +7,7 @@ class Collections(Stream):
     name = "collections"
     data_key = "collections"
     replication_key = "updatedAt"
+    access_scope = ["read_products"]
 
     def transform_products(self, data):
         """

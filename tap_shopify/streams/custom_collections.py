@@ -7,6 +7,7 @@ class CustomCollections(Stream):
     name = "custom_collections"
     data_key = "collections"
     replication_key = "updatedAt"
+    access_scope = ["read_products"]
 
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """

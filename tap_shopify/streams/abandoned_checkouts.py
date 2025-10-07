@@ -7,6 +7,7 @@ class AbandonedCheckouts(Stream):
     name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
+    access_scope = ["read_orders"]
 
     @classmethod
     def process_sub_entities(cls, data, entity_name):

@@ -10,6 +10,7 @@ class Policies(Stream):
     """Stream class for Policies in Shopify."""
     name = "policies"
     data_key = "shop"
+    access_scope = ["read_legal_policies"]
 
     def call_api(self, query_params, query=None, data_key=None):
         """

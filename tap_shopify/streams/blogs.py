@@ -7,6 +7,7 @@ class Blogs(Stream):
     name = "blogs"
     data_key = "blogs"
     replication_key = "updatedAt"
+    access_scope = ["read_content" ,"read_online_store_pages"]
 
     def get_query(self):
         return """

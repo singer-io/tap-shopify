@@ -136,6 +136,7 @@ class Stream():
     date_window_size = None
     data_key = None
     results_per_page = None
+    access_scope = None
 
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)

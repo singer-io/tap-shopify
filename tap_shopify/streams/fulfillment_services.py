@@ -10,6 +10,7 @@ class FulfillmentServices(FullTableStream):
     """Stream class for Fulfillment Services in Shopify."""
     name = "fulfillment_services"
     data_key = "shop"
+    access_scope = ["read_fulfillments"]
 
     def call_api(self, query_params, query=None, data_key=None):
         """

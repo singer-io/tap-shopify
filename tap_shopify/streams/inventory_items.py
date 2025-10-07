@@ -8,6 +8,7 @@ class InventoryItems(Stream):
     name = "inventory_items"
     data_key = "inventoryItems"
     replication_key = "updatedAt"
+    access_scope = ["read_inventory"]
 
     def transform_object(self, obj, **_kwargs):
         """
