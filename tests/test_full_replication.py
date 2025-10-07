@@ -27,6 +27,16 @@ class FullReplicationTest(BaseTapTest):
             different values for the replication key
         """
         conn_id = self.create_connection()
+        # excluding streams due to lack of permssion and data
+        streams_to_exclude = {
+            "article_authors",
+            "article_tags",
+            "carrier_services",
+            "fulfillment_services",
+            "price_rules",
+            "recurring_application_charges",
+            "shipping_zones"
+        }
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
