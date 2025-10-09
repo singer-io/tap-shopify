@@ -43,7 +43,7 @@ class BaseTapTest(BaseCase):
     def get_properties(self, original: bool = True):
         """Configuration properties required for the tap."""
         return_value = {
-            'start_date': '2017-07-01T00:00:00Z',
+            'start_date': '2024-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
             'date_window_size': 180,
             # BUG: https://jira.talendforge.org/browse/TDL-13180

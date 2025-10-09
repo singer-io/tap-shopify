@@ -41,7 +41,7 @@ class FullReplicationTest(BaseTapTest):
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         full_streams = {key for key, value in self.expected_replication_method().items()
-                        if value == self.FULL}
+                        if value == self.FULL} - streams_to_exclude
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in full_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)
