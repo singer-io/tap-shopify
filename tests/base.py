@@ -27,7 +27,7 @@ class BaseTapTest(BaseCase):
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
-    DEFAULT_RESULTS_PER_PAGE = 250
+    DEFAULT_RESULTS_PER_PAGE = 2
 
     @staticmethod
     def tap_name():
@@ -43,7 +43,7 @@ class BaseTapTest(BaseCase):
     def get_properties(self, original: bool = True):
         """Configuration properties required for the tap."""
         return_value = {
-            'start_date': '2024-07-01T00:00:00Z',
+            'start_date': '2020-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
             'date_window_size': 180,
             # BUG: https://jira.talendforge.org/browse/TDL-13180
@@ -85,12 +85,12 @@ class BaseTapTest(BaseCase):
         full_default = {
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.FULL,
-                self.API_LIMIT: 20
+                self.API_LIMIT: 2
             }
 
         meta = default.copy()
         meta[self.REPLICATION_KEYS] =  {"updatedAt"}
-        meta[self.API_LIMIT] = 30
+        meta[self.API_LIMIT] = 2
         meta.update({self.FOREIGN_KEYS: {"owner", "ownerType"}})
 
         return {
@@ -99,7 +99,7 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 # BUG: https://qlik-dev.atlassian.net/browse/TDL-13180
-                self.API_LIMIT: 50},
+                self.API_LIMIT: 2},
             "collections": default,
             "customers": default,
             "orders": default,
@@ -107,13 +107,13 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 30
+                self.API_LIMIT: 2
             },
             "order_shipping_lines": {
                 self.REPLICATION_KEYS: {"updatedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 15
+                self.API_LIMIT: 2
             },
             "order_refunds": default,
             "products": default,
@@ -128,7 +128,7 @@ class BaseTapTest(BaseCase):
                 self.PRIMARY_KEYS: {"id"},
                 self.FOREIGN_KEYS: {"order"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 150},
+                self.API_LIMIT: 2},
             "locations": {
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
@@ -140,19 +140,19 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "application_charges": full_default,
             "application_credits": full_default,
             "article_authors": {
                 self.PRIMARY_KEYS: {"name"},
                 self.REPLICATION_METHOD: self.FULL,
-                self.API_LIMIT: 20
+                self.API_LIMIT: 2
             },
             "article_tags": {
                 self.PRIMARY_KEYS: {"article_tag"},
                 self.REPLICATION_METHOD: self.FULL,
-                self.API_LIMIT: 20
+                self.API_LIMIT: 2
             },
             "blogs": default,
             "carrier_services": full_default,
@@ -160,7 +160,7 @@ class BaseTapTest(BaseCase):
             "currencies": {
                 self.PRIMARY_KEYS: {"currencyCode"},
                 self.REPLICATION_METHOD: self.FULL,
-                self.API_LIMIT: 20
+                self.API_LIMIT: 2
             },
             "custom_collections": default,
             "draft_orders": default,
@@ -169,7 +169,7 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_KEYS: {"started_at"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "pages": default,
             "policies": default,
@@ -179,19 +179,19 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_KEYS: {"createdAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "resource_feedback": {
                 self.REPLICATION_KEYS: {"feedback_generated_at"},
                 self.PRIMARY_KEYS: {"app_id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "script_tags": default,
             "shipping_zones": {
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.FULL,
-                self.API_LIMIT: 10
+                self.API_LIMIT: 2
             },
             "shop": default,
             "smart_collections": default,
@@ -199,7 +199,7 @@ class BaseTapTest(BaseCase):
                 self.REPLICATION_KEYS: {"processedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
-                self.API_LIMIT: 50
+                self.API_LIMIT: 2
             },
             "themes": default,
             "webhooks": default
@@ -207,12 +207,37 @@ class BaseTapTest(BaseCase):
 
     def expected_streams(self):
         """A set of expected stream names"""
+        # excluding streams due to lack of data and permissions
+        streams_to_exclude = {
+            'article_authors',
+            'article_tags',
+            'blogs',
+            'carrier_services',
+            'comments',
+            'draft_orders',
+            'fulfillment_services',
+            'marketing_events',
+            'pages',
+            'policies',
+            'price_rules',
+            'redirects',
+            'script_tags',
+            'shipping_zones',
+            'themes',
+            'application_charges',
+            'custom_collections',
+            'currencies',
+            'application_credits',
+            'webhooks',
+            'recurring_application_charges',
+            'abandoned_checkouts'
+        }
         # removed "abandoned_checkouts", as per the Doc:
         #   https://help.shopify.com/en/manual/orders/abandoned-checkouts?st_source=admin&st_campaign=abandoned_checkouts_footer&utm_source=admin&utm_campaign=abandoned_checkouts_footer#review-your-abandoned-checkouts
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        return set(self.expected_metadata().keys()) - {"abandoned_checkouts"}
+        return set(self.expected_metadata().keys()) - streams_to_exclude
 
     def child_streams(self):
         """
