@@ -27,7 +27,7 @@ class BaseTapTest(BaseCase):
     FULL = "FULL_TABLE"
     START_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
     BOOKMARK_COMPARISON_FORMAT = "%Y-%m-%dT00:00:00+00:00"
-    DEFAULT_RESULTS_PER_PAGE = 2
+    DEFAULT_RESULTS_PER_PAGE = 1
 
     @staticmethod
     def tap_name():
