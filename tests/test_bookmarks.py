@@ -40,7 +40,18 @@ class BookmarkTest(BaseTapTest):
             'currencies',
             'application_credits',
             'webhooks',
-            'recurring_application_charges'
+            'recurring_application_charges',
+            'metafields_collections',
+            'metafields_orders',
+            'customers',
+            'smart_collections',
+            'fulfillment_orders',
+            'shop',
+            'events',
+            'orders',
+            'metafields_customers',
+            'resource_feedback',
+            'collections'
         }
 
     def max_bookmarks_by_stream(self, sync_records):
