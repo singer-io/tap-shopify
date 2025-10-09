@@ -6,7 +6,7 @@ class MarketingEvents(Stream):
     """Stream class for Marketing Events in Shopify."""
     name = "marketing_events"
     data_key = "marketingEvents"
-    replication_key = "started_at"
+    replication_key = "startedAt"
     access_scope = ["read_marketing_events"]
 
     def get_query(self):

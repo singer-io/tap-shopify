@@ -166,7 +166,7 @@ class BaseTapTest(BaseCase):
             "draft_orders": default,
             "fulfillment_services": full_default,
             "marketing_events": {
-                self.REPLICATION_KEYS: {"started_at"},
+                self.REPLICATION_KEYS: {"startedAt"},
                 self.PRIMARY_KEYS: {"id"},
                 self.REPLICATION_METHOD: self.INCREMENTAL,
                 self.API_LIMIT: 2
