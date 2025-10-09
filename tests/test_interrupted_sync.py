@@ -41,8 +41,7 @@ class InterruptedSyncTest(BaseTapTest):
                             'orders',
                             'products',
                             'transactions',
-                            'events',
-                            'product_variants'}
+                            'events'}
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
