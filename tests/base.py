@@ -225,7 +225,6 @@ class BaseTapTest(BaseCase):
             'shipping_zones',
             'themes',
             'application_charges',
-            'custom_collections',
             'currencies',
             'application_credits',
             'webhooks',

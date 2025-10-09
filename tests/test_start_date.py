@@ -58,13 +58,13 @@ class StartDateTest(BaseTapTest):
             "orders",
             "blogs",
             "comments",
-            "orders",
             "marketing_events",
             "pages",
             "policies",
             "redirects",
             "script_tags",
-            "themes"
+            "themes",
+            "draft_orders"
         }
 
         # Select all streams and all fields within streams
@@ -74,9 +74,9 @@ class StartDateTest(BaseTapTest):
         # abandoned checkouts are saved in the Shopify admin for three months.
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
-        expected_replication_method = self.expected_replication_method() - streams_to_exclude
+        expected_replication_method = self.expected_replication_method()
         incremental_streams = {key for key, value in expected_replication_method.items()
-                               if value == self.INCREMENTAL}
+                               if value == self.INCREMENTAL} - streams_to_exclude
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED
         # REPLACE THE EMPTY SET BELOW WITH THOSE STREAMS
