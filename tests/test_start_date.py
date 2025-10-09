@@ -64,7 +64,8 @@ class StartDateTest(BaseTapTest):
             "redirects",
             "script_tags",
             "themes",
-            "draft_orders"
+            "draft_orders",
+            "webhooks"
         }
 
         # Select all streams and all fields within streams
