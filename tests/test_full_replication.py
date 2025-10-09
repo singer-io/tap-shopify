@@ -35,7 +35,10 @@ class FullReplicationTest(BaseTapTest):
             "fulfillment_services",
             "price_rules",
             "recurring_application_charges",
-            "shipping_zones"
+            "shipping_zones",
+            "application_credits",
+            "application_charges",
+            "currencies"
         }
 
         # Select all streams and no fields within streams
