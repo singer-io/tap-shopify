@@ -93,19 +93,25 @@ Currently, `locations` graphql endpoint doesn't support querying on the `updated
 
 ## Required Account Access Scopes
 
-1. Carrier Service - shipping
-2. Comments, Pages, Redirect - content
-3. Custom Collection - products
-4. Smart Collection - products
-5. Draft Order - draft_orders
-6. TenderTransaction - orders
+1. CarrierServices, ShippingZones - shipping
+2. Comments, Pages, Redirect, Article, Blog - content
+3. Collections, CustomCollection , SmartCollection, ProductVariants, Products, ResourceFeedback - products
+5. DraftOrders - draft_orders
+6. TenderTransaction, Transactions, AbandonedCheckouts, OrderRefund, OrderShippingLines - orders
 7. FulfillmentService - fulfillments
 8. Marketing Events - marketing_events
 9. ResourceFeedback - resource_feedbacks
-10. Script Tags  - script_tags
+10. ScriptTags  - script_tags
 11. Themes - themes
-12. Price Rules - price_rules
-
+12. PriceRules - price_rules
+13. Customers - customers
+14. FulfillmentOrders - fulfillments_orders
+15. InventoryItems, InventoryLevels - inventory
+16. Locations - location
+17. MarketingEvents - marketing_events
+18. Policies - legal_policies
+19. PriceRules - discount
+20. Redirects - online_store_navigation
 
 ## Quick Start
 
