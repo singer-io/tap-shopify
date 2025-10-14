@@ -39,7 +39,10 @@
                 "null"
             ],
             "items": {
-                "type": "string"
+                "type": [
+                    "string",
+                    "null"
+                ]
             }
         },
         "title": {
@@ -125,7 +128,10 @@
                                             "null"
                                         ],
                                         "items": {
-                                            "type": "string"
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
                                         }
                                     }
                                 }
