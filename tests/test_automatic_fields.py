@@ -64,6 +64,8 @@ class MinimumSelectionTest(BaseTapTest):
                 stream_metadata = self.expected_metadata().get(stream, {})
                 expected_primary_keys = self.expected_primary_keys().get(stream, set())
 
+                extra_automatic_keys = {"order"} if stream == "order_refunds" else set()
+
                 # collect records
                 messages = synced_records.get(stream)
 
@@ -79,7 +81,7 @@ class MinimumSelectionTest(BaseTapTest):
                 # verify that only the automatic fields are sent to the target
                 self.assertEqual(
                     actual_fields_by_stream.get(stream, set()),
-                    expected_primary_keys |
+                    expected_primary_keys | extra_automatic_keys |
                     self.expected_replication_keys().get(stream, set()),
                     msg="The fields sent to the target are not the automatic fields"
                 )

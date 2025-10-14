@@ -103,7 +103,8 @@ def get_discovery_metadata(stream, schema):
         mdata = metadata.write(mdata, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
     for field_name in schema['properties'].keys():
-        if field_name in stream.key_properties or field_name == stream.replication_key:
+        if field_name in stream.key_properties or field_name == stream.replication_key \
+            or field_name in stream.automatic_keys:
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'automatic')
         elif field_name in UNSUPPORTED_FIELDS and not has_read_users_access():
             mdata = metadata.write(mdata, ('properties', field_name), 'inclusion', 'unsupported')
