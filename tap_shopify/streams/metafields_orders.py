@@ -8,6 +8,7 @@ class MetafieldsOrders(Metafields):
     """Stream class for metafields associated with orders."""
     name = "metafields_orders"
     data_key = "orders"
+    access_scope = ["read_orders"]
 
     def get_query(self):
         """Returns the GraphQL query for fetching order metafields."""

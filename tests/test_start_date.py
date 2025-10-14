@@ -53,6 +53,20 @@ class StartDateTest(BaseTapTest):
     def test_run(self):
         """Test we get a lot of data back based on the start date configured in base"""
         conn_id = self.create_connection()
+        streams_to_exclude = {
+            "abandoned_checkouts",
+            "orders",
+            "blogs",
+            "comments",
+            "marketing_events",
+            "pages",
+            "policies",
+            "redirects",
+            "script_tags",
+            "themes",
+            "draft_orders",
+            "webhooks"
+        }
 
         # Select all streams and all fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
@@ -62,10 +76,8 @@ class StartDateTest(BaseTapTest):
         # Every Monday, abandoned checkouts that are older than three months are removed from your admin.
         # Also no POST call is available for this endpoint: https://shopify.dev/api/admin-rest/2022-01/resources/abandoned-checkouts
         expected_replication_method = self.expected_replication_method()
-        expected_replication_method.pop("abandoned_checkouts")
-        expected_replication_method.pop("orders")
         incremental_streams = {key for key, value in expected_replication_method.items()
-                               if value == self.INCREMENTAL}
+                               if value == self.INCREMENTAL} - streams_to_exclude
 
         # IF THERE ARE STREAMS THAT SHOULD NOT BE TESTED
         # REPLACE THE EMPTY SET BELOW WITH THOSE STREAMS

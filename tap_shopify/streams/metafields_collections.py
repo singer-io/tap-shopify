@@ -9,6 +9,7 @@ class MetafieldsCollections(Metafields):
 
     name = "metafields_collections"
     data_key = "collections"
+    access_scope = ["read_products"]
 
     def get_query(self):
         """Return the GraphQL query for fetching collection metafields."""
