@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.8.0
+  * Introduced new streams [#242](https://github.com/singer-io/tap-shopify/pull/242)
+
 ### 3.7.1
   * Query and extract multiple pages of products for each collection [#227](https://github.com/singer-io/tap-shopify/pull/231)
 
