@@ -108,7 +108,10 @@
                         "null"
                     ],
                     "items": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 },
                 "publishedAt": {
