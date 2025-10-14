@@ -1,0 +1,1021 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "note2": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "email": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "taxesIncluded": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "currencyCode": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "invoiceSentAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "updatedAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "taxExempt": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "completedAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "name": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "status": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "invoiceUrl": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "tags": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "string"
+            }
+        },
+        "phone": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "totalShippingPriceSet": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "presentmentMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "shopMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "totalPriceSet": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "presentmentMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "shopMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "subtotalPriceSet": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "presentmentMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "shopMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "totalTaxSet": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "presentmentMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "shopMoney": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "amount": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "lineItems": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "edges": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "node": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "quantity": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "sku": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "requiresShipping": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "taxable": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "custom": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "isGiftCard": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "vendor": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "variant": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "title": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "weight": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "value": {
+                                                "type": [
+                                                    "number",
+                                                    "null"
+                                                ]
+                                            },
+                                            "unit": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "originalUnitPriceWithCurrency": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "amount": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "currencyCode": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "product": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "title": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "taxLines": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "title": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "source": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "rate": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "ratePercentage": {
+                                                    "type": [
+                                                        "number",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "priceSet": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "presentmentMoney": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "amount": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "currencyCode": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "shopMoney": {
+                                                            "type": [
+                                                                "object",
+                                                                "null"
+                                                            ],
+                                                            "properties": {
+                                                                "amount": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "currencyCode": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "shippingAddress": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "address1": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "address2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "city": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "company": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "country": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "countryCodeV2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "firstName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "lastName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "latitude": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "longitude": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "phone": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "province": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "provinceCode": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "zip": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "shippingLine": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "title": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "carrierIdentifier": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "custom": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "code": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "deliveryCategory": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "phone": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "discountedPriceSet": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "presentmentMoney": {
+                            "type": [
+                                "object",
+                                "null"
+                            ],
+                            "properties": {
+                                "amount": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "currencyCode": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        },
+                        "shopMoney": {
+                            "type": [
+                                "object",
+                                "null"
+                            ],
+                            "properties": {
+                                "amount": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "currencyCode": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "taxLines": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "channelLiable": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "rate": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "ratePercentage": {
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "title": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "priceSet": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "presentmentMoney": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "currencyCode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                }
+                            },
+                            "shopMoney": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "currencyCode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "customer": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "createdAt": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time"
+                },
+                "lastName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "firstName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "taxExempt": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "tags": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "defaultAddress": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "address1": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "address2": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "city": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "company": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "country": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "countryCodeV2": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "firstName": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "lastName": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "longitude": {
+                            "type": [
+                                "number",
+                                "null"
+                            ]
+                        },
+                        "name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "phone": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "province": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "provinceCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "zip": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "defaultEmailAddress": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "emailAddress": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                },
+                "lastOrder": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "name": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "currencyCode": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

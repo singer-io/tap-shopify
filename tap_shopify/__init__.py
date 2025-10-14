@@ -59,6 +59,19 @@ def has_read_users_access():
         return False
     return True
 
+def has_access_scope(stream, scopes):
+    """If the app does not have the required scope, return False"""
+    app_access_scopes = fetch_app_scopes()
+
+    if not any(access_scope in scopes for access_scope in app_access_scopes):
+        message = "The account credentials supplied do not have '{0}' access scope " \
+        "to the following stream: {1}. The data for these streams would not be " \
+        "collected due to lack of required permission.".format(", ".join(scopes), stream)
+        LOGGER.warning(message)
+        return False
+
+    return True
+
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
@@ -82,8 +95,12 @@ def get_discovery_metadata(stream, schema):
     mdata = metadata.write(mdata, (), 'table-key-properties', stream.key_properties)
     mdata = metadata.write(mdata, (), 'forced-replication-method', stream.replication_method)
 
-    if stream.replication_key:
+    if stream.replication_method=="INCREMENTAL" and stream.replication_key:
         mdata = metadata.write(mdata, (), 'valid-replication-keys', [stream.replication_key])
+
+    parent_tap_stream_id = getattr(stream, "parent", None)
+    if parent_tap_stream_id:
+        mdata = metadata.write(mdata, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
     for field_name in schema['properties'].keys():
         if field_name in stream.key_properties or field_name == stream.replication_key:
@@ -105,12 +122,15 @@ def discover():
 
     raw_schemas = load_schemas()
     streams = []
+    error_list = []
 
     for schema_name, schema in raw_schemas.items():
         if schema_name not in Context.stream_objects:
             continue
 
         stream = Context.stream_objects[schema_name]()
+        if stream.access_scope and not has_access_scope(stream.name, stream.access_scope):
+            error_list.append({stream.name: stream.access_scope})
         catalog_schema = add_synthetic_key_to_schema(schema)
 
         # create and add catalog entry
@@ -120,10 +140,24 @@ def discover():
             'schema': catalog_schema,
             'metadata': get_discovery_metadata(stream, schema),
             'key_properties': stream.key_properties,
-            'replication_key': stream.replication_key,
-            'replication_method': stream.replication_method
         }
         streams.append(catalog_entry)
+
+    if error_list:
+        total_stream = len(raw_schemas.keys())
+        missing_scopes_msg = [
+            f"{stream}: {', '.join(scopes)}"
+            for item in error_list
+            for stream, scopes in item.items()
+        ]
+        message = "The account credentials supplied do not have access to the following " \
+        "stream(s): {}. The data for these streams would not be collected due to lack of " \
+        "required permission.".format(", ".join(missing_scopes_msg))
+
+        if len(error_list) != total_stream:
+            LOGGER.warning(message)
+        else:
+            raise ShopifyAPIError(message)
 
     return {'streams': streams}
 
@@ -157,8 +191,7 @@ def sync():
         if Context.is_selected(stream["tap_stream_id"]):
             singer.write_schema(stream["tap_stream_id"],
                                 stream["schema"],
-                                stream["key_properties"],
-                                bookmark_properties=stream["replication_key"])
+                                stream["key_properties"])
             Context.counts[stream["tap_stream_id"]] = 0
 
     # Loop over streams in catalog
