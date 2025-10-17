@@ -9,6 +9,7 @@ class Locations(Stream):
     # Currently, the replication key is set to 'createdAt' because the Shopify
     # locations graphql endpoint doesn't allow the filter on 'updatedAt' field.
     replication_key = "createdAt"
+    access_scope = ["read_locations"]
 
     def get_query(self):
         """

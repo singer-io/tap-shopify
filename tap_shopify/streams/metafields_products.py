@@ -8,6 +8,7 @@ class MetafieldsProducts(Metafields):
     """Stream class for product metafields."""
     name = "metafields_products"
     data_key = "products"
+    access_scope = ["read_products"]
 
     def get_query(self):
         """Return the GraphQL query for product metafields."""

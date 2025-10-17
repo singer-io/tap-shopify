@@ -1,0 +1,415 @@
+{
+    "type": "object",
+    "properties": {
+        "alerts": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "title": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "url": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            }
+        },
+        "billingAddress": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "address1": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "address2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "city": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "company": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "country": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "countryCodeV2": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "latitude": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "longitude": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "phone": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "province": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "provinceCode": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "zip": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "countriesInShippingZones": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "countryCodes": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "includeRestOfWorld": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "checkoutApiSupported": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "contactEmail": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "createdAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "currencyCode": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "currencyFormats": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "moneyFormat": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "moneyInEmailsFormat": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "moneyWithCurrencyFormat": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "moneyWithCurrencyInEmailsFormat": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "customerAccounts": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "description": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "email": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "enabledPresentmentCurrencies": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            }
+        },
+        "fulfillmentServices": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "handle": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "serviceName": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            }
+        },
+        "ianaTimezone": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "id": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "marketingSmsConsentEnabledAtCheckout": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "myshopifyDomain": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "name": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "paymentSettings": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "supportedDigitalWallets": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            }
+        },
+        "plan": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "partnerDevelopment": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "shopifyPlus": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "publicDisplayName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "primaryDomain": {
+            "type": [
+                "object",
+                "null"
+            ],
+            "properties": {
+                "host": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "setupRequired": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "shipsToCountries": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            }
+        },
+        "taxesIncluded": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "taxShipping": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "timezoneAbbreviation": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "transactionalSmsDisabled": {
+            "type": [
+                "boolean",
+                "null"
+            ]
+        },
+        "updatedAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time"
+        },
+        "url": {
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "weightUnit": {
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    }
+}
