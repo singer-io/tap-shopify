@@ -1130,6 +1130,7 @@ class Orders(Stream):
                 return op.get("url")
 
             if current_status in ["FAILED", "CANCELED"]:
+                self.clear_bulk_operation_state()
                 raise ShopifyAPIError(f"Bulk operation failed: {op.get('errorCode')}")
 
             time.sleep(60)
