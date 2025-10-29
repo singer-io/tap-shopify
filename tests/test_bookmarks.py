@@ -18,41 +18,6 @@ class BookmarkTest(BaseTapTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_date = '2021-04-01T00:00:00Z'
-        # excluding streams which dont have data or permission
-        self.streams_to_exclude = {
-            'article_authors',
-            'article_tags',
-            'blogs',
-            'carrier_services',
-            'comments',
-            'draft_orders',
-            'fulfillment_services',
-            'marketing_events',
-            'pages',
-            'policies',
-            'price_rules',
-            'redirects',
-            'script_tags',
-            'shipping_zones',
-            'themes',
-            'application_charges',
-            'custom_collections',
-            'currencies',
-            'application_credits',
-            'webhooks',
-            'recurring_application_charges',
-            'metafields_collections',
-            'metafields_orders',
-            'customers',
-            'smart_collections',
-            'fulfillment_orders',
-            'shop',
-            'events',
-            'orders',
-            'metafields_customers',
-            'resource_feedback',
-            'collections'
-        }
 
     def max_bookmarks_by_stream(self, sync_records):
         """
@@ -112,7 +77,7 @@ class BookmarkTest(BaseTapTest):
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         incremental_streams = {key for key, value in self.expected_replication_method().items()
-                               if value == self.INCREMENTAL and key in testable_streams} - self.streams_to_exclude
+                               if value == self.INCREMENTAL and key in testable_streams}
         incremental_streams = incremental_streams
 
         # Our test data sets for Shopify do not have any abandoned_checkouts
@@ -134,7 +99,7 @@ class BookmarkTest(BaseTapTest):
         first_max_bookmarks = self.max_bookmarks_by_stream(first_sync_records)
         first_min_bookmarks = self.min_bookmarks_by_stream(first_sync_records)
         #first_sync_bookmarks = menagerie.get_state(conn_id)
-
+        
         #######################
         # Update State between Syncs
         #######################

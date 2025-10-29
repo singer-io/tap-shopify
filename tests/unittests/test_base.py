@@ -102,7 +102,7 @@ class TestStream(unittest.TestCase):
 
     @patch('shopify.GraphQL')
     @patch.object(Stream, 'get_query', return_value=mock_query())
-    @patch.object(Stream, 'transform_object', side_effect=lambda x, **_kwargs: x)
+    @patch.object(Stream, 'transform_object', side_effect=lambda x: x)
     @patch('tap_shopify.streams.base.utils.now', return_value=datetime(2025, 2, 1, 0, 0, tzinfo=tzlocal()))
     def test_get_objects(self, mock_now, mock_transform_object, mock_get_query, mock_graphql):
         """Test get_objects with pagination and bookmarking."""

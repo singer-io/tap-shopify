@@ -8,15 +8,14 @@ class InventoryItems(Stream):
     name = "inventory_items"
     data_key = "inventoryItems"
     replication_key = "updatedAt"
-    access_scope = ["read_inventory"]
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms the object by extracting country harmonized system codes.
 
         Args:
             obj (dict): The object to transform.
-            **_kwargs: Optional additional parameters.
+
         Returns:
             dict: Transformed object.
         """

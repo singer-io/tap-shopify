@@ -16,7 +16,6 @@ class Orders(Stream):
     name = "orders"
     data_key = "orders"
     replication_key = "updatedAt"
-    access_scope = ["read_orders"]
 
     def get_query(self):
         """
@@ -1186,7 +1185,7 @@ class Orders(Stream):
             current_order["lineItems"] = current_line_items
             yield current_order
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         if obj.get("lineItems", {}).get("edges"):
             obj["lineItems"] = [item["node"] for item in obj["lineItems"]["edges"]]
         return obj

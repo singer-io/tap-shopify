@@ -7,7 +7,6 @@ class Customers(Stream):
     name = "customers"
     data_key = "customers"
     replication_key = "updatedAt"
-    access_scope = ["read_customers"]
 
     def get_query(self):
         """

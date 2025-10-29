@@ -7,15 +7,14 @@ class ProductVariants(Stream):
     name = "product_variants"
     data_key = "productVariants"
     replication_key = "updatedAt"
-    access_scope = ["read_products"]
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms the object if needed.
 
         Args:
             obj (dict): The object to transform.
-            **_kwargs: Optional additional parameters.
+
         Returns:
             dict: The transformed object.
         """

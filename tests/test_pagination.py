@@ -11,7 +11,7 @@ class PaginationTest(BaseTapTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_date = '2021-04-01T00:00:00Z'
+        self.start_date = '2021-04-01T00:00:00Z'        
 
     @staticmethod
     def name():
@@ -19,7 +19,7 @@ class PaginationTest(BaseTapTest):
 
     def get_properties(self, *args, **kwargs):
         props = super().get_properties(*args, **kwargs)
-        props['results_per_page'] = '3'
+        props['results_per_page'] = '30'
         return props
 
     def test_run(self):

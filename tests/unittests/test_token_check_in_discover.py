@@ -25,25 +25,15 @@ def connection_error_raiser():
 @mock.patch('tap_shopify.discover', side_effect=tap_shopify.discover)
 @mock.patch("builtins.print")
 @mock.patch("tap_shopify.has_read_users_access")
-@mock.patch("tap_shopify.has_access_scope")
 class TestTokenInDiscoverMode(unittest.TestCase):
 
     @mock.patch('tap_shopify.initialize_shopify_client', side_effect=resource_not_found_raiser)
-    def test_resource_not_found(
-        self,
-        mocked_client,
-        mocked_access_scope,
-        mocked_access,
-        mocked_print,
-        mocked_discover,
-        mocked_args
-    ):
+    def test_resource_not_found(self, mocked_client, mocked_access, mocked_print, mocked_discover, mocked_args):
         '''
             Verify exception is raised for ResourceNotFound with proper error message and
-            test that discover mode is called
+            test that discover mode is called 
         '''
         mocked_access.return_value = True
-        mocked_access_scope.return_value = True
         mocked_args.return_value = Args()
         try:
             tap_shopify.main()
@@ -54,21 +44,12 @@ class TestTokenInDiscoverMode(unittest.TestCase):
             self.assertEqual(mocked_print.call_count, 0)
 
     @mock.patch('tap_shopify.initialize_shopify_client', side_effect=unauthorized_access_raiser)
-    def test_unauthorized_access(
-        self,
-        mocked_client,
-        mocked_access_scope,
-        mocked_access,
-        mocked_print,
-        mocked_discover,
-        mocked_args
-    ):
+    def test_unauthorized_access(self, mocked_client, mocked_access, mocked_print, mocked_discover, mocked_args):
         '''
             Verify exception is raised for UnauthorizedAccess with proper error message and
-            test that discover mode is called
+            test that discover mode is called 
         '''
         mocked_access.return_value = True
-        mocked_access_scope.return_value = True
         mocked_args.return_value = Args()
         try:
             tap_shopify.main()
@@ -79,21 +60,12 @@ class TestTokenInDiscoverMode(unittest.TestCase):
             self.assertEqual(mocked_print.call_count, 0)
 
     @mock.patch('tap_shopify.initialize_shopify_client', side_effect=connection_error_raiser)
-    def test_connection_error(
-        self,
-        mocked_client,
-        mocked_access_scope,
-        mocked_access,
-        mocked_print,
-        mocked_discover,
-        mocked_args
-    ):
+    def test_connection_error(self, mocked_client, mocked_access, mocked_print, mocked_discover, mocked_args):
         '''
             Verify exception is raised for ConnectionError with proper error message and
-            test that discover mode is called
+            test that discover mode is called 
         '''
         mocked_access.return_value = True
-        mocked_access_scope.return_value = True
         mocked_args.return_value = Args()
         try:
             tap_shopify.main()
@@ -104,21 +76,12 @@ class TestTokenInDiscoverMode(unittest.TestCase):
             self.assertEqual(mocked_print.call_count, 0)
 
     @mock.patch('tap_shopify.initialize_shopify_client')
-    def test_no_error(
-        self,
-        mocked_client,
-        mocked_access_scope,
-        mocked_access,
-        mocked_print,
-        mocked_discover,
-        mocked_args
-    ):
+    def test_no_error(self, mocked_client, mocked_access, mocked_print, mocked_discover, mocked_args):
         '''
             Verify that if no error during discover then print should be called once for
             writing catalog
         '''
         mocked_access.return_value = True
-        mocked_access_scope.return_value = True
         mocked_args.return_value = Args()
         tap_shopify.main()
         self.assertEqual(mocked_discover.call_count, 1)

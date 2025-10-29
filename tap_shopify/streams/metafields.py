@@ -21,7 +21,7 @@ class Metafields(Stream, ABC):
     def get_query(self):
         """Placeholder for get_query method."""
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms a metafield object for output.
         """

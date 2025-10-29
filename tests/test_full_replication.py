@@ -27,24 +27,11 @@ class FullReplicationTest(BaseTapTest):
             different values for the replication key
         """
         conn_id = self.create_connection()
-        # excluding streams due to lack of permssion and data
-        streams_to_exclude = {
-            "article_authors",
-            "article_tags",
-            "carrier_services",
-            "fulfillment_services",
-            "price_rules",
-            "recurring_application_charges",
-            "shipping_zones",
-            "application_credits",
-            "application_charges",
-            "currencies"
-        }
 
         # Select all streams and no fields within streams
         found_catalogs = menagerie.get_catalogs(conn_id)
         full_streams = {key for key, value in self.expected_replication_method().items()
-                        if value == self.FULL} - streams_to_exclude
+                        if value == self.FULL}
         our_catalogs = [catalog for catalog in found_catalogs if
                         catalog.get('tap_stream_id') in full_streams]
         self.select_all_streams_and_fields(conn_id, our_catalogs, select_all_fields=True)

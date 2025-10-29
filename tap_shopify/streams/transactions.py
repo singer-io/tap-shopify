@@ -11,7 +11,6 @@ class Transactions(Stream):
     data_key = "orders"
     child_data_key = "transactions"
     replication_key = "createdAt"
-    access_scope = ["read_orders"]
 
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):

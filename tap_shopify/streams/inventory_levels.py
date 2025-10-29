@@ -11,7 +11,6 @@ class InventoryLevels(Stream):
     data_key = "locations"
     child_data_key = "inventoryLevels"
     replication_key = "updatedAt"
-    access_scope = ["read_inventory"]
 
     def get_next_page_child(self, parent_id, cursor, child_query):
         """
