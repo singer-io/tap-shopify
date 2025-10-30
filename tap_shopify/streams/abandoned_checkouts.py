@@ -7,7 +7,6 @@ class AbandonedCheckouts(Stream):
     name = "abandoned_checkouts"
     data_key = "abandonedCheckouts"
     replication_key = "updatedAt"
-    access_scope = ["read_orders"]
 
     @classmethod
     def process_sub_entities(cls, data, entity_name):
@@ -27,13 +26,13 @@ class AbandonedCheckouts(Stream):
                 sub_entities.append(node)
         return sub_entities
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms the object by processing its sub-entities.
 
         Args:
             obj (dict): Object to transform.
-            **_kwargs: Optional additional parameters.
+
         Returns:
             dict: Transformed object.
         """

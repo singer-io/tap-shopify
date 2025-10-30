@@ -7,7 +7,6 @@ class Collections(Stream):
     name = "collections"
     data_key = "collections"
     replication_key = "updatedAt"
-    access_scope = ["read_products"]
 
     def transform_products(self, data):
         """
@@ -48,13 +47,13 @@ class Collections(Stream):
 
         return product_ids
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms a collection object.
 
         Args:
             obj (dict): Collection object.
-            **_kwargs: Optional additional parameters.
+
         Returns:
             dict: Transformed collection object.
         """

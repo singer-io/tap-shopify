@@ -11,12 +11,6 @@ class FulfillmentOrders(Stream):
     name = "fulfillment_orders"
     data_key = "fulfillmentOrders"
     replication_key = "updatedAt"
-    access_scope = [
-        "read_assigned_fulfillment_orders",
-        "read_merchant_managed_fulfillment_orders",
-        "read_third_party_fulfillment_orders",
-        "read_marketplace_fulfillment_orders"
-    ]
 
     # pylint: disable=W0221,fixme
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
@@ -71,12 +65,11 @@ class FulfillmentOrders(Stream):
 
         return child_records
 
-    def transform_object(self, obj, **_kwargs):
+    def transform_object(self, obj):
         """
         Transforms a collection object.
         Args:
             obj (dict): Collection object.
-            **_kwargs: Optional additional parameters.
         Returns:
             dict: Transformed collection object.
         """
