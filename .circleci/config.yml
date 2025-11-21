@@ -20,9 +20,9 @@ jobs:
       - run:
           name: 'Setup virtual env'
           command: |
-            uv venv --python 3.11 /usr/local/share/virtualenvs/tap-shopify
+            uv venv --python 3.12 /usr/local/share/virtualenvs/tap-shopify
             source /usr/local/share/virtualenvs/tap-shopify/bin/activate
-            uv pip install -U 'pip==23.3.2' 'setuptools<56.0.0'
+            uv pip install -U pip setuptools
             uv pip install .[dev]
             uv pip install --upgrade awscli
       - persist_to_workspace:
