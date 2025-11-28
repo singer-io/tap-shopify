@@ -1265,6 +1265,7 @@ class Orders(Stream):
         backoff.expo,
         BulkOperationInProgressError,
         max_tries=5,
+        factor=5,
         max_time=600,  # 10 minutes total
         jitter=backoff.full_jitter,
         giveup=lambda e: not isinstance(e, BulkOperationInProgressError),
