@@ -1,4 +1,5 @@
 from datetime import timedelta
+import backoff
 import json
 import time
 import re
@@ -8,7 +9,7 @@ import singer
 from singer import metrics, utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
-from tap_shopify.exceptions import ShopifyAPIError
+from tap_shopify.exceptions import ShopifyAPIError, BulkOperationInProgressError
 
 LOGGER = singer.get_logger()
 
@@ -1238,53 +1239,12 @@ class Orders(Stream):
             query_end = min(sync_start, date_window_end)
 
             if not existing_url:
-                with metrics.http_request_timer(self.name):
-                    query_filter = self.build_query_filter(
-                        utils.strftime(last_updated_at),
-                        utils.strftime(query_end)
-                    )
-                    query = query_template % query_filter
-                    LOGGER.info("Fetching records in date range: %s", query_filter)
-
-                    bulk_op_data = self.submit_bulk_query(query)
-
-                    user_errors = (
-                        bulk_op_data.get("data", {})
-                        .get("bulkOperationRunQuery", {})
-                        .get("userErrors")
-                    )
-                    if user_errors:
-                        for error in user_errors:
-                            message = error.get("message", "")
-                            if (
-                                "bulk query operation for this app and shop is already in progress"
-                                in message
-                            ):
-                                # Try to extract BulkOperation ID using regex
-                                match = re.search(
-                                    r"gid://shopify/BulkOperation/\d+", message
-                                )
-                                bulk_op_id = match.group(0) if match else "UNKNOWN"
-                                raise ShopifyAPIError(
-                                    "Shopify limitation: Only one bulk operation of this type "
-                                    "is allowed at a time. A bulk operation is already in progress "
-                                    f"(ID: {bulk_op_id}). To proceed, please adjust the anchor time"
-                                    " to avoid overlapping operations."
-                                )
-                        raise ShopifyAPIError("Bulk query error: {}".format(user_errors))
-
-                    bulk_operation = (
-                        bulk_op_data.get("data", {})
-                        .get("bulkOperationRunQuery", {})
-                        .get("bulkOperation")
-                    )
-                    bulk_op_id = bulk_operation.get("id") if bulk_operation else None
-                    if not bulk_op_id:
-                        raise ShopifyAPIError("Invalid bulk operation response: {}".
-                                           format(bulk_op_data))
-
-                    existing_url = self.poll_bulk_completion(current_bookmark, bulk_op_id)
-
+                existing_url = self.submit_and_poll_bulk_query(
+                    query_template,
+                    last_updated_at,
+                    query_end,
+                    current_bookmark
+                )
             if existing_url:
                 for obj in self.parse_bulk_jsonl(existing_url):
                     replication_value = utils.strptime_to_utc(obj[self.replication_key])
@@ -1300,5 +1260,68 @@ class Orders(Stream):
             max_bookmark_value = min(sync_start, current_bookmark)
             self.update_bookmark(utils.strftime(max_bookmark_value))
             existing_url = None
+
+    @backoff.on_exception(
+        backoff.expo,
+        BulkOperationInProgressError,
+        max_tries=5,
+        max_time=600,  # 10 minutes total
+        jitter=backoff.full_jitter,
+        giveup=lambda e: not isinstance(e, BulkOperationInProgressError),
+        on_backoff=lambda details: LOGGER.warning(
+            "Bulk operation already in progress (ID: %s). "
+            "Retry attempt %d after %.2f seconds. Total elapsed: %.2f seconds.",
+            getattr(details['exception'], 'bulk_op_id', 'UNKNOWN'),
+            details['tries'],
+            details['wait'],
+            details['elapsed']
+        )
+    )
+    def submit_and_poll_bulk_query(self, query_template, last_updated_at, query_end, current_bookmark):
+        """Submit bulk query and poll for completion with automatic retry on conflicts"""
+        with metrics.http_request_timer(self.name):
+            query_filter = self.build_query_filter(
+                utils.strftime(last_updated_at),
+                utils.strftime(query_end)
+            )
+            query = query_template % query_filter
+            LOGGER.info("Fetching records in date range: %s", query_filter)
+
+            bulk_op_data = self.submit_bulk_query(query)
+
+            user_errors = (
+                bulk_op_data.get("data", {})
+                .get("bulkOperationRunQuery", {})
+                .get("userErrors")
+            )
+
+            if user_errors:
+                for error in user_errors:
+                    message = error.get("message", "")
+                    if "bulk query operation for this app and shop is already in progress" in message:
+                        # Extract BulkOperation ID using regex
+                        match = re.search(r"gid://shopify/BulkOperation/\d+", message)
+                        bulk_op_id = match.group(0) if match else None
+
+                        LOGGER.info("Detected concurrent bulk operation (ID: %s)", bulk_op_id)
+                        raise BulkOperationInProgressError(
+                            f"Bulk operation already in progress: {bulk_op_id}",
+                            bulk_op_id=bulk_op_id
+                        )
+
+                # Handle other user errors
+                raise ShopifyAPIError("Bulk query error: {}".format(user_errors))
+
+            bulk_operation = (
+                bulk_op_data.get("data", {})
+                .get("bulkOperationRunQuery", {})
+                .get("bulkOperation")
+            )
+            bulk_op_id = bulk_operation.get("id") if bulk_operation else None
+            if not bulk_op_id:
+                raise ShopifyAPIError("Invalid bulk operation response: {}".format(bulk_op_data))
+
+            return self.poll_bulk_completion(current_bookmark, bulk_op_id)
+
 
 Context.stream_objects["orders"] = Orders
