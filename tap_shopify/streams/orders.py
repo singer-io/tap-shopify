@@ -1264,10 +1264,9 @@ class Orders(Stream):
     @backoff.on_exception(
         backoff.expo,
         BulkOperationInProgressError,
-        max_tries=5,
-        factor=5,
-        max_time=600,  # 10 minutes total
-        jitter=backoff.full_jitter,
+        max_tries=7,
+        factor=10,
+        jitter=None,
         giveup=lambda e: not isinstance(e, BulkOperationInProgressError),
         on_backoff=lambda details: LOGGER.warning(
             "Bulk operation already in progress (ID: %s). "
