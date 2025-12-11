@@ -1,8 +1,8 @@
 from datetime import timedelta
-import backoff
 import json
 import time
 import re
+import backoff
 import requests
 import shopify
 import singer
@@ -1277,7 +1277,8 @@ class Orders(Stream):
             details['elapsed']
         )
     )
-    def submit_and_poll_bulk_query(self, query_template, last_updated_at, query_end, current_bookmark):
+    def submit_and_poll_bulk_query(self, query_template, last_updated_at, \
+                                   query_end, current_bookmark):
         """Submit bulk query and poll for completion with automatic retry on conflicts"""
         with metrics.http_request_timer(self.name):
             query_filter = self.build_query_filter(
@@ -1298,7 +1299,8 @@ class Orders(Stream):
             if user_errors:
                 for error in user_errors:
                     message = error.get("message", "")
-                    if "bulk query operation for this app and shop is already in progress" in message:
+                    if "bulk query operation for this app and shop is already in progress" \
+                        in message:
                         # Extract BulkOperation ID using regex
                         match = re.search(r"gid://shopify/BulkOperation/\d+", message)
                         bulk_op_id = match.group(0) if match else None
