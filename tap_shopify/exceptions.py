@@ -10,8 +10,3 @@ class BulkOperationInProgressError(Exception):
     def __init__(self, message, bulk_op_id=None):
         super().__init__(message)
         self.bulk_op_id = bulk_op_id
-
-    def __str__(self):
-        # Make sure ShopifyError(exc) shows the full message
-        base_msg = super().__str__()
-        return base_msg
