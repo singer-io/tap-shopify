@@ -1254,6 +1254,7 @@ class Orders(Stream):
             else:
                 LOGGER.info("No data returned for the date range: %s to %s",
                                last_updated_at, query_end)
+                current_bookmark = max(current_bookmark, query_end)
 
             self.clear_bulk_operation_state()
             last_updated_at = query_end
