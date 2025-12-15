@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.8.0
+  * Exponential backoff for Shopify bulk operations in progress [#246](https://github.com/singer-io/tap-shopify/pull/246)
+
 ### 3.7.3
   * Cleanup state file for failed Bulk operations [#244](https://github.com/singer-io/tap-shopify/pull/244)
 
