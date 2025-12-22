@@ -1004,6 +1004,7 @@ class Orders(Stream):
                         code
                     }
                     ... on ManualDiscountApplication {
+                        __typename
                         title
                         description
                     }
@@ -1019,6 +1020,14 @@ class Orders(Stream):
         }
         }
         """
+
+    def is_discount_application(self, rec):
+        if '__typename' in rec and rec['__typename'] in ['AutomaticDiscountApplication',
+                                                       'DiscountCodeApplication',
+                                                       'ManualDiscountApplication',
+                                                       'ScriptDiscountApplication']:
+            return True
+        return False
 
     def update_bookmark(self, bookmark_value, bookmark_key=None, bulk_op_metadata=None):
         # Standard Singer bookmark
@@ -1163,6 +1172,7 @@ class Orders(Stream):
         resp = requests.get(url, stream=True, timeout=60)
         current_order = None
         current_line_items = []
+        current_discount_applications = []
 
         for line in resp.iter_lines():
             if not line:
@@ -1173,15 +1183,20 @@ class Orders(Stream):
                 continue
             # Detect line item (child) or order (parent)
             if '__parentId' in rec:
+                if self.is_discount_application(rec):
+                    # It's a discount application belonging to current_order
+                    current_discount_applications.append(rec)
                 # It's a line item belonging to current_order
                 current_line_items.append(rec)
             else:
                 if current_order:
                     current_order["lineItems"] = current_line_items
+                    current_order["discountApplications"] = current_discount_applications
                     yield current_order
                 # Start tracking new parent group
                 current_order = rec
                 current_line_items = []
+                current_discount_applications = []
         # Yield the last parent group (if exists)
         if current_order:
             current_order["lineItems"] = current_line_items
