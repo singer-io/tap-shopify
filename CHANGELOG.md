@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.8.1
+  * Update the bookmark value even if the record is not retrieved [#247](https://github.com/singer-io/tap-shopify/pull/247)
+
 ### 3.8.0
   * Exponential backoff for Shopify bulk operations in progress [#246](https://github.com/singer-io/tap-shopify/pull/246)
 

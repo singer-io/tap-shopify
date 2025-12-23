@@ -12,8 +12,7 @@ KNOWN_MISSING_FIELDS = {
         'canDelete',
         'rawMessage',
         'canEdit',
-    },
-    'orders': {'discountApplications'}
+    }
 }
 
 class AllFieldsTest(BaseTapTest):
