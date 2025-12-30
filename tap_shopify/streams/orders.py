@@ -1186,8 +1186,9 @@ class Orders(Stream):
                 if self.is_discount_application(rec):
                     # It's a discount application belonging to current_order
                     current_discount_applications.append(rec)
-                # It's a line item belonging to current_order
-                current_line_items.append(rec)
+                else:
+                    # It's a line item belonging to current_order
+                    current_line_items.append(rec)
             else:
                 if current_order:
                     current_order["lineItems"] = current_line_items
@@ -1200,6 +1201,7 @@ class Orders(Stream):
         # Yield the last parent group (if exists)
         if current_order:
             current_order["lineItems"] = current_line_items
+            current_order["discountApplications"] = current_discount_applications
             yield current_order
 
     def transform_object(self, obj):
