@@ -73,7 +73,7 @@ class FulfillmentOrders(Stream):
         query = """
                 query FulfillmentLineItems($fulfillmentId: ID!, $next_page: String) {
                 fulfillment(id: $fulfillmentId) {
-                    fulfillmentLineItems(first: 1, after: $next_page) {
+                    fulfillmentLineItems(first: 100, after: $next_page) {
                     pageInfo {
                         hasNextPage
                         endCursor
