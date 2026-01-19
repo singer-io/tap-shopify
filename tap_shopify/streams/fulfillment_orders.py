@@ -119,8 +119,7 @@ class FulfillmentOrders(Stream):
         while True:
             response = self.call_api(params, query=query, data_key="fulfillment")
             fulfillment_line_items.extend(
-                node for item in response.get("fulfillmentLineItems", {}).get("nodes", [])
-                if (node := item)
+                response.get("fulfillmentLineItems", {}).get("nodes", [])
             )
 
             page_info = response.get("fulfillmentLineItems", {}).get("pageInfo", {})
@@ -169,9 +168,9 @@ class FulfillmentOrders(Stream):
                 if item["fulfillmentLineItems"]["pageInfo"]["hasNextPage"]:
                     more_nodes = self.get_fulfillment_line_items(
                         fulfillment_id=item["id"],
-                        next_page = item["fulfillmentLineItems"]["pageInfo"]["endCursor"]
+                        next_page=item["fulfillmentLineItems"]["pageInfo"]["endCursor"]
                     )
-                    item["fulfillmentLineItems"] = more_nodes + initial_nodes
+                    item["fulfillmentLineItems"] = initial_nodes + more_nodes
                 else:
                     item["fulfillmentLineItems"] = initial_nodes
 
