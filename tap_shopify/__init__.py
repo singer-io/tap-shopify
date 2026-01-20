@@ -182,7 +182,7 @@ def sync():
             # some fields have epoch-time as date, hence transform into UTC date
             with Transformer(singer.UNIX_SECONDS_INTEGER_DATETIME_PARSING) as transformer:
                 for rec in stream.sync():
-                    extraction_time = singer.utils.now()
+d                    extraction_time = singer.utils.now()
                     record_schema = catalog_entry['schema']
                     record_metadata = metadata.to_map(catalog_entry['metadata'])
                     rec = transformer.transform({**rec, **sdc_fields},
