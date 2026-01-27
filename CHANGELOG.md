@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.9.0
+  * Add pagination support for fulfillment line items [#248](https://github.com/singer-io/tap-shopify/pull/248)
+
 ### 3.8.1
   * Update the bookmark value even if the record is not retrieved [#247](https://github.com/singer-io/tap-shopify/pull/247)
 
