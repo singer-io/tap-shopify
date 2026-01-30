@@ -232,6 +232,26 @@ def main():
                 Context.catalog = discover()
 
             sync()
+
+            today = datetime.datetime.now(datetime.timezone.utc)
+
+            # Get the last triggered date from state
+            last_triggered_raw = Context.state.get('last_exception_triggered')
+            last_triggered_date = utils.strptime_with_tz(last_triggered_raw) if last_triggered_raw else None
+
+            # Default to more than 7 days ago if never set
+            if not last_triggered_date or (today - last_triggered_date > datetime.timedelta(days=7)):
+                # Update state
+                iso_today = today.strftime('%Y-%m-%dT%H:%M:%SZ')
+                Context.state['last_exception_triggered'] = iso_today
+                singer.write_state(Context.state)
+
+                # Raise exception to trigger Stitch notification
+                raise Exception(
+                    "Version 3 of this integration has been available as of 2025-03-29. "
+                    "Stitch does not guarantee support for deprecated integrations. "
+                    "Please upgrade to version 3 to ensure continued support."
+                )
     except pyactiveresource.connection.ResourceNotFound as exc:
         raise ShopifyError(exc, 'Ensure shop is entered correctly') from exc
     except pyactiveresource.connection.UnauthorizedAccess as exc:
@@ -250,7 +270,7 @@ def main():
     except ShopifyAPIError as error:
         raise error
     except Exception as exc:
-        raise ShopifyError(exc) from exc
+        raise exc
 
 if __name__ == "__main__":
     main()
