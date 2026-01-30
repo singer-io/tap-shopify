@@ -65,6 +65,71 @@ class FulfillmentOrders(Stream):
 
         return child_records
 
+    def get_fulfillment_line_items(self, fulfillment_id, next_page=None):
+        """
+        Fetch all fulfillment line items for a given fulfillment ID.
+        """
+        fulfillment_line_items = []
+        query = """
+                query FulfillmentLineItems($fulfillmentId: ID!, $next_page: String) {
+                fulfillment(id: $fulfillmentId) {
+                    fulfillmentLineItems(first: 100, after: $next_page) {
+                    pageInfo {
+                        hasNextPage
+                        endCursor
+                    }
+                    nodes {
+                        id
+                        quantity
+                        originalTotalSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        discountedTotalSet {
+                        presentmentMoney {
+                            amount
+                            currencyCode
+                        }
+                        shopMoney {
+                            amount
+                            currencyCode
+                        }
+                        }
+                        lineItem {
+                        id
+                        }
+                    }
+                    }
+                }
+                }
+                """
+
+        params = {
+            "fulfillmentId": fulfillment_id,
+        }
+        if next_page:
+            params["next_page"] = next_page
+
+        while True:
+            response = self.call_api(params, query=query, data_key="fulfillment")
+            fulfillment_line_items.extend(
+                response.get("fulfillmentLineItems", {}).get("nodes", [])
+            )
+
+            page_info = response.get("fulfillmentLineItems", {}).get("pageInfo", {})
+            if not page_info.get("hasNextPage"):
+                break
+
+            params["next_page"] = page_info.get("endCursor")
+
+        return fulfillment_line_items
+
     def transform_object(self, obj):
         """
         Transforms a collection object.
@@ -98,8 +163,16 @@ class FulfillmentOrders(Stream):
             )
             for item in obj["fulfillments"]:
                 item["fulfillmentOrders"] = item["fulfillmentOrders"]["nodes"]
-                item["fulfillmentLineItems"] = item["fulfillmentLineItems"]["nodes"]
                 item["events"] = item["events"]["nodes"]
+                initial_nodes = item["fulfillmentLineItems"]["nodes"]
+                if item["fulfillmentLineItems"]["pageInfo"]["hasNextPage"]:
+                    more_nodes = self.get_fulfillment_line_items(
+                        fulfillment_id=item["id"],
+                        next_page=item["fulfillmentLineItems"]["pageInfo"]["endCursor"]
+                    )
+                    item["fulfillmentLineItems"] = initial_nodes + more_nodes
+                else:
+                    item["fulfillmentLineItems"] = initial_nodes
 
         if obj.get("fulfillmentOrdersForMerge"):
             obj["fulfillmentOrdersForMerge"] = obj["fulfillmentOrdersForMerge"]["nodes"]
@@ -286,6 +359,10 @@ class FulfillmentOrders(Stream):
                                             }
                                         }
                                         fulfillmentLineItems(first: 3) {
+                                            pageInfo {
+                                                    hasNextPage
+                                                    endCursor
+                                                }
                                             nodes {
                                                 id
                                                 quantity
@@ -313,7 +390,6 @@ class FulfillmentOrders(Stream):
                                                     id
                                                 }
                                             }
-                                            
                                         }
                                         legacyResourceId
                                         order {
