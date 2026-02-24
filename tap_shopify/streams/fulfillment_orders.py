@@ -434,6 +434,9 @@ class FulfillmentOrders(Stream):
                                         }
                                         location {
                                             id
+                                            address {
+                                                city
+                                            }
                                         }
                                         fulfillmentOrders(first: 250) {
                                             nodes {

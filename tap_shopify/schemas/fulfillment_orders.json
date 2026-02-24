@@ -782,6 +782,20 @@
                                     "null",
                                     "string"
                                 ]
+                            },
+                            "address": {
+                                "type": [
+                                    "null",
+                                    "object"
+                                ],
+                                "properties": {
+                                    "city": {
+                                        "type": [
+                                            "null",
+                                            "string"
+                                        ]
+                                    }
+                                }
                             }
                         }
                     },
