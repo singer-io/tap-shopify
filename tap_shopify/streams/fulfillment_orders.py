@@ -130,6 +130,73 @@ class FulfillmentOrders(Stream):
 
         return fulfillment_line_items
 
+    def get_line_items(self, fulfillment_order_id, next_page=None):
+        """
+        Fetch all line items for a given fulfillment order ID.
+        """
+        line_items = []
+        query = """
+                query FulfillmentOrderLineItems($fulfillmentOrderId: ID!, $next_page: String) {
+                fulfillmentOrder(id: $fulfillmentOrderId) {
+                    lineItems(first: 100, after: $next_page) {
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
+                    edges {
+                        node {
+                            id
+                            remainingQuantity
+                            totalQuantity
+                            sku
+                            lineItem {
+                                currentQuantity
+                                id
+                                nonFulfillableQuantity
+                                originalTotalSet {
+                                    presentmentMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                    shopMoney {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+                                quantity
+                                refundableQuantity
+                                requiresShipping
+                                title
+                                unfulfilledQuantity
+                            }
+                        }
+                    }
+                    }
+                }
+                }
+                """
+
+        params = {
+            "fulfillmentOrderId": fulfillment_order_id,
+        }
+        if next_page:
+            params["next_page"] = next_page
+
+        while True:
+            response = self.call_api(params, query=query, data_key="fulfillmentOrder")
+            line_items.extend(
+                node for item in response.get("lineItems", {}).get("edges", [])
+                if (node := item.get("node"))
+            )
+
+            page_info = response.get("lineItems", {}).get("pageInfo", {})
+            if not page_info.get("hasNextPage"):
+                break
+
+            params["next_page"] = page_info.get("endCursor")
+
+        return line_items
+
     def transform_object(self, obj):
         """
         Transforms a collection object.
@@ -176,6 +243,21 @@ class FulfillmentOrders(Stream):
 
         if obj.get("fulfillmentOrdersForMerge"):
             obj["fulfillmentOrdersForMerge"] = obj["fulfillmentOrdersForMerge"]["nodes"]
+
+        if obj.get("lineItems"):
+            initial_nodes = [
+                node for item in obj["lineItems"].get("edges", [])
+                if (node := item.get("node"))
+            ]
+            page_info = obj["lineItems"].get("pageInfo", {})
+            if page_info.get("hasNextPage"):
+                more_nodes = self.get_line_items(
+                    fulfillment_order_id=obj["id"],
+                    next_page=page_info.get("endCursor")
+                )
+                obj["lineItems"] = initial_nodes + more_nodes
+            else:
+                obj["lineItems"] = initial_nodes
 
         return obj
 
@@ -303,7 +385,7 @@ class FulfillmentOrders(Stream):
                                                 id
                                             }
                                         }
-                                        unavailableLineItems(first:250) {
+                                        unavailableLineItems(first: 250) {
                                             nodes {
                                                 id
                                             }
@@ -360,9 +442,9 @@ class FulfillmentOrders(Stream):
                                         }
                                         fulfillmentLineItems(first: 3) {
                                             pageInfo {
-                                                    hasNextPage
-                                                    endCursor
-                                                }
+                                                endCursor
+                                                hasNextPage
+                                            }
                                             nodes {
                                                 id
                                                 quantity
@@ -407,6 +489,40 @@ class FulfillmentOrders(Stream):
                                     hasNextPage
                                 }
                             }
+                            lineItems(first: 10) {
+                                edges {
+                                    node {
+                                        id
+                                        remainingQuantity
+                                        totalQuantity
+                                        sku
+                                        lineItem {
+                                            currentQuantity
+                                            id
+                                            nonFulfillableQuantity
+                                            originalTotalSet {
+                                                presentmentMoney {
+                                                    amount
+                                                    currencyCode
+                                                }
+                                                shopMoney {
+                                                    amount
+                                                    currencyCode
+                                                }
+                                            }
+                                            quantity
+                                            refundableQuantity
+                                            requiresShipping
+                                            title
+                                            unfulfilledQuantity
+                                        }
+                                    }
+                                }
+                                pageInfo {
+                                    endCursor
+                                    hasNextPage
+                                }
+                            }
                         }
                     }
                     pageInfo {
@@ -414,7 +530,7 @@ class FulfillmentOrders(Stream):
                         hasNextPage
                     }
                 }
-            }                
+            }
         """
 
 

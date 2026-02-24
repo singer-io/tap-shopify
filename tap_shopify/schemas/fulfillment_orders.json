@@ -974,6 +974,145 @@
                     }
                 }
             }
+        },
+        "lineItems": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "remainingQuantity": {
+                        "type": [
+                            "null",
+                            "integer"
+                        ]
+                    },
+                    "totalQuantity": {
+                        "type": [
+                            "null",
+                            "integer"
+                        ]
+                    },
+                    "sku": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "lineItem": {
+                        "type": [
+                            "null",
+                            "object"
+                        ],
+                        "properties": {
+                            "currentQuantity": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "id": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "nonFulfillableQuantity": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "originalTotalSet": {
+                                "type": [
+                                    "null",
+                                    "object"
+                                ],
+                                "properties": {
+                                    "presentmentMoney": {
+                                        "type": [
+                                            "null",
+                                            "object"
+                                        ],
+                                        "properties": {
+                                            "amount": {
+                                                "type": [
+                                                    "null",
+                                                    "number"
+                                                ]
+                                            },
+                                            "currencyCode": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "shopMoney": {
+                                        "type": [
+                                            "null",
+                                            "object"
+                                        ],
+                                        "properties": {
+                                            "amount": {
+                                                "type": [
+                                                    "null",
+                                                    "number"
+                                                ]
+                                            },
+                                            "currencyCode": {
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "quantity": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "refundableQuantity": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            },
+                            "requiresShipping": {
+                                "type": [
+                                    "null",
+                                    "boolean"
+                                ]
+                            },
+                            "title": {
+                                "type": [
+                                    "null",
+                                    "string"
+                                ]
+                            },
+                            "unfulfilledQuantity": {
+                                "type": [
+                                    "null",
+                                    "integer"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
