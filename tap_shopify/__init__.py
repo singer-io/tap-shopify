@@ -13,17 +13,18 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
+from tap_shopify.client import ShopifyClient
 from tap_shopify.exceptions import ShopifyError, ShopifyAPIError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["shop"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 UNSUPPORTED_FIELDS = {"author"}
 
 @shopify_error_handling
 def initialize_shopify_client():
-    api_key = Context.config['api_key']
+    api_key = Context.config.get('access_token') or Context.config.get('api_key')
     shop = Context.config['shop']
     version = '2025-07'
     session = shopify.Session(shop, version, api_key)
@@ -218,6 +219,19 @@ def main():
 
         Context.config = args.config
         Context.state = args.state
+
+        dev_mode = args.dev
+        if dev_mode:
+            LOGGER.warning("Executing Tap in Dev mode")
+
+        if 'access_token' in Context.config:
+            # Initialize the ShopifyClient for token management
+            Context.client = ShopifyClient(
+                config_path=args.config_path,
+                config=Context.config,
+                dev_mode=dev_mode
+            )
+            Context.config['access_token'] = Context.client.access_token
 
         # If discover flag was passed, run discovery mode and dump output to stdout
         if args.discover:

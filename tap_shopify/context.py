@@ -10,6 +10,7 @@ class Context():
     stream_map = {}
     stream_objects = {}
     counts = {}
+    client = None  # ShopifyClient instance for token management
 
     @classmethod
     def get_catalog_entry(cls, stream_name):
