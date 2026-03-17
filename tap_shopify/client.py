@@ -1,10 +1,10 @@
 import json
 import datetime
+import urllib
 import backoff
 import requests
 import shopify
 import singer
-import urllib
 from tap_shopify.streams.base import get_request_timeout
 from tap_shopify.exceptions import ShopifyError
 
