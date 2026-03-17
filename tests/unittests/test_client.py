@@ -1,10 +1,9 @@
 import json
 import os
-import time
 import datetime
 import tempfile
 import unittest
-from unittest.mock import patch, MagicMock, mock_open, call
+from unittest.mock import patch, MagicMock
 
 import requests
 
@@ -15,7 +14,7 @@ from tap_shopify.client import (
     SHOPIFY_API_VERSION,
 )
 from tap_shopify.context import Context
-
+from tap_shopify.exceptions import ShopifyError
 
 def _iso_future(seconds=7200):
     """Helper to generate an ISO timestamp in the future."""
@@ -313,7 +312,7 @@ class TestRefreshAccessToken(unittest.TestCase):
                 status_code=401,
                 text="Unauthorized",
             )
-            with self.assertRaises(Exception) as ctx:
+            with self.assertRaises(ShopifyError) as ctx:
                 client._refresh_access_token()
             self.assertIn("Failed to obtain access token", str(ctx.exception))
         finally:

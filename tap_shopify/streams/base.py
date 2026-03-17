@@ -76,7 +76,7 @@ def leaky_bucket_handler(details):
     LOGGER.info("Received 429 -- sleeping for %s seconds",
                 details['wait'])
 
-def retry_401_handler(details):
+def retry_401_handler(_details):
     LOGGER.info("Received 401 Unauthorized - attempting token refresh and retry")
     if Context.client.refresh_if_expired():
         Context.client.reinitialize_session()
@@ -306,7 +306,7 @@ class Stream():
                     f"Unauthorized access - token may have expired with status {http_error.code} "
                     f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
                 ) from http_error
-           
+
             raise ShopifyError(http_error,
                 f"GraphQL request failed for stream '{self.name}' with status {http_error.code} "
                 f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."

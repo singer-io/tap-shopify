@@ -1,12 +1,12 @@
-from decimal import Context
 import json
-import time
 import datetime
 import backoff
 import requests
 import shopify
 import singer
+import urllib
 from tap_shopify.streams.base import get_request_timeout
+from tap_shopify.exceptions import ShopifyError
 
 LOGGER = singer.get_logger()
 
@@ -54,7 +54,8 @@ class ShopifyClient:
         buffer = datetime.timedelta(seconds=TOKEN_EXPIRY_BUFFER_SECONDS)
 
         if now >= (expires_at - buffer):
-            LOGGER.info("Access token expiring soon (expires_at: %s). Refreshing it now.", token_expires_at)
+            LOGGER.info("Access token expiring soon (expires_at: %s). Refreshing it now.",
+                        token_expires_at)
             return False
         return True
 
@@ -79,7 +80,8 @@ class ShopifyClient:
         response = requests.post(token_url, json=payload, timeout=30)
 
         if response.status_code != 200:
-            raise Exception(
+            raise ShopifyError(
+                urllib.error.HTTPError,
                 f"Failed to obtain access token. "
                 f"Status: {response.status_code}, Response: {response.text}"
             )
@@ -130,7 +132,6 @@ class ShopifyClient:
 
     def reinitialize_session(self):
         """Reinitialize the Shopify session with the current access token."""
-        
         session = shopify.Session(self.config['shop'], SHOPIFY_API_VERSION, self.access_token)
         shopify.ShopifyResource.activate_session(session)
 
