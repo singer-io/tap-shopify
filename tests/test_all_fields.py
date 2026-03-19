@@ -32,14 +32,6 @@ class AllFieldsTest(BaseTapTest):
 
         return return_value
 
-    @staticmethod
-    def get_credentials(original_credentials: bool = True):
-        """Authentication information for the test account"""
-
-        return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
-        }
-
     def test_run(self):
         """
         Ensure running the tap with all streams and fields selected results in the

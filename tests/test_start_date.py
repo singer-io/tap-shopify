@@ -41,12 +41,6 @@ class StartDateTest(BaseTapTest):
         return return_value
 
     @staticmethod
-    def get_credentials(original_credentials: bool = True):
-        return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
-        }
-
-    @staticmethod
     def name():
         return "tap_tester_shopify_start_date_test"
 
