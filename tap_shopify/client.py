@@ -77,13 +77,31 @@ class ShopifyClient:
         }
 
         LOGGER.info("Requesting new access token via client credentials grant")
-        response = requests.post(token_url, json=payload, timeout=30)
+        response = requests.post(token_url, json=payload,
+                                 headers={"Accept": "application/json"},
+                                 timeout=30)
 
         if response.status_code != 200:
+            try:
+                error_data = response.json()
+                error_detail = (
+                    error_data.get('error_description')
+                    or error_data.get('error')
+                    or response.text
+                )
+            except Exception:
+                error_detail = response.text
+
             raise ShopifyError(
-                urllib.error.HTTPError,
+                urllib.error.HTTPError(
+                    url=token_url,
+                    code=response.status_code,
+                    msg=error_detail,
+                    hdrs={},
+                    fp=None
+                ),
                 f"Failed to obtain access token. "
-                f"Status: {response.status_code}, Response: {response.text}"
+                f"Status: {response.status_code}. {error_detail}"
             )
 
         token_data = response.json()
