@@ -31,7 +31,7 @@ class ShopifyClient:
         self.config_path = config_path
         self.config = config
         self.dev_mode = dev_mode
-        self.access_token = config['access_token']
+        self.access_token = config.get('access_token')
 
         self.refresh_if_expired()
 
@@ -48,7 +48,7 @@ class ShopifyClient:
             expires_at = datetime.datetime.fromisoformat(token_expires_at)
         except (ValueError, TypeError):
             LOGGER.warning("Invalid 'access_token_expires_at': %s. Will refresh.", token_expires_at)
-            return True
+            return False
 
         now = datetime.datetime.now(datetime.timezone.utc)
         buffer = datetime.timedelta(seconds=TOKEN_EXPIRY_BUFFER_SECONDS)

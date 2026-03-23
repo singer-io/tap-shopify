@@ -224,7 +224,7 @@ def main():
         if dev_mode:
             LOGGER.warning("Executing Tap in Dev mode")
 
-        if 'access_token' in Context.config:
+        if 'api_key' not in Context.config:
             # Initialize the ShopifyClient for token management
             Context.client = ShopifyClient(
                 config_path=args.config_path,
