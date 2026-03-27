@@ -78,7 +78,8 @@ def leaky_bucket_handler(details):
 
 def retry_401_handler(_details):
     LOGGER.info("Received 401 Unauthorized - attempting token refresh and retry")
-    if Context.client.refresh_if_expired():
+    if Context.client:
+        Context.client.refresh_token()
         Context.client.reinitialize_session()
 
 def retry_handler(details):

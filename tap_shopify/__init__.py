@@ -14,7 +14,7 @@ from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.client import ShopifyClient
-from tap_shopify.exceptions import ShopifyError, ShopifyAPIError
+from tap_shopify.exceptions import ShopifyError, ShopifyAPIError, ShopifyUnauthorizedError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 
 REQUIRED_CONFIG_KEYS = ["shop"]
@@ -34,7 +34,10 @@ def initialize_shopify_client():
     shopify.Shop.set_timeout(get_request_timeout())
 
     # Shop.current() makes a call for shop details with provided shop and api_key
-    return shopify.Shop.current().attributes
+    try:
+        return shopify.Shop.current().attributes
+    except pyactiveresource.connection.UnauthorizedAccess as exc:
+        raise ShopifyUnauthorizedError(exc, "Invalid access token") from exc
 
 # Add helper
 def fetch_app_scopes():
@@ -220,16 +223,11 @@ def main():
         Context.config = args.config
         Context.state = args.state
 
-        dev_mode = args.dev
-        if dev_mode:
-            LOGGER.warning("Executing Tap in Dev mode")
-
-        if 'api_key' not in Context.config:
-            # Initialize the ShopifyClient for token management
+        if 'client_id' in Context.config:
+            # Initialize the ShopifyClient for token management (client credentials mode)
             Context.client = ShopifyClient(
                 config_path=args.config_path,
-                config=Context.config,
-                dev_mode=dev_mode
+                config=Context.config
             )
             Context.config['access_token'] = Context.client.access_token
 

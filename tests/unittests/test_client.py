@@ -1,6 +1,5 @@
 import json
 import os
-import datetime
 import tempfile
 import unittest
 from unittest.mock import patch, MagicMock
@@ -9,24 +8,10 @@ import requests
 
 from tap_shopify.client import (
     ShopifyClient,
-    TOKEN_VALIDITY_SECONDS,
-    TOKEN_EXPIRY_BUFFER_SECONDS,
     SHOPIFY_API_VERSION,
 )
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyError
-
-def _iso_future(seconds=7200):
-    """Helper to generate an ISO timestamp in the future."""
-    return (datetime.datetime.now(datetime.timezone.utc)
-            + datetime.timedelta(seconds=seconds)).isoformat()
-
-
-def _iso_past(seconds=100):
-    """Helper to generate an ISO timestamp in the past."""
-    return (datetime.datetime.now(datetime.timezone.utc)
-            - datetime.timedelta(seconds=seconds)).isoformat()
-
 
 class TestShopifyClientInit(unittest.TestCase):
     """Tests for ShopifyClient initialization."""
@@ -37,7 +22,6 @@ class TestShopifyClientInit(unittest.TestCase):
             "client_id": "cid",
             "client_secret": "csecret",
             "access_token": "existing_token",
-            "token_expires_at": _iso_future(7200),
             "start_date": "2025-01-01T00:00:00Z",
         }
         base.update(overrides)
@@ -50,156 +34,36 @@ class TestShopifyClientInit(unittest.TestCase):
         tmp.close()
         return tmp.name
 
-    # -------------------------------------------------------------------------
-    # Dev mode tests
-    # -------------------------------------------------------------------------
-    def test_dev_mode_with_access_token(self):
-        """Dev mode should use existing access_token and not refresh."""
-        config = self._make_config()
+    @patch('tap_shopify.client.requests.post')
+    def test_init_uses_existing_token_without_refresh(self, mock_post):
+        """When an access_token is already in config, no refresh should be triggered."""
+        config = self._make_config()  # has access_token='existing_token'
         path = self._write_config_file(config)
         try:
-            client = ShopifyClient(path, config, dev_mode=True)
-            self.assertTrue(client.dev_mode)
+            client = ShopifyClient(path, config)
+            mock_post.assert_not_called()
             self.assertEqual(client.access_token, "existing_token")
         finally:
             os.unlink(path)
 
-    def test_dev_mode_without_access_token_raises(self):
-        """Dev mode without access_token should raise KeyError."""
+    @patch('tap_shopify.client.requests.post')
+    def test_init_fetches_token_when_missing(self, mock_post):
+        """First run: no access_token in config, should fetch one via client credentials."""
         config = self._make_config()
         del config['access_token']
         path = self._write_config_file(config)
         try:
-            with self.assertRaises(KeyError):
-                ShopifyClient(path, config, dev_mode=True)
-        finally:
-            os.unlink(path)
-
-    # -------------------------------------------------------------------------
-    # Non-dev mode — valid token
-    # -------------------------------------------------------------------------
-    def test_init_with_valid_token(self):
-        """If token is not expired, no refresh should occur."""
-        config = self._make_config(token_expires_at=_iso_future(7200))
-        path = self._write_config_file(config)
-        try:
-            with patch.object(ShopifyClient, '_refresh_access_token') as mock_refresh:
-                client = ShopifyClient(path, config, dev_mode=False)
-                mock_refresh.assert_not_called()
-                self.assertEqual(client.access_token, "existing_token")
-        finally:
-            os.unlink(path)
-
-    # -------------------------------------------------------------------------
-    # Non-dev mode — expired token triggers refresh
-    # -------------------------------------------------------------------------
-    @patch('tap_shopify.client.requests.post')
-    def test_init_with_expired_token_triggers_refresh(self, mock_post):
-        """Expired token should trigger a token refresh."""
-        config = self._make_config(token_expires_at=_iso_past(100))
-        path = self._write_config_file(config)
-        try:
             mock_post.return_value = MagicMock(
                 status_code=200,
-                json=MagicMock(return_value={
-                    "access_token": "new_token",
-                    "expires_in": TOKEN_VALIDITY_SECONDS,
-                }),
+                json=MagicMock(return_value={"access_token": "fetched_token"}),
             )
-            client = ShopifyClient(path, config, dev_mode=False)
+            client = ShopifyClient(path, config)
             mock_post.assert_called_once()
-            self.assertEqual(client.access_token, "new_token")
-            self.assertEqual(config['access_token'], "new_token")
+            self.assertEqual(client.access_token, "fetched_token")
+            self.assertEqual(config['access_token'], "fetched_token")
         finally:
             os.unlink(path)
 
-    @patch('tap_shopify.client.requests.post')
-    def test_init_calls_refresh_if_expired(self, mock_post):
-        """__init__ should call refresh_if_expired on construction."""
-        config = self._make_config(token_expires_at=_iso_past(100))
-        path = self._write_config_file(config)
-        try:
-            mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={
-                    "access_token": "refreshed",
-                    "expires_in": TOKEN_VALIDITY_SECONDS,
-                }),
-            )
-            with patch.object(ShopifyClient, 'refresh_if_expired', return_value=True) as mock_rfe:
-                client = ShopifyClient(path, config, dev_mode=False)
-                mock_rfe.assert_called_once()
-        finally:
-            os.unlink(path)
-
-
-class TestIsTokenValid(unittest.TestCase):
-    """Tests for ShopifyClient._is_token_valid."""
-
-    def _create_client_skip_init(self, config):
-        """Create a client instance bypassing __init__ to test individual methods."""
-        client = object.__new__(ShopifyClient)
-        client.config = config
-        client.dev_mode = False
-        client.config_path = "/tmp/dummy.json"
-        return client
-
-    def test_valid_token(self):
-        """Token expiring well in the future should be valid."""
-        config = {
-            "access_token": "tok",
-            "token_expires_at": _iso_future(7200),
-        }
-        client = self._create_client_skip_init(config)
-        self.assertTrue(client._is_token_valid())
-
-    def test_expired_token(self):
-        """Token that expired in the past should be invalid."""
-        config = {
-            "access_token": "tok",
-            "token_expires_at": _iso_past(100),
-        }
-        client = self._create_client_skip_init(config)
-        self.assertFalse(client._is_token_valid())
-
-    def test_token_within_buffer_is_invalid(self):
-        """Token expiring within the buffer window should be treated as invalid."""
-        config = {
-            "access_token": "tok",
-            "token_expires_at": _iso_future(TOKEN_EXPIRY_BUFFER_SECONDS - 10),
-        }
-        client = self._create_client_skip_init(config)
-        self.assertFalse(client._is_token_valid())
-
-    def test_token_outside_buffer_is_valid(self):
-        """Token expiring well beyond the buffer should be valid."""
-        config = {
-            "access_token": "tok",
-            "token_expires_at": _iso_future(TOKEN_EXPIRY_BUFFER_SECONDS + 100),
-        }
-        client = self._create_client_skip_init(config)
-        self.assertTrue(client._is_token_valid())
-
-    def test_missing_token_expires_at_returns_false(self):
-        """Missing token_expires_at should return False (triggers refresh)."""
-        config = {"access_token": "tok"}
-        client = self._create_client_skip_init(config)
-        self.assertFalse(client._is_token_valid())
-
-    def test_invalid_format_returns_true(self):
-        """Invalid token_expires_at format should return True (logs warning, no refresh)."""
-        config = {
-            "access_token": "tok",
-            "token_expires_at": "not-a-valid-date",
-        }
-        client = self._create_client_skip_init(config)
-        self.assertTrue(client._is_token_valid())
-
-    def test_none_token_expires_at_returns_false(self):
-        """Explicit None token_expires_at should return False."""
-        config = {"access_token": "tok", "token_expires_at": None}
-        client = self._create_client_skip_init(config)
-        self.assertFalse(client._is_token_valid())
 
 
 class TestRefreshAccessToken(unittest.TestCase):
@@ -209,7 +73,6 @@ class TestRefreshAccessToken(unittest.TestCase):
         client = object.__new__(ShopifyClient)
         client.config = config
         client.config_path = config_path
-        client.dev_mode = False
         return client
 
     @patch('tap_shopify.client.requests.post')
@@ -237,10 +100,6 @@ class TestRefreshAccessToken(unittest.TestCase):
 
             self.assertEqual(client.access_token, "refreshed_token")
             self.assertEqual(config['access_token'], "refreshed_token")
-            self.assertIn('token_expires_at', config)
-            # token_expires_at is now an ISO string; verify it parses to a future datetime
-            expires_at = datetime.datetime.fromisoformat(config['token_expires_at'])
-            self.assertGreater(expires_at, datetime.datetime.now(datetime.timezone.utc))
 
             # Verify the correct endpoint was called (shop + .myshopify.com)
             mock_post.assert_called_once_with(
@@ -250,47 +109,14 @@ class TestRefreshAccessToken(unittest.TestCase):
                     "client_secret": "csecret",
                     "grant_type": "client_credentials",
                 },
+                headers={"Accept": "application/json"},
                 timeout=30,
             )
 
-            # Verify config file was updated
+            # Verify config file was updated (access_token only, no expiry fields)
             with open(tmp.name, 'r') as f:
                 saved = json.load(f)
             self.assertEqual(saved['access_token'], "refreshed_token")
-            self.assertIn('token_expires_at', saved)
-        finally:
-            os.unlink(tmp.name)
-
-    @patch('tap_shopify.client.requests.post')
-    def test_refresh_uses_default_expiry_when_missing(self, mock_post):
-        """When expires_in is missing from response, use default 24h."""
-        config = {
-            "shop": "test-shop",
-            "client_id": "cid",
-            "client_secret": "csecret",
-        }
-        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-        json.dump(config, tmp)
-        tmp.close()
-
-        try:
-            client = self._create_client_skip_init(config, tmp.name)
-            mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={
-                    "access_token": "new_tok",
-                    # no expires_in
-                }),
-            )
-            before = datetime.datetime.now(datetime.timezone.utc)
-            client._refresh_access_token()
-            after = datetime.datetime.now(datetime.timezone.utc)
-
-            expires_at = datetime.datetime.fromisoformat(config['token_expires_at'])
-            expected_min = before + datetime.timedelta(seconds=TOKEN_VALIDITY_SECONDS)
-            expected_max = after + datetime.timedelta(seconds=TOKEN_VALIDITY_SECONDS)
-            self.assertGreaterEqual(expires_at, expected_min)
-            self.assertLessEqual(expires_at, expected_max)
         finally:
             os.unlink(tmp.name)
 
@@ -318,43 +144,12 @@ class TestRefreshAccessToken(unittest.TestCase):
         finally:
             os.unlink(tmp.name)
 
-    @patch('tap_shopify.client.requests.post')
-    def test_refresh_stores_iso_format_expiry(self, mock_post):
-        """token_expires_at should be stored as an ISO 8601 string."""
-        config = {
-            "shop": "test-shop",
-            "client_id": "cid",
-            "client_secret": "csecret",
-        }
-        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-        json.dump(config, tmp)
-        tmp.close()
-
-        try:
-            client = self._create_client_skip_init(config, tmp.name)
-            mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={
-                    "access_token": "tok",
-                    "expires_in": 3600,
-                }),
-            )
-            client._refresh_access_token()
-
-            # Verify it's a string, not a float
-            self.assertIsInstance(config['token_expires_at'], str)
-            # Verify it's valid ISO format
-            parsed = datetime.datetime.fromisoformat(config['token_expires_at'])
-            self.assertIsNotNone(parsed.tzinfo)
-        finally:
-            os.unlink(tmp.name)
-
 
 class TestWriteConfig(unittest.TestCase):
     """Tests for ShopifyClient._write_config."""
 
     def test_write_config_updates_file(self):
-        """Config file should be updated with new access_token and token_expires_at."""
+        """Config file should be updated with new access_token (token_expires_at not persisted)."""
         original = {
             "shop": "test-shop",
             "client_id": "cid",
@@ -365,17 +160,14 @@ class TestWriteConfig(unittest.TestCase):
         json.dump(original, tmp)
         tmp.close()
 
-        expires_iso = _iso_future(86400)
         try:
             config = {
                 **original,
                 "access_token": "new_token",
-                "token_expires_at": expires_iso,
             }
             client = object.__new__(ShopifyClient)
             client.config = config
             client.config_path = tmp.name
-            client.dev_mode = False
 
             client._write_config()
 
@@ -383,7 +175,7 @@ class TestWriteConfig(unittest.TestCase):
                 saved = json.load(f)
 
             self.assertEqual(saved['access_token'], "new_token")
-            self.assertEqual(saved['token_expires_at'], expires_iso)
+            self.assertNotIn('token_expires_at', saved)
             # Original keys preserved
             self.assertEqual(saved['shop'], "test-shop")
             self.assertEqual(saved['client_id'], "cid")
@@ -406,12 +198,10 @@ class TestWriteConfig(unittest.TestCase):
             config = {
                 **original,
                 "access_token": "tok",
-                "token_expires_at": _iso_future(86400),
             }
             client = object.__new__(ShopifyClient)
             client.config = config
             client.config_path = tmp.name
-            client.dev_mode = False
 
             client._write_config()
 
@@ -422,66 +212,18 @@ class TestWriteConfig(unittest.TestCase):
             os.unlink(tmp.name)
 
 
-class TestRefreshIfExpired(unittest.TestCase):
-    """Tests for ShopifyClient.refresh_if_expired."""
 
-    def _create_client_skip_init(self, config, dev_mode=False):
+class TestRefreshToken(unittest.TestCase):
+    """Tests for ShopifyClient.refresh_token (reactive 401 refresh)."""
+
+    @patch.object(ShopifyClient, '_refresh_access_token')
+    def test_refresh_token_calls_underlying_refresh(self, mock_refresh):
+        """refresh_token should always call _refresh_access_token."""
         client = object.__new__(ShopifyClient)
-        client.config = config
+        client.config = {"shop": "test-shop", "access_token": "tok"}
         client.config_path = "/tmp/dummy.json"
-        client.dev_mode = dev_mode
-        return client
-
-    def test_dev_mode_returns_false(self):
-        """Dev mode should never refresh."""
-        client = self._create_client_skip_init(
-            {"access_token": "tok", "token_expires_at": _iso_past(100)},
-            dev_mode=True,
-        )
-        result = client.refresh_if_expired()
-        self.assertFalse(result)
-
-    @patch.object(ShopifyClient, '_refresh_access_token')
-    def test_expired_token_triggers_refresh(self, mock_refresh):
-        """Expired token should trigger refresh and return True."""
-        client = self._create_client_skip_init({
-            "access_token": "tok",
-            "token_expires_at": _iso_past(100),
-        })
-        result = client.refresh_if_expired()
-        self.assertTrue(result)
-        mock_refresh.assert_called_once()
-
-    @patch.object(ShopifyClient, '_refresh_access_token')
-    def test_valid_token_does_not_refresh(self, mock_refresh):
-        """Valid token should not trigger refresh and return False."""
-        client = self._create_client_skip_init({
-            "access_token": "tok",
-            "token_expires_at": _iso_future(7200),
-        })
-        result = client.refresh_if_expired()
-        self.assertFalse(result)
-        mock_refresh.assert_not_called()
-
-    @patch.object(ShopifyClient, '_refresh_access_token')
-    def test_token_in_buffer_triggers_refresh(self, mock_refresh):
-        """Token within the expiry buffer should trigger refresh."""
-        client = self._create_client_skip_init({
-            "access_token": "tok",
-            "token_expires_at": _iso_future(TOKEN_EXPIRY_BUFFER_SECONDS - 10),
-        })
-        result = client.refresh_if_expired()
-        self.assertTrue(result)
-        mock_refresh.assert_called_once()
-
-    @patch.object(ShopifyClient, '_refresh_access_token')
-    def test_missing_token_expires_at_triggers_refresh(self, mock_refresh):
-        """Missing token_expires_at should trigger refresh."""
-        client = self._create_client_skip_init({
-            "access_token": "tok",
-        })
-        result = client.refresh_if_expired()
-        self.assertTrue(result)
+        client.access_token = "tok"
+        client.refresh_token()
         mock_refresh.assert_called_once()
 
 
@@ -496,7 +238,6 @@ class TestReinitializeSession(unittest.TestCase):
         client = object.__new__(ShopifyClient)
         client.config = {"shop": "test-shop"}
         client.access_token = "my_token"
-        client.dev_mode = False
         client.config_path = "/tmp/dummy.json"
 
         mock_session_instance = MagicMock()
@@ -523,44 +264,24 @@ class TestRetry401Handler(unittest.TestCase):
         Context.client = self.original_client
 
     def test_retry_401_handler_refreshes_and_reinitializes(self):
-        """retry_401_handler should call refresh_if_expired and reinitialize_session when refresh occurs."""
+        """retry_401_handler should call refresh_token and reinitialize_session."""
         from tap_shopify.streams.base import retry_401_handler
 
         mock_client = MagicMock()
-        mock_client.refresh_if_expired.return_value = True
         Context.client = mock_client
 
         retry_401_handler({'wait': 1, 'tries': 1})
 
-        mock_client.refresh_if_expired.assert_called_once()
+        mock_client.refresh_token.assert_called_once()
         mock_client.reinitialize_session.assert_called_once()
 
-    def test_retry_401_handler_no_reinitialize_when_not_refreshed(self):
-        """retry_401_handler should not reinitialize if refresh_if_expired returns False."""
+    def test_retry_401_handler_no_client(self):
+        """retry_401_handler should do nothing if Context.client is None."""
         from tap_shopify.streams.base import retry_401_handler
 
-        mock_client = MagicMock()
-        mock_client.refresh_if_expired.return_value = False
-        Context.client = mock_client
-
+        Context.client = None
+        # Should not raise
         retry_401_handler({'wait': 1, 'tries': 1})
-
-        mock_client.refresh_if_expired.assert_called_once()
-        mock_client.reinitialize_session.assert_not_called()
-
-    def test_retry_401_handler_dev_mode_does_not_refresh(self):
-        """In dev mode, refresh_if_expired returns False so no reinitialize should happen."""
-        from tap_shopify.streams.base import retry_401_handler
-
-        mock_client = MagicMock()
-        # In dev mode, refresh_if_expired returns False
-        mock_client.refresh_if_expired.return_value = False
-        Context.client = mock_client
-
-        retry_401_handler({'wait': 1, 'tries': 1})
-
-        mock_client.refresh_if_expired.assert_called_once()
-        mock_client.reinitialize_session.assert_not_called()
 
 
 class TestCallApiWithTokenRefresh(unittest.TestCase):
@@ -654,7 +375,7 @@ class TestCallApiWithTokenRefresh(unittest.TestCase):
 
         # Must provide a mock client so the retry_401_handler doesn't blow up
         mock_client = MagicMock()
-        mock_client.refresh_if_expired.return_value = False
+        mock_client.refresh_token.return_value = False
         Context.client = mock_client
 
         http_error = urllib.error.HTTPError(
@@ -672,86 +393,8 @@ class TestCallApiWithTokenRefresh(unittest.TestCase):
             stream.call_api({"query": "test", "first": 10})
 
 
-class TestMainDevMode(unittest.TestCase):
-    """Tests for dev mode flag in main()."""
-
-    @patch('tap_shopify.ShopifyClient')
-    @patch('tap_shopify.discover')
-    @patch('singer.utils.parse_args')
-    def test_main_passes_dev_mode_to_client(self, mock_parse_args, mock_discover, mock_client_cls):
-        """main() should pass dev mode flag to ShopifyClient."""
-        from tap_shopify import main
-
-        mock_args = MagicMock()
-        mock_args.config = {
-            "shop": "test-shop",
-            "client_id": "cid",
-            "client_secret": "csecret",
-            "access_token": "tok",
-            "token_expires_at": _iso_future(7200),
-            "start_date": "2025-01-01T00:00:00Z",
-        }
-        mock_args.state = {}
-        mock_args.dev = True
-        mock_args.discover = True
-        mock_args.config_path = "/tmp/config.json"
-        mock_args.catalog = None
-        mock_parse_args.return_value = mock_args
-
-        mock_client_instance = MagicMock()
-        mock_client_instance.access_token = "tok"
-        mock_client_cls.return_value = mock_client_instance
-        mock_discover.return_value = {"streams": []}
-
-        try:
-            main()
-        except SystemExit:
-            pass
-
-        mock_client_cls.assert_called_once_with(
-            config_path="/tmp/config.json",
-            config=mock_args.config,
-            dev_mode=True,
-        )
-
-    @patch('tap_shopify.ShopifyClient')
-    @patch('tap_shopify.discover')
-    @patch('singer.utils.parse_args')
-    def test_main_no_dev_mode(self, mock_parse_args, mock_discover, mock_client_cls):
-        """main() should pass dev_mode=False when --dev is not set."""
-        from tap_shopify import main
-
-        mock_args = MagicMock()
-        mock_args.config = {
-            "shop": "test-shop",
-            "client_id": "cid",
-            "client_secret": "csecret",
-            "access_token": "tok",
-            "token_expires_at": _iso_future(7200),
-            "start_date": "2025-01-01T00:00:00Z",
-        }
-        mock_args.state = {}
-        mock_args.dev = False
-        mock_args.discover = True
-        mock_args.config_path = "/tmp/config.json"
-        mock_args.catalog = None
-        mock_parse_args.return_value = mock_args
-
-        mock_client_instance = MagicMock()
-        mock_client_instance.access_token = "tok"
-        mock_client_cls.return_value = mock_client_instance
-        mock_discover.return_value = {"streams": []}
-
-        try:
-            main()
-        except SystemExit:
-            pass
-
-        mock_client_cls.assert_called_once_with(
-            config_path="/tmp/config.json",
-            config=mock_args.config,
-            dev_mode=False,
-        )
+class TestMainClient(unittest.TestCase):
+    """Tests for ShopifyClient wiring in main()."""
 
     @patch('tap_shopify.ShopifyClient')
     @patch('tap_shopify.discover')
@@ -766,7 +409,6 @@ class TestMainDevMode(unittest.TestCase):
             "client_id": "cid",
             "client_secret": "csecret",
             "access_token": "tok",
-            "token_expires_at": _iso_future(7200),
             "start_date": "2025-01-01T00:00:00Z",
         }
         mock_args.state = {}
@@ -790,8 +432,8 @@ class TestMainDevMode(unittest.TestCase):
 
     @patch('tap_shopify.discover')
     @patch('singer.utils.parse_args')
-    def test_main_no_client_when_no_access_token(self, mock_parse_args, mock_discover):
-        """main() should NOT create ShopifyClient when access_token is not in config."""
+    def test_main_no_client_when_api_key_present(self, mock_parse_args, mock_discover):
+        """main() should NOT create ShopifyClient when api_key is in config (legacy auth)."""
         from tap_shopify import main
 
         mock_args = MagicMock()
@@ -801,7 +443,6 @@ class TestMainDevMode(unittest.TestCase):
             "start_date": "2025-01-01T00:00:00Z",
         }
         mock_args.state = {}
-        mock_args.dev = False
         mock_args.discover = True
         mock_args.config_path = "/tmp/config.json"
         mock_args.catalog = None
@@ -832,7 +473,6 @@ class TestMainDevMode(unittest.TestCase):
             "client_id": "cid",
             "client_secret": "csecret",
             "access_token": "old_tok",
-            "token_expires_at": _iso_future(7200),
             "start_date": "2025-01-01T00:00:00Z",
         }
         mock_args.state = {}
@@ -874,7 +514,6 @@ class TestBackoffOnRefresh(unittest.TestCase):
             client = object.__new__(ShopifyClient)
             client.config = config
             client.config_path = tmp.name
-            client.dev_mode = False
 
             # Fail twice then succeed
             mock_post.side_effect = [
@@ -890,7 +529,7 @@ class TestBackoffOnRefresh(unittest.TestCase):
             ]
             client._refresh_access_token()
             self.assertEqual(client.access_token, "recovered_token")
-            self.assertEqual(mock_post.call_count, 3)
+            self.assertEqual(mock_post.call_count, 3)  # backoff retried twice then succeeded
         finally:
             os.unlink(tmp.name)
 
@@ -910,7 +549,6 @@ class TestBackoffOnRefresh(unittest.TestCase):
             client = object.__new__(ShopifyClient)
             client.config = config
             client.config_path = tmp.name
-            client.dev_mode = False
 
             mock_post.side_effect = requests.exceptions.ConnectionError("Connection refused")
 
