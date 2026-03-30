@@ -235,10 +235,20 @@ class Stream():
 
         class FieldRemover(Visitor):
             def enter_selection_set(self, node, _key, _parent, _path, _ancestors):
+                # Only remove unselected fields at the top-level stream node
+                # (stream_name → edges → node → [top-level fields]).
+                field_ancestor_names = [
+                    a.name.value
+                    for a in _ancestors
+                    if isinstance(a, FieldNode)
+                ]
+
+                at_top_level_node = len(field_ancestor_names) == 3
+
                 new_selections = []
                 for selection in node.selections:
                     if isinstance(selection, FieldNode):
-                        if selection.name.value in fields_to_remove:
+                        if at_top_level_node and selection.name.value in fields_to_remove:
                             continue
                         # Check field arguments for variable usage
                         for arg in selection.arguments or []:
