@@ -236,7 +236,8 @@ class Stream():
         class FieldRemover(Visitor):
             def enter_selection_set(self, node, _key, _parent, _path, _ancestors):
                 # Only prune fields at the top-level record node (stream → edges → node).
-                # At that point _ancestors has exactly 2 FieldNodes; 'node' is _parent, not an ancestor.
+                # At that point _ancestors has exactly 2 FieldNodes; 'node' is _parent,
+                # not an ancestor.
                 field_ancestor_names = [
                     a.name.value
                     for a in _ancestors
