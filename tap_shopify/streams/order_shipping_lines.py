@@ -12,6 +12,11 @@ class OrderShippingLines(Stream):
     child_data_key = "shippingLines"
     replication_key = "updatedAt"
 
+    def _get_record_node_path(self):
+        # Shipping-line records live at
+        # orders.edges.node.shippingLines.edges.node { FIELDS }.
+        return ("orders", "edges", "node", "shippingLines", "edges", "node")
+
     # pylint: disable=too-many-locals
     def get_objects(self):
         """

@@ -17,6 +17,11 @@ class Metafields(Stream, ABC):
     child_data_key = "metafields"
     replication_key = "updatedAt"
 
+    def _get_record_node_path(self):
+        # Metafield records live at {data_key}.edges.node.metafields.edges.node.
+        # data_key is defined by each concrete subclass.
+        return (self.data_key, "edges", "node", "metafields", "edges", "node")
+
     @abstractmethod
     def get_query(self):
         """Placeholder for get_query method."""

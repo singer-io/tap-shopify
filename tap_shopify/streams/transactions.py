@@ -12,6 +12,11 @@ class Transactions(Stream):
     child_data_key = "transactions"
     replication_key = "createdAt"
 
+    def _get_record_node_path(self):
+        # Transaction records live at orders.edges.node.transactions { FIELDS },
+        # not at the standard edges.node depth.
+        return ("orders", "edges", "node", "transactions")
+
     # pylint: disable=W0221
     def get_query_params(self, updated_at_min, updated_at_max, cursor=None):
         """
