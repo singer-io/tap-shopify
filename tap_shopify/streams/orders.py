@@ -1052,7 +1052,10 @@ class Orders(Stream):
         url = f"https://{Context.config.get('shop')}.myshopify.com/admin/api/2025-07/graphql.json"
         headers = {
             "Content-Type": "application/json",
-            "X-Shopify-Access-Token": Context.config.get("access_token") or Context.config.get("api_key"),
+            "X-Shopify-Access-Token": (
+                Context.config.get("access_token")
+                or Context.config.get("api_key")
+            ),
         }
         operation = {
             "query": """

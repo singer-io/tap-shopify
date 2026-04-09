@@ -29,6 +29,7 @@ class ShopifyClient:
             self._refresh_access_token()
 
 
+    # pylint: disable=broad-exception-caught
     @backoff.on_exception(backoff.expo,
                           requests.exceptions.RequestException,
                           max_tries=3,
