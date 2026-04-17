@@ -90,6 +90,7 @@ class InterruptedSyncTest(BaseTapTest):
                      {'currently_sync_stream': currently_syncing_stream,
                       'customers': first_sync_state.get('bookmarks').get('customers'),
                       'orders': first_sync_state.get('bookmarks').get('orders'),
+                      'collections': first_sync_state.get('bookmarks').get('collections'),
                       'products': first_sync_state.get('bookmarks').get('products'),
                       'transactions': first_sync_state.get('bookmarks').get('transactions')
                       }}
