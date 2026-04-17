@@ -39,7 +39,6 @@ class InterruptedSyncTest(BaseTapTest):
         expected_streams = {'customers',
                             'collections',
                             'orders',
-                            'events',
                             'products',
                             'transactions'}
 
@@ -92,7 +91,6 @@ class InterruptedSyncTest(BaseTapTest):
                       'customers': first_sync_state.get('bookmarks').get('customers'),
                       'orders': first_sync_state.get('bookmarks').get('orders'),
                       'collections': first_sync_state.get('bookmarks').get('collections'),
-                      'events': first_sync_state.get('bookmarks').get('events'),
                       'products': first_sync_state.get('bookmarks').get('products'),
                       'transactions': first_sync_state.get('bookmarks').get('transactions')
                       }}
