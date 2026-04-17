@@ -38,9 +38,7 @@ class InterruptedSyncTest(BaseTapTest):
 
         expected_streams = {'customers',
                             'collections',
-                            #'orders',
-                            # TODO: SAC-30638 - add orders stream back to the test after
-                            # fixing the issue with orders stream bookmark value
+                            'orders',
                             'events',
                             'products',
                             'transactions'}
@@ -92,9 +90,7 @@ class InterruptedSyncTest(BaseTapTest):
         base_state = {'bookmarks':
                      {'currently_sync_stream': currently_syncing_stream,
                       'customers': first_sync_state.get('bookmarks').get('customers'),
-                      #'orders': first_sync_state.get('bookmarks').get('orders'),
-                      # TODO: SAC-30638 - add orders stream back to the test after 
-                      # fixing the issue with orders stream bookmark value
+                      'orders': first_sync_state.get('bookmarks').get('orders'),
                       'collections': first_sync_state.get('bookmarks').get('collections'),
                       'events': first_sync_state.get('bookmarks').get('events'),
                       'products': first_sync_state.get('bookmarks').get('products'),
