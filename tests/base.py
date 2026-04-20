@@ -60,7 +60,7 @@ class BaseTapTest(BaseCase):
         return return_value
 
     @staticmethod
-    def get_credentials():
+    def get_credentials(original_credentials=True):
         """Authentication information for the test account"""
 
         return {
