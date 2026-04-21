@@ -38,16 +38,15 @@ class BaseTapTest(BaseCase):
     def get_type():
         """the expected url route ending"""
         # return "platform.shopify-tba"  # moved to alpha Oct 13, 2023
-        return "platform.shopify"        # new connections after Oct 13th
+        # return "platform.shopify"        # new connections after Oct 13th
+        return "platform.shopify-byoa"
 
     def get_properties(self, original: bool = True):
         """Configuration properties required for the tap."""
         return_value = {
             'start_date': '2017-07-01T00:00:00Z',
             'shop': 'stitchdatawearhouse',
-            'date_window_size': 180,
-            # BUG: https://jira.talendforge.org/browse/TDL-13180
-            # 'results_per_page': '50'
+            'date_window_size': 180
         }
 
         if original:
@@ -61,16 +60,12 @@ class BaseTapTest(BaseCase):
         return return_value
 
     @staticmethod
-    def get_credentials(original_credentials: bool = True):
+    def get_credentials(original_credentials=True):
         """Authentication information for the test account"""
 
-        if original_credentials:
-            return {
-                'api_key': os.getenv('TAP_SHOPIFY_API_KEY_STITCHDATAWEARHOUSE')
-            }
-
         return {
-            'api_key': os.getenv('TAP_SHOPIFY_API_KEY_TALENDDATAWEARHOUSE')
+            'client_id': os.getenv('TAP_SHOPIFY_CLIENT_ID'),
+            'client_secret': os.getenv('TAP_SHOPIFY_CLIENT_SECRET')
         }
 
     def expected_metadata(self):

@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.10.0
+  * Add support of client_cred grant type auth [#249](https://github.com/singer-io/tap-shopify/pull/249)
+  * Fix current bookmark value for no data time window [#251](https://github.com/singer-io/tap-shopify/pull/251)
+
 ### 3.9.0
   * Add pagination support for fulfillment line items [#248](https://github.com/singer-io/tap-shopify/pull/248)
 

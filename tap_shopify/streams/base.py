@@ -16,7 +16,7 @@ from singer import metrics, utils
 from graphql import parse, print_ast, visit
 from graphql.language import Visitor, FieldNode, SelectionSetNode, OperationDefinitionNode, NameNode
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError, ShopifyAPIError
+from tap_shopify.exceptions import ShopifyError, ShopifyAPIError, ShopifyUnauthorizedError
 
 LOGGER = singer.get_logger()
 
@@ -76,6 +76,14 @@ def leaky_bucket_handler(details):
     LOGGER.info("Received 429 -- sleeping for %s seconds",
                 details['wait'])
 
+def retry_401_handler(_details):
+    if Context.client:
+        LOGGER.info("Received 401 Unauthorized - attempting token refresh and retry")
+        Context.client.refresh_token()
+        Context.client.reinitialize_session()
+    else:
+        LOGGER.info("Received 401 Unauthorized - no client available for token refresh")
+
 def retry_handler(details):
     LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
                 details['tries'], MAX_RETRIES)
@@ -115,6 +123,10 @@ def shopify_error_handling(fnc):
                           giveup=is_not_status_code_fn([404]),
                           on_backoff=retry_handler,
                           max_tries=MAX_RETRIES)
+    @backoff.on_exception(backoff.expo,
+                          ShopifyUnauthorizedError,
+                          on_backoff=retry_401_handler,
+                          max_tries=2)  # Only retry once on 401 for refreshing token
     @backoff.on_exception(backoff.expo,
                           pyactiveresource.connection.ClientError,
                           giveup=is_not_status_code_fn([429]),
@@ -292,6 +304,12 @@ class Stream():
                 if error_body
                 else http_error.reason
             )
+            if http_error.code == 401:
+                raise ShopifyUnauthorizedError(http_error,
+                    f"Unauthorized access - token may have expired with status {http_error.code} "
+                    f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
+                ) from http_error
+
             raise ShopifyError(http_error,
                 f"GraphQL request failed for stream '{self.name}' with status {http_error.code} "
                 f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."

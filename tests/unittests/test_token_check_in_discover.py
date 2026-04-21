@@ -11,6 +11,7 @@ class Args():
         self.catalog = False
         self.config = {'api_key': 'test', 'shop': 'shop'}
         self.state = False
+        self.dev = False
 
 def resource_not_found_raiser():
     raise pyactiveresource.connection.ResourceNotFound

@@ -13,17 +13,18 @@ from singer import utils
 from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError, ShopifyAPIError
+from tap_shopify.client import ShopifyClient
+from tap_shopify.exceptions import ShopifyError, ShopifyAPIError, ShopifyUnauthorizedError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 
-REQUIRED_CONFIG_KEYS = ["shop", "api_key"]
+REQUIRED_CONFIG_KEYS = ["shop"]
 LOGGER = singer.get_logger()
 SDC_KEYS = {'id': 'integer', 'name': 'string', 'myshopify_domain': 'string'}
 UNSUPPORTED_FIELDS = {"author"}
 
 @shopify_error_handling
 def initialize_shopify_client():
-    api_key = Context.config['api_key']
+    api_key = Context.config.get('access_token') or Context.config.get('api_key')
     shop = Context.config['shop']
     version = '2025-07'
     session = shopify.Session(shop, version, api_key)
@@ -33,7 +34,10 @@ def initialize_shopify_client():
     shopify.Shop.set_timeout(get_request_timeout())
 
     # Shop.current() makes a call for shop details with provided shop and api_key
-    return shopify.Shop.current().attributes
+    try:
+        return shopify.Shop.current().attributes
+    except pyactiveresource.connection.UnauthorizedAccess as exc:
+        raise ShopifyUnauthorizedError(exc, "Invalid access token") from exc
 
 # Add helper
 def fetch_app_scopes():
@@ -219,6 +223,14 @@ def main():
         Context.config = args.config
         Context.state = args.state
 
+        if 'client_id' in Context.config:
+            # Initialize the ShopifyClient for token management (client credentials mode)
+            Context.client = ShopifyClient(
+                config_path=args.config_path,
+                config=Context.config
+            )
+            Context.config['access_token'] = Context.client.access_token
+
         # If discover flag was passed, run discovery mode and dump output to stdout
         if args.discover:
             catalog = discover()
@@ -245,6 +257,8 @@ def main():
             msg = body.get('errors')
         finally:
             raise ShopifyError(exc, msg) from exc
+    except ShopifyUnauthorizedError as error:
+        raise error
     except ShopifyError as error:
         raise error
     except ShopifyAPIError as error:
