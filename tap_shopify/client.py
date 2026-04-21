@@ -1,5 +1,5 @@
 import json
-import urllib
+import urllib.error
 import backoff
 import requests
 import shopify
