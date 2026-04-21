@@ -77,10 +77,12 @@ def leaky_bucket_handler(details):
                 details['wait'])
 
 def retry_401_handler(_details):
-    LOGGER.info("Received 401 Unauthorized - attempting token refresh and retry")
     if Context.client:
+        LOGGER.info("Received 401 Unauthorized - attempting token refresh and retry")
         Context.client.refresh_token()
         Context.client.reinitialize_session()
+    else:
+        LOGGER.info("Received 401 Unauthorized - no client available for token refresh")
 
 def retry_handler(details):
     LOGGER.info("Received 500 or retryable error -- Retry %s/%s",
