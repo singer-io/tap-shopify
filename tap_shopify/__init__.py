@@ -257,6 +257,8 @@ def main():
             msg = body.get('errors')
         finally:
             raise ShopifyError(exc, msg) from exc
+    except ShopifyUnauthorizedError as error:
+        raise error
     except ShopifyError as error:
         raise error
     except ShopifyAPIError as error:

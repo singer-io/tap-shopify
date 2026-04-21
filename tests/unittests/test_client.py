@@ -11,7 +11,7 @@ from tap_shopify.client import (
     SHOPIFY_API_VERSION,
 )
 from tap_shopify.context import Context
-from tap_shopify.exceptions import ShopifyError
+from tap_shopify.exceptions import ShopifyError, ShopifyUnauthorizedError
 
 class TestShopifyClientInit(unittest.TestCase):
     """Tests for ShopifyClient initialization."""
@@ -283,6 +283,57 @@ class TestRetry401Handler(unittest.TestCase):
         # Should not raise
         retry_401_handler({'wait': 1, 'tries': 1})
 
+    @patch('tap_shopify.client.requests.post')
+    def test_retry_401_handler_updates_context_config_access_token(self, mock_post):
+        """After retry_401_handler fires, Context.config['access_token'] must reflect
+        the newly fetched token.
+
+        This relies on ShopifyClient.config being the *same dict object* as
+        Context.config (passed by reference in main()), so that
+        _refresh_access_token()'s `self.config['access_token'] = ...`
+        is immediately visible via Context.config['access_token'].
+        """
+        import tempfile, os
+        from tap_shopify.streams.base import retry_401_handler
+
+        shared_config = {
+            "shop": "test-shop",
+            "client_id": "cid",
+            "client_secret": "csecret",
+            "access_token": "old_token",
+            "start_date": "2025-01-01T00:00:00Z",
+        }
+
+        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(shared_config, tmp)
+        tmp.close()
+
+        try:
+            # Wire up a real ShopifyClient sharing the same config dict as Context
+            client = object.__new__(ShopifyClient)
+            client.config = shared_config       # same object as Context.config below
+            client.config_path = tmp.name
+            client.access_token = "old_token"
+
+            Context.config = shared_config      # same dict reference
+            Context.client = client
+
+            mock_post.return_value = MagicMock(
+                status_code=200,
+                json=MagicMock(return_value={"access_token": "new_token"}),
+            )
+
+            with patch('shopify.Session'), \
+                 patch('shopify.ShopifyResource.activate_session'), \
+                 patch('shopify.Shop.set_timeout'):
+                retry_401_handler({'wait': 1, 'tries': 1})
+
+            # The token update in ShopifyClient must be visible through Context.config
+            self.assertEqual(Context.config['access_token'], "new_token")
+            self.assertEqual(client.access_token, "new_token")
+        finally:
+            os.unlink(tmp.name)
+
 
 class TestCallApiWithTokenRefresh(unittest.TestCase):
     """Tests for call_api behaviour regarding token handling."""
@@ -493,6 +544,93 @@ class TestMainClient(unittest.TestCase):
             pass
 
         self.assertEqual(Context.config.get('access_token'), "refreshed_tok")
+
+    def _make_discover_args(self, extra_config=None):
+        mock_args = MagicMock()
+        mock_args.config = {
+            "shop": "test-shop",
+            "client_id": "cid",
+            "client_secret": "csecret",
+            "access_token": "tok",
+            "start_date": "2025-01-01T00:00:00Z",
+        }
+        if extra_config:
+            mock_args.config.update(extra_config)
+        mock_args.state = {}
+        mock_args.dev = False
+        mock_args.discover = True
+        mock_args.config_path = "/tmp/config.json"
+        mock_args.catalog = None
+        return mock_args
+
+    @patch('tap_shopify.ShopifyClient')
+    @patch('tap_shopify.discover')
+    @patch('singer.utils.parse_args')
+    def test_main_propagates_shopify_unauthorized_error(
+        self, mock_parse_args, mock_discover, mock_client_cls
+    ):
+        """main() must re-raise ShopifyUnauthorizedError as-is, not wrap it in ShopifyError.
+
+        Before the fix, ShopifyUnauthorizedError fell into `except Exception` and was
+        re-raised as ShopifyError(exc) with an empty message, losing the original context.
+        After the fix, a dedicated `except ShopifyUnauthorizedError` branch re-raises it
+        directly so callers receive the correct type and message.
+        """
+        from tap_shopify import main
+
+        mock_parse_args.return_value = self._make_discover_args()
+
+        mock_client_instance = MagicMock()
+        mock_client_instance.access_token = "tok"
+        mock_client_cls.return_value = mock_client_instance
+
+        original_error = ShopifyUnauthorizedError(
+            Exception("UnauthorizedAccess"), "Invalid access token"
+        )
+        mock_discover.side_effect = original_error
+
+        with self.assertRaises(ShopifyUnauthorizedError) as ctx:
+            main()
+
+        # The exception must be the original instance (not a wrapped ShopifyError)
+        self.assertIsInstance(ctx.exception, ShopifyUnauthorizedError)
+        self.assertNotIsInstance(ctx.exception, ShopifyError)
+        self.assertIn("Invalid access token", str(ctx.exception))
+
+    @patch('tap_shopify.ShopifyClient')
+    @patch('tap_shopify.discover')
+    @patch('singer.utils.parse_args')
+    def test_main_unauthorized_error_message_preserved(
+        self, mock_parse_args, mock_discover, mock_client_cls
+    ):
+        """ShopifyUnauthorizedError message must survive propagation through main().
+
+        Previously the message was lost because the error was caught by the generic
+        `except Exception` handler and re-raised as ShopifyError(exc, msg='').
+        """
+        from tap_shopify import main
+
+        mock_parse_args.return_value = self._make_discover_args()
+
+        mock_client_instance = MagicMock()
+        mock_client_instance.access_token = "tok"
+        mock_client_cls.return_value = mock_client_instance
+
+        expected_message = "Invalid access token"
+        mock_discover.side_effect = ShopifyUnauthorizedError(
+            Exception("UnauthorizedAccess"), expected_message
+        )
+
+        try:
+            main()
+            self.fail("Expected ShopifyUnauthorizedError to be raised")
+        except ShopifyUnauthorizedError as exc:
+            self.assertIn(expected_message, str(exc))
+        except ShopifyError:
+            self.fail(
+                "ShopifyUnauthorizedError was incorrectly wrapped as ShopifyError, "
+                "losing the original message"
+            )
 
 
 class TestBackoffOnRefresh(unittest.TestCase):
