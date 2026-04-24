@@ -109,6 +109,25 @@
                 "boolean"
             ]
         },
+        "selectedOptions": {
+            "type": [
+                "null",
+                "array"
+            ],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": [
+                      "null",
+                      "string"
+                    ] },
+                    "value": { "type": [
+                      "null",
+                      "string"
+                    ] }
+                }
+            }
+        },
         "sellableOnlineQuantity": {
             "type": [
                 "null",
