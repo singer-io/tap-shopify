@@ -12,6 +12,11 @@ class InventoryLevels(Stream):
     child_data_key = "inventoryLevels"
     replication_key = "updatedAt"
 
+    def _get_record_node_path(self):
+        # Inventory-level records live at
+        # locations.edges.node.inventoryLevels.edges.node { FIELDS }.
+        return ("locations", "edges", "node", "inventoryLevels", "edges", "node")
+
     def get_next_page_child(self, parent_id, cursor, child_query):
         """
         Gets all child objects efficiently with pagination.

@@ -150,6 +150,16 @@ class Stream():
     data_key = None
     results_per_page = None
 
+    def _get_record_node_path(self):
+        """
+        Returns the exact tuple of FieldNode names leading from the query root
+        to the selection set that holds the stream's top-level record fields.
+
+        The default covers the standard ``{ stream { edges { node { FIELDS } } } }``
+        shape; subclasses whose records sit at a different depth must override.
+        """
+        return (self.data_key, "edges", "node")
+
     def __init__(self):
         self.results_per_page = Context.get_results_per_page(RESULTS_PER_PAGE)
         self.date_window_size = float(Context.config.get("date_window_size") or
@@ -232,15 +242,37 @@ class Stream():
     def remove_fields_from_query(self, fields_to_remove: list) -> str:
         ast = parse(self.get_query())
         used_variable_names = set()
+        # O(1) membership checks.
+        fields_to_remove_set = set(fields_to_remove)
+        # Exact full path from the query root to the record-level selection set.
+        # Exact matching (not suffix) avoids false positives when a nested
+        # connection (e.g. lineItems.edges.node) ends with the same field names.
+        record_path = self._get_record_node_path()
 
         class FieldRemover(Visitor):
-            def enter_selection_set(self, node, _key, _parent, _path, _ancestors):
+            def __init__(self):
+                super().__init__()
+                # Incremental stack of FieldNode names maintained via
+                # enter_field / leave_field — O(1) push/pop per visit.
+                self._field_stack = []
+
+            def enter_field(self, node, *_):
+                self._field_stack.append(node.name.value)
+
+            def leave_field(self, node, *_):
+                self._field_stack.pop()
+
+            def enter_selection_set(self, node, *_):
+                # Exact match against the full path: only the one selection set
+                # that corresponds to the stream's record node is pruned.
+                at_record_node = tuple(self._field_stack) == record_path
+
                 new_selections = []
                 for selection in node.selections:
                     if isinstance(selection, FieldNode):
-                        if selection.name.value in fields_to_remove:
+                        if at_record_node and selection.name.value in fields_to_remove_set:
                             continue
-                        # Check field arguments for variable usage
+                        # Track variable names used in field arguments.
                         for arg in selection.arguments or []:
                             if hasattr(arg.value, "name") and isinstance(arg.value.name, NameNode):
                                 used_variable_names.add(arg.value.name.value)

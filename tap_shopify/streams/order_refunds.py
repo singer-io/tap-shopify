@@ -13,6 +13,11 @@ class OrderRefunds(Stream):
     replication_key = "updatedAt"
     automatic_keys = ["order"]
 
+    def _get_record_node_path(self):
+        # Refund records live at orders.edges.node.refunds { FIELDS },
+        # not at the standard edges.node depth.
+        return ("orders", "edges", "node", "refunds")
+
     # pylint: disable=too-many-locals
     def get_objects(self):
         """
