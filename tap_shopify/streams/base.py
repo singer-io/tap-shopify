@@ -259,7 +259,7 @@ class Stream():
             def enter_field(self, node, *_):
                 self._field_stack.append(node.name.value)
 
-            def leave_field(self, node, *_):
+            def leave_field(self, _node, *_):
                 self._field_stack.pop()
 
             def enter_selection_set(self, node, *_):
