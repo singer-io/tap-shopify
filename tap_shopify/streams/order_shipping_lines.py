@@ -32,6 +32,7 @@ class OrderShippingLines(Stream):
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
         current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
+        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
         # Process each date window
         while last_updated_at < sync_start:
@@ -43,14 +44,14 @@ class OrderShippingLines(Stream):
                 query_params = self.get_query_params(last_updated_at, query_end, cursor)
 
                 with metrics.http_request_timer(self.name):
-                    data = self.call_api(query_params)
+                    data = self.call_api(query_params, query=query)
 
                 # Process parent objects and their shippinglines
                 edges = data.get("edges", [])
                 for edge in edges:
                     node = edge.get("node", {})
 
-                    for shipping_line in self.paginate_shipping_lines(node):
+                    for shipping_line in self.paginate_shipping_lines(node, query):
                         shipping_line["orderId"] = node["id"].split("/")[-1]
                         shipping_line["updatedAt"] = node["updatedAt"]
 
@@ -71,12 +72,13 @@ class OrderShippingLines(Stream):
             max_bookmark_value = min(sync_start, current_bookmark)
             self.update_bookmark(utils.strftime(max_bookmark_value))
 
-    def paginate_shipping_lines(self, data):
+    def paginate_shipping_lines(self, data, query):
         """
         Transforms the shippingLines data by handling pagination.
 
         Args:
             data (dict): Order data.
+            query (str): Pruned GraphQL query string.
 
         Returns:
             list: List of shippingLines.
@@ -98,7 +100,7 @@ class OrderShippingLines(Stream):
             }
 
             # Fetch the next page of data
-            response = self.call_api(params)
+            response = self.call_api(params, query=query)
             node = response.get("edges", [])[0].get("node", {})
             shipping_lines_data = node.get("shippingLines")
             for item in shipping_lines_data["edges"]:

@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.11.0
+  * Filter GraphQL field pruning to top-level record selection sets [#250](https://github.com/singer-io/tap-shopify/pull/250)
+
 ### 3.10.0
   * Add support of client_cred grant type auth [#249](https://github.com/singer-io/tap-shopify/pull/249)
   * Fix current bookmark value for no data time window [#251](https://github.com/singer-io/tap-shopify/pull/251)
