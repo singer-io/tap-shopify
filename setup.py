@@ -16,13 +16,13 @@ setup(
         "ShopifyAPI==12.7.0",
         "singer-python==6.8.0",
         "graphql-core==3.2.6",
-        'requests==2.32.4',
+        'requests==2.34.2',
     ],
     extras_require={
         'dev': [
             'pylint==3.3.6',
             'ipdb',
-            'requests==2.32.4',
+            'requests==2.34.2',
             'nose',
         ]
     },
