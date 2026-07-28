@@ -2,6 +2,7 @@ from datetime import timedelta
 import json
 import time
 import re
+import urllib.error
 import backoff
 import requests
 import shopify
@@ -1100,7 +1101,27 @@ class Orders(Stream):
                 }}
             }}
             """
-            response = json.loads(shopify.GraphQL().execute(query=query))
+            try:
+                response = json.loads(shopify.GraphQL().execute(query=query))
+            except urllib.error.HTTPError as http_error:
+                if http_error.code == 401:
+                    LOGGER.warning(
+                        "Received 401 Unauthorized during bulk operation polling. "
+                        "Refreshing access token and retrying."
+                    )
+                    if Context.client:
+                        Context.client.refresh_token()
+                        Context.client.reinitialize_session()
+                        Context.config['access_token'] = Context.client.access_token
+                    else:
+                        raise ShopifyAPIError(
+                            "Received 401 Unauthorized during bulk operation polling "
+                            "but no client is available to refresh the token."
+                        ) from http_error
+                    # Retry once with the refreshed token
+                    response = json.loads(shopify.GraphQL().execute(query=query))
+                else:
+                    raise
             if not isinstance(response, dict):
                 raise ShopifyAPIError(f"Unexpected GraphQL response: {response}")
             return response.get("data", {}).get("node")
