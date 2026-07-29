@@ -1102,13 +1102,10 @@ class Orders(Stream):
             }}
             """
             try:
-                response = json.loads(shopify.GraphQL().execute(query=query))
+                response = json.loads(shopify.GraphQL().execute(query=query, timeout=self.request_timeout))
             except urllib.error.HTTPError as http_error:
                 if http_error.code == 401:
-                    LOGGER.warning(
-                        "Received 401 Unauthorized during bulk operation polling. "
-                        "Refreshing access token and retrying."
-                    )
+                    LOGGER.warning("Received 401 Unauthorized during bulk operation polling.")
                     if Context.client:
                         Context.client.refresh_token()
                         Context.client.reinitialize_session()
@@ -1119,7 +1116,7 @@ class Orders(Stream):
                             "but no client is available to refresh the token."
                         ) from http_error
                     # Retry once with the refreshed token
-                    response = json.loads(shopify.GraphQL().execute(query=query))
+                    response = json.loads(shopify.GraphQL().execute(query=query, timeout=self.request_timeout))
                 else:
                     raise
             if not isinstance(response, dict):
