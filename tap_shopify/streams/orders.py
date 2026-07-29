@@ -1101,8 +1101,11 @@ class Orders(Stream):
                 }}
             }}
             """
+            # pylint: disable=unexpected-keyword-arg
+            # execute() is monkey-patched in base.py (execute_gql) to accept timeout
             try:
-                response = json.loads(shopify.GraphQL().execute(query=query, timeout=self.request_timeout))
+                response = json.loads(shopify.GraphQL().execute(
+                    query=query, timeout=self.request_timeout))
             except urllib.error.HTTPError as http_error:
                 if http_error.code == 401:
                     LOGGER.warning("Received 401 Unauthorized during bulk operation polling.")
@@ -1116,9 +1119,11 @@ class Orders(Stream):
                             "but no client is available to refresh the token."
                         ) from http_error
                     # Retry once with the refreshed token
-                    response = json.loads(shopify.GraphQL().execute(query=query, timeout=self.request_timeout))
+                    response = json.loads(shopify.GraphQL().execute(
+                        query=query, timeout=self.request_timeout))
                 else:
                     raise
+            # pylint: enable=unexpected-keyword-arg
             if not isinstance(response, dict):
                 raise ShopifyAPIError(f"Unexpected GraphQL response: {response}")
             return response.get("data", {}).get("node")
