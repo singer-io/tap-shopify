@@ -1,7 +1,7 @@
 # Changelog
 
 ### 4.0.0
-  * Re-stringify JSON values in transform_object to prevent SQL error 22P02. [#253] (https://github.com/singer-io/tap-shopify/pull/253)
+  * Re-stringify JSON values in transform_object to prevent SQL error 22P02. [#253](https://github.com/singer-io/tap-shopify/pull/253)
   * Update metafield value types to ["null", "string"] across all metafields schemas to match emitted values.
 
 ### 3.11.1

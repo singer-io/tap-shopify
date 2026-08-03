@@ -32,14 +32,8 @@ class Metafields(Stream, ABC):
         """
         obj["value_type"] = obj.get("type") or None
         obj["updated_at"] = obj.get("updatedAt")
-        if obj["value_type"] in ["json", "weight", "volume", "dimension", "rating"]:
-            value = obj.get("value")
-            try:
-                parsed = json.loads(value) if value is not None else value
-                obj["value"] = json.dumps(parsed) if parsed is not None else value
-            except json.decoder.JSONDecodeError:
-                LOGGER.info("Failed to decode JSON value for obj %s", obj.get("id"))
-                obj["value"] = value
+        if isinstance(obj.get("value"), (dict, list)):
+            obj["value"] = json.dumps(obj["value"])
         return obj
 
     def fetch_paginated_child_data(self, initial_child_data, parent_id):
