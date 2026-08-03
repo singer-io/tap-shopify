@@ -61,11 +61,8 @@
     "value": {
       "type": [
         "null",
-        "integer",
-        "object",
         "string"
-      ],
-      "properties": {}
+      ]
     },
     "updatedAt": {
       "type": [

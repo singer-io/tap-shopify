@@ -35,7 +35,8 @@ class Metafields(Stream, ABC):
         if obj["value_type"] in ["json", "weight", "volume", "dimension", "rating"]:
             value = obj.get("value")
             try:
-                obj["value"] = json.loads(value) if value is not None else value
+                parsed = json.loads(value) if value is not None else value
+                obj["value"] = json.dumps(parsed) if parsed is not None else value
             except json.decoder.JSONDecodeError:
                 LOGGER.info("Failed to decode JSON value for obj %s", obj.get("id"))
                 obj["value"] = value
