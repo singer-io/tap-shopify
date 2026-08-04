@@ -1,8 +1,10 @@
 # Changelog
 
 ### 3.12.0
-  * Add token refresh and retry logic for 401 errors during bulk operation polling [#252](https://github.com/singer-io/tap-shopify/pull/252)
   * Re-stringify JSON values in transform_object to prevent SQL error 22P02 for QTC. [#253](https://github.com/singer-io/tap-shopify/pull/253)
+
+### 3.11.1
+  * Add token refresh and retry logic for 401 errors during bulk operation polling [#252](https://github.com/singer-io/tap-shopify/pull/252)
 
 ### 3.11.0
   * Filter GraphQL field pruning to top-level record selection sets [#250](https://github.com/singer-io/tap-shopify/pull/250)
