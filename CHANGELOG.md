@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.12.0
+  * Re-stringify JSON values in transform_object to prevent SQL error 22P02 for QTC. [#253](https://github.com/singer-io/tap-shopify/pull/253)
+  * Fix metafield schema SQL type conflicts.
+
 ### 3.11.1
   * Add token refresh and retry logic for 401 errors during bulk operation polling [#252](https://github.com/singer-io/tap-shopify/pull/252)
 
