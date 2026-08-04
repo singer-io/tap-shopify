@@ -110,6 +110,7 @@ def discover():
 
     raw_schemas = load_schemas()
     streams = []
+    user_agent = Context.config.get("user_agent")
 
     for schema_name, schema in raw_schemas.items():
         if schema_name not in Context.stream_objects:
@@ -117,6 +118,16 @@ def discover():
 
         stream = Context.stream_objects[schema_name]()
         catalog_schema = add_synthetic_key_to_schema(schema)
+
+        # For metafield streams, remove 'integer' and 'object' from the value field's
+        # type array to avoid SQL type conflicts in targets
+        if user_agent and schema_name.startswith('metafields_'):
+            value_prop = catalog_schema.get('properties', {}).get('value', {})
+            if isinstance(value_prop.get('type'), list):
+                value_prop['type'] = [t for t in value_prop['type']
+                                      if t not in ('integer', 'object')]
+            if 'properties' in value_prop and value_prop['properties'] == {}:
+                del value_prop['properties']
 
         # create and add catalog entry
         catalog_entry = {
