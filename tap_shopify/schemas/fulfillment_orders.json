@@ -560,7 +560,7 @@
                             "type": "object",
                             "properties": {
                                 "action": {
-                                    "id": [
+                                    "type": [
                                         "null",
                                         "string"
                                     ]
