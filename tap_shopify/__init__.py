@@ -5,6 +5,7 @@ import json
 import time
 import math
 import copy
+import urllib.error
 
 import pyactiveresource
 import shopify
@@ -40,6 +41,7 @@ def initialize_shopify_client():
         raise ShopifyUnauthorizedError(exc, "Invalid access token") from exc
 
 # Add helper
+@shopify_error_handling
 def fetch_app_scopes():
     query = """
     query {
@@ -50,7 +52,16 @@ def fetch_app_scopes():
       }
     }
     """
-    data = json.loads(shopify.GraphQL().execute(query))
+    try:
+        data = json.loads(shopify.GraphQL().execute(query))
+    except urllib.error.HTTPError as http_error:
+        if http_error.code == 401:
+            raise ShopifyUnauthorizedError(http_error,
+                f"Unauthorized access - token may have expired with status {http_error.code}."
+            ) from http_error
+        raise ShopifyError(http_error,
+            f"GraphQL request failed while fetching app scopes with status {http_error.code}."
+        ) from http_error
     return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
 
 def has_read_users_access():
