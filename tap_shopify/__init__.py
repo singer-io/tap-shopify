@@ -53,14 +53,26 @@ def fetch_app_scopes():
     }
     """
     try:
-        data = json.loads(shopify.GraphQL().execute(query))
+        # pylint: disable=unexpected-keyword-arg
+        # execute() is monkey-patched in base.py (execute_gql) to accept timeout
+        data = json.loads(shopify.GraphQL().execute(query, timeout=get_request_timeout()))
     except urllib.error.HTTPError as http_error:
+        # Extract X-Request-ID from the error response headers
+        request_id = http_error.headers.get("X-Request-ID")
+        error_body = http_error.read().decode("utf-8") if http_error.fp else None
+        error_message = (
+            f"{http_error.reason} - {error_body}"
+            if error_body
+            else http_error.reason
+        )
         if http_error.code == 401:
             raise ShopifyUnauthorizedError(http_error,
-                f"Unauthorized access - token may have expired with status {http_error.code}."
+                f"Unauthorized access - token may have expired with status {http_error.code} "
+                f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
             ) from http_error
         raise ShopifyError(http_error,
-            f"GraphQL request failed while fetching app scopes with status {http_error.code}."
+            f"GraphQL request failed while fetching app scopes with status {http_error.code} "
+            f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
         ) from http_error
     return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
 

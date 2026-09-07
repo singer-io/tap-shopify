@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.12.1
+  * Add HTTP error handling (with timeout, 401 mapping to `ShopifyUnauthorizedError`, and request-id/reason context) for `fetch_app_scopes()` GraphQL query [#254](https://github.com/singer-io/tap-shopify/pull/254)
+
 ### 3.12.0
   * Re-stringify JSON values in transform_object to prevent SQL error 22P02 for QTC. [#253](https://github.com/singer-io/tap-shopify/pull/253)
   * Fix metafield schema SQL type conflicts.
