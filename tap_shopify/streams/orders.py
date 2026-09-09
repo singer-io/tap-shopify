@@ -210,22 +210,6 @@ class Orders(Stream):
                 email
                 firstName
                 lastName
-                addresses {
-                    address1
-                    address2
-                    city
-                    countryCodeV2
-                    country
-                    company
-                    firstName
-                    lastName
-                    id
-                    name
-                    phone
-                    province
-                    provinceCode
-                    zip
-                }
                 state
                 verifiedEmail
                 updatedAt
