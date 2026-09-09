@@ -5,6 +5,7 @@ import json
 import time
 import math
 import copy
+import urllib.error
 
 import pyactiveresource
 import shopify
@@ -40,6 +41,7 @@ def initialize_shopify_client():
         raise ShopifyUnauthorizedError(exc, "Invalid access token") from exc
 
 # Add helper
+@shopify_error_handling
 def fetch_app_scopes():
     query = """
     query {
@@ -50,7 +52,28 @@ def fetch_app_scopes():
       }
     }
     """
-    data = json.loads(shopify.GraphQL().execute(query))
+    try:
+        # pylint: disable=unexpected-keyword-arg
+        # execute() is monkey-patched in base.py (execute_gql) to accept timeout
+        data = json.loads(shopify.GraphQL().execute(query, timeout=get_request_timeout()))
+    except urllib.error.HTTPError as http_error:
+        # Extract X-Request-ID from the error response headers
+        request_id = http_error.headers.get("X-Request-ID")
+        error_body = http_error.read().decode("utf-8") if http_error.fp else None
+        error_message = (
+            f"{http_error.reason} - {error_body}"
+            if error_body
+            else http_error.reason
+        )
+        if http_error.code == 401:
+            raise ShopifyUnauthorizedError(http_error,
+                f"Unauthorized access - token may have expired with status {http_error.code} "
+                f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
+            ) from http_error
+        raise ShopifyError(http_error,
+            f"GraphQL request failed while fetching app scopes with status {http_error.code} "
+            f"and X-Request-ID '{request_id or 'N/A'}', Reason: {error_message}."
+        ) from http_error
     return {s["handle"] for s in data["data"]["currentAppInstallation"]["accessScopes"]}
 
 def has_read_users_access():
