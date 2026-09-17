@@ -239,17 +239,14 @@
         "internationalDuties": {
             "type": [
                 "null",
-                "array"
+                "object"
             ],
-            "items": {
-                "type": "object",
-                "properties": {
-                    "incoterm": {
-                        "type": [
-                            "null",
-                            "string"
-                        ]
-                    }
+            "properties": {
+                "incoterm": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
                 }
             }
         },
