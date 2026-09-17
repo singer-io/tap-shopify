@@ -237,11 +237,6 @@
             }
         },
         "internationalDuties": {
-            "type": [
-                "null",
-                "array"
-            ],
-            "items": {
                 "type": "object",
                 "properties": {
                     "incoterm": {
