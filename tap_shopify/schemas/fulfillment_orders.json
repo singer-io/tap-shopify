@@ -237,39 +237,18 @@
             }
         },
         "internationalDuties": {
-            "anyOf": [
-                {
+            "type": [
+                "null",
+                "object"
+            ],
+            "properties": {
+                "incoterm": {
                     "type": [
                         "null",
-                        "array"
-                    ],
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "incoterm": {
-                                "type": [
-                                    "null",
-                                    "string"
-                                ]
-                            }
-                        }
-                    }
-                },
-                {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "properties": {
-                        "incoterm": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        }
-                    }
+                        "string"
+                    ]
                 }
-            ]
+            }
         },
         "deliveryMethod": {
             "type": [
