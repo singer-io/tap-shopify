@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.13.0
+  * Fix `fulfillment_orders` schema: `internationalDuties` is a nullable object (`FulfillmentOrderInternationalDuties`), not an array [#256](https://github.com/singer-io/tap-shopify/pull/256)
+
 ### 3.12.1
   * Add HTTP error handling (with timeout, 401 mapping to `ShopifyUnauthorizedError`, and request-id/reason context) for `fetch_app_scopes()` GraphQL query [#254](https://github.com/singer-io/tap-shopify/pull/254)
 
