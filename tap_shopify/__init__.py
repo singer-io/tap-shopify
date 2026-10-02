@@ -97,6 +97,8 @@ def load_schemas():
     # 'number's, which may result in lost precision.
     for filename in sorted(os.listdir(get_abs_path('schemas'))):
         path = get_abs_path('schemas') + '/' + filename
+        if not filename.endswith('.json') or not os.path.isfile(path):
+            continue
         schema_name = filename.replace('.json', '')
         with open(path, encoding='UTF-8') as file:
             schemas[schema_name] = json.load(file)
