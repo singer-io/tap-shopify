@@ -52,6 +52,15 @@ This tap:
 
 Currently, `locations` graphql endpoint doesn't support querying on the `updatedAt`, therefore, `createdAt` is made the replication key.
 
+### Fulfillment Orders Bulk Extraction
+
+`fulfillment_orders` reuses the `orders` bulk submission and polling infrastructure
+on API version `2025-07`. With all fields selected, each date window uses three
+sequential bulk queries containing three, four, and three connections. Results
+are reconstructed using `__parentId` and merged by fulfillment order and
+fulfillment IDs in a temporary SQLite database. Ensure the host has sufficient
+temporary disk space for a date window. Unselected connections are not queried.
+
 ## Quick Start
 
 1. Install

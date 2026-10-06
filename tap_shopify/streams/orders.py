@@ -1039,9 +1039,8 @@ class Orders(Stream):
             bookmark_value
         )
 
-        # Store under orders -> bulk_operation
         if bulk_op_metadata:
-            orders_bookmark = Context.state.setdefault("bookmarks", {}).setdefault("orders", {})
+            orders_bookmark = Context.state.setdefault("bookmarks", {}).setdefault(self.name, {})
             orders_bookmark["bulk_operation"] = bulk_op_metadata
 
         singer.write_state(Context.state)
@@ -1236,7 +1235,7 @@ class Orders(Stream):
         return obj
 
     def clear_bulk_operation_state(self):
-        orders_bookmark = Context.state.get("bookmarks", {}).get("orders", {})
+        orders_bookmark = Context.state.get("bookmarks", {}).get(self.name, {})
         if "bulk_operation" in orders_bookmark:
             del orders_bookmark["bulk_operation"]
             singer.write_state(Context.state)
@@ -1271,7 +1270,7 @@ class Orders(Stream):
                 op_id = bulk_op.get("bulk_operation_id")
                 op_status = bulk_op.get("status")
 
-                if op_status in ["RUNNING", "COMPLETED"]:
+                if op_status in ["CREATED", "RUNNING", "COMPLETED"]:
                     LOGGER.info("Resuming polling for existing bulk operation ID: %s", op_id)
                     existing_url = self.poll_bulk_completion(current_bookmark, op_id)
                 else:
@@ -1368,6 +1367,15 @@ class Orders(Stream):
             if not bulk_op_id:
                 raise ShopifyAPIError("Invalid bulk operation response: {}".format(bulk_op_data))
 
+            self.update_bookmark(
+                utils.strftime(current_bookmark),
+                bulk_op_metadata={
+                    "bulk_operation_id": bulk_op_id,
+                    "status": bulk_operation.get("status", "CREATED"),
+                    "created_at": bulk_operation.get("createdAt"),
+                    "last_date_window": self.date_window_size,
+                }
+            )
             return self.poll_bulk_completion(current_bookmark, bulk_op_id)
 
 

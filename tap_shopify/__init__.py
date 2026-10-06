@@ -185,6 +185,14 @@ def sync():
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
     require_reauth = False
 
+    streams = Context.catalog["streams"]
+    orders_index = next((index for index, entry in enumerate(streams)
+                         if entry["tap_stream_id"] == "orders"), None)
+    fulfillment_index = next((index for index, entry in enumerate(streams)
+                              if entry["tap_stream_id"] == "fulfillment_orders"), None)
+    if orders_index is not None and fulfillment_index is not None and fulfillment_index < orders_index:
+        streams.insert(orders_index, streams.pop(fulfillment_index))
+
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
     currently_sync_stream_name = Context.state.get('bookmarks', {}).get('currently_sync_stream')
