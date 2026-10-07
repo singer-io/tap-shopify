@@ -190,7 +190,8 @@ def sync():
                          if entry["tap_stream_id"] == "orders"), None)
     fulfillment_index = next((index for index, entry in enumerate(streams)
                               if entry["tap_stream_id"] == "fulfillment_orders"), None)
-    if orders_index is not None and fulfillment_index is not None and fulfillment_index < orders_index:
+    if (orders_index is not None and fulfillment_index is not None
+            and fulfillment_index < orders_index):
         streams.insert(orders_index, streams.pop(fulfillment_index))
 
     # If there is a currently syncing stream bookmark, shuffle the

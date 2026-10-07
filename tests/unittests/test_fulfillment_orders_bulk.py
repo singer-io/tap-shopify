@@ -73,7 +73,8 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         response.__enter__.return_value = response
         response.iter_lines.return_value = [json.dumps(record).encode("utf-8") for record in records]
         with patch("tap_shopify.streams.fulfillment_orders.requests.get", return_value=response):
-            result = list(self.stream.parse_bulk_jsonl("https://example.com/results", query))
+            result = list(self.stream.parse_fulfillment_bulk_jsonl(
+                "https://example.com/results", query))
         response.raise_for_status.assert_called_once()
         response.__exit__.assert_called_once()
         return result
@@ -128,7 +129,7 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
 
     def test_sequential_queries_merge_by_id_and_advance_only_after_emission(self):
         self.stream.submit_and_poll_bulk_query = MagicMock(side_effect=["first", "second", "third"])
-        self.stream.parse_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
+        self.stream.parse_fulfillment_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
         self.stream.get_locations_for_move = MagicMock(return_value=[])
         iterator = self.stream.get_objects()
         first = next(iterator)
@@ -153,7 +154,7 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
             "fulfillment_orders": {"bulk_operation": self.window_state(self.stream.get_bulk_queries())}}}
         self.stream.poll_bulk_completion = MagicMock(side_effect=["first", "second"])
         self.stream.submit_and_poll_bulk_query = MagicMock(return_value="third")
-        self.stream.parse_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
+        self.stream.parse_fulfillment_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
         with patch.object(Context, "get_unselected_fields", return_value=["locationsForMove"]):
             Context.state["bookmarks"]["fulfillment_orders"]["bulk_operation"]["query_hash"] = hashlib.sha256(
                 json.dumps(self.stream.get_bulk_queries()).encode("utf-8")).hexdigest()
@@ -188,7 +189,7 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
 
     def test_closing_during_emission_keeps_window_uncommitted(self):
         self.stream.submit_and_poll_bulk_query = MagicMock(side_effect=["first", "second", "third"])
-        self.stream.parse_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
+        self.stream.parse_fulfillment_bulk_jsonl = MagicMock(side_effect=self.bulk_results())
         self.stream.get_locations_for_move = MagicMock(return_value=[])
         iterator = self.stream.get_objects()
         next(iterator)
@@ -208,7 +209,8 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         stored = self.window_state(queries)
         Context.state = {"bookmarks": {"fulfillment_orders": {"bulk_operation": copy.deepcopy(stored)}}}
         self.stream.poll_bulk_completion = MagicMock(side_effect=["first", ShopifyAPIError("timeout")])
-        self.stream.parse_bulk_jsonl = MagicMock(return_value=self.bulk_results()[0])
+        self.stream.parse_fulfillment_bulk_jsonl = MagicMock(
+            return_value=self.bulk_results()[0])
         with self.assertRaises(ShopifyAPIError):
             list(self.stream.get_objects())
         self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"]["bulk_operation"], stored)
