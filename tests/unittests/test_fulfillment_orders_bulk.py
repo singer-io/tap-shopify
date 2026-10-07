@@ -199,10 +199,16 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
     def test_missing_saved_operation_does_not_commit_the_window(self):
         Context.state = {"bookmarks": {"fulfillment_orders": {
             "bulk_operation": self.window_state(self.stream.get_bulk_queries())}}}
-        self.stream.poll_bulk_completion = MagicMock(return_value=None)
+        self.stream.poll_bulk_completion = MagicMock(side_effect=["completed-url", None])
+        self.stream.parse_fulfillment_bulk_jsonl = MagicMock(
+            return_value=self.bulk_results()[0])
         with self.assertRaises(ShopifyAPIError):
             list(self.stream.get_objects())
-        self.assertNotIn("updatedAt", Context.state["bookmarks"]["fulfillment_orders"])
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertNotIn("updatedAt", bookmark)
+        operations = bookmark["bulk_operation"]["operations"]
+        self.assertEqual(operations["0"]["bulk_operation_id"], "op1")
+        self.assertNotIn("1", operations)
 
     def test_failure_leaves_bookmark_unchanged_and_keeps_completed_parts(self):
         queries = self.stream.get_bulk_queries()

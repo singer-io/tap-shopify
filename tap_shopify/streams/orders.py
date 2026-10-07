@@ -1050,13 +1050,6 @@ class Orders(Stream):
 
     def submit_bulk_query(self, query_string):
         url = f"https://{Context.config.get('shop')}.myshopify.com/admin/api/2025-07/graphql.json"
-        headers = {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": (
-                Context.config.get("access_token")
-                or Context.config.get("api_key")
-            ),
-        }
         operation = {
             "query": """
                 mutation bulkOperationRunQuery($query: String!) {
@@ -1077,8 +1070,28 @@ class Orders(Stream):
                 "query": query_string
             }
         }
-        response = requests.post(url, headers=headers, json=operation, timeout=300)
-        LOGGER.info("X-request-ID for the bulk operation: %s", response.headers.get("X-Request-ID"))
+        for attempt in range(2):
+            headers = {
+                "Content-Type": "application/json",
+                "X-Shopify-Access-Token": (
+                    Context.config.get("access_token")
+                    or Context.config.get("api_key")
+                ),
+            }
+            response = requests.post(url, headers=headers, json=operation, timeout=300)
+            LOGGER.info("X-request-ID for the bulk operation: %s",
+                        response.headers.get("X-Request-ID"))
+            if response.status_code != 401:
+                break
+            if attempt or not Context.client:
+                response.raise_for_status()
+                raise ShopifyAPIError("Bulk query submission was unauthorized")
+            LOGGER.warning("Received 401 Unauthorized during bulk query submission.")
+            Context.client.refresh_token()
+            Context.client.reinitialize_session()
+            Context.config["access_token"] = Context.client.access_token
+
+        response.raise_for_status()
 
         return response.json()
 

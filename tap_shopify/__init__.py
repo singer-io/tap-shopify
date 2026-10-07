@@ -179,6 +179,12 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+def is_fulfillment_access_denied(error):
+    message = str(error)
+    if error.__cause__:
+        message += f" {error.__cause__}"
+    return "Access denied" in message
+
 # pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
@@ -240,7 +246,7 @@ def sync():
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
         except ShopifyAPIError as e:
-            if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
+            if stream_id == 'fulfillment_orders' and is_fulfillment_access_denied(e):
                 require_reauth = True
                 continue
             raise e

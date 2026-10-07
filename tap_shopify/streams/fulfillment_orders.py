@@ -209,6 +209,12 @@ class FulfillmentOrders(Orders):
                 existing[key] = value
         return existing
 
+    def _clear_missing_bulk_operation(self, operation_index):
+        self._bulk_window_state["operations"].pop(str(operation_index), None)
+        Context.state.setdefault("bookmarks", {}).setdefault(self.name, {})[
+            "bulk_operation"] = deepcopy(self._bulk_window_state)
+        singer.write_state(Context.state)
+
     def _get_window_records(self, last_updated_at, query_end, queries, stored):
         self._bulk_window_state = stored or {
             "window_start": utils.strftime(last_updated_at),
@@ -234,6 +240,7 @@ class FulfillmentOrders(Orders):
                         url = self.submit_and_poll_bulk_query(
                             query, last_updated_at, query_end, last_updated_at)
                     if url is None and not self._bulk_poll_completed:
+                        self._clear_missing_bulk_operation(index)
                         raise ShopifyAPIError("Fulfillment bulk operation was not found")
                     if url:
                         for record in self.parse_fulfillment_bulk_jsonl(url, query):
