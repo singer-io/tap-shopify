@@ -56,12 +56,12 @@ class FulfillmentOrders(Stream):
 
             # Fetch the next page of data
             response = self.call_api(params, query=query)
-            node = response.get("edges", [])[0].get("node", {})
+            parent_node = response.get("edges", [])[0].get("node", {})
             child_records.extend(
-                node for item in node[key]["edges"]
-                if (node := item.get("node"))
+                child for item in parent_node[key]["edges"]
+                if (child := item.get("node"))
             )
-            page_info = node.get("pageInfo", {})
+            page_info = parent_node[key].get("pageInfo", {})
 
         return child_records
 
