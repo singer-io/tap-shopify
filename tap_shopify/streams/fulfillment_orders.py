@@ -146,7 +146,8 @@ class FulfillmentOrders(Orders):
 
     @staticmethod
     def _append_bulk_child(record, parent_id, current, fulfillments,
-                           connections, nested_connections):
+                           connection_names):
+        connections, nested_connections = connection_names
         record_type = record["id"].split("/")[-2]
         if parent_id == current["id"]:
             connection = {"Fulfillment": "fulfillments",
@@ -190,7 +191,7 @@ class FulfillmentOrders(Orders):
                 if current is None:
                     raise ShopifyAPIError("Bulk child appeared before its fulfillment order")
                 self._append_bulk_child(record, parent_id, current, fulfillments,
-                                        connections, nested_connections)
+                                        (connections, nested_connections))
             if current is not None:
                 yield current
 
