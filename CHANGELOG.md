@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.13.1
+  * Fix `fulfillment_orders` nested child pagination: `fulfillments`, `merchantRequests` and `locationsForMove` beyond the first 6 records were dropped [#259](https://github.com/singer-io/tap-shopify/pull/259)
+
 ### 3.13.0
   * Fix `fulfillment_orders` schema: `internationalDuties` is a nullable object (`FulfillmentOrderInternationalDuties`), not an array [#256](https://github.com/singer-io/tap-shopify/pull/256)
 
