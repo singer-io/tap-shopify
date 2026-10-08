@@ -15,6 +15,7 @@ from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.client import ShopifyClient
+from tap_shopify.constants import SHOPIFY_API_VERSION
 from tap_shopify.exceptions import ShopifyError, ShopifyAPIError, ShopifyUnauthorizedError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 
@@ -27,8 +28,7 @@ UNSUPPORTED_FIELDS = {"author"}
 def initialize_shopify_client():
     api_key = Context.config.get('access_token') or Context.config.get('api_key')
     shop = Context.config['shop']
-    version = '2025-07'
-    session = shopify.Session(shop, version, api_key)
+    session = shopify.Session(shop, SHOPIFY_API_VERSION, api_key)
     shopify.ShopifyResource.activate_session(session)
 
     # set request timeout
@@ -179,11 +179,26 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+def is_fulfillment_access_denied(error):
+    message = str(error)
+    if error.__cause__:
+        message += f" {error.__cause__}"
+    return "Access denied" in message
+
 # pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
     require_reauth = False
+
+    streams = Context.catalog["streams"]
+    orders_index = next((index for index, entry in enumerate(streams)
+                         if entry["tap_stream_id"] == "orders"), None)
+    fulfillment_index = next((index for index, entry in enumerate(streams)
+                              if entry["tap_stream_id"] == "fulfillment_orders"), None)
+    if (orders_index is not None and fulfillment_index is not None
+            and fulfillment_index < orders_index):
+        streams.insert(orders_index, streams.pop(fulfillment_index))
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
@@ -231,7 +246,7 @@ def sync():
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
         except ShopifyAPIError as e:
-            if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
+            if stream_id == 'fulfillment_orders' and is_fulfillment_access_denied(e):
                 require_reauth = True
                 continue
             raise e

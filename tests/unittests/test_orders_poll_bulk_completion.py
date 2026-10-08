@@ -22,8 +22,10 @@ import unittest
 import urllib.error
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
+import requests
 
 from tap_shopify.context import Context
+from tap_shopify.constants import SHOPIFY_API_VERSION
 from tap_shopify.exceptions import ShopifyAPIError
 from tap_shopify.streams.orders import Orders
 
@@ -56,7 +58,7 @@ def _op_response(status, url=_RESULT_URL):
 def _http_error(code):
     """Create a urllib.error.HTTPError with the given HTTP status code."""
     return urllib.error.HTTPError(
-        url="https://test.myshopify.com/admin/api/2025-07/graphql.json",
+        url=f"https://test.myshopify.com/admin/api/{SHOPIFY_API_VERSION}/graphql.json",
         code=code,
         msg="Unauthorized" if code == 401 else "Server Error",
         hdrs=MagicMock(get=MagicMock(return_value=None)),
@@ -93,6 +95,7 @@ class TestPollBulkCompletion401Handling(unittest.TestCase):
         self._orig_config = Context.config
         self._orig_client = Context.client
         Context.config = {
+            "shop": "test",
             "access_token": "original_token",
             "start_date": "2025-01-01T00:00:00Z",
         }
@@ -101,6 +104,53 @@ class TestPollBulkCompletion401Handling(unittest.TestCase):
     def tearDown(self):
         Context.config = self._orig_config
         Context.client = self._orig_client
+
+
+    @patch("tap_shopify.streams.orders.requests.post")
+    def test_401_refreshes_token_and_retries_with_updated_header(self, mock_post):
+        unauthorized = MagicMock(status_code=401)
+        authorized = MagicMock(status_code=200)
+        authorized.json.return_value = {"data": "ok"}
+        mock_post.side_effect = [unauthorized, authorized]
+        client = _mock_client("new-token")
+        Context.client = client
+
+        result = Orders().submit_bulk_query("{ orders { edges { node { id } } }")
+
+        self.assertEqual(result, {"data": "ok"})
+        client.refresh_token.assert_called_once()
+        client.reinitialize_session.assert_called_once()
+        self.assertEqual(Context.config["access_token"], "new-token")
+        self.assertEqual(mock_post.call_args_list[0].kwargs["headers"]["X-Shopify-Access-Token"],
+                         "original_token")
+        self.assertEqual(mock_post.call_args_list[1].kwargs["headers"]["X-Shopify-Access-Token"],
+                         "new-token")
+
+    @patch("tap_shopify.streams.orders.requests.post")
+    def test_second_401_is_not_retried_again(self, mock_post):
+        unauthorized = MagicMock(status_code=401)
+        unauthorized.raise_for_status.side_effect = requests.exceptions.HTTPError("401")
+        mock_post.return_value = unauthorized
+        Context.client = _mock_client("new-token")
+
+        with self.assertRaises(requests.exceptions.HTTPError):
+            Orders().submit_bulk_query("{ orders { edges { node { id } } }")
+
+        self.assertEqual(mock_post.call_count, 2)
+        Context.client.refresh_token.assert_called_once()
+
+
+    def test_detects_direct_bulk_permission_error(self):
+        from tap_shopify import is_fulfillment_access_denied
+        error = ShopifyAPIError("Bulk query error: Access denied for fulfillmentOrders")
+        self.assertTrue(is_fulfillment_access_denied(error))
+
+    def test_detects_chained_permission_error(self):
+        from tap_shopify import is_fulfillment_access_denied
+        cause = ShopifyAPIError("Access denied for fulfillmentOrders")
+        error = ShopifyAPIError("An error occurred with GraphQL API")
+        error.__cause__ = cause
+        self.assertTrue(is_fulfillment_access_denied(error))
 
     # ------------------------------------------------------------------
     # Happy-path baseline
