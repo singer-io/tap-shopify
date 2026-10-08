@@ -7,6 +7,7 @@ import backoff
 import requests
 import shopify
 import singer
+from tap_shopify.constants import SHOPIFY_API_VERSION
 from singer import metrics, utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
@@ -1049,7 +1050,8 @@ class Orders(Stream):
         return f"updated_at:>='{updated_at_min}' AND updated_at:<'{updated_at_max}'"
 
     def submit_bulk_query(self, query_string):
-        url = f"https://{Context.config.get('shop')}.myshopify.com/admin/api/2025-07/graphql.json"
+        url = (f"https://{Context.config.get('shop')}.myshopify.com/admin/api/"
+               f"{SHOPIFY_API_VERSION}/graphql.json")
         operation = {
             "query": """
                 mutation bulkOperationRunQuery($query: String!) {

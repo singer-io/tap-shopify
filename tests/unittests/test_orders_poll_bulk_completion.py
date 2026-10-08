@@ -25,6 +25,7 @@ from unittest.mock import MagicMock, patch
 import requests
 
 from tap_shopify.context import Context
+from tap_shopify.constants import SHOPIFY_API_VERSION
 from tap_shopify.exceptions import ShopifyAPIError
 from tap_shopify.streams.orders import Orders
 
@@ -57,7 +58,7 @@ def _op_response(status, url=_RESULT_URL):
 def _http_error(code):
     """Create a urllib.error.HTTPError with the given HTTP status code."""
     return urllib.error.HTTPError(
-        url="https://test.myshopify.com/admin/api/2025-07/graphql.json",
+        url=f"https://test.myshopify.com/admin/api/{SHOPIFY_API_VERSION}/graphql.json",
         code=code,
         msg="Unauthorized" if code == 401 else "Server Error",
         hdrs=MagicMock(get=MagicMock(return_value=None)),

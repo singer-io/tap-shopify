@@ -6,10 +6,9 @@ import shopify
 import singer
 from tap_shopify.streams.base import get_request_timeout
 from tap_shopify.exceptions import ShopifyError
+from tap_shopify.constants import SHOPIFY_API_VERSION
 
 LOGGER = singer.get_logger()
-
-SHOPIFY_API_VERSION = '2025-07'
 
 class ShopifyClient:
     """

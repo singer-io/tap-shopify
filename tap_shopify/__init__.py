@@ -15,6 +15,7 @@ from singer import metadata
 from singer import Transformer
 from tap_shopify.context import Context
 from tap_shopify.client import ShopifyClient
+from tap_shopify.constants import SHOPIFY_API_VERSION
 from tap_shopify.exceptions import ShopifyError, ShopifyAPIError, ShopifyUnauthorizedError
 from tap_shopify.streams.base import shopify_error_handling, get_request_timeout
 
@@ -27,8 +28,7 @@ UNSUPPORTED_FIELDS = {"author"}
 def initialize_shopify_client():
     api_key = Context.config.get('access_token') or Context.config.get('api_key')
     shop = Context.config['shop']
-    version = '2025-07'
-    session = shopify.Session(shop, version, api_key)
+    session = shopify.Session(shop, SHOPIFY_API_VERSION, api_key)
     shopify.ShopifyResource.activate_session(session)
 
     # set request timeout
