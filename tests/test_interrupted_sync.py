@@ -30,7 +30,7 @@ class InterruptedSyncTest(BaseTapTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_date = '2022-03-01T00:00:00Z'
+        self.start_date = '2025-01-01T00:00:00Z'
 
     def test_run(self):
 
@@ -104,15 +104,26 @@ class InterruptedSyncTest(BaseTapTest):
             }
         }
 
-        menagerie.set_state(conn_id, new_state)
-
         ################################
         # Run Resuming (2nd) Sync
         ################################
 
-        resuming_sync_record_count = self.run_sync(conn_id)
+        first_sync_start_date = self.start_date
+        self.start_date = '2026-01-01T00:00:00Z'
+        second_sync_start_date = self.start_date
+        second_conn_id = self.create_connection(
+            original_properties=False,
+            original_credentials=False
+        )
+        found_catalogs = menagerie.get_catalogs(second_conn_id)
+        our_catalogs = [catalog for catalog in found_catalogs if
+                        catalog.get('tap_stream_id') in expected_streams]
+        self.select_all_streams_and_fields(second_conn_id, our_catalogs, select_all_fields=True)
+        menagerie.set_state(second_conn_id, new_state)
+
+        resuming_sync_record_count = self.run_sync(second_conn_id)
         resuming_sync_records = runner.get_records_from_target_output()
-        resuming_sync_state = menagerie.get_state(conn_id)
+        resuming_sync_state = menagerie.get_state(second_conn_id)
         resuming_sync_order = runner.get_stream_sync_order_from_target()
 
         LOGGER.info("First sync stream order: %s", first_sync_order)
@@ -155,6 +166,13 @@ class InterruptedSyncTest(BaseTapTest):
                     if record.get('action') == 'upsert']
 
                 replication_key = next(iter(expected_replication_keys[stream]))
+                oldest_first_sync_replication_date = min(
+                    self.parse_date(record.get(replication_key))
+                    for record in first_sync_messages)
+                self.assertGreaterEqual(
+                    oldest_first_sync_replication_date,
+                    self.parse_date(first_sync_start_date)
+                )
                 first_bookmark_stream = first_sync_state.get('bookmarks', {}).get(stream, {})
                 first_bookmark_value = first_bookmark_stream.get(replication_key)
                 resuming_bookmark_stream = resuming_sync_state.get('bookmarks', {}).get(stream, {})
@@ -222,16 +240,15 @@ class InterruptedSyncTest(BaseTapTest):
                     self.assertLess(resuming_sync_count, first_sync_count,
                                     msg="Resuming sync record count greater than expected")
 
-                # verify yet to be sync'd streams have equal oldest record
+                # Unbookmarked streams use the second connection's start date.
                 if stream in yet_to_be_synced_streams:
-                    oldest_first_sync_replication_date = min(
-                        self.parse_date(record.get(replication_key))
-                        for record in first_sync_messages)
                     oldest_resuming_sync_replication_date = min(
                         self.parse_date(record.get(replication_key))
                         for record in resuming_sync_messages)
-                    self.assertEqual(oldest_resuming_sync_replication_date,
-                                     oldest_first_sync_replication_date)
+                    self.assertGreaterEqual(
+                        oldest_resuming_sync_replication_date,
+                        self.parse_date(second_sync_start_date)
+                    )
 
                 # verify that we get at least 1 record in the resuming sync
                 self.assertGreater(resuming_sync_count, 0, msg="Resuming sync yielded 0 recs")
