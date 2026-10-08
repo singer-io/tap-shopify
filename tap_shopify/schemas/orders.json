@@ -1228,7 +1228,6 @@
               "handle": { "type":  ["null", "string"] },
               "trackingSupport": { "type":  ["null", "boolean"] },
               "type": { "type":  ["null", "string"] },
-              "permitsSkuSharing": { "type":  ["null", "boolean"] },
               "inventoryManagement": { "type":  ["null", "boolean"] }
             }
           },

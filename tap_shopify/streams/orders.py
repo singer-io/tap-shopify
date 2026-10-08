@@ -577,7 +577,6 @@ class Orders(Stream):
                     handle
                     trackingSupport
                     type
-                    permitsSkuSharing
                     inventoryManagement
                 }
                 location {
