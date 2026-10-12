@@ -179,11 +179,25 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+def order_bulk_streams():
+    """Place fulfillment after orders without changing other streams' relative order."""
+    streams = Context.catalog["streams"]
+    positions = {entry["tap_stream_id"]: index for index, entry in enumerate(streams)}
+    orders_index = positions.get("orders")
+    fulfillment_index = positions.get("fulfillment_orders")
+    if (orders_index is not None and fulfillment_index is not None
+            and fulfillment_index < orders_index):
+        fulfillment = streams.pop(fulfillment_index)
+        streams.insert(orders_index, fulfillment)
+
+
 # pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
     require_reauth = False
+
+    order_bulk_streams()
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
