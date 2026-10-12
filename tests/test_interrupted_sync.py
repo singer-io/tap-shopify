@@ -109,7 +109,7 @@ class InterruptedSyncTest(BaseTapTest):
         ################################
 
         first_sync_start_date = self.start_date
-        self.start_date = '2026-01-01T00:00:00Z'
+        self.start_date = '2025-03-01T00:00:00Z'
         second_sync_start_date = self.start_date
         second_conn_id = self.create_connection(
             original_properties=False,
