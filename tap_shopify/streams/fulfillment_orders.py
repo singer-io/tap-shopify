@@ -31,10 +31,8 @@ class FulfillmentOrders(Stream):
 
     def get_bulk_queries(self):
         """Split supported selected fields into bounded bulk query selections."""
-        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
-        document = parse(query)
-        operation = document.definitions[0]
-        root = operation.selection_set.selections[0]
+        document = parse(self.remove_fields_from_query(Context.get_unselected_fields(self.name)))
+        root = document.definitions[0].selection_set.selections[0]
         fields = root.selection_set.selections[0].selection_set.selections[0].selection_set
         groups = (
             {"merchantRequests", "fulfillmentOrdersForMerge"},
@@ -200,22 +198,36 @@ class FulfillmentOrders(Stream):
             time.sleep(60)
         raise ShopifyAPIError(f"Fulfillment bulk operation {bulk_op_id} timed out")
 
+    @staticmethod
+    def _connection_children(node):
+        result = {}
+        for field in node.selection_set.selections:
+            if field.selection_set:
+                edges = next((child for child in field.selection_set.selections
+                              if child.name.value == "edges"), None)
+                if edges:
+                    result[field.name.value] = edges.selection_set.selections[0]
+        return result
+
+    @staticmethod
+    def _parse_bulk_record(line):
+        record = json.loads(line)
+        if not isinstance(record, dict):
+            raise ShopifyAPIError("Invalid fulfillment bulk JSONL record")
+        parent_id = record.pop("__parentId", None)
+        markers = [key for key in record if key.startswith("bulk_")]
+        if len(markers) != 1:
+            raise ShopifyAPIError(f"Missing fulfillment bulk connection marker: {record}")
+        field_name = markers[0][5:]
+        record.pop(markers[0])
+        return record, parent_id, field_name
+
     def parse_bulk_jsonl(self, url, query):
         """Rebuild one root record at a time using connection markers and parent IDs."""
-        document = parse(query)
-
-        def connection_children(node):
-            result = {}
-            for field in node.selection_set.selections:
-                if field.selection_set:
-                    edges = next((child for child in field.selection_set.selections
-                                  if child.name.value == "edges"), None)
-                    if edges:
-                        result[field.name.value] = edges.selection_set.selections[0]
-            return result
-
-        root_connection = document.definitions[0].selection_set.selections[0]
-        root_node = root_connection.selection_set.selections[0].selection_set.selections[0]
+        root_node = (
+            parse(query).definitions[0].selection_set.selections[0]
+            .selection_set.selections[0].selection_set.selections[0]
+        )
         current = None
         parents = {}
         with requests.get(url, stream=True, timeout=self.request_timeout) as response:
@@ -225,15 +237,7 @@ class FulfillmentOrders(Stream):
             for line in response.iter_lines():
                 if not line:
                     continue
-                record = json.loads(line)
-                if not isinstance(record, dict):
-                    raise ShopifyAPIError("Invalid fulfillment bulk JSONL record")
-                parent_id = record.pop("__parentId", None)
-                markers = [key for key in record if key.startswith("bulk_")]
-                if len(markers) != 1:
-                    raise ShopifyAPIError(f"Missing fulfillment bulk connection marker: {record}")
-                field_name = markers[0][5:]
-                record.pop(markers[0])
+                record, parent_id, field_name = self._parse_bulk_record(line)
                 if parent_id is None:
                     if field_name != self.data_key or not record.get("id"):
                         raise ShopifyAPIError("Invalid fulfillment bulk root record")
@@ -248,7 +252,7 @@ class FulfillmentOrders(Stream):
                         raise ShopifyAPIError(f"Unknown fulfillment bulk parent: {parent_id}")
                     selection = parent[1][field_name]
                     parent[0][field_name].append(record)
-                children = connection_children(selection)
+                children = self._connection_children(selection)
                 for child_name in children:
                     record[child_name] = []
                 if children:
@@ -260,6 +264,50 @@ class FulfillmentOrders(Stream):
         bookmark = Context.state.get("bookmarks", {}).get(self.name, {})
         bookmark.pop("bulk_operation", None)
         singer.write_state(Context.state)
+
+    def _load_bulk_results(self, database, queries, pending):
+        """Run each window query sequentially and merge its records into the database."""
+        for index, template in enumerate(queries):
+            document = parse(template)
+            root = document.definitions[0].selection_set.selections[0]
+            root.arguments = (*root.arguments, ArgumentNode(
+                name=NameNode(value="query"),
+                value=StringValueNode(value=(
+                    f"updated_at:>='{pending['window_start']}' AND "
+                    f"updated_at:<'{pending['window_end']}'"
+                )),
+            ))
+            query = print_ast(document)
+            operation = pending["operations"].get(str(index))
+            with metrics.http_request_timer(self.name):
+                if not operation or operation.get("status") in {
+                    "FAILED", "CANCELED", "EXPIRED",
+                }:
+                    operation = self.submit_bulk_query(query)
+                    pending["operations"][str(index)] = operation
+                    singer.write_state(Context.state)
+                url = self.poll_bulk_completion(operation["id"])
+                operation["status"] = "COMPLETED"
+                singer.write_state(Context.state)
+            if url:
+                for record in self.parse_bulk_jsonl(url, query):
+                    existing = database.execute(
+                        "SELECT payload, parts FROM records WHERE id = ?",
+                        (record["id"],),
+                    ).fetchone()
+                    if index and not existing:
+                        self.clear_bulk_operation_state()
+                        raise ShopifyAPIError(
+                            "Fulfillment bulk query roots changed; retry window"
+                        )
+                    merged = json.loads(existing[0]) if existing else {}
+                    merged.update(record)
+                    database.execute(
+                        "INSERT OR REPLACE INTO records VALUES (?, ?, ?)",
+                        (record["id"], json.dumps(merged),
+                         existing[1] + 1 if existing else 1),
+                    )
+            database.commit()
 
     def get_objects(self):
         queries = self.get_bulk_queries()
@@ -296,47 +344,7 @@ class FulfillmentOrders(Stream):
                     database.execute(
                         "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, parts INTEGER)"
                     )
-                    for index, template in enumerate(queries):
-                        document = parse(template)
-                        root = document.definitions[0].selection_set.selections[0]
-                        root.arguments = (*root.arguments, ArgumentNode(
-                            name=NameNode(value="query"),
-                            value=StringValueNode(value=(
-                                f"updated_at:>='{pending['window_start']}' AND "
-                                f"updated_at:<'{pending['window_end']}'"
-                            )),
-                        ))
-                        query = print_ast(document)
-                        operation = pending["operations"].get(str(index))
-                        with metrics.http_request_timer(self.name):
-                            if not operation or operation.get("status") in {
-                                "FAILED", "CANCELED", "EXPIRED",
-                            }:
-                                operation = self.submit_bulk_query(query)
-                                pending["operations"][str(index)] = operation
-                                singer.write_state(Context.state)
-                            url = self.poll_bulk_completion(operation["id"])
-                            operation["status"] = "COMPLETED"
-                            singer.write_state(Context.state)
-                        if url:
-                            for record in self.parse_bulk_jsonl(url, query):
-                                existing = database.execute(
-                                    "SELECT payload, parts FROM records WHERE id = ?",
-                                    (record["id"],),
-                                ).fetchone()
-                                if index and not existing:
-                                    self.clear_bulk_operation_state()
-                                    raise ShopifyAPIError(
-                                        "Fulfillment bulk query roots changed; retry window"
-                                    )
-                                merged = json.loads(existing[0]) if existing else {}
-                                merged.update(record)
-                                database.execute(
-                                    "INSERT OR REPLACE INTO records VALUES (?, ?, ?)",
-                                    (record["id"], json.dumps(merged),
-                                     existing[1] + 1 if existing else 1),
-                                )
-                        database.commit()
+                    self._load_bulk_results(database, queries, pending)
                     if database.execute(
                         "SELECT 1 FROM records WHERE parts != ? LIMIT 1", (len(queries),),
                     ).fetchone():
