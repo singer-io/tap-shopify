@@ -194,7 +194,8 @@ def order_bulk_streams():
 def _is_fulfillment_scope_error(error):
     current = error
     while current is not None:
-        if "access denied" in str(current).lower():
+        message = str(current).lower().replace("_", " ")
+        if "access denied" in message:
             return True
         current = current.__cause__
     return False

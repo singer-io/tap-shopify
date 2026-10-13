@@ -157,8 +157,9 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         self.stream.bulk_request = MagicMock(return_value={
             "bulkOperation": {"status": "FAILED", "errorCode": "ACCESS_DENIED"},
         })
-        with self.assertRaisesRegex(ShopifyAPIError, "ACCESS_DENIED"):
+        with self.assertRaisesRegex(ShopifyAPIError, "ACCESS_DENIED") as error:
             self.stream.poll_bulk_completion("op")
+        self.assertTrue(_is_fulfillment_scope_error(error.exception))
         self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"][
             "bulk_operation"]["operations"]["0"]["status"], "FAILED")
 
