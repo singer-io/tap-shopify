@@ -142,7 +142,7 @@ class FulfillmentOrders(Stream):
     def submit_bulk_query(self, query_string):
         data = self.bulk_request("""
             mutation bulkOperationRunQuery($query: String!) {
-                bulkOperationRunQuery(query: $query) {
+                bulkOperationRunQuery(query: $query, groupObjects: true) {
                     bulkOperation { id status }
                     userErrors { field message }
                 }

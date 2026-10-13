@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 from graphql import parse
 import requests
 
-from tap_shopify import order_bulk_streams, shuffle_streams
+from tap_shopify import _is_fulfillment_scope_error, order_bulk_streams, shuffle_streams
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyAPIError
 from tap_shopify.streams.fulfillment_orders import FulfillmentOrders
@@ -210,6 +210,26 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         })
         with self.assertRaisesRegex(ShopifyAPIError, "Access denied"):
             self.stream.submit_bulk_query("query")
+
+    def test_submit_requests_grouped_bulk_output(self):
+        self.stream.bulk_request = MagicMock(return_value={
+            "bulkOperationRunQuery": {"bulkOperation": {"id": "op"}},
+        })
+        self.stream.submit_bulk_query("query")
+        mutation = parse(self.stream.bulk_request.call_args.args[0])
+        operation = mutation.definitions[0]
+        bulk_operation = operation.selection_set.selections[0]
+        arguments = {argument.name.value: argument.value for argument in bulk_operation.arguments}
+        self.assertEqual(arguments["groupObjects"].value, True)
+
+    def test_fulfillment_scope_errors_detect_direct_and_chained_messages(self):
+        direct_error = ShopifyAPIError("Fulfillment GraphQL error: Access denied")
+        wrapped_error = ShopifyAPIError("An error occurred with the GraphQL API.")
+        wrapped_error.__cause__ = ShopifyAPIError("Access denied for fulfillmentOrders")
+        unrelated_error = ShopifyAPIError("Request failed")
+        self.assertTrue(_is_fulfillment_scope_error(direct_error))
+        self.assertTrue(_is_fulfillment_scope_error(wrapped_error))
+        self.assertFalse(_is_fulfillment_scope_error(unrelated_error))
 
     def mock_sync(self, empty=False):
         self.stream.submit_bulk_query = MagicMock(side_effect=[

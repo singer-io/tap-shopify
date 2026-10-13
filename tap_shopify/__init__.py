@@ -191,6 +191,15 @@ def order_bulk_streams():
         streams.insert(orders_index, fulfillment)
 
 
+def _is_fulfillment_scope_error(error):
+    current = error
+    while current is not None:
+        if "access denied" in str(current).lower():
+            return True
+        current = current.__cause__
+    return False
+
+
 # pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
@@ -245,7 +254,7 @@ def sync():
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
         except ShopifyAPIError as e:
-            if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
+            if stream_id == 'fulfillment_orders' and _is_fulfillment_scope_error(e):
                 require_reauth = True
                 continue
             raise e
