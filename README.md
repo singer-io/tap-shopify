@@ -52,6 +52,29 @@ This tap:
 
 Currently, `locations` graphql endpoint doesn't support querying on the `updatedAt`, therefore, `createdAt` is made the replication key.
 
+### Fulfillment Orders Bulk Sync
+
+`fulfillment_orders` uses its own submission, polling, and JSONL processing on
+Admin API version `2026-10`, independently of the `orders` implementation. Normal
+syncs place it after `orders`; interrupted syncs retain their existing resume
+priority. Up to two bulk queries run sequentially per date window, each with at
+most five connections and two nested connection levels. Selected fields are
+preserved, and JSONL records are reconstructed using `__parentId` and merged by
+fulfillment order ID through a temporary disk-backed database.
+
+Shopify requires bulk connection nodes to implement the `Node` interface.
+`locationsForMove` does not, so this field uses targeted paginated requests,
+including all pages of available and unavailable line items. It is not included
+in the bulk queries. Unselecting `locationsForMove` skips these requests.
+
+Operation IDs and exact date-window bounds are saved under the fulfillment
+stream's `bulk_operation` state before polling. The `updatedAt` bookmark advances
+to the window end only after all merged records and location data are emitted.
+Interrupted windows are replayed, so consumers should deduplicate by `id`.
+Changed selections or date-window sizes discard saved operation state. Expired
+downloads and missing operations clear that state and fail the current run;
+the next run resubmits the window. Other streams keep their existing API version.
+
 ## Quick Start
 
 1. Install

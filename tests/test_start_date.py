@@ -58,6 +58,7 @@ class StartDateTest(BaseTapTest):
         expected_replication_method = self.expected_replication_method()
         expected_replication_method.pop("abandoned_checkouts")
         expected_replication_method.pop("orders")
+        expected_replication_method.pop("fulfillment_orders")
         incremental_streams = {key for key, value in expected_replication_method.items()
                                if value == self.INCREMENTAL}
 
