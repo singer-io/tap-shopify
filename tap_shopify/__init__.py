@@ -179,11 +179,35 @@ def shuffle_streams(stream_name):
     bottom_half = Context.catalog["streams"][:matching_index]
     Context.catalog["streams"] = top_half + bottom_half
 
+def order_bulk_streams():
+    """Place fulfillment after orders without changing other streams' relative order."""
+    streams = Context.catalog["streams"]
+    positions = {entry["tap_stream_id"]: index for index, entry in enumerate(streams)}
+    orders_index = positions.get("orders")
+    fulfillment_index = positions.get("fulfillment_orders")
+    if (orders_index is not None and fulfillment_index is not None
+            and fulfillment_index < orders_index):
+        fulfillment = streams.pop(fulfillment_index)
+        streams.insert(orders_index, fulfillment)
+
+
+def _is_fulfillment_scope_error(error):
+    current = error
+    while current is not None:
+        message = str(current).lower().replace("_", " ")
+        if "access denied" in message:
+            return True
+        current = current.__cause__
+    return False
+
+
 # pylint: disable=too-many-locals
 def sync():
     shop_attributes = initialize_shopify_client()
     sdc_fields = {"_sdc_shop_" + x: shop_attributes[x] for x in SDC_KEYS}
     require_reauth = False
+
+    order_bulk_streams()
 
     # If there is a currently syncing stream bookmark, shuffle the
     # stream order so it gets sync'd first
@@ -231,7 +255,7 @@ def sync():
                                         time_extracted=extraction_time)
                     Context.counts[stream_id] += 1
         except ShopifyAPIError as e:
-            if stream_id == 'fulfillment_orders' and 'Access denied' in str(e.__cause__):
+            if stream_id == 'fulfillment_orders' and _is_fulfillment_scope_error(e):
                 require_reauth = True
                 continue
             raise e
