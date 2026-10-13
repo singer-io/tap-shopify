@@ -3,6 +3,48 @@ from singer import metrics, utils
 from tap_shopify.context import Context
 from tap_shopify.streams.base import Stream
 
+# Shopify rejects nodes(ids:) with more than 250 ids.
+MAX_NODES_PER_QUERY = 250
+
+REFUND_SHIPPING_LINES_QUERY = """query GetRefundShippingLines($ids: [ID!]!) {
+    nodes(ids: $ids) {
+        ... on Refund {
+            id
+            refundShippingLines(first: 250) {
+                edges {
+                    node {
+                        id
+                        subtotalAmountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        taxAmountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        shippingLine {
+                            id
+                            title
+                        }
+                    }
+                }
+            }
+        }
+    }
+}"""
+
 
 class OrderRefunds(Stream):
     """Stream class for fetching order refunds from Shopify"""
@@ -33,7 +75,9 @@ class OrderRefunds(Stream):
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
         initial_bookmark_time = current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
-        query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
+        unselected_fields = Context.get_unselected_fields(self.name)
+        query = self.remove_fields_from_query(unselected_fields)
+        fetch_shipping_lines = "refundShippingLines" not in unselected_fields
 
         # Process each date window
         while last_updated_at < sync_start:
@@ -48,18 +92,25 @@ class OrderRefunds(Stream):
                     data = self.call_api(query_params, query=query)
 
                 # Process parent objects and their refunds
+                refunds = []
                 edges = data.get("edges", [])
                 for edge in edges:
                     node = edge.get("node", {})
                     child_edges = node.get(self.child_data_key, [])
 
-                    # Yield each transformed refund
                     for child_obj in child_edges:
                         replication_value = utils.strptime_with_tz(child_obj[self.replication_key])
                         current_bookmark = max(current_bookmark, replication_value)
                         # Perform the pseudo sync for the child objects
                         if replication_value >= initial_bookmark_time:
-                            yield self.transform_object(child_obj)
+                            refunds.append(child_obj)
+
+                if fetch_shipping_lines:
+                    self.add_refund_shipping_lines(refunds)
+
+                # Yield each transformed refund
+                for refund in refunds:
+                    yield self.transform_object(refund)
 
                 # Handle pagination
                 page_info = data.get("pageInfo", {})
@@ -71,6 +122,24 @@ class OrderRefunds(Stream):
             # Update bookmark to the latest value, but not beyond sync start time
             max_bookmark_value = min(sync_start, current_bookmark)
             self.update_bookmark(utils.strftime(max_bookmark_value))
+
+    def add_refund_shipping_lines(self, refunds):
+        """
+        Set refundShippingLines on each refund from a separate nodes(ids:) query.
+        Adding the connection to the main query pushes it past Shopify's 1000-point limit.
+        """
+        for start in range(0, len(refunds), MAX_NODES_PER_QUERY):
+            batch = refunds[start:start + MAX_NODES_PER_QUERY]
+            with metrics.http_request_timer(self.name):
+                nodes = self.call_api({"ids": [refund["id"] for refund in batch]},
+                                      query=REFUND_SHIPPING_LINES_QUERY,
+                                      data_key="nodes")
+            shipping_lines = {
+                node["id"]: [edge["node"] for edge in node["refundShippingLines"]["edges"]]
+                for node in nodes if node
+            }
+            for refund in batch:
+                refund["refundShippingLines"] = shipping_lines.get(refund["id"], [])
 
     def transform_lineitems(self, data):
         """

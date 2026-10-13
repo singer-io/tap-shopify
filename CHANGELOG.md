@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.14.0
+  * Add `refundShippingLines` to `order_refunds`, fetched with a separate `nodes(ids:)` query to keep the refunds query under Shopify's 1000-point cost limit [#261](https://github.com/singer-io/tap-shopify/pull/261)
+
 ### 3.13.2
   * Add resumable Shopify bulk API sync for `fulfillment_orders`, including grouped JSONL processing and paginated move-location data [#260](https://github.com/singer-io/tap-shopify/pull/260)
 
