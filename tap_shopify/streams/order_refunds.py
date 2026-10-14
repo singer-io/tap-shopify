@@ -40,6 +40,53 @@ REFUND_SHIPPING_LINES_QUERY = """query GetRefundShippingLines($ids: [ID!]!) {
                         }
                     }
                 }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+    }
+}"""
+
+REFUND_SHIPPING_LINES_PAGE_QUERY = """query GetRefundShippingLinesPage($id: ID!, $after: String) {
+    node(id: $id) {
+        ... on Refund {
+            id
+            refundShippingLines(first: 250, after: $after) {
+                edges {
+                    node {
+                        id
+                        subtotalAmountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        taxAmountSet {
+                            presentmentMoney {
+                                amount
+                                currencyCode
+                            }
+                            shopMoney {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        shippingLine {
+                            id
+                            title
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
             }
         }
     }
@@ -125,19 +172,43 @@ class OrderRefunds(Stream):
 
     def add_refund_shipping_lines(self, refunds):
         """
-        Set refundShippingLines on each refund from a separate nodes(ids:) query.
-        Adding the connection to the main query pushes it past Shopify's 1000-point limit.
+        Set refundShippingLines on each refund from separate GraphQL queries.
+        The nodes(ids:) query keeps the main refunds query under Shopify's cost limit.
         """
         for start in range(0, len(refunds), MAX_NODES_PER_QUERY):
             batch = refunds[start:start + MAX_NODES_PER_QUERY]
+            shipping_lines = {refund["id"]: [] for refund in batch}
             with metrics.http_request_timer(self.name):
-                nodes = self.call_api({"ids": [refund["id"] for refund in batch]},
-                                      query=REFUND_SHIPPING_LINES_QUERY,
-                                      data_key="nodes")
-            shipping_lines = {
-                node["id"]: [edge["node"] for edge in node["refundShippingLines"]["edges"]]
-                for node in nodes if node
-            }
+                nodes = self.call_api(
+                    {"ids": [refund["id"] for refund in batch]},
+                    query=REFUND_SHIPPING_LINES_QUERY, data_key="nodes"
+                )
+
+            for node in nodes:
+                if not node:
+                    continue
+                refund_id = node["id"]
+                connection = node["refundShippingLines"]
+                shipping_lines[refund_id].extend(
+                    edge["node"] for edge in connection["edges"]
+                )
+                page_info = connection["pageInfo"]
+                while page_info["hasNextPage"]:
+                    with metrics.http_request_timer(self.name):
+                        node = self.call_api(
+                            {"id": refund_id, "after": page_info["endCursor"]},
+                            query=REFUND_SHIPPING_LINES_PAGE_QUERY,
+                            data_key="node",
+                        )
+                    if not node:
+                        break
+
+                    connection = node["refundShippingLines"]
+                    shipping_lines[refund_id].extend(
+                        edge["node"] for edge in connection["edges"]
+                    )
+                    page_info = connection["pageInfo"]
+
             for refund in batch:
                 refund["refundShippingLines"] = shipping_lines.get(refund["id"], [])
 
