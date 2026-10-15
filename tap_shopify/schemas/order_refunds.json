@@ -992,6 +992,146 @@
         }
       }
     },
+    "refundShippingLines": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "null",
+          "object"
+        ],
+        "properties": {
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subtotalAmountSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "taxAmountSet": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "presentmentMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              },
+              "shopMoney": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "format": "singer.decimal"
+                  },
+                  "currencyCode": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "shippingLine": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              "title": {
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "updatedAt": {
       "type": [
         "null",
