@@ -56,7 +56,7 @@ class Transactions(Stream):
         # to ensure we don't miss any updates as its observed shopify updates
         # the parent object initially and then the child objects
         last_updated_at = self.get_bookmark() - timedelta(minutes=1)
-        initial_bookmark_time = current_bookmark = self.get_bookmark()
+        current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
 
@@ -80,9 +80,11 @@ class Transactions(Stream):
                     for child_obj in child_edges:
                         replication_value = utils.strptime_with_tz(child_obj[self.replication_key])
                         current_bookmark = max(current_bookmark, replication_value)
-                        # Perform the pseudo sync for the child objects
-                        if replication_value >= initial_bookmark_time:
-                            yield self.transform_object(child_obj)
+                        # Do not filter on the transaction's own createdAt: a transaction
+                        # can predate its parent order (e.g. payment-first flows), so the
+                        # bookmark may already be past it when the order becomes visible.
+                        # The parent order's updated_at window bounds the fetch.
+                        yield self.transform_object(child_obj)
 
                 page_info = data.get("pageInfo", {})
                 cursor = page_info.get("endCursor")

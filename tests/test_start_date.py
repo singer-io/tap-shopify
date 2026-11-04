@@ -59,6 +59,10 @@ class StartDateTest(BaseTapTest):
         expected_replication_method.pop("abandoned_checkouts")
         expected_replication_method.pop("orders")
         expected_replication_method.pop("fulfillment_orders")
+        # transactions is windowed on the parent order's updated_at, not the transaction's own
+        # createdAt, so a later-start_date sync can still emit transactions older than start_date
+        # whenever their order is touched again (see tap_shopify/streams/transactions.py).
+        expected_replication_method.pop("transactions")
         incremental_streams = {key for key, value in expected_replication_method.items()
                                if value == self.INCREMENTAL}
 
