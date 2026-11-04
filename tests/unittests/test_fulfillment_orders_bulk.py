@@ -333,14 +333,16 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         self.assertEqual(len(list(self.stream.get_objects())), 1)
         self.stream.submit_bulk_query.assert_called_once()
 
-    def test_mismatched_roots_do_not_emit_or_advance(self):
+    def test_roots_modified_between_queries_are_skipped_not_fatal(self):
         self.mock_sync()
         self.stream.parse_bulk_jsonl.side_effect = [
-            iter([{"id": "root"}]), iter([]),
+            iter([{"id": "root"}, {"id": "moved"}]), iter([{"id": "root"}, {"id": "late"}]),
         ]
-        with self.assertRaisesRegex(ShopifyAPIError, "roots changed"):
-            list(self.stream.get_objects())
-        self.assertNotIn("updatedAt", Context.state["bookmarks"]["fulfillment_orders"])
+        records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["root"])
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertIn("updatedAt", bookmark)
+        self.assertNotIn("bulk_operation", bookmark)
 
     def test_location_and_line_item_pagination(self):
         def connection(nodes, cursor=None):

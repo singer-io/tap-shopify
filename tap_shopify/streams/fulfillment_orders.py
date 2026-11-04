@@ -296,10 +296,9 @@ class FulfillmentOrders(Stream):
                         (record["id"],),
                     ).fetchone()
                     if index and not existing:
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError(
-                            "Fulfillment bulk query roots changed; retry window"
-                        )
+                        # Not returned by the first query, so it entered the window late.
+                        # The next window picks it up in full.
+                        continue
                     merged = json.loads(existing[0]) if existing else {}
                     merged.update(record)
                     database.execute(
@@ -345,12 +344,21 @@ class FulfillmentOrders(Stream):
                         "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, parts INTEGER)"
                     )
                     self._load_bulk_results(database, queries, pending)
-                    if database.execute(
-                        "SELECT 1 FROM records WHERE parts != ? LIMIT 1", (len(queries),),
-                    ).fetchone():
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError("Fulfillment bulk query roots changed; retry window")
-                    for payload, in database.execute("SELECT payload FROM records"):
+                    # Bulk queries run one after another, so a root modified in between gets
+                    # updatedAt >= window_end and is missing from later queries. It is
+                    # re-fetched in full by the next window (window_start == this window_end),
+                    # so skip the partial record instead of failing the sync.
+                    partial = database.execute(
+                        "SELECT COUNT(*) FROM records WHERE parts != ?", (len(queries),),
+                    ).fetchone()[0]
+                    if partial:
+                        LOGGER.warning(
+                            "Skipping %d fulfillment order(s) modified between bulk queries; "
+                            "they will be synced in the next window", partial,
+                        )
+                    for payload, in database.execute(
+                        "SELECT payload FROM records WHERE parts = ?", (len(queries),),
+                    ):
                         record = json.loads(payload)
                         if "locationsForMove" not in Context.get_unselected_fields(self.name):
                             record["locationsForMove"] = self.get_locations_for_move(record["id"])
