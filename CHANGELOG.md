@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.14.1
+  * Fix `fulfillment_orders` sync failing with `Fulfillment bulk query roots changed; retry window`: orders updated while the bulk queries run are now skipped (and re-fetched in the next window) instead of aborting the sync
+
 ### 3.14.0
   * Add `refundShippingLines` to `order_refunds`, fetched with a separate `nodes(ids:)` query to keep the refunds query under Shopify's 1000-point cost limit [#261](https://github.com/singer-io/tap-shopify/pull/261)
 

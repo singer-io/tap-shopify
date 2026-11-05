@@ -295,11 +295,6 @@ class FulfillmentOrders(Stream):
                         "SELECT payload, parts FROM records WHERE id = ?",
                         (record["id"],),
                     ).fetchone()
-                    if index and not existing:
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError(
-                            "Fulfillment bulk query roots changed; retry window"
-                        )
                     merged = json.loads(existing[0]) if existing else {}
                     merged.update(record)
                     database.execute(
@@ -345,12 +340,18 @@ class FulfillmentOrders(Stream):
                         "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, parts INTEGER)"
                     )
                     self._load_bulk_results(database, queries, pending)
-                    if database.execute(
-                        "SELECT 1 FROM records WHERE parts != ? LIMIT 1", (len(queries),),
-                    ).fetchone():
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError("Fulfillment bulk query roots changed; retry window")
-                    for payload, in database.execute("SELECT payload FROM records"):
+                    incomplete = database.execute(
+                        "SELECT COUNT(*) FROM records WHERE parts != ?", (len(queries),),
+                    ).fetchone()[0]
+                    if incomplete:
+                        # Records updated mid-run left the window; the next window re-fetches them.
+                        LOGGER.warning(
+                            "Skipping %s fulfillment orders that changed between bulk queries",
+                            incomplete,
+                        )
+                    for payload, in database.execute(
+                        "SELECT payload FROM records WHERE parts = ?", (len(queries),),
+                    ):
                         record = json.loads(payload)
                         if "locationsForMove" not in Context.get_unselected_fields(self.name):
                             record["locationsForMove"] = self.get_locations_for_move(record["id"])
