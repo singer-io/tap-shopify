@@ -292,15 +292,16 @@ class FulfillmentOrders(Stream):
             if url:
                 for record in self.parse_bulk_jsonl(url, query):
                     existing = database.execute(
-                        "SELECT payload, parts FROM records WHERE id = ?",
+                        "SELECT payload, parts, late FROM records WHERE id = ?",
                         (record["id"],),
                     ).fetchone()
                     merged = json.loads(existing[0]) if existing else {}
                     merged.update(record)
                     database.execute(
-                        "INSERT OR REPLACE INTO records VALUES (?, ?, ?)",
+                        "INSERT OR REPLACE INTO records VALUES (?, ?, ?, ?)",
                         (record["id"], json.dumps(merged),
-                         existing[1] + 1 if existing else 1),
+                         existing[1] + 1 if existing else 1,
+                         existing[2] if existing else int(index > 0)),
                     )
             database.commit()
 
@@ -337,17 +338,27 @@ class FulfillmentOrders(Stream):
             with tempfile.TemporaryDirectory() as directory:
                 with closing(sqlite3.connect(f"{directory}/fulfillment.sqlite")) as database:
                     database.execute(
-                        "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, parts INTEGER)"
+                        "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, "
+                        "parts INTEGER, late INTEGER)"
                     )
                     self._load_bulk_results(database, queries, pending)
-                    incomplete = database.execute(
-                        "SELECT COUNT(*) FROM records WHERE parts != ?", (len(queries),),
+                    # Absent from the first query but present later (e.g. search index lag):
+                    # the window start cannot move past them or they would never be fetched.
+                    late_updated_at = [
+                        utils.strptime_with_tz(json.loads(payload)[self.replication_key])
+                        for payload, in database.execute(
+                            "SELECT payload FROM records WHERE late = 1"
+                        )
+                    ]
+                    left_window = database.execute(
+                        "SELECT COUNT(*) FROM records WHERE parts != ? AND late = 0",
+                        (len(queries),),
                     ).fetchone()[0]
-                    if incomplete:
-                        # Records updated mid-run left the window; the next window re-fetches them.
+                    if left_window:
+                        # Updated after window end; the next window re-fetches them.
                         LOGGER.warning(
-                            "Skipping %s fulfillment orders that changed between bulk queries",
-                            incomplete,
+                            "Skipping %s fulfillment orders that left the window mid-run",
+                            left_window,
                         )
                     for payload, in database.execute(
                         "SELECT payload FROM records WHERE parts = ?", (len(queries),),
@@ -357,6 +368,16 @@ class FulfillmentOrders(Stream):
                             record["locationsForMove"] = self.get_locations_for_move(record["id"])
                         yield record
             bookmark.pop("bulk_operation", None)
+            if late_updated_at:
+                LOGGER.warning(
+                    "%s fulfillment orders appeared only in later bulk queries; "
+                    "holding the bookmark so the next run fetches them again",
+                    len(late_updated_at),
+                )
+                self.update_bookmark(utils.strftime(
+                    max(last_updated_at, min(late_updated_at))
+                ))
+                return
             self.update_bookmark(utils.strftime(query_end))
             last_updated_at = query_end
             pending = None
