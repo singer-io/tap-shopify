@@ -333,14 +333,50 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         self.assertEqual(len(list(self.stream.get_objects())), 1)
         self.stream.submit_bulk_query.assert_called_once()
 
-    def test_mismatched_roots_do_not_emit_or_advance(self):
+    def test_roots_that_left_window_are_skipped_and_bookmark_advances(self):
+        self.mock_sync()
+        updated_at = "2026-01-01T01:00:00Z"
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": updated_at, "status": "OPEN"},
+                  {"id": "left_window", "updatedAt": updated_at, "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": updated_at, "fulfillments": []}]),
+        ]
+        with patch("tap_shopify.streams.fulfillment_orders.LOGGER") as logger:
+            records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        self.assertEqual(logger.warning.call_args.args[1], 1)
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertEqual(bookmark["updatedAt"], "2026-01-02T00:00:00.000000Z")
+        self.assertNotIn("bulk_operation", bookmark)
+
+    def test_roots_only_in_later_query_hold_bookmark(self):
         self.mock_sync()
         self.stream.parse_bulk_jsonl.side_effect = [
-            iter([{"id": "root"}]), iter([]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []},
+                  {"id": "late", "updatedAt": "2026-01-01T03:00:00Z", "fulfillments": []},
+                  {"id": "later", "updatedAt": "2026-01-01T05:00:00Z", "fulfillments": []}]),
         ]
-        with self.assertRaisesRegex(ShopifyAPIError, "roots changed"):
-            list(self.stream.get_objects())
-        self.assertNotIn("updatedAt", Context.state["bookmarks"]["fulfillment_orders"])
+        with patch("tap_shopify.streams.fulfillment_orders.LOGGER"):
+            records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertEqual(bookmark["updatedAt"], "2026-01-01T03:00:00.000000Z")
+        self.assertNotIn("bulk_operation", bookmark)
+        self.assertEqual(self.stream.submit_bulk_query.call_count, 2)
+
+    def test_late_root_beyond_window_end_does_not_move_bookmark_past_it(self):
+        self.mock_sync()
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []},
+                  {"id": "late", "updatedAt": "2026-01-05T00:00:00Z", "fulfillments": []}]),
+        ]
+        with patch("tap_shopify.streams.fulfillment_orders.LOGGER"):
+            records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"][
+            "updatedAt"], "2026-01-02T00:00:00.000000Z")
 
     def test_location_and_line_item_pagination(self):
         def connection(nodes, cursor=None):
