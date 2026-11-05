@@ -365,6 +365,19 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
         self.assertNotIn("bulk_operation", bookmark)
         self.assertEqual(self.stream.submit_bulk_query.call_count, 2)
 
+    def test_late_root_beyond_window_end_does_not_move_bookmark_past_it(self):
+        self.mock_sync()
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []},
+                  {"id": "late", "updatedAt": "2026-01-05T00:00:00Z", "fulfillments": []}]),
+        ]
+        with patch("tap_shopify.streams.fulfillment_orders.LOGGER"):
+            records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"][
+            "updatedAt"], "2026-01-02T00:00:00.000000Z")
+
     def test_location_and_line_item_pagination(self):
         def connection(nodes, cursor=None):
             return {"nodes": nodes, "pageInfo": {

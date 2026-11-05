@@ -368,15 +368,18 @@ class FulfillmentOrders(Stream):
                             record["locationsForMove"] = self.get_locations_for_move(record["id"])
                         yield record
             bookmark.pop("bulk_operation", None)
-            if late_updated_at:
+            # A late order whose updatedAt is past query_end needs no hold; the next window covers it.
+            hold_at = (
+                min(query_end, max(last_updated_at, min(late_updated_at)))
+                if late_updated_at else query_end
+            )
+            if hold_at < query_end:
                 LOGGER.warning(
                     "%s fulfillment orders appeared only in later bulk queries; "
                     "holding the bookmark so the next run fetches them again",
                     len(late_updated_at),
                 )
-                self.update_bookmark(utils.strftime(
-                    max(last_updated_at, min(late_updated_at))
-                ))
+                self.update_bookmark(utils.strftime(hold_at))
                 return
             self.update_bookmark(utils.strftime(query_end))
             last_updated_at = query_end
