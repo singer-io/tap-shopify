@@ -1,5 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, timezone
+import hashlib
 import json
 import unittest
 from unittest.mock import MagicMock, patch
@@ -10,7 +11,7 @@ import requests
 from tap_shopify import _is_fulfillment_scope_error, order_bulk_streams, shuffle_streams
 from tap_shopify.context import Context
 from tap_shopify.exceptions import ShopifyAPIError
-from tap_shopify.streams.fulfillment_orders import FulfillmentOrders
+from tap_shopify.streams.fulfillment_orders import FulfillmentOrders, MAX_HOLD_RETRIES
 
 
 class TestFulfillmentOrdersBulk(unittest.TestCase):
@@ -242,6 +243,7 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
             iter([{"id": "root", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []}]),
         ])
         self.stream.get_locations_for_move = MagicMock(return_value=[])
+        self.stream.get_current_updated_at = MagicMock(return_value={})
         now_patch = patch("tap_shopify.streams.fulfillment_orders.utils.now", return_value=(
             datetime(2026, 1, 2, tzinfo=timezone.utc)
         ))
@@ -341,13 +343,138 @@ class TestFulfillmentOrdersBulk(unittest.TestCase):
                   {"id": "left_window", "updatedAt": updated_at, "status": "OPEN"}]),
             iter([{"id": "kept", "updatedAt": updated_at, "fulfillments": []}]),
         ]
-        with patch("tap_shopify.streams.fulfillment_orders.LOGGER") as logger:
-            records = list(self.stream.get_objects())
+        self.stream.get_current_updated_at.return_value = {
+            "left_window": datetime(2026, 1, 2, 0, 30, tzinfo=timezone.utc),
+        }
+        records = list(self.stream.get_objects())
         self.assertEqual([record["id"] for record in records], ["kept"])
-        self.assertEqual(logger.warning.call_args.args[1], 1)
+        self.stream.get_current_updated_at.assert_called_once_with(["left_window"])
         bookmark = Context.state["bookmarks"]["fulfillment_orders"]
         self.assertEqual(bookmark["updatedAt"], "2026-01-02T00:00:00.000000Z")
         self.assertNotIn("bulk_operation", bookmark)
+        self.assertNotIn("hold", bookmark)
+
+    def test_deleted_root_missing_from_later_query_is_skipped(self):
+        self.mock_sync()
+        updated_at = "2026-01-01T01:00:00Z"
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "gone", "updatedAt": updated_at, "status": "OPEN"}]),
+            iter([]),
+        ]
+        self.assertEqual(list(self.stream.get_objects()), [])
+        self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"][
+            "updatedAt"], "2026-01-02T00:00:00.000000Z")
+
+    def test_root_missing_from_later_query_but_still_in_window_holds_bookmark(self):
+        self.mock_sync()
+        self.mock_missing_in_later_query()
+        records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertEqual(bookmark["updatedAt"], "2026-01-01T02:00:00.000000Z")
+        self.assertEqual(bookmark["hold"], {
+            "held_at": "2026-01-01T02:00:00.000000Z", "retries": 1,
+        })
+        self.assertNotIn("bulk_operation", bookmark)
+
+    def mock_missing_in_later_query(self):
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"},
+                  {"id": "lagged", "updatedAt": "2026-01-01T02:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []}]),
+        ]
+        self.stream.get_current_updated_at.return_value = {
+            "lagged": datetime(2026, 1, 1, 2, tzinfo=timezone.utc),
+        }
+
+    def test_root_missing_from_middle_query_of_three_holds_bookmark(self):
+        queries = self.stream.get_bulk_queries()
+        queries.append(queries[1])
+        self.mock_sync()
+        self.stream.submit_bulk_query.side_effect = [
+            {"id": f"op{index}", "status": "CREATED"} for index in range(3)
+        ]
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"},
+                  {"id": "skipped", "updatedAt": "2026-01-01T02:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "events": []},
+                  {"id": "skipped", "updatedAt": "2026-01-01T02:00:00Z", "events": []}]),
+        ]
+        self.stream.get_current_updated_at.return_value = {
+            "skipped": datetime(2026, 1, 1, 2, tzinfo=timezone.utc),
+        }
+        with patch.object(FulfillmentOrders, "get_bulk_queries", return_value=queries):
+            records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"][
+            "updatedAt"], "2026-01-01T02:00:00.000000Z")
+
+    def test_late_root_on_consecutive_runs_stops_holding_after_max_retries(self):
+        for run in range(1, MAX_HOLD_RETRIES + 1):
+            self.mock_sync()
+            self.mock_missing_in_later_query()
+            list(self.stream.get_objects())
+            bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+            self.assertEqual(bookmark["updatedAt"], "2026-01-01T02:00:00.000000Z")
+            self.assertEqual(bookmark["hold"]["retries"], run)
+        self.mock_sync()
+        self.mock_missing_in_later_query()
+        with patch("tap_shopify.streams.fulfillment_orders.LOGGER") as logger:
+            list(self.stream.get_objects())
+        logger.error.assert_called_once()
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertEqual(bookmark["updatedAt"], "2026-01-02T00:00:00.000000Z")
+        self.assertNotIn("hold", bookmark)
+
+    def test_hold_retries_restart_when_held_value_moves(self):
+        Context.state["bookmarks"] = {"fulfillment_orders": {
+            "updatedAt": "2026-01-01T00:00:00.000000Z",
+            "hold": {"held_at": "2026-01-01T01:30:00.000000Z", "retries": MAX_HOLD_RETRIES},
+        }}
+        self.mock_sync()
+        self.mock_missing_in_later_query()
+        list(self.stream.get_objects())
+        self.assertEqual(Context.state["bookmarks"]["fulfillment_orders"]["hold"], {
+            "held_at": "2026-01-01T02:00:00.000000Z", "retries": 1,
+        })
+
+    def test_resume_from_saved_operations_holds_for_late_root(self):
+        queries = self.stream.get_bulk_queries()
+        Context.state["bookmarks"] = {"fulfillment_orders": {"bulk_operation": {
+            "window_start": "2026-01-01T00:00:00.000000Z",
+            "window_end": "2026-01-02T00:00:00.000000Z",
+            "last_date_window": self.stream.date_window_size,
+            "query_hash": hashlib.sha256(json.dumps(queries).encode("utf-8")).hexdigest(),
+            "operations": {
+                "0": {"id": "op0", "status": "COMPLETED"},
+                "1": {"id": "op1", "status": "COMPLETED"},
+            },
+        }}}
+        self.mock_sync()
+        self.stream.parse_bulk_jsonl.side_effect = [
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "status": "OPEN"}]),
+            iter([{"id": "kept", "updatedAt": "2026-01-01T01:00:00Z", "fulfillments": []},
+                  {"id": "late", "updatedAt": "2026-01-01T03:00:00Z", "fulfillments": []}]),
+        ]
+        records = list(self.stream.get_objects())
+        self.assertEqual([record["id"] for record in records], ["kept"])
+        self.stream.submit_bulk_query.assert_not_called()
+        bookmark = Context.state["bookmarks"]["fulfillment_orders"]
+        self.assertEqual(bookmark["updatedAt"], "2026-01-01T03:00:00.000000Z")
+        self.assertNotIn("bulk_operation", bookmark)
+
+    def test_current_updated_at_batches_ids_and_omits_deleted_orders(self):
+        ids = [f"gid://shopify/FulfillmentOrder/{index}" for index in range(251)]
+        self.stream.bulk_request = MagicMock(side_effect=[
+            {"nodes": [{"id": ids[0], "updatedAt": "2026-01-01T01:00:00Z"}, None]},
+            {"nodes": [{"id": ids[250], "updatedAt": "2026-01-01T02:00:00Z"}]},
+        ])
+        result = self.stream.get_current_updated_at(ids)
+        self.assertEqual(self.stream.bulk_request.call_count, 2)
+        self.assertEqual(len(self.stream.bulk_request.call_args_list[0].args[1]["ids"]), 250)
+        self.assertEqual(set(result), {ids[0], ids[250]})
+        self.assertEqual(result[ids[0]], datetime(2026, 1, 1, 1, tzinfo=timezone.utc))
 
     def test_roots_only_in_later_query_hold_bookmark(self):
         self.mock_sync()

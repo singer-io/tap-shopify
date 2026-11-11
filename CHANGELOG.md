@@ -1,7 +1,7 @@
 # Changelog
 
 ### 3.14.1
-  * Fix `fulfillment_orders` sync failing with `Fulfillment bulk query roots changed; retry window`: orders updated while the bulk queries run are now skipped (and re-fetched in the next window) instead of aborting the sync [#264](https://github.com/singer-io/tap-shopify/pull/264)
+  * Fix `fulfillment_orders` sync failing with `Fulfillment bulk query roots changed; retry window`: orders missing from a later bulk query are re-fetched by ID and skipped only if they were updated after the window end; otherwise (e.g. search index lag) the bookmark is held at the earliest such order so the next run fetches it again. A hold repeating at the same value is retried up to 3 runs, then the sync logs an error and advances. Because a hold re-reads the window, records updated after the held bookmark can be emitted again on the next run (at-least-once delivery; targets should upsert on the primary key) [#264](https://github.com/singer-io/tap-shopify/pull/264)
 
 ### 3.14.0
   * Add `refundShippingLines` to `order_refunds`, fetched with a separate `nodes(ids:)` query to keep the refunds query under Shopify's 1000-point cost limit [#261](https://github.com/singer-io/tap-shopify/pull/261)
