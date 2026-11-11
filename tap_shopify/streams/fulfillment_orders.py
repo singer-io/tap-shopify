@@ -21,6 +21,15 @@ from tap_shopify.streams.base import Stream
 
 LOGGER = singer.get_logger()
 
+# Shopify rejects nodes(ids:) with more than 250 ids.
+MAX_NODES_PER_QUERY = 250
+# How many consecutive runs may hold the bookmark at the same value before moving on.
+MAX_HOLD_RETRIES = 3
+
+UPDATED_AT_QUERY = """query fulfillmentOrdersUpdatedAt($ids: [ID!]!) {
+    nodes(ids: $ids) { ... on FulfillmentOrder { id updatedAt } }
+}"""
+
 
 class FulfillmentOrders(Stream):
     """Stream class for Shopify fulfillment_orders."""
@@ -34,6 +43,14 @@ class FulfillmentOrders(Stream):
         document = parse(self.remove_fields_from_query(Context.get_unselected_fields(self.name)))
         root = document.definitions[0].selection_set.selections[0]
         fields = root.selection_set.selections[0].selection_set.selections[0].selection_set
+        # Shopify bulk queries allow at most 5 connections and 2 levels of nesting per query,
+        # so the connection fields are split across queries: the first one also carries all
+        # scalar/object fields, the second one only `fulfillments` (already at the 5-connection
+        # limit). `locationsForMove` is excluded because it does not implement Node and
+        # cannot be exported in bulk; it is fetched per order in get_locations_for_move().
+        # Follow-up: the queries run sequentially. On API 2026-01+ Shopify allows 5 concurrent bulk
+        # queries per app per shop, so submitting them together would shrink the gap between
+        # them from hours to minutes and make cross-query mismatches much rarer (follow-up).
         groups = (
             {"merchantRequests", "fulfillmentOrdersForMerge"},
             {"fulfillments"},
@@ -265,6 +282,39 @@ class FulfillmentOrders(Stream):
         bookmark.pop("bulk_operation", None)
         singer.write_state(Context.state)
 
+    def get_current_updated_at(self, ids):
+        """Fetch the current updatedAt of fulfillment orders; deleted orders are omitted."""
+        result = {}
+        for start in range(0, len(ids), MAX_NODES_PER_QUERY):
+            data = self.bulk_request(
+                UPDATED_AT_QUERY, {"ids": ids[start:start + MAX_NODES_PER_QUERY]},
+            )
+            for node in data.get("nodes") or []:
+                if node and node.get("id"):
+                    result[node["id"]] = utils.strptime_with_tz(node[self.replication_key])
+        return result
+
+    def get_unconfirmed_departures(self, missing, window_end):
+        """
+        Return the updatedAt of orders missing from a later bulk query that did not
+        provably leave the window (e.g. search index lag or clock skew).
+        """
+        current = self.get_current_updated_at([record_id for record_id, _ in missing])
+        unconfirmed = []
+        for record_id, payload in missing:
+            updated_at = current.get(record_id)
+            if updated_at is None:
+                LOGGER.warning("Fulfillment order %s no longer exists; skipping", record_id)
+            elif updated_at >= window_end:
+                LOGGER.warning(
+                    "Skipping fulfillment order %s updated after the window end", record_id,
+                )
+            else:
+                unconfirmed.append(
+                    utils.strptime_with_tz(json.loads(payload)[self.replication_key])
+                )
+        return unconfirmed
+
     def _load_bulk_results(self, database, queries, pending):
         """Run each window query sequentially and merge its records into the database."""
         for index, template in enumerate(queries):
@@ -292,20 +342,16 @@ class FulfillmentOrders(Stream):
             if url:
                 for record in self.parse_bulk_jsonl(url, query):
                     existing = database.execute(
-                        "SELECT payload, parts FROM records WHERE id = ?",
+                        "SELECT payload, parts, late FROM records WHERE id = ?",
                         (record["id"],),
                     ).fetchone()
-                    if index and not existing:
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError(
-                            "Fulfillment bulk query roots changed; retry window"
-                        )
                     merged = json.loads(existing[0]) if existing else {}
                     merged.update(record)
                     database.execute(
-                        "INSERT OR REPLACE INTO records VALUES (?, ?, ?)",
+                        "INSERT OR REPLACE INTO records VALUES (?, ?, ?, ?)",
                         (record["id"], json.dumps(merged),
-                         existing[1] + 1 if existing else 1),
+                         existing[1] + 1 if existing else 1,
+                         existing[2] if existing else int(index > 0)),
                     )
             database.commit()
 
@@ -342,23 +388,77 @@ class FulfillmentOrders(Stream):
             with tempfile.TemporaryDirectory() as directory:
                 with closing(sqlite3.connect(f"{directory}/fulfillment.sqlite")) as database:
                     database.execute(
-                        "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, parts INTEGER)"
+                        "CREATE TABLE records (id TEXT PRIMARY KEY, payload TEXT, "
+                        "parts INTEGER, late INTEGER)"
                     )
                     self._load_bulk_results(database, queries, pending)
-                    if database.execute(
-                        "SELECT 1 FROM records WHERE parts != ? LIMIT 1", (len(queries),),
-                    ).fetchone():
-                        self.clear_bulk_operation_state()
-                        raise ShopifyAPIError("Fulfillment bulk query roots changed; retry window")
-                    for payload, in database.execute("SELECT payload FROM records"):
+                    # Absent from the first query but present later (e.g. search index lag):
+                    # the window start cannot move past them or they would never be fetched.
+                    late_updated_at = [
+                        utils.strptime_with_tz(json.loads(payload)[self.replication_key])
+                        for payload, in database.execute(
+                            "SELECT payload FROM records WHERE late = 1"
+                        )
+                    ]
+                    # Present in the first query but missing from a later one. Skipping is only
+                    # safe if the order was updated past the window end (the next window then
+                    # covers it); otherwise hold the bookmark just like for late orders.
+                    missing = database.execute(
+                        "SELECT id, payload FROM records WHERE parts != ? AND late = 0",
+                        (len(queries),),
+                    ).fetchall()
+                    if missing:
+                        late_updated_at.extend(
+                            self.get_unconfirmed_departures(missing, query_end)
+                        )
+                    for payload, in database.execute(
+                        "SELECT payload FROM records WHERE parts = ?", (len(queries),),
+                    ):
                         record = json.loads(payload)
                         if "locationsForMove" not in Context.get_unselected_fields(self.name):
                             record["locationsForMove"] = self.get_locations_for_move(record["id"])
                         yield record
             bookmark.pop("bulk_operation", None)
+            if self.hold_bookmark(bookmark, last_updated_at, query_end, late_updated_at):
+                return
+            bookmark.pop("hold", None)
             self.update_bookmark(utils.strftime(query_end))
             last_updated_at = query_end
             pending = None
+
+    def hold_bookmark(self, bookmark, last_updated_at, query_end, mismatched_updated_at):
+        """
+        Hold the bookmark at the earliest mismatched order so the next run fetches it again.
+        Returns False when nothing needs holding or the same hold repeated too often.
+        Orders updated after the held bookmark are emitted again on the next run, so targets
+        must upsert on the primary key (at-least-once delivery).
+        """
+        if not mismatched_updated_at:
+            return False
+        # An order updated past query_end needs no hold; the next window covers it.
+        hold_at = min(query_end, max(last_updated_at, min(mismatched_updated_at)))
+        if hold_at >= query_end:
+            return False
+        held_at = utils.strftime(hold_at)
+        previous = bookmark.get("hold") or {}
+        retries = 1
+        if previous.get("held_at") == held_at:
+            retries = previous.get("retries", 0) + 1
+        if retries > MAX_HOLD_RETRIES:
+            LOGGER.error(
+                "%s fulfillment orders still mismatched between bulk queries after %s "
+                "runs holding the bookmark at %s; advancing past them",
+                len(mismatched_updated_at), MAX_HOLD_RETRIES, held_at,
+            )
+            return False
+        LOGGER.warning(
+            "%s fulfillment orders were missing from some bulk queries; "
+            "holding the bookmark so the next run fetches them again (%s/%s)",
+            len(mismatched_updated_at), retries, MAX_HOLD_RETRIES,
+        )
+        bookmark["hold"] = {"held_at": held_at, "retries": retries}
+        self.update_bookmark(held_at)
+        return True
 
     def get_locations_for_move(self, fulfillment_order_id):
         """Fetch the non-Node connection without an expensive nested selection."""
