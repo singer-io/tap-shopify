@@ -16,9 +16,15 @@ def _page(*transactions_per_order):
 
 class TestTransactionsLateArrival(unittest.TestCase):
     def setUp(self):
-        Context.config = {"start_date": "2025-01-01T00:00:00Z"}
-        Context.state = {"bookmarks": {"transactions": {"createdAt": "2025-03-21T11:12:31.000000Z"}}}
-        Context.get_unselected_fields = lambda name: []
+        # Patch shared Context attributes so they are restored after each test.
+        for attr, value in (
+            ("config", {"start_date": "2025-01-01T00:00:00Z"}),
+            ("state", {"bookmarks": {"transactions": {"createdAt": "2025-03-21T11:12:31.000000Z"}}}),
+            ("get_unselected_fields", lambda name: []),
+        ):
+            patcher = patch.object(Context, attr, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self.stream = Transactions()
         self.stream.date_window_size = 30
 
