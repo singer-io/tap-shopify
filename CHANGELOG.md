@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.14.1
+  * Fix `transactions` stream dropping transactions created before their parent order (older than the bookmark); remove client-side `createdAt` filter
+  * Add `order_updated_at` bookmark to `transactions` so the parent-order window advances each sync and older transactions are not re-emitted without a further order update
+
 ### 3.14.0
   * Add `refundShippingLines` to `order_refunds`, fetched with a separate `nodes(ids:)` query to keep the refunds query under Shopify's 1000-point cost limit [#261](https://github.com/singer-io/tap-shopify/pull/261)
 

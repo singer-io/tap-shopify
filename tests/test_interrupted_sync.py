@@ -178,8 +178,14 @@ class InterruptedSyncTest(BaseTapTest):
                 # verify the resuming bookmark is greater or equal than 1st sync bookmark
                 self.assertGreaterEqual(resuming_bookmark_value, first_bookmark_value)
 
+                # 'transactions' records are selected by the parent order's updated_at, and a transaction
+                # can be older than the bookmark (created before its order), so the record-vs-bookmark
+                # checks below do not apply to it (SUPPORT-12618).
+                check_records_vs_bookmark = stream != 'transactions'
+
                 # verify oldest record from resuming sync respects bookmark from previous sync
-                if stream in new_state['bookmarks'].keys() and resuming_sync_messages:
+                if (check_records_vs_bookmark and stream in new_state['bookmarks'].keys()
+                        and resuming_sync_messages):
                     # if metafields owner_resource != 'shop' resuming_sync_messages can be empty
                     actual_oldest_resuming_replication_date = min(
                         self.parse_date(record.get(replication_key))
@@ -206,7 +212,7 @@ class InterruptedSyncTest(BaseTapTest):
                 for record in resuming_sync_messages:
                     replication_key_value = record.get(replication_key)
                     # this assertion is only for completed and interrupted streams
-                    if stream in new_state['bookmarks'].keys():
+                    if check_records_vs_bookmark and stream in new_state['bookmarks'].keys():
                         # verify 2nd sync rep key value is greater or equal to 1st sync bookmarks
                         msg = "Resuming sync records do not respect the previous bookmark"
                         self.assertGreaterEqual(replication_key_value, simulated_bookmark_value,

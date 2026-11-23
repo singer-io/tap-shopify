@@ -149,7 +149,11 @@ class BookmarkTest(BaseTapTest):
                 for record in second_sync_messages:
                     replication_key_value = record.get(replication_key)
                     # verify the 2nd sync replication key value is greater or equal to the 1st sync bookmarks
-                    self.assertGreaterEqual(self.convert_state_to_utc(replication_key_value), simulated_bookmark_value, msg="Second sync records do not respect the previous                                                  bookmark")
+                    # NOTE: not applicable to 'transactions'. Its records are selected by the parent order's
+                    # updated_at, and a transaction can be created before its order (e.g. payment-first flows),
+                    # so a transaction older than the bookmark must still be replicated (SUPPORT-12618).
+                    if stream != 'transactions':
+                        self.assertGreaterEqual(self.convert_state_to_utc(replication_key_value), simulated_bookmark_value, msg="Second sync records do not respect the previous                                                  bookmark")
                     # verify the 2nd sync bookmark value is the max replication key value for a given stream
                     self.assertLessEqual(replication_key_value, second_bookmark_value_utc, msg="Second sync bookmark was set incorrectly, a record with a greater replication key value was synced")
 
