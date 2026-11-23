@@ -11,6 +11,19 @@ class Transactions(Stream):
     data_key = "orders"
     child_data_key = "transactions"
     replication_key = "createdAt"
+    # Secondary bookmark: end of the last fully-synced parent-order updated_at window.
+    # Records are selected by the parent order's updated_at, so the query window must
+    # advance on that cursor, not on the transactions' own createdAt.
+    parent_bookmark_key = "order_updated_at"
+
+    def get_parent_bookmark(self):
+        """Return the parent-order window cursor, falling back to the createdAt bookmark
+        (state written before this key existed, or no state at all)."""
+        parent_bookmark = Context.state.get("bookmarks", {}).get(self.name, {}).get(
+            self.parent_bookmark_key)
+        if parent_bookmark:
+            return utils.strptime_with_tz(parent_bookmark)
+        return self.get_bookmark()
 
     def _get_record_node_path(self):
         # Transaction records live at orders.edges.node.transactions { FIELDS },
@@ -55,7 +68,8 @@ class Transactions(Stream):
         # Set the initial last updated time to the bookmark minus one minute
         # to ensure we don't miss any updates as its observed shopify updates
         # the parent object initially and then the child objects
-        last_updated_at = self.get_bookmark() - timedelta(minutes=1)
+        parent_bookmark = self.get_parent_bookmark()
+        last_updated_at = parent_bookmark - timedelta(minutes=1)
         current_bookmark = self.get_bookmark()
         sync_start = utils.now().replace(microsecond=0)
         query = self.remove_fields_from_query(Context.get_unselected_fields(self.name))
@@ -83,7 +97,8 @@ class Transactions(Stream):
                         # Do not filter on the transaction's own createdAt: a transaction
                         # can predate its parent order (e.g. payment-first flows), so the
                         # bookmark may already be past it when the order becomes visible.
-                        # The parent order's updated_at window bounds the fetch.
+                        # Re-emission is bounded by the parent order's updated_at window,
+                        # which advances via parent_bookmark_key.
                         yield self.transform_object(child_obj)
 
                 page_info = data.get("pageInfo", {})
@@ -94,7 +109,13 @@ class Transactions(Stream):
             last_updated_at = query_end
             # Update bookmark to the latest value, but not beyond sync start time
             max_bookmark_value = min(sync_start, current_bookmark)
+            # Write createdAt first so it stays the first key in the stream's state.
             self.update_bookmark(utils.strftime(max_bookmark_value))
+            # The window is fully synced, so the next sync can start from its end.
+            # Without this, orders updated after the latest transaction would be
+            # re-fetched (and their transactions re-emitted) on every sync.
+            parent_bookmark = max(parent_bookmark, query_end)
+            self.update_bookmark(utils.strftime(parent_bookmark), self.parent_bookmark_key)
 
     def get_query(self):
         """
