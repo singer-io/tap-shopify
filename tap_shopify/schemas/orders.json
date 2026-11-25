@@ -620,62 +620,194 @@
         "object"
       ],
       "properties": {
-        "lastVisit": {
-            "type": [
-                "null",
-                "object"
-            ],
-            "properties": {
-                "landingPage": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "referrerUrl": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                }
-            }
-        },
-        "utmParameters": {
+        "firstVisit": {
           "type": [
-              "null",
-              "object"
+            "null",
+            "object"
           ],
           "properties": {
-              "campaign": {
+            "landingPage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "landingPageHtml": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "referrerUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "referralCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "occurredAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "utmParameters": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "campaign": {
                   "type": [
-                      "null",
-                      "string"
+                    "null",
+                    "string"
                   ]
-              },
-              "content": {
+                },
+                "content": {
                   "type": [
-                      "null",
-                      "string"
+                    "null",
+                    "string"
                   ]
-              },
-              "medium": {
+                },
+                "medium": {
                   "type": [
-                      "null",
-                      "string"
+                    "null",
+                    "string"
                   ]
-              },
-              "source": {
+                },
+                "source": {
                   "type": [
-                      "null",
-                      "string"
+                    "null",
+                    "string"
                   ]
-              },
-              "term": {
+                },
+                "term": {
                   "type": [
-                      "null",
-                      "string"
+                    "null",
+                    "string"
                   ]
+                }
               }
+            }
+          }
+        },
+        "lastVisit": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "properties": {
+            "landingPage": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "landingPageHtml": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "referrerUrl": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "referralCode": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "source": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceType": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "sourceDescription": {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            "occurredAt": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "format": "date-time"
+            },
+            "utmParameters": {
+              "type": [
+                "null",
+                "object"
+              ],
+              "properties": {
+                "campaign": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "content": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "medium": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "source": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
+                "term": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -1202,6 +1334,7 @@
           "id": { "type": "string" },
           "name": { "type":  ["null", "string"] },
           "status": { "type":  ["null", "string"] },
+          "displayStatus": { "type":  ["null", "string"] },
           "totalQuantity":  { "type": ["null", "number"] },
           "updatedAt": { "type":  ["null", "string"], "format": "date-time" },
           "createdAt": { "type":  ["null", "string"], "format": "date-time" },
