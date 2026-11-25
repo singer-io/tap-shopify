@@ -253,9 +253,39 @@ class Orders(Stream):
                 }
                 }
                 customerJourneySummary {
+                firstVisit {
+                    landingPage
+                    landingPageHtml
+                    referrerUrl
+                    referralCode
+                    source
+                    sourceType
+                    sourceDescription
+                    occurredAt
+                    utmParameters {
+                        campaign
+                        content
+                        medium
+                        source
+                        term
+                    }
+                }
                 lastVisit {
                     landingPage
+                    landingPageHtml
                     referrerUrl
+                    referralCode
+                    source
+                    sourceType
+                    sourceDescription
+                    occurredAt
+                    utmParameters {
+                        campaign
+                        content
+                        medium
+                        source
+                        term
+                    }
                 }
                 }
                 merchantOfRecordApp {
@@ -558,6 +588,7 @@ class Orders(Stream):
                 id
                 name
                 status
+                displayStatus
                 totalQuantity
                 updatedAt
                 createdAt
